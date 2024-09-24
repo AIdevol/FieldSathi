@@ -1,0 +1,41 @@
+import 'package:get/get.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/AgentsViewScreenController.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/LeaveReportViewScreenController.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/OtpViewController.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/amc_screen_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/attendance_screen_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/calender_screen_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/customer_list_view_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/expenditure_screen_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/fsr_screen_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/login_screen_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/map_Screen_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/profile_screen_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/service_request_screen_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/ticket_list_controller.dart';
+import 'package:tms_sathi/page/Authentications/widgets/bindings/bindings.dart';
+import '../presentations/controllers/lead_list_view_controller.dart';
+import '../presentations/controllers/register_screen_controller.dart';
+
+class AuthenticationBinding extends Bindings {
+  @override
+  void dependencies() {
+    // TODO: implement dependencies
+    Get.lazyPut<WidgetBindings>(()=> WidgetBindings());
+    Get.lazyPut<LoginScreenController>(()=> LoginScreenController());
+    Get.lazyPut<RegisterScreenController>(() => RegisterScreenController());
+    Get.lazyPut<CalendarController>(() => CalendarController());
+    Get.lazyPut<FsrViewcontroller>(()=> FsrViewcontroller());
+    Get.lazyPut<AttendanceScreenController>(()=> AttendanceScreenController());
+    Get.lazyPut<ExpenditureScreenController>(()=> ExpenditureScreenController());
+    Get.lazyPut<ServiceRequestScreenController>(()=> ServiceRequestScreenController());
+    Get.lazyPut<AMCScreenController>(()=> AMCScreenController());
+    Get.lazyPut<AgentsViewScreenController>(()=> AgentsViewScreenController());
+    Get.lazyPut<MapViewScreenController>(()=> MapViewScreenController());
+    Get.lazyPut<ProfileViewScreenController>(()=> ProfileViewScreenController());
+    Get.lazyPut<TicketListViewScreenController>(()=> TicketListViewScreenController());
+    Get.lazyPut<LeaveReportViewScreenController>(()=> LeaveReportViewScreenController());
+    Get.lazyPut<CustomerListViewController>(()=> CustomerListViewController());
+    Get.lazyPut<LeadListViewController>(()=> LeadListViewController());
+  }
+}

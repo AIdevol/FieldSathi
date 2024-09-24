@@ -1,0 +1,231 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_feather_icons/flutter_feather_icons.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:get/get.dart';
+import 'package:tms_sathi/constans/color_constants.dart';
+import 'package:tms_sathi/navigations/navigation.dart';
+import 'package:tms_sathi/page/home/presentations/controllers/home_screen_controller.dart';
+import 'package:tms_sathi/page/home/widget/drawer_screen.dart';
+import 'package:tms_sathi/utilities/helper_widget.dart';
+
+import '../../../../main.dart';
+import '../../../../main.dart';
+import '../../../../utilities/custom_loader.dart';
+import '../../../../utilities/google_fonts_textStyles.dart';
+import '../../widget/bottom_sheets.dart';
+import '../../widget/graphs_view.dart';
+
+class HomeScreen extends GetView<HomeScreenController> {
+  final GlobalKey<ScaffoldState> drawerkey = GlobalKey();
+  bool _isDialOpen = false;
+
+  HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MyAnnotatedRegion(
+      child: GetBuilder<HomeScreenController>(
+        builder: (controller) => Scaffold(
+          floatingActionButton: _buildSpeedDial(context: context),
+          extendBodyBehindAppBar: true,
+          key: drawerkey,
+          resizeToAvoidBottomInset: true,
+          drawer: DrawerScreen(
+            dkey: drawerkey,
+          ),
+          appBar: AppBar(
+            backgroundColor: appColor,
+            title: Text("TMS_Sathi",style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 15)),
+            leading: IconButton(
+              icon: Icon(FeatherIcons.menu),
+              onPressed: () {
+                drawerkey.currentState?.openDrawer();
+              },
+            ),
+            actions: [
+              // IconButton(onPressed: ()async{
+              //   customLoader.show();
+              //   await Future.delayed(Duration(seconds: 2));
+              //   Get.toNamed(AppRoutes.mapView);
+              //   customLoader.hide();
+              // }, icon: Icon(FeatherIcons.mapPin,size: 20,)),
+              PopupMenuButton<String>(
+                color: appColor,
+                offset: Offset(0, 56),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: CircleAvatar(
+                    radius: 20,
+                    backgroundImage: NetworkImage('https://images.pexels.com/photos/1759531/pexels-photo-1759531.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'),
+                  ),
+                ),
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    value: 'profile',
+                    onTap: (){
+                      Get.toNamed(AppRoutes.editProfile);
+                    },
+                    child: ListTile(
+                      leading: Icon(Icons.person),
+                      title: Text('Profile'),
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'settings',
+                    child: ListTile(
+                      leading: Icon(Icons.settings),
+                      title: Text('Settings'),
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'logout',
+                    child: ListTile(
+                      leading: Icon(Icons.exit_to_app),
+                      title: Text('Logout'),
+                    ),
+                  ),
+                ],
+                onSelected: (String value) {
+                  // Handle menu item selection
+                  switch (value) {
+                    case 'profile':
+                    // Navigate to profile page
+                      break;
+                    case 'settings':
+                    // Navigate to settings page
+                      break;
+                    case 'logout':
+                    // Perform logout action
+                      break;
+                  }
+                },
+              ),
+              hGap(10)
+            ],
+          ),
+          body: Center(
+            child: Container(
+              height: Get.height*0.2,
+                width: Get.width*0.97,
+                // decoration: BoxDecoration(color: Colors.black),
+                child: _buildWidgetView(context)),
+          )
+        ),
+      ),
+    );
+  }
+
+  _buildWidgetView(BuildContext context){
+    return const Column(
+
+      children: [
+        Expanded(child: GraphViewScreen())],
+    );
+  }
+  SpeedDial _buildSpeedDial( {required BuildContext context}) {
+    return SpeedDial(
+      icon: _isDialOpen ? Icons.close : Icons.add,
+      activeIcon: Icons.close,
+      visible: true,
+      curve: Curves.bounceIn,
+      overlayColor: Colors.black,
+      overlayOpacity: 0.5,
+      // onOpen: () => setState(() => _isDialOpen = true),
+      // onClose: () => setState(() => _isDialOpen = false),
+      backgroundColor: appColor,
+      foregroundColor: Colors.black,
+      elevation: 8.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18.0),
+      ),
+      children: [
+        SpeedDialChild(
+          child: const Icon(Icons.add_home_work),
+          backgroundColor: appColor,
+          label: 'Field Worker',
+          onTap: () => AppBottomSheets.show(context: context, title: 'Field Worker', actions: <CupertinoActionSheetAction>[
+            CupertinoActionSheetAction(
+              child: Text('Technician List'),
+              onPressed: () {
+                // Handle option 1
+                Navigator.pop(context);
+              },
+            ),
+            CupertinoActionSheetAction(
+              child: Text('Attendance'),
+              onPressed: () {
+                // Handle option 2
+                Get.toNamed(AppRoutes.attendanceScreen);
+              },
+            ),
+            CupertinoActionSheetAction(
+              child: Text('Expenditure'),
+              onPressed: () {
+                // Handle option 2
+                Get.toNamed(AppRoutes.expenditureScreen);
+              },
+            ),CupertinoActionSheetAction(
+              child: Text('Service Requests'),
+              onPressed: () {
+                // Handle option 2
+                Get.toNamed(AppRoutes.serviceReqScreen);
+              },
+            ),
+            CupertinoActionSheetAction(
+              child: Text('Track All'),
+              onPressed: () async{
+                customLoader.show();
+                await Future.delayed(Duration(seconds: 2));
+                Get.toNamed(AppRoutes.mapView);
+                customLoader.hide();
+              },
+            ),
+          ],)
+        ),
+        SpeedDialChild(
+          child: const Icon(Icons.person_pin),
+          backgroundColor: appColor,
+          label: 'Super user',
+          onTap: () => print('Calling Police...'),
+        ),
+        SpeedDialChild(
+          child: const Icon(Icons.person_pin_circle_sharp),
+          backgroundColor: appColor,
+          label: 'Services',
+          onTap: () => print('Navigating to nearest hospital...'),
+        ),
+        SpeedDialChild(
+          child: const Icon(Icons.list),
+          backgroundColor: appColor,
+          label: 'CRM',
+          onTap: () =>
+          AppBottomSheets.show(context: context, title: 'Customer List',
+            actions: <CupertinoActionSheetAction>[
+                      CupertinoActionSheetAction(
+                        child: Text('Customer List'),
+                        onPressed: () {
+                        Get.toNamed(AppRoutes.customerListScreen);
+                        },
+                      ),
+                      CupertinoActionSheetAction(
+                        child: Text('Lead List 2'),
+                        onPressed: () {
+                          // Handle option 2
+                          Navigator.pop(context);
+                        },
+                      ),
+    ],
+
+          )
+        ),
+      ],
+    );
+  }
+}
+
+
+
+
+
+
