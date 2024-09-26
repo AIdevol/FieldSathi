@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:get/get.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/profile_screen_controller.dart';
 import 'package:tms_sathi/page/home/presentations/controllers/home_screen_controller.dart';
 import 'package:tms_sathi/page/home/widget/drawer_screen.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
@@ -71,15 +73,20 @@ class HomeScreen extends GetView<HomeScreenController> {
                       title: Text('Profile'),
                     ),
                   ),
-                  const PopupMenuItem<String>(
-                    value: 'settings',
+                   PopupMenuItem<String>(
+                    onTap: () => Get.toNamed(AppRoutes.accountViewScreen),
+                    value: 'Account',
                     child: ListTile(
-                      leading: Icon(Icons.settings),
-                      title: Text('Settings'),
+                      leading: Icon(Icons.account_balance),
+                      title: Text('Account'),
                     ),
                   ),
                   PopupMenuItem<String>(
                     value: 'logout',
+                    onTap: ()async{
+                      final controller = Get.put(ProfileViewScreenController());
+                      controller.logout();
+                    },
                     child: ListTile(
                       leading: Icon(Icons.exit_to_app),
                       title: Text('Logout'),
@@ -91,9 +98,6 @@ class HomeScreen extends GetView<HomeScreenController> {
                   switch (value) {
                     case 'profile':
                     // Navigate to profile page
-                      break;
-                    case 'settings':
-                    // Navigate to settings page
                       break;
                     case 'logout':
                     // Perform logout action
@@ -187,13 +191,13 @@ class HomeScreen extends GetView<HomeScreenController> {
           child: const Icon(Icons.person_pin),
           backgroundColor: appColor,
           label: 'Super user',
-          onTap: () => print('Calling Police...'),
+          onTap: () => Get.toNamed(AppRoutes.SuperAgentsScreen),
         ),
         SpeedDialChild(
           child: const Icon(Icons.person_pin_circle_sharp),
           backgroundColor: appColor,
           label: 'Services',
-          onTap: () => print('Navigating to nearest hospital...'),
+          onTap: () =>Get.toNamed(AppRoutes.serviceCategoriesScreen),
         ),
         SpeedDialChild(
           child: const Icon(Icons.list),
@@ -209,10 +213,10 @@ class HomeScreen extends GetView<HomeScreenController> {
                         },
                       ),
                       CupertinoActionSheetAction(
-                        child: Text('Lead List 2'),
+                        child: Text('Lead List'),
                         onPressed: () {
                           // Handle option 2
-                          Navigator.pop(context);
+                          Get.toNamed(AppRoutes.leadListScreen);
                         },
                       ),
     ],

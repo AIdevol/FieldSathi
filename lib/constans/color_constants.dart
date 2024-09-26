@@ -9,6 +9,10 @@ const whiteColor = Colors.white;
 const blackColor = Colors.black;
 final kyellowColor = HexColor('FEA64C');
 final kpurupleColor = HexColor('443390');
+final lightBlue = HexColor('87A2FF');
+final lightcream = HexColor('A594F9');
+final lightgreens = HexColor('6A9AB0');
+final lighthardGreen = HexColor('697565');
 
 final klightTextColor = HexColor('C6C6C6');
 final blueShade2 = HexColor('12185DFF');

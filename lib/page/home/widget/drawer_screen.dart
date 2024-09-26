@@ -64,7 +64,7 @@ class _DrawerScreenState extends State<DrawerScreen>{
         divider(),
         menuTile(
           icon: FeatherIcons.grid,
-          title: "Leave Report",
+          title: "Leaves",
           onTap: () async {
             Get.back();
             Get.toNamed(AppRoutes.leaveReportScreen);

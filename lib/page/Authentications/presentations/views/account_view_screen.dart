@@ -1,11 +1,10 @@
-import 'dart:io';
 
-import 'package:country_code_picker/country_code_picker.dart';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:tms_sathi/page/Authentications/presentations/controllers/profile_screen_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/account_view_screen_controller.dart';
 
 import '../../../../constans/color_constants.dart';
 import '../../../../constans/string_const.dart';
@@ -13,15 +12,13 @@ import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../../utilities/helper_widget.dart';
 
-class ProfileViewScreen extends GetView<ProfileViewScreenController> {
-  ProfileViewScreen({Key? key}) : super(key: key);
-
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+class AccountViewScreen extends GetView<AccountViewScreenController>{
+final GlobalKey<FormState>_formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return MyAnnotatedRegion(
-      child: GetBuilder<ProfileViewScreenController>(
+      child: GetBuilder<AccountViewScreenController>(
         builder: (_) => SafeArea(
           child: Scaffold(
             extendBodyBehindAppBar: true,
@@ -93,7 +90,7 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
         children: [
           const SizedBox(height: 15),
           Text(
-            'Profile'.tr,
+            'Account'.tr,
             style: MontserratStyles.montserratBoldTextStyle(
               color: blackColor,
               size: 25,
@@ -102,7 +99,7 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
           ),
           const SizedBox(height: 15),
           Text(
-            'Create your profile'.tr,
+            'Your attached account details'.tr,
             style: MontserratStyles.montserratSemiBoldTextStyle(
               color: Colors.grey,
               size: 16,
@@ -124,58 +121,58 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
         children: [
           const SizedBox(height: 10),
           _buildTextField(
-            hintText: "Name".tr,
-            controller: controller.nameController,
-            focusNode: controller.nameFocusNode,
-            nextFocusNode: controller.emailFocusNode,
+            hintText: "Bank Name".tr,
+            controller: controller.branchController,
+            focusNode: controller.brancfocusenode,
+            nextFocusNode: controller.ifscfocusnode,
             icon: Icons.person,
           ),
           const SizedBox(height: 16),
           _buildTextField(
-            hintText: "Email".tr,
-            controller: controller.emailController,
-            focusNode: controller.emailFocusNode,
-            nextFocusNode: controller.companyNameFocusNode,
+            hintText: "IFSC/SWIFTCODE".tr,
+            controller: controller.ifscController,
+            focusNode: controller.ifscfocusnode,
+            nextFocusNode: controller.branchAddressFocusNode,
             icon: FeatherIcons.mail,
-            keyboardType: TextInputType.emailAddress,
+            keyboardType: TextInputType.text,
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(
+            hintText: "Branch Address".tr,
+            controller: controller.branchAdressController,
+            focusNode: controller.branchAddressFocusNode,
+            nextFocusNode: controller.accountfocusnode,
+            icon: FeatherIcons.mail,
+            keyboardType: TextInputType.text,
           ),
           vGap(16),
           _buildTextField(
-            hintText: "Phone Number".tr,
-            controller: controller.phoneController,
-            focusNode: controller.phoneFocusNode,
-            nextFocusNode: controller.countryFocusNode,
-            icon: FeatherIcons.phone,
+            hintText: "Account Number".tr,
+            controller: controller.accountController,
+            focusNode: controller.accountfocusnode,
+            nextFocusNode: controller.Upifocusnode,
+            icon: Icons.account_balance,
             keyboardType: TextInputType.number,
           ),
 
           const SizedBox(height: 16),
           _buildTextField(
-            hintText: "Company Name".tr,
-            controller: controller.companyNameController,
-            focusNode: controller.companyNameFocusNode,
-            nextFocusNode: controller.employeesFocusNode,
+            hintText: "UPI ID".tr,
+            controller: controller.UPIController,
+            focusNode: controller.Upifocusnode,
+            nextFocusNode: controller.paymentfocusnode,
             icon: FeatherIcons.briefcase,
           ),
           const SizedBox(height: 16),
           _buildTextField(
-            hintText: "Address".tr,
-            controller: controller.addressController,
-            focusNode: controller.addressFocusNode,
-            nextFocusNode: controller.employeesFocusNode,
+            hintText: "Payment Links".tr,
+            controller: controller.paymentController,
+            focusNode: controller.paymentfocusnode,
+            nextFocusNode: controller.brancfocusenode,
             icon: FeatherIcons.briefcase,
           ),
-          const SizedBox(height: 16),
-          _buildTextField(
-            hintText: "Employees".tr,
-            controller: controller.employeesController,
-            focusNode: controller.employeesFocusNode,
-            nextFocusNode: controller.countryFocusNode,
-            icon: FeatherIcons.users,
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 16),
-          _buildCountryTextField(context),
+          // const SizedBox(height: 16),
+          // _buildCountryTextField(context),
           const SizedBox(height: 20),
           _buildUpdateButton(),
         ],
@@ -203,29 +200,29 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
     );
   }
 
-  Widget _buildCountryTextField(BuildContext context) {
-    return CustomTextField(
-      hintText: "Country".tr,
-      controller: controller.countryController,
-      focusNode: controller.countryFocusNode,
-      labletext: "Country".tr,
-      prefix: const Icon(FeatherIcons.globe, color: Colors.black),
-      suffix: InkWell(
-        onTap: () => _showCountryPicker(context: context),
-        child: Container(
-          margin: const EdgeInsets.only(right: 10),
-          child: const Icon(Icons.arrow_drop_down, color: Colors.black, size: 30),
-        ),
-      ),
-      validator: (value) => value?.isEmpty ?? true ? "Country is required" : null,
-    );
-  }
+  // Widget _buildCountryTextField(BuildContext context) {
+  //   return CustomTextField(
+  //     hintText: "Country".tr,
+  //     controller: controller.countryController,
+  //     focusNode: controller.countryFocusNode,
+  //     labletext: "Country".tr,
+  //     prefix: const Icon(FeatherIcons.globe, color: Colors.black),
+  //     suffix: InkWell(
+  //       onTap: () => _showCountryPicker(context: context),
+  //       child: Container(
+  //         margin: const EdgeInsets.only(right: 10),
+  //         child: const Icon(Icons.arrow_drop_down, color: Colors.black, size: 30),
+  //       ),
+  //     ),
+  //     validator: (value) => value?.isEmpty ?? true ? "Country is required" : null,
+  //   );
+  // }
 
   Widget _buildUpdateButton() {
     return InkWell(
       onTap: () {
         if (_formKey.currentState!.validate()){
-          controller.hitUserupdateProfile();
+          controller.hitUpdateAccountApiCall();
         }
       },
       child: Container(
@@ -269,63 +266,63 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
   //   );
   // }
 
-  void _showImagePickerOptions(BuildContext context) {
-    showModalBottomSheet(
-      backgroundColor: whiteColor,
-      context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Choose from Gallery'),
-                onTap: () {
-                  controller.getImage(ImageSource.gallery);
-                  Navigator.of(context).pop();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: const Text('Take a Photo'),
-                onTap: () {
-                  controller.getImage(ImageSource.camera);
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _showCountryPicker({required BuildContext context}) {
-    return CountryCodePicker(
-      onChanged: (CountryCode countryCode) {
-        controller.countryController.text = countryCode.name ?? '';
-        controller.selectedCountry = countryCode;
-        controller.update();
-        Navigator.pop(context);
-      },
-      initialSelection: 'IN',
-      favorite: const ['+1', 'US', '+91', 'IN'],
-      showCountryOnly: true,
-      showOnlyCountryWhenClosed: true,
-      alignLeft: false,
-      showFlag: true,
-      showFlagDialog: true,
-      builder: (CountryCode? countryCode) {
-        return ListTile(
-          leading: SizedBox(
-            width: 30,
-            height: 20,
-            child: countryCode != null ? Text(countryCode.flagUri ?? '') : const SizedBox(),
-          ),
-          title: Text(countryCode?.name ?? ''),
-          trailing: Text(countryCode?.dialCode ?? ''),
-        );
-      },
-    );
-  }
+  // void _showImagePickerOptions(BuildContext context) {
+  //   showModalBottomSheet(
+  //     backgroundColor: whiteColor,
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return SafeArea(
+  //         child: Wrap(
+  //           children: <Widget>[
+  //             ListTile(
+  //               leading: const Icon(Icons.photo_library),
+  //               title: const Text('Choose from Gallery'),
+  //               onTap: () {
+  //                 controller.getImage(ImageSource.gallery);
+  //                 Navigator.of(context).pop();
+  //               },
+  //             ),
+  //             ListTile(
+  //               leading: const Icon(Icons.photo_camera),
+  //               title: const Text('Take a Photo'),
+  //               onTap: () {
+  //                 controller.getImage(ImageSource.camera);
+  //                 Navigator.of(context).pop();
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+  //
+  // Widget _showCountryPicker({required BuildContext context}) {
+  //   return CountryCodePicker(
+  //     onChanged: (CountryCode countryCode) {
+  //       controller.countryController.text = countryCode.name ?? '';
+  //       controller.selectedCountry = countryCode;
+  //       controller.update();
+  //       Navigator.pop(context);
+  //     },
+  //     initialSelection: 'IN',
+  //     favorite: const ['+1', 'US', '+91', 'IN'],
+  //     showCountryOnly: true,
+  //     showOnlyCountryWhenClosed: true,
+  //     alignLeft: false,
+  //     showFlag: true,
+  //     showFlagDialog: true,
+  //     builder: (CountryCode? countryCode) {
+  //       return ListTile(
+  //         leading: SizedBox(
+  //           width: 30,
+  //           height: 20,
+  //           child: countryCode != null ? Text(countryCode.flagUri ?? '') : const SizedBox(),
+  //         ),
+  //         title: Text(countryCode?.name ?? ''),
+  //         trailing: Text(countryCode?.dialCode ?? ''),
+  //       );
+  //     },
+  //   );
+  // }
 }

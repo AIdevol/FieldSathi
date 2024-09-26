@@ -24,8 +24,10 @@ abstract class AppRoutes {
   static const customerListScreen = '/customerListScreen';
   static const principleCustomerScreen = '/principleCustomerScreen';
   static const leadListScreen = '/leadListScreen';
-  static const helpCenter = '/help';
-  static const phoneOtp = '/phoneOtp';
+  static const leadFormFieldScreen = '/leadformFieldScreen';
+  static const serviceCategoriesScreen = '/serviceCategoriesEnd';
+  static const SuperAgentsScreen = '/SuperAgentsScreen';
+  static const accountViewScreen = '/accountViewScreen';
 }
 
 class RoutesArgument {

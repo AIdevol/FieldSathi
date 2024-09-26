@@ -4,4 +4,12 @@ class ApiEnd{
   static const String signUpEnd = 'users/signup/';
   static const String verifyotpEnd = 'users/verify_otp/';
   static const String resendOtpEnd = 'users/resend_otp/';
+  static const String tmsUsersEnd = 'users/tms_users/';
+  static const String get_attendanceEnd = 'users/attendance/';
+  static const String get_ticketEnd ='api/tickets/';
+  static const String get_fsrEnd = 'api/tickets/';
+  static const String leavesReportEnd = 'api/leaves/';
+  static const String checkpointsCategoriesEnd = 'api/add-checkpoints/';
+  static const String holidaysApiEnd = 'api/holidays/';
+  // static const String
 }

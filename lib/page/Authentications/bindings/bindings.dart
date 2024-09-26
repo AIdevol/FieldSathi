@@ -12,10 +12,13 @@ import 'package:tms_sathi/page/Authentications/presentations/controllers/login_s
 import 'package:tms_sathi/page/Authentications/presentations/controllers/map_Screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/profile_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/service_request_screen_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/services_Categories_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/ticket_list_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/bindings/bindings.dart';
+import '../presentations/controllers/account_view_screen_controller.dart';
 import '../presentations/controllers/lead_list_view_controller.dart';
 import '../presentations/controllers/register_screen_controller.dart';
+import '../presentations/controllers/super_view_screen_controller.dart';
 
 class AuthenticationBinding extends Bindings {
   @override
@@ -33,9 +36,12 @@ class AuthenticationBinding extends Bindings {
     Get.lazyPut<AgentsViewScreenController>(()=> AgentsViewScreenController());
     Get.lazyPut<MapViewScreenController>(()=> MapViewScreenController());
     Get.lazyPut<ProfileViewScreenController>(()=> ProfileViewScreenController());
-    Get.lazyPut<TicketListViewScreenController>(()=> TicketListViewScreenController());
+    Get.lazyPut<TicketListController>(()=> TicketListController());
     Get.lazyPut<LeaveReportViewScreenController>(()=> LeaveReportViewScreenController());
     Get.lazyPut<CustomerListViewController>(()=> CustomerListViewController());
     Get.lazyPut<LeadListViewController>(()=> LeadListViewController());
+    Get.lazyPut<ServiceCategoriesController>(()=> ServiceCategoriesController());
+    Get.lazyPut<SuperViewScreenController>(()=> SuperViewScreenController());
+    Get.lazyPut<AccountViewScreenController>(()=> AccountViewScreenController());
   }
 }

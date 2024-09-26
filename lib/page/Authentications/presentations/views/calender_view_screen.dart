@@ -6,24 +6,11 @@ import 'package:tms_sathi/utilities/helper_widget.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../controllers/calender_screen_controller.dart';
 
-class Holiday {
-  final DateTime date;
-  final String name;
-
-  Holiday(this.date, this.name);
-}
-
 class CalendarView extends GetView<CalendarController> {
-  final List<Holiday> holidays = [
-    Holiday(DateTime(2024, 9, 20), 'Holi'),
-    Holiday(DateTime(2024, 10, 2), 'Gandhi Jayanti'),
-    Holiday(DateTime(2024, 9, 22), 'Occasional leaves'),
-    Holiday(DateTime(2024, 12, 25), 'Christmas'),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return GetBuilder<CalendarController>(
+      init: CalendarController(),
       builder: (controller) => Scaffold(
         appBar: AppBar(
           title: Text('Calendar',
@@ -33,7 +20,7 @@ class CalendarView extends GetView<CalendarController> {
         ),
         body: Column(
           children: [
-            Obx(() => TableCalendar<Holiday>(
+            Obx(() => TableCalendar<Event>(
               firstDay: DateTime.utc(2024, 1, 1),
               lastDay: DateTime.utc(2024, 12, 31),
               focusedDay: controller.focusedDay.value,
@@ -48,9 +35,7 @@ class CalendarView extends GetView<CalendarController> {
                 controller.onFormatChanged(format);
               },
               eventLoader: (day) {
-                return holidays
-                    .where((holiday) => isSameDay(holiday.date, day))
-                    .toList();
+                return controller.getEventsForDay(day);
               },
               calendarStyle: CalendarStyle(
                 todayDecoration: BoxDecoration(
@@ -77,19 +62,19 @@ class CalendarView extends GetView<CalendarController> {
                     return Positioned(
                       right: 1,
                       top: 0,
-                      child: _buildHolidayMarker(),
+                      child: _buildHolidayMarker(events.first.color),
                     );
                   }
                   return null;
                 },
               ),
             )),
-          vGap(20),
+            vGap(20),
             Expanded(
-              child: ListView.builder(
-                itemCount: holidays.length,
+              child: Obx(() => ListView.builder(
+                itemCount: controller.selectedEvents.length,
                 itemBuilder: (BuildContext context, index) {
-                  final holiday = holidays[index];
+                  final event = controller.selectedEvents[index];
                   return Container(
                     margin: EdgeInsets.all(5),
                     padding: EdgeInsets.all(5),
@@ -98,15 +83,18 @@ class CalendarView extends GetView<CalendarController> {
                       borderRadius: BorderRadius.circular(25),
                     ),
                     child: ListTile(
-                      title: Text(holiday.name,style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 15),),
+                      title: Text(event.title,
+                        style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 15),
+                      ),
                       subtitle: Text(
-                          '${holiday.date.day}/${holiday.date.month}/${holiday.date.year}',
-                          style: MontserratStyles.montserratNormalTextStyle(color: blackColor, size: 15)),
-                      leading: Icon(Icons.celebration, color: Colors.red),
+                          '${event.start.day}/${event.start.month}/${event.start.year} - ${event.end.day}/${event.end.month}/${event.end.year}',
+                          style: MontserratStyles.montserratNormalTextStyle(color: blackColor, size: 15)
+                      ),
+                      leading: Icon(Icons.celebration, color: event.color),
                     ),
                   );
                 },
-              ),
+              )),
             ),
           ],
         ),
@@ -114,11 +102,11 @@ class CalendarView extends GetView<CalendarController> {
     );
   }
 
-  Widget _buildHolidayMarker() {
+  Widget _buildHolidayMarker(Color color) {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.red,
+        color: color,
       ),
       width: 8.0,
       height: 8.0,

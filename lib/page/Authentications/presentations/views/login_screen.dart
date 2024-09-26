@@ -146,8 +146,8 @@ Widget _loginTextfields(BuildContext context){
 
               InkWell(onTap: ()async{
                 if (formGlobalKey.currentState!.validate()) {
-                // controller.hitloginApicall();
-                  Get.offAllNamed(AppRoutes.homeScreen);
+                controller.hitloginApicall();
+                  // Get.offAllNamed(AppRoutes.homeScreen);
                 print('Registration button tapped');
               }},
                 child: Container( height: Get.height*0.06,

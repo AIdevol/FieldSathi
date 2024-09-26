@@ -17,13 +17,17 @@ import 'package:tms_sathi/page/Authentications/presentations/views/otp_view_scre
 import 'package:tms_sathi/page/Authentications/presentations/views/profile_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/register_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/service_request_view_screen.dart';
+import 'package:tms_sathi/page/Authentications/presentations/views/services_View_screen.dart';
+import 'package:tms_sathi/page/Authentications/presentations/views/super_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/ticket_list_screen.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/add_amc_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/add_fsr_view.dart';
+import 'package:tms_sathi/page/Authentications/widgets/views/lead_form_field.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/principal_customer_view.dart';
 import 'package:tms_sathi/page/home/bindings/home_bindings.dart';
 import 'package:tms_sathi/page/home/presentations/views/home_screen.dart';
 
+import '../page/Authentications/presentations/views/account_view_screen.dart';
 import '../page/splash/bindings/splash_bindings.dart';
 import '../page/splash/presentations/views/splash.dart';
 import 'navigation.dart';
@@ -104,7 +108,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.ticketListScreen,
       binding: AuthenticationBinding(),
-      page: () => TicketListViewScreen(),
+      page: () => TicketListScreen(),
     ),
     GetPage(
       name: AppRoutes.addfsrScreen,
@@ -140,6 +144,26 @@ class AppPages {
       name: AppRoutes.leadListScreen,
       binding: AuthenticationBinding(),
       page: () => LeadListViewScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.leadFormFieldScreen,
+      binding: AuthenticationBinding(),
+      page: () => LeadFormFieldScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.serviceCategoriesScreen,
+      binding: AuthenticationBinding(),
+      page: () => ServicesViewScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.SuperAgentsScreen,
+      binding: AuthenticationBinding(),
+      page: () => SuperViewScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.accountViewScreen,
+      binding: AuthenticationBinding(),
+      page: () => AccountViewScreen(),
     ),
   ];
 }

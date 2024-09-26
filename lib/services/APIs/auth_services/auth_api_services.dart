@@ -5,8 +5,10 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/response_models/login_response_model.dart';
 import 'package:tms_sathi/response_models/otp_response_model.dart';
+import 'package:tms_sathi/response_models/user_response_model.dart';
 import 'package:tms_sathi/services/APIs/dio_client.dart';
 
+import '../../../response_models/holidays_calender_response_model.dart';
 import '../../../response_models/register_response_model.dart';
 import '../../../response_models/resend_otp_api_call.dart';
 import '../api_end.dart';
@@ -81,6 +83,45 @@ implements AuthenticationApi{
       final response = await dioClient!.post(ApiEnd.resendOtpEnd, data: dataBody);
       return ResendOtpApiCall.fromJson(response);
     } catch (e) {
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+
+  @override
+  Future<UserResponseModel>userDetailsApiCall({Map<String, dynamic>? dataBody, String? id})async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.tmsUsersEnd}/$id/", data: dataBody);
+      return UserResponseModel.fromJson(response);
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+
+  @override
+  Future<UserResponseModel>updateUserDetailsApiCall({Map<String, dynamic>? dataBody, String? id})async{
+    try{
+      final response = await dioClient!.put("${ApiEnd.tmsUsersEnd}/$id/", data: dataBody, skipAuth: false);
+      return UserResponseModel.fromJson(response);
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+
+  @override
+  Future<UserResponseModel>ticketDetailsApiCall({Map<String, dynamic>? dataBody, String? id})async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.tmsUsersEnd}/$id/", data: dataBody);
+      return UserResponseModel.fromJson(response);
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+  @override
+  Future<HolidaysCalenderResponseModel>holidaysCalenderApiCall({Map<String, dynamic>? dataBody})async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.holidaysApiEnd}", data: dataBody);
+      return HolidaysCalenderResponseModel.fromJson(response);
+    }catch(e){
       return Future.error(NetworkExceptions.getDioException(e));
     }
   }
