@@ -37,30 +37,32 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController>{
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          // _buildSearchBar(controller),
-          hGap(10),
-          ElevatedButton(
-            onPressed: () => _showImportModelView(Get.context!),
-            style: _buttonStyle(),
-            child: Text(
-              'Import',
-              style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),
+      child: Expanded(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            // _buildSearchBar(controller),
+            hGap(10),
+            ElevatedButton(
+              onPressed: () => _showImportModelView(Get.context!),
+              style: _buttonStyle(),
+              child: Text(
+                'Import',
+                style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),
+              ),
             ),
-          ),
-          hGap(30),
-          ElevatedButton(
-            onPressed: () {},
-            child: Text(
-              'Export',
-              style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),
+            hGap(30),
+            ElevatedButton(
+              onPressed: () {},
+              child: Text(
+                'Export',
+                style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),
+              ),
+              style: _buttonStyle(),
             ),
-            style: _buttonStyle(),
-          ),
-          hGap(10),
-        ],
+            hGap(10),
+          ],
+        ),
       ),
     );
   }
@@ -68,7 +70,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController>{
     return ButtonStyle(
       backgroundColor: WidgetStateProperty.all(appColor),
       foregroundColor: WidgetStateProperty.all(Colors.white),
-      padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 60, vertical: 10)),
+      padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 50, vertical: 10)),
       elevation: WidgetStateProperty.all(5),
       shape: WidgetStateProperty.all(
         RoundedRectangleBorder(

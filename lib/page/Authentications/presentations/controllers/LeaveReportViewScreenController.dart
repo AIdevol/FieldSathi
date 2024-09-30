@@ -1,15 +1,14 @@
-import 'dart:convert';
-
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tms_sathi/navigations/navigation.dart';
-import 'package:http/http.dart'as http;
+import 'package:overlay_support/overlay_support.dart';
+import 'package:tms_sathi/constans/const_local_keys.dart';
+import 'package:tms_sathi/main.dart';
+import 'package:tms_sathi/response_models/leaves_response_model.dart';
+import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
+import 'package:intl/intl.dart';
 
-import '../../widgets/views/ticket_model_data.dart';
-
-class LeaveReportViewScreenController extends GetxController{
-
-  static const String API_ENDPOINT = 'https://your-api-endpoint.com/tickets';
-
+class LeaveReportViewScreenController extends GetxController {
+  RxInt casualLeaves = 0.obs;
   RxList<String> filterTypes = [
     "Select Status",
     "Submitted",
@@ -17,32 +16,50 @@ class LeaveReportViewScreenController extends GetxController{
     "Rejected",
   ].obs;
 
+  void incrementCasualLeaves() {
+    casualLeaves.value++;
+  }
+
+  void decrementCasualLeaves() {
+    if (casualLeaves.value > 0) {
+      casualLeaves.value--;
+    }
+  }
+
+  RxList<String> roleTypes = [
+    "Agent",
+    "Technician",
+    "Manager",
+  ].obs;
+
+  RxString selectedRoleFilter = "Agent".obs;
   RxString selectedFilter = "Select Status".obs;
-  RxList<Ticket> tickets = <Ticket>[].obs;
+  Rx<LeaveManagementResponseModel?> leaveManagementData = Rx<LeaveManagementResponseModel?>(null);
+  RxList<Result> filteredLeaves = <Result>[].obs;
   RxBool isLoading = false.obs;
   RxString searchQuery = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchTickets();
+    hitLeavesApiCall();
   }
 
-  Future<void> fetchTickets() async {
+  Future<void> hitLeavesApiCall() async {
+    customLoader.show();
     isLoading.value = true;
+    FocusManager.instance.primaryFocus?.unfocus();
     try {
-      final response = await http.get(Uri.parse(API_ENDPOINT));
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonData = json.decode(response.body);
-        tickets.value = jsonData.map((json) => Ticket.fromJson(json)).toList();
-      } else {
-        throw Exception('Failed to load tickets');
-      }
-    } catch (e) {
-      print('Error fetching tickets: $e');
-      Get.snackbar('Error', 'Failed to load tickets. Please try again.');
+      final response = await Get.find<AuthenticationApiService>().getLeavesApiCall();
+      leaveManagementData.value = leaveManagementFromJson(response.toString());
+      applyFilters();
+      toast("Fetched leaves successfully");
+    } catch (error) {
+      toast(error.toString());
     } finally {
+      customLoader.hide();
       isLoading.value = false;
+      update();
     }
   }
 
@@ -59,84 +76,50 @@ class LeaveReportViewScreenController extends GetxController{
   }
 
   void applyFilters() {
-    List<Ticket> filteredTickets = tickets;
+    if (leaveManagementData.value == null) return;
 
-    if (searchQuery.isNotEmpty) {
-      filteredTickets = filteredTickets.where((ticket) {
-        return ticket.customerName.toLowerCase().contains(searchQuery.toLowerCase()) ||
-            ticket.subCustomerName.toLowerCase().contains(searchQuery.toLowerCase()) ||
-            ticket.technicianName.toLowerCase().contains(searchQuery.toLowerCase());
-      }).toList();
-    }
-
-    if (selectedFilter.value != "Select Status") {
-      filteredTickets = filteredTickets.where((ticket) {
-        switch (selectedFilter.value) {
-          case "Submitted":
-            return ticket.customerName.toLowerCase().contains(searchQuery.toLowerCase());
-          case "Approved":
-            return ticket.subCustomerName.toLowerCase().contains(searchQuery.toLowerCase());
-          case "Rejected":
-            return ticket.technicianName.toLowerCase().contains(searchQuery.toLowerCase());
-          default:
-            return true;
-        }
-      }).toList();
-    }
-
-    tickets.value = filteredTickets;
+    filteredLeaves.value = leaveManagementData.value!.results.where((leave) {
+      final nameMatch = '${leave.userId.firstName} ${leave.userId.lastName}'
+          .toLowerCase()
+          .contains(searchQuery.value.toLowerCase());
+      final statusMatch = selectedFilter.value == "Select Status" || leave.status == selectedFilter.value;
+      return nameMatch && statusMatch;
+    }).toList();
   }
 
-  Future<void> addTicket(Ticket newTicket) async {
-    try {
-      final response = await http.post(
-        Uri.parse(API_ENDPOINT),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(newTicket.toJson()),
-      );
-      if (response.statusCode == 201) {
-        await fetchTickets();
-        Get.snackbar('Success', 'Ticket added successfully');
-      } else {
-        throw Exception('Failed to add ticket');
-      }
-    } catch (e) {
-      print('Error adding ticket: $e');
-      Get.snackbar('Error', 'Failed to add ticket. Please try again.');
-    }
+  void showLeaveDetails(Result leave) {
+    Get.dialog(
+      AlertDialog(
+        title: Text('Leave Details'),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Name: ${leave.userId.firstName} ${leave.userId.lastName}'),
+            Text('Phone: ${leave.userId.phoneNumber}'),
+            Text('Profile: ${leave.userId.role}'),
+            Text('From Date: ${formatDate(leave.startDate)}'),
+            Text('To Date: ${formatDate(leave.endDate)}'),
+            Text('Days: ${calculateDays(leave.startDate, leave.endDate)}'),
+            Text('Reason: ${leave.reason}'),
+            Text('Status: ${leave.status}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            child: Text('Close'),
+            onPressed: () => Get.back(),
+          ),
+        ],
+      ),
+    );
   }
 
-  Future<void> updateTicket(Ticket updatedTicket) async {
-    try {
-      final response = await http.put(
-        Uri.parse('$API_ENDPOINT/${updatedTicket.id}'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(updatedTicket.toJson()),
-      );
-      if (response.statusCode == 200) {
-        await fetchTickets();
-        Get.snackbar('Success', 'Ticket updated successfully');
-      } else {
-        throw Exception('Failed to update ticket');
-      }
-    } catch (e) {
-      print('Error updating ticket: $e');
-      Get.snackbar('Error', 'Failed to update ticket. Please try again.');
-    }
+  String formatDate(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(date);
   }
 
-  Future<void> deleteTicket(int id) async {
-    try {
-      final response = await http.delete(Uri.parse('$API_ENDPOINT/$id'));
-      if (response.statusCode == 204) {
-        tickets.removeWhere((ticket) => ticket.id == id);
-        Get.snackbar('Success', 'Ticket deleted successfully');
-      } else {
-        throw Exception('Failed to delete ticket');
-      }
-    } catch (e) {
-      print('Error deleting ticket: $e');
-      Get.snackbar('Error', 'Failed to delete ticket. Please try again.');
-    }
+  int calculateDays(DateTime startDate, DateTime endDate) {
+    return endDate.difference(startDate).inDays + 1;
   }
 }

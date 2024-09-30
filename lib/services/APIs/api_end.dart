@@ -8,8 +8,8 @@ class ApiEnd{
   static const String get_attendanceEnd = 'users/attendance/';
   static const String get_ticketEnd ='api/tickets/';
   static const String get_fsrEnd = 'api/tickets/';
-  static const String leavesReportEnd = 'api/leaves/';
+  static const String leavesReportEnd = 'users/leaves/';
   static const String checkpointsCategoriesEnd = 'api/add-checkpoints/';
   static const String holidaysApiEnd = 'api/holidays/';
-  // static const String
+  // static const String superUser
 }

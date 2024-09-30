@@ -3,14 +3,17 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:tms_sathi/response_models/leaves_response_model.dart';
 import 'package:tms_sathi/response_models/login_response_model.dart';
 import 'package:tms_sathi/response_models/otp_response_model.dart';
+import 'package:tms_sathi/response_models/ticket_response_model.dart';
 import 'package:tms_sathi/response_models/user_response_model.dart';
 import 'package:tms_sathi/services/APIs/dio_client.dart';
 
 import '../../../response_models/holidays_calender_response_model.dart';
 import '../../../response_models/register_response_model.dart';
 import '../../../response_models/resend_otp_api_call.dart';
+import '../../../response_models/super_user_response_model.dart';
 import '../api_end.dart';
 import '../network_except.dart';
 import 'auth_abstract_api_services_impl.dart';
@@ -116,6 +119,9 @@ implements AuthenticationApi{
       return Future.error(NetworkExceptions.getDioException(e));
     }
   }
+
+
+// =====================================================Page ApI's=======================================================================
   @override
   Future<HolidaysCalenderResponseModel>holidaysCalenderApiCall({Map<String, dynamic>? dataBody})async{
     try{
@@ -125,4 +131,35 @@ implements AuthenticationApi{
       return Future.error(NetworkExceptions.getDioException(e));
     }
   }
+  @override
+  Future<TicketResponseModel>getticketDetailsApiCall({Map<String, dynamic>? dataBody})async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.get_ticketEnd}", data: dataBody,skipAuth: false);
+      return TicketResponseModel.fromJson(response);
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+
+  @override
+  Future<LeaveManagementResponseModel>getLeavesApiCall({Map<String, dynamic>? dataBody})async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.leavesReportEnd}", data: dataBody,skipAuth: false);
+      return LeaveManagementResponseModel.fromJson(response);
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+
+  @override
+  Future<SuperUsersResponseModel>getSuperUserApiCall({Map<String, dynamic>? dataBody, parameters})async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.tmsUsersEnd}", data: dataBody,skipAuth: false,queryParameters: parameters );
+      return SuperUsersResponseModel.fromJson(response);
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+
+
 }

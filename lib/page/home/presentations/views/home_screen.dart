@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
@@ -20,8 +21,8 @@ import '../../widget/graphs_view.dart';
 
 class HomeScreen extends GetView<HomeScreenController> {
   final GlobalKey<ScaffoldState> drawerkey = GlobalKey();
-  bool _isDialOpen = false;
 
+  bool _isDialOpen = false;
   HomeScreen({super.key});
 
   @override
@@ -46,12 +47,12 @@ class HomeScreen extends GetView<HomeScreenController> {
               },
             ),
             actions: [
-              // IconButton(onPressed: ()async{
-              //   customLoader.show();
-              //   await Future.delayed(Duration(seconds: 2));
-              //   Get.toNamed(AppRoutes.mapView);
-              //   customLoader.hide();
-              // }, icon: Icon(FeatherIcons.mapPin,size: 20,)),
+              IconButton(onPressed: ()async{
+                // customLoader.show();
+                // await Future.delayed(Duration(seconds: 2));
+                // Get.toNamed(AppRoutes.mapView);
+                // customLoader.hide();
+              }, icon: Icon(Icons.notifications_sharp,size: 25,)),
               PopupMenuButton<String>(
                 color: appColor,
                 offset: Offset(0, 56),
@@ -108,23 +109,25 @@ class HomeScreen extends GetView<HomeScreenController> {
               hGap(10)
             ],
           ),
-          body: Center(
-            child: Container(
-              height: Get.height*0.2,
-                width: Get.width*0.97,
-                // decoration: BoxDecoration(color: Colors.black),
-                child: _buildWidgetView(context)),
-          )
+          body: _buildWidgetView(context)
         ),
       ),
     );
   }
 
   _buildWidgetView(BuildContext context){
-    return const Column(
-
-      children: [
-        Expanded(child: GraphViewScreen())],
+    return  Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: ListView(
+        children: [
+          vGap(40),
+          _graphVisualScreen(context, text: 'Ticket Details'),
+          vGap(40),
+          _graphVisualScreen(context, text:"Today's Attendance"),
+          vGap(40),
+          _graphVisualScreen(context, text: "AMC Status"),
+        ],
+      ),
     );
   }
   SpeedDial _buildSpeedDial( {required BuildContext context}) {
@@ -226,8 +229,72 @@ class HomeScreen extends GetView<HomeScreenController> {
       ],
     );
   }
+
+
+  _graphVisualScreen(BuildContext context, {required String text}){
+    final containerLength = MediaQuery.of(context).size * 1/2;
+    return Container(
+        height: containerLength.height*0.6,
+        width: Get.width*0.9,
+        decoration: BoxDecoration(
+          color: whiteColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(text, style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: blackColor),),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: _buttonBuildContainer(onTap: (){}, text: "Create Ticket " ),
+                )
+              ],
+            ),
+            Expanded(child: GraphViewScreen()),
+          ],
+        ));
+  }
 }
 
+
+Widget _buttonBuildContainer({required Function()? onTap, required String text}){
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+    height: Get.height*0.06,
+    width: Get.width*0.3,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: appColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+    child: Center(
+      child: Text(
+        text,
+      style: MontserratStyles.montserratSemiBoldTextStyle(size: 13), /*textAlign:TextAlign.center,*/),
+    ),
+  ),);
+}
 
 
 

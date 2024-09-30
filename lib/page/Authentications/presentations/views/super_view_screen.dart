@@ -14,11 +14,21 @@ class SuperViewScreen extends GetView<SuperViewScreenController>{
   Widget build(BuildContext context){
     return MyAnnotatedRegion(child: GetBuilder<SuperViewScreenController>(builder: (controller)=>Scaffold(
       appBar: AppBar(
-        title: Text("Service Categories", style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),),
+        title: Text("Super User", style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),),
         backgroundColor: appColor,
-        actions: [IconButton(onPressed: (){}, icon: Icon(FeatherIcons.search))],
+        actions: [IconButton(onPressed: (){}, icon: Icon(FeatherIcons.search)),
+          IconButton(onPressed: (){}, icon: Icon(FeatherIcons.plus))],
       ),
-      body: _buildTopBar(controller),
+      body: Column(
+        children: [
+          _buildTopBar(controller),
+          Expanded(
+            child: Obx(() => controller.isLoading.value
+                ? Center(child: Container())
+                : _mainData(controller)),
+          ),
+        ],
+      ),
     )));
   }
   Widget _buildTopBar(SuperViewScreenController controller) {
@@ -67,7 +77,7 @@ class SuperViewScreen extends GetView<SuperViewScreenController>{
     return ButtonStyle(
       backgroundColor: WidgetStateProperty.all(appColor),
       foregroundColor: WidgetStateProperty.all(Colors.white),
-      padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 60, vertical: 10)),
+      padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 50, vertical: 10)),
       elevation: WidgetStateProperty.all(5),
       shape: WidgetStateProperty.all(
         RoundedRectangleBorder(
@@ -78,6 +88,69 @@ class SuperViewScreen extends GetView<SuperViewScreenController>{
     );
   }
 }
+
+Widget _mainData(SuperViewScreenController controller){
+  return SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child:  DataTable(columns: const[
+      DataColumn(label: Text('Name')),
+      DataColumn(label: Text('Email')),
+      DataColumn(label: Text('Contact Number')),
+      DataColumn(label: Text('Status')),
+      // DataColumn(label: Text('To Date')),
+      // DataColumn(label: Text('Days')),
+      // DataColumn(label: Text('Reason')),
+      // DataColumn(label: Text('Status')),
+      // DataColumn(label: Text('Actions')),
+    ], rows: controller.filteredData.map((superData){
+        return DataRow(cells: [
+          DataCell(Text("kadlfjasf")),
+          DataCell(Text("adfadsf")),
+          DataCell(Text("dfadsf")),
+          DataCell(Text("adsfasdf"))
+        ],
+        );
+    }).toList()
+    ),
+  );
+  //   return SingleChildScrollView(
+  //   scrollDirection: Axis.horizontal,
+  //   child: DataTable(
+  //     columns:const [
+  //       DataColumn(label: Text('Name')),
+  //       DataColumn(label: Text('Phone')),
+  //       DataColumn(label: Text('Profile')),
+  //       DataColumn(label: Text('From Date')),
+  //       DataColumn(label: Text('To Date')),
+  //       DataColumn(label: Text('Days')),
+  //       DataColumn(label: Text('Reason')),
+  //       DataColumn(label: Text('Status')),
+  //       DataColumn(label: Text('Actions')),
+  //     ],
+  //     rows: controller.filteredLeaves.map((leave) {
+  //       return DataRow(
+  //         cells: [
+  //           DataCell(Text('${leave.userId.firstName} ${leave.userId.lastName}')),
+  //           DataCell(Text(leave.userId.phoneNumber)),
+  //           DataCell(Text(leave.userId.role)),
+  //           // DataCell(Text(controller.formatDate(leave.startDate))),
+  //           // DataCell(Text(controller.formatDate(leave.endDate))),
+  //           // DataCell(Text(controller.calculateDays(leave.startDate, leave.endDate).toString())),
+  //           DataCell(Text(leave.reason)),
+  //           DataCell(Text(leave.status)),
+  //           DataCell(
+  //             IconButton(
+  //               icon: Icon(Icons.info),
+  //               onPressed: () =>/* controller.showLeaveDetails(leave)*/,
+  //             ),
+  //           ),
+  //         ],
+  //       );
+  //     }).toList(),
+  //   ),
+  // );
+}
+
 void _showImportModelView(BuildContext context) {
   showDialog(
     context: context,

@@ -6,6 +6,8 @@ const String LOCALKEY_token = "LOCALKEY_token";
 const String RefreshToken = "RefreshToken";
 const String rememberMe = 'rememberMe';
 const String emailKey = 'emailKey';
+const String longitudeRealTime = 'longitude';
+const String latitudeRealTime = 'latitude';
 
 // RememberMeModal? getRememberMe() {
 //   String? email = storage.read(emailKey);

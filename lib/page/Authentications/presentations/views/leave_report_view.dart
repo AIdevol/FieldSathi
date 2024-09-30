@@ -1,31 +1,28 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-import 'package:tms_sathi/page/Authentications/presentations/views/ticket_list_screen.dart';
-import 'package:tms_sathi/utilities/helper_widget.dart';
+import 'package:tms_sathi/constans/color_constants.dart';
+import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/LeaveReportViewScreenController.dart';
+import 'package:tms_sathi/response_models/leaves_response_model.dart';
+import 'package:intl/intl.dart';
 
+import '../../../home/widget/leave_update_screen.dart';
 
-import '../../../../constans/color_constants.dart';
-import '../../../../utilities/google_fonts_textStyles.dart';
-import '../controllers/LeaveReportViewScreenController.dart';
-
-class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController>{
-
+class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: appColor,
-        title: Text('Leaves',style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),),
+        title: Text('Leaves', style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black)),
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
-            onPressed: controller.fetchTickets,
+            onPressed: controller.hitLeavesApiCall,
           ),
           IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {}
+              icon: Icon(Icons.add),
+              onPressed: () { Get.to(LeaveUpdateScreen()); }
           ),
         ],
       ),
@@ -36,7 +33,7 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController>{
           Expanded(
             child: Obx(() => controller.isLoading.value
                 ? Center(child: CircularProgressIndicator())
-                : _buildDataGrid()),
+                : _buildLeavesDataTable()),
           ),
         ],
       ),
@@ -49,28 +46,16 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController>{
       child: Row(
         children: [
           Expanded(child: _buildFilterDropdown()),
-          SizedBox(width: 8),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: appColor),
-            onPressed: () {/* Implement import functionality */},
-            child: Text('Import',style: MontserratStyles.montserratSemiBoldTextStyle(size: 13)),
-          ),
-          SizedBox(width: 8),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: appColor),
-            onPressed: () {/* Implement export functionality */},
-            child: Text('Export',style: MontserratStyles.montserratSemiBoldTextStyle(size: 13),),
-          ),
         ],
       ),
     );
   }
 
   Widget _buildFilterDropdown() {
-    return Obx(() => DropdownButton<String>(
+    return Obx(() => DropdownButton(
       value: controller.selectedFilter.value,
       items: controller.filterTypes.map((String value) {
-        return DropdownMenuItem<String>(
+        return DropdownMenuItem(
           value: value,
           child: Text(value),
         );
@@ -90,36 +75,55 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController>{
           border: OutlineInputBorder(),
         ),
       ),
-
     );
   }
 
-  Widget _buildDataGrid() {
-    return Obx(() => SfDataGrid(
-      source: TicketDataSource(tickets: controller.tickets),
-      columns: [
-        GridColumn(columnName: 'id', label: _buildHeaderCell('Ticket ID')),
-        GridColumn(columnName: 'customerName', label: _buildHeaderCell('Customer Name')),
-        GridColumn(columnName: 'subCustomerName', label: _buildHeaderCell('Sub-Customer Name')),
-        GridColumn(columnName: 'technicianName', label: _buildHeaderCell('Technician Name')),
-        GridColumn(columnName: 'startDateTime', label: _buildHeaderCell('Start Date/Time')),
-        GridColumn(columnName: 'endDateTime', label: _buildHeaderCell('End Date/Time')),
-        GridColumn(columnName: 'time', label: _buildHeaderCell('Time')),
-        GridColumn(columnName: 'address', label: _buildHeaderCell('Address')),
-        GridColumn(columnName: 'region', label: _buildHeaderCell('Region')),
-        GridColumn(columnName: 'purpose', label: _buildHeaderCell('Purpose')),
-        GridColumn(columnName: 'status', label: _buildHeaderCell('Status')),
-        GridColumn(columnName: 'ticketDate', label: _buildHeaderCell('Ticket Date')),
-        GridColumn(columnName: 'aging', label: _buildHeaderCell('Aging')),
-      ],
-    ));
-  }
-
-  Widget _buildHeaderCell(String title) {
-    return Container(
-      padding: EdgeInsets.all(8.0),
-      alignment: Alignment.center,
-      child: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+  Widget _buildLeavesDataTable() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          border: TableBorder(
+            horizontalInside: BorderSide(width: 1, color: Colors.grey.shade300),
+          ),
+          columnSpacing: 20,
+          headingRowColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+            return Colors.grey.shade100;
+          }),
+          columns: const [
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Phone')),
+            DataColumn(label: Text('Profile')),
+            DataColumn(label: Text('From Date')),
+            DataColumn(label: Text('To Date')),
+            DataColumn(label: Text('Days')),
+            DataColumn(label: Text('Reason')),
+            DataColumn(label: Text('Status')),
+            DataColumn(label: Text('Actions')),
+          ],
+          rows: controller.filteredLeaves.map((leave) {
+            return DataRow(
+              cells: [
+                DataCell(Text('${leave.userId.firstName} ${leave.userId.lastName}')),
+                DataCell(Text(leave.userId.phoneNumber)),
+                DataCell(Text(leave.userId.role)),
+                DataCell(Text(controller.formatDate(leave.startDate))),
+                DataCell(Text(controller.formatDate(leave.endDate))),
+                DataCell(Text(controller.calculateDays(leave.startDate, leave.endDate).toString())),
+                DataCell(Text(leave.reason)),
+                DataCell(Text(leave.status)),
+                DataCell(
+                  IconButton(
+                    icon: Icon(Icons.info),
+                    onPressed: () => controller.showLeaveDetails(leave),
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }

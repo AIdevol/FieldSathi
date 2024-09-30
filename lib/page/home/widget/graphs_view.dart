@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/page/home/presentations/controllers/graph_view_controller.dart';
+import 'package:tms_sathi/utilities/helper_widget.dart';
 
 class GraphViewScreen extends GetView<GraphViewController> {
   const GraphViewScreen({Key? key}) : super(key: key);
@@ -78,7 +79,7 @@ class GraphViewScreen extends GetView<GraphViewController> {
     return List.generate(4, (i) {
       final isTouched = i == controller.touchedIndex;
       final fontSize = isTouched ? 25.0 : 16.0;
-      final radius = isTouched ? 60.0 : 50.0;
+      final radius = isTouched ? 45.0 : 35.0;
       const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
       switch (i) {
         case 0:
@@ -168,7 +169,7 @@ class Indicator extends StatelessWidget {
             color: color,
           ),
         ),
-        const SizedBox(width: 4),
+     hGap(10),
         Text(
           text,
           style: TextStyle(
