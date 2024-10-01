@@ -1,5 +1,5 @@
 class ApiEnd{
-  static const String baseUrl = 'http://103.190.242.56:9002/';
+  static const String baseUrl = 'https://103.36.78.132:92/';
   static const String loginEnd = 'users/login/';
   static const String signUpEnd = 'users/signup/';
   static const String verifyotpEnd = 'users/verify_otp/';

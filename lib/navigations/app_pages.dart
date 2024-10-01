@@ -19,12 +19,15 @@ import 'package:tms_sathi/page/Authentications/presentations/views/register_scre
 import 'package:tms_sathi/page/Authentications/presentations/views/service_request_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/services_View_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/super_view_screen.dart';
+import 'package:tms_sathi/page/Authentications/presentations/views/technician_list_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/ticket_list_screen.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/add_amc_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/add_fsr_view.dart';
+import 'package:tms_sathi/page/Authentications/widgets/views/add_technician_list.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/lead_form_field.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/principal_customer_view.dart';
 import 'package:tms_sathi/page/home/bindings/home_bindings.dart';
+import 'package:tms_sathi/page/home/notification_service/views/notification_view_screen.dart';
 import 'package:tms_sathi/page/home/presentations/views/home_screen.dart';
 
 import '../page/Authentications/presentations/views/account_view_screen.dart';
@@ -164,6 +167,21 @@ class AppPages {
       name: AppRoutes.accountViewScreen,
       binding: AuthenticationBinding(),
       page: () => AccountViewScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.technicianListsScreen,
+      binding: AuthenticationBinding(),
+      page: () => TechnicianListViewScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.addtechnicianListScreen,
+      binding: AuthenticationBinding(),
+      page: () => AddTechnicianList(),
+    ),
+    GetPage(
+      name: AppRoutes.notificationsScreen,
+      binding: AuthenticationBinding(),
+      page: () => NotificationViewScreen(),
     ),
   ];
 }

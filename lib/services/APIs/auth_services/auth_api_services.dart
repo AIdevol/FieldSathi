@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:tms_sathi/response_models/add_technician_response_model.dart';
 import 'package:tms_sathi/response_models/leaves_response_model.dart';
 import 'package:tms_sathi/response_models/login_response_model.dart';
 import 'package:tms_sathi/response_models/otp_response_model.dart';
@@ -161,5 +162,14 @@ implements AuthenticationApi{
     }
   }
 
+  @override
+  Future<AddTechnicianResponseModel>addTechnicialPostApiCall({Map<String, dynamic>? dataBody, parameters})async{
+    try{
+      final response = await dioClient!.post("${ApiEnd.tmsUsersEnd}", data: dataBody,skipAuth: false,queryParameters: parameters );
+      return AddTechnicianResponseModel.fromJson(response);
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
 
 }

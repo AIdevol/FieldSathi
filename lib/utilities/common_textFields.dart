@@ -146,7 +146,7 @@ class CustomTextField extends StatelessWidget {
         this.inputFormatters,
         this.textInputType,
         this.onFieldSubmitted,
-        this.maxLength})
+        this.maxLength, })
       : super(key: key);
 
   @override

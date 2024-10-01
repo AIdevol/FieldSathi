@@ -48,10 +48,10 @@ class HomeScreen extends GetView<HomeScreenController> {
             ),
             actions: [
               IconButton(onPressed: ()async{
-                // customLoader.show();
-                // await Future.delayed(Duration(seconds: 2));
-                // Get.toNamed(AppRoutes.mapView);
-                // customLoader.hide();
+                customLoader.show();
+                await Future.delayed(Duration(seconds: 2));
+                Get.toNamed(AppRoutes.notificationsScreen);
+                customLoader.hide();
               }, icon: Icon(Icons.notifications_sharp,size: 25,)),
               PopupMenuButton<String>(
                 color: appColor,
@@ -126,6 +126,7 @@ class HomeScreen extends GetView<HomeScreenController> {
           _graphVisualScreen(context, text:"Today's Attendance"),
           vGap(40),
           _graphVisualScreen(context, text: "AMC Status"),
+          vGap(40),
         ],
       ),
     );
@@ -154,9 +155,11 @@ class HomeScreen extends GetView<HomeScreenController> {
           onTap: () => AppBottomSheets.show(context: context, title: 'Field Worker', actions: <CupertinoActionSheetAction>[
             CupertinoActionSheetAction(
               child: Text('Technician List'),
-              onPressed: () {
-                // Handle option 1
-                Navigator.pop(context);
+              onPressed: ()async {
+               customLoader.show();
+               await Future.delayed(Duration(seconds: 1));
+               Get.toNamed(AppRoutes.technicianListsScreen);
+               customLoader.hide();
               },
             ),
             CupertinoActionSheetAction(
@@ -222,7 +225,7 @@ class HomeScreen extends GetView<HomeScreenController> {
                           Get.toNamed(AppRoutes.leadListScreen);
                         },
                       ),
-    ],
+            ],
 
           )
         ),
@@ -233,39 +236,45 @@ class HomeScreen extends GetView<HomeScreenController> {
 
   _graphVisualScreen(BuildContext context, {required String text}){
     final containerLength = MediaQuery.of(context).size * 1/2;
-    return Container(
-        height: containerLength.height*0.6,
-        width: Get.width*0.9,
-        decoration: BoxDecoration(
-          color: whiteColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(text, style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: blackColor),),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: _buttonBuildContainer(onTap: (){}, text: "Create Ticket " ),
-                )
-              ],
-            ),
-            Expanded(child: GraphViewScreen()),
-          ],
-        ));
+    return GestureDetector(
+      onTap: (){
+        print("buttton tapped");
+      },
+      child: Container(
+          height: containerLength.height*0.63,
+          width: Get.width*0.9,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
+            color: whiteColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(text, style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: blackColor),),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: _buttonBuildContainer(onTap: (){}, text: "Create Ticket " ),
+                  )
+                ],
+              ),
+              Expanded(child: GraphViewScreen()),
+            ],
+          )),
+    );
   }
 }
 

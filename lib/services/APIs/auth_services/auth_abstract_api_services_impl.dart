@@ -1,3 +1,4 @@
+import '../../../response_models/add_technician_response_model.dart';
 import '../../../response_models/holidays_calender_response_model.dart';
 import '../../../response_models/leaves_response_model.dart';
 import '../../../response_models/login_response_model.dart';
@@ -22,4 +23,5 @@ abstract class AuthenticationApi {
   Future<TicketResponseModel>getticketDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<LeaveManagementResponseModel>getLeavesApiCall({Map<String, dynamic>? dataBody});
   Future<SuperUsersResponseModel>getSuperUserApiCall({Map<String, dynamic>? dataBody});
+  Future<AddTechnicianResponseModel>addTechnicialPostApiCall({Map<String, dynamic>? dataBody, parameters});
 }

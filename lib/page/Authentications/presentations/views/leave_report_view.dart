@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
@@ -17,7 +18,7 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
         title: Text('Leaves', style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black)),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: Icon(FontAwesomeIcons.refresh),
             onPressed: controller.hitLeavesApiCall,
           ),
           IconButton(

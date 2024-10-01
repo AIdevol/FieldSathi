@@ -281,8 +281,6 @@
 //     return data;
 //   }
 // }
-import 'package:intl/intl.dart';
-
 class OtpResponseModel {
   final String? message;
   final int? userId;
@@ -311,13 +309,13 @@ class OtpResponseModel {
 
 class UserDetails {
   final int id;
-  final TodayAttendance todayAttendance;
+  final dynamic todayAttendance;
   final List<String> brandNames;
   final dynamic lastLogin;
-  final String firstName;
-  final String lastName;
+  final String? firstName;
+  final String? lastName;
   final String email;
-  final dynamic phoneNumber;
+  final String? phoneNumber;
   final String companyName;
   final String employees;
   final dynamic dob;
@@ -327,44 +325,44 @@ class UserDetails {
   final bool isSuperuser;
   final bool isActive;
   final dynamic profileImage;
-  final dynamic customerName;
-  final dynamic customerTag;
-  final dynamic modelNo;
-  final dynamic socialId;
+  final String? customerName;
+  final String? customerTag;
+  final String? modelNo;
+  final String? socialId;
   final bool deactivate;
   final String role;
-  final dynamic customerType;
+  final String? customerType;
   final dynamic batteryStatus;
   final bool gpsStatus;
   final dynamic longitude;
   final dynamic latitude;
-  final dynamic companyAddress;
-  final dynamic companyCity;
-  final dynamic companyState;
-  final dynamic companyPincode;
-  final dynamic companyCountry;
-  final dynamic companyRegion;
-  final dynamic companyLandlineNo;
-  final dynamic gstNo;
-  final dynamic cinNo;
-  final dynamic panNo;
-  final dynamic companyContactNo;
-  final dynamic companyWebsite;
-  final dynamic bankName;
-  final dynamic ifscSwift;
-  final dynamic accountNumber;
-  final dynamic branchAddress;
-  final dynamic upiId;
-  final dynamic paymentLink;
+  final String? companyAddress;
+  final String? companyCity;
+  final String? companyState;
+  final String? companyPincode;
+  final String? companyCountry;
+  final String? companyRegion;
+  final String? companyLandlineNo;
+  final String? gstNo;
+  final String? cinNo;
+  final String? panNo;
+  final String? companyContactNo;
+  final String? companyWebsite;
+  final String? bankName;
+  final String? ifscSwift;
+  final String? accountNumber;
+  final String? branchAddress;
+  final String? upiId;
+  final String? paymentLink;
   final dynamic fileUpload;
-  final dynamic primaryAddress;
-  final dynamic landmarkPaci;
-  final dynamic notes;
-  final dynamic state;
-  final String country;
-  final dynamic city;
-  final dynamic zipcode;
-  final dynamic region;
+  final String? primaryAddress;
+  final String? landmarkPaci;
+  final String? notes;
+  final String? state;
+  final String? country;
+  final String? city;
+  final String? zipcode;
+  final String? region;
   final int allocatedSickLeave;
   final int allocatedCasualLeave;
   final dynamic dateJoined;
@@ -374,11 +372,11 @@ class UserDetails {
 
   UserDetails({
     required this.id,
-    required this.todayAttendance,
+    this.todayAttendance,
     required this.brandNames,
     this.lastLogin,
-    required this.firstName,
-    required this.lastName,
+    this.firstName,
+    this.lastName,
     required this.email,
     this.phoneNumber,
     required this.companyName,
@@ -424,7 +422,7 @@ class UserDetails {
     this.landmarkPaci,
     this.notes,
     this.state,
-    required this.country,
+    this.country,
     this.city,
     this.zipcode,
     this.region,
@@ -439,7 +437,7 @@ class UserDetails {
   factory UserDetails.fromJson(Map<String, dynamic> json) {
     return UserDetails(
       id: json['id'],
-      todayAttendance: TodayAttendance.fromJson(json['today_attendance']),
+      todayAttendance: json['today_attendance'],
       brandNames: List<String>.from(json['brand_names']),
       lastLogin: json['last_login'],
       firstName: json['first_name'],
@@ -499,35 +497,6 @@ class UserDetails {
       createdBy: json['created_by'],
       admin: json['admin'],
       customerId: json['customer_id'],
-    );
-  }
-}
-
-class TodayAttendance {
-  final int id;
-  final int user;
-  final dynamic checkIn;
-  final dynamic checkOut;
-  final String status;
-  final String date;
-
-  TodayAttendance({
-    required this.id,
-    required this.user,
-    this.checkIn,
-    this.checkOut,
-    required this.status,
-    required this.date,
-  });
-
-  factory TodayAttendance.fromJson(Map<String, dynamic> json) {
-    return TodayAttendance(
-      id: json['id'],
-      user: json['user'],
-      checkIn: json['check_in'],
-      checkOut: json['check_out'],
-      status: json['status'],
-      date: json['date'],
     );
   }
 }

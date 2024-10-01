@@ -16,16 +16,19 @@ class  LeaveUpdateScreen extends GetView<LeaveReportViewScreenController>{
         backgroundColor: appColor,
         title: Text("Edit Assigned Leaves", style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),),
       ),
-      body: ListView(children: [
-        vGap(30),
-        _agentRoleSelectdropDownVal(),
-        vGap(20),
-        _SickleaveViewSelection(),
-        vGap(20),
-        _casualLeaveSelection(),
-        vGap(20),
-        _buttonViewSelection(),
-      ],),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ListView(children: [
+          vGap(30),
+          _agentRoleSelectdropDownVal(),
+          vGap(20),
+          _SickleaveViewSelection(),
+          vGap(20),
+          _casualLeaveSelection(),
+          vGap(20),
+          _buttonViewSelection(),
+        ],),
+      ),
     )));
   }
 
@@ -89,6 +92,10 @@ class  LeaveUpdateScreen extends GetView<LeaveReportViewScreenController>{
   }
 
   _buttonViewSelection(){
-    return ElevatedButton(onPressed: (){}, child: Text("Update Leave", style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black),));
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(backgroundColor: appColor),
+        onPressed: (){},
+        child: Text("Update Leave",
+          style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black),));
   }
 }

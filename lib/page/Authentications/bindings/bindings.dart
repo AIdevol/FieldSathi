@@ -13,8 +13,10 @@ import 'package:tms_sathi/page/Authentications/presentations/controllers/map_Scr
 import 'package:tms_sathi/page/Authentications/presentations/controllers/profile_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/service_request_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/services_Categories_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/technician_list_view_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/ticket_list_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/bindings/bindings.dart';
+import 'package:tms_sathi/page/home/notification_service/bindings/notification_view_screen.dart';
 import '../presentations/controllers/account_view_screen_controller.dart';
 import '../presentations/controllers/lead_list_view_controller.dart';
 import '../presentations/controllers/register_screen_controller.dart';
@@ -25,6 +27,7 @@ class AuthenticationBinding extends Bindings {
   void dependencies() {
     // TODO: implement dependencies
     Get.lazyPut<WidgetBindings>(()=> WidgetBindings());
+    Get.lazyPut<NotificationBindings>(()=> NotificationBindings());
     Get.lazyPut<LoginScreenController>(()=> LoginScreenController());
     Get.lazyPut<RegisterScreenController>(() => RegisterScreenController());
     Get.lazyPut<CalendarController>(() => CalendarController());
@@ -43,5 +46,6 @@ class AuthenticationBinding extends Bindings {
     Get.lazyPut<ServiceCategoriesController>(()=> ServiceCategoriesController());
     Get.lazyPut<SuperViewScreenController>(()=> SuperViewScreenController());
     Get.lazyPut<AccountViewScreenController>(()=> AccountViewScreenController());
+    Get.lazyPut<TechnicianListViewScreenController>(()=> TechnicianListViewScreenController());
   }
 }

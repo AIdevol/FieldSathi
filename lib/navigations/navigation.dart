@@ -28,6 +28,9 @@ abstract class AppRoutes {
   static const serviceCategoriesScreen = '/serviceCategoriesEnd';
   static const SuperAgentsScreen = '/SuperAgentsScreen';
   static const accountViewScreen = '/accountViewScreen';
+  static const technicianListsScreen ='/technicianListsScreen';
+  static const addtechnicianListScreen = '/addtechnicianListScreen';
+  static const notificationsScreen = '/notificationsScreen';
 }
 
 class RoutesArgument {
