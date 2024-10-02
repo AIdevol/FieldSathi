@@ -71,6 +71,8 @@ dependencies:
   syncfusion_flutter_datagrid: ^27.1.48
   file_picker: ^8.1.2
   geolocator: ^13.0.1
+  data_table_2: ^2.5.15
+  pluto_grid: ^8.0.0
 
 
 dev_dependencies:

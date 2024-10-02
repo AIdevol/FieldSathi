@@ -4,6 +4,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/response_models/add_technician_response_model.dart';
+import 'package:tms_sathi/response_models/fsr_response_model.dart';
 import 'package:tms_sathi/response_models/leaves_response_model.dart';
 import 'package:tms_sathi/response_models/login_response_model.dart';
 import 'package:tms_sathi/response_models/otp_response_model.dart';
@@ -11,6 +12,7 @@ import 'package:tms_sathi/response_models/ticket_response_model.dart';
 import 'package:tms_sathi/response_models/user_response_model.dart';
 import 'package:tms_sathi/services/APIs/dio_client.dart';
 
+import '../../../response_models/check_points_response_model.dart';
 import '../../../response_models/holidays_calender_response_model.dart';
 import '../../../response_models/register_response_model.dart';
 import '../../../response_models/resend_otp_api_call.dart';
@@ -133,20 +135,35 @@ implements AuthenticationApi{
     }
   }
   @override
-  Future<TicketResponseModel>getticketDetailsApiCall({Map<String, dynamic>? dataBody})async{
+  Future<List<TicketResponseModel>>getticketDetailsApiCall({Map<String, dynamic>? dataBody})async{
     try{
-      final response = await dioClient!.get("${ApiEnd.get_ticketEnd}", data: dataBody,skipAuth: false);
+      final response = await dioClient!.get("${ApiEnd.get_ticketEnd}", data: dataBody);
+      print("inside api calling method: ${response}");
+      if (response is List) {
+        return response.map((item) => TicketResponseModel.fromJson(item)).toList();
+      } else if (response is Map<String, dynamic> && response.containsKey('data')) {
+        final List<dynamic> data = response['data'];
+        return data.map((item) => TicketResponseModel.fromJson(item)).toList();
+      }
+      throw Exception('Unexpected response format');
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+  @override
+  Future<TicketResponseModel>postTicketDetailsApiCall({Map<String, dynamic>? dataBody})async{
+    try{
+      final response = await dioClient!.post("${ApiEnd.get_ticketEnd}", data: dataBody,skipAuth: false);
       return TicketResponseModel.fromJson(response);
     }catch(e){
       return Future.error(NetworkExceptions.getDioException(e));
     }
   }
-
   @override
-  Future<LeaveManagementResponseModel>getLeavesApiCall({Map<String, dynamic>? dataBody})async{
+  Future<LeaveResponseModel>getLeavesApiCall({Map<String, dynamic>? dataBody})async{
     try{
       final response = await dioClient!.get("${ApiEnd.leavesReportEnd}", data: dataBody,skipAuth: false);
-      return LeaveManagementResponseModel.fromJson(response);
+      return LeaveResponseModel.fromJson(response);
     }catch(e){
       return Future.error(NetworkExceptions.getDioException(e));
     }
@@ -167,6 +184,35 @@ implements AuthenticationApi{
     try{
       final response = await dioClient!.post("${ApiEnd.tmsUsersEnd}", data: dataBody,skipAuth: false,queryParameters: parameters );
       return AddTechnicianResponseModel.fromJson(response);
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+
+  @override
+  Future<FsrResponseModel>getfsrDetailsApiCall({Map<String, dynamic>? dataBody})async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.fsrApiEnd}", data: dataBody,skipAuth: false,);
+      return FsrResponseModel.fromJson(response);
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+  @override
+  Future<FsrResponseModel>postfsrDetailsApiCall({Map<String, dynamic>? dataBody, parameters})async{
+    try{
+      final response = await dioClient!.post("${ApiEnd.fsrApiEnd}", data: dataBody,skipAuth: false,queryParameters: parameters );
+      return FsrResponseModel.fromJson(response);
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+
+  @override
+  Future<CheckPointsResponseModel>postcheckPointStatusDetailsApiCall({Map<String, dynamic>? dataBody,})async{
+    try{
+      final response = await dioClient!.post("${ApiEnd.checkingPointStatusApiEnd}", data: dataBody,skipAuth: false);
+      return CheckPointsResponseModel.fromJson(response);
     }catch(e){
       return Future.error(NetworkExceptions.getDioException(e));
     }

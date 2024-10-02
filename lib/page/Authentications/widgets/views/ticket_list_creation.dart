@@ -12,12 +12,14 @@ import 'package:tms_sathi/utilities/helper_widget.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 
-class TicketListCreation extends GetView<TicketListController> {
+class TicketListCreation extends GetView<TicketListCreationController> {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CupertinoPageScaffold(
+      body: MyAnnotatedRegion(child: GetBuilder<TicketListCreationController>(
+        init: TicketListCreationController(),
+        builder: (controller)=>CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
             leading: IconButton(
               icon: Icon(Icons.arrow_back, size: 25, color: Colors.black,),
@@ -28,7 +30,7 @@ class TicketListCreation extends GetView<TicketListController> {
             middle: Text('Add Ticket'),
           ),
           child: _form(context)
-      ),
+      ),))
     );
   }
 }
@@ -194,7 +196,7 @@ _addTechnician({required BuildContext context}){
  }
 
 Widget _dobView({required BuildContext context}) {
-  final controller = Get.put(TicketListController());
+  final controller = Get.put(TicketListCreationController());
   return CustomTextField(
     hintText: "dd-month-yyyy".tr,
     controller: controller.dateController,

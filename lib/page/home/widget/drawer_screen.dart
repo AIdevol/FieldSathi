@@ -66,7 +66,6 @@ class _DrawerScreenState extends State<DrawerScreen>{
           icon: FeatherIcons.grid,
           title: "Leaves",
           onTap: () async {
-            Get.back();
             Get.toNamed(AppRoutes.leaveReportScreen);
           },
         ),

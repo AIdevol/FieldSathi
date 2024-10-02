@@ -1,27 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:overlay_support/overlay_support.dart';
+import 'package:tms_sathi/main.dart';
+import 'package:tms_sathi/response_models/fsr_response_model.dart';
+import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
+
+import '../../../../constans/const_local_keys.dart';
 
 class FsrViewcontroller extends GetxController {
   final TextEditingController searchController = TextEditingController();
+  late TextEditingController checkPointStatusCheckingController;
+  late FocusNode checkPointStatusCheckingFocusNode;
   final RxString searchQuery = ''.obs;
-  final RxList<Ticket> filteredTickets = <Ticket>[].obs;
+  final RxList<FsrResponseModel> filteredTickets = <FsrResponseModel>[].obs;
 
-  List<Ticket> allTickets = [
-    Ticket(Name: "Devesh", Categories: 'John Doe'),
-    Ticket(Name: "Ayush", Categories: 'Malaika Arora'),
-    // Add more sample data as needed
-  ];
+  List<FsrResponseModel> allFsr = <FsrResponseModel>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    filteredTickets.assignAll(allTickets);
+    checkPointStatusCheckingController = TextEditingController();
+    checkPointStatusCheckingFocusNode = FocusNode();
+    filteredTickets.assignAll(allFsr);
     searchController.addListener(_onSearchChanged);
+    hitGetfsrDetailsApiCall();
   }
 
   @override
   void onClose() {
     searchController.removeListener(_onSearchChanged);
+    checkPointStatusCheckingController.dispose();
+    checkPointStatusCheckingFocusNode.dispose();
     searchController.dispose();
     super.onClose();
   }
@@ -37,10 +46,10 @@ class FsrViewcontroller extends GetxController {
 
   void _filterTickets() {
     if (searchQuery.isEmpty) {
-      filteredTickets.assignAll(allTickets);
+      filteredTickets.assignAll(allFsr);
     } else {
-      filteredTickets.assignAll(allTickets.where((ticket) =>
-          ticket.Categories.toLowerCase().contains(searchQuery.toLowerCase())));
+      filteredTickets.assignAll(allFsr.where((FsrData) =>
+          FsrData.fsrName!.toLowerCase().contains(searchQuery.toLowerCase())));
     }
     update();
   }
@@ -52,14 +61,37 @@ class FsrViewcontroller extends GetxController {
     // For example:
     // Get.to(() => EditTicketScreen(ticketId: id));
   }
-}
+  void hitGetfsrDetailsApiCall(){
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.context;
+    Get.find<AuthenticationApiService>().getfsrDetailsApiCall().then((value)async{
+      var fsrDatalist = value;
+      customLoader.hide();
+      await storage.write(FsrId, fsrDatalist.id??"");
+      print('fsr_id: ${fsrDatalist.id}');
+      toast('FSR Fetched Successfully');
+      update();
+    }).onError((error, stackError){
+        customLoader.hide();
+        toast(error.toString());
+    });
+  }
 
-class Ticket {
-  final String Name;
-  final String Categories;
+  void hitPostCheckingStatusApiCall(){
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.context;
+      var checkPointData = {
+        "status_name":checkPointStatusCheckingController.text
+      };
+      Get.find<AuthenticationApiService>().postcheckPointStatusDetailsApiCall(dataBody: checkPointData).then((value){
+        customLoader.hide();
+        toast('updated checking status');
+        update();
+      }).onError((error, stackError){
+        customLoader.hide();
+        toast(error.toString());
+      });
+  }
 
-  Ticket({
-    required this.Name,
-    required this.Categories,
-  });
+
 }

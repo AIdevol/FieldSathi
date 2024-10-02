@@ -1,4 +1,6 @@
 import '../../../response_models/add_technician_response_model.dart';
+import '../../../response_models/check_points_response_model.dart';
+import '../../../response_models/fsr_response_model.dart';
 import '../../../response_models/holidays_calender_response_model.dart';
 import '../../../response_models/leaves_response_model.dart';
 import '../../../response_models/login_response_model.dart';
@@ -20,8 +22,11 @@ abstract class AuthenticationApi {
   Future<UserResponseModel>userDetailsApiCall({Map<String, dynamic>? dataBody, String? id});
   Future<UserResponseModel>updateUserDetailsApiCall({Map<String, dynamic>? dataBody, String? id});
   Future<HolidaysCalenderResponseModel>holidaysCalenderApiCall({Map<String, dynamic>? dataBody});
-  Future<TicketResponseModel>getticketDetailsApiCall({Map<String, dynamic>? dataBody});
-  Future<LeaveManagementResponseModel>getLeavesApiCall({Map<String, dynamic>? dataBody});
+  Future<List<TicketResponseModel>>getticketDetailsApiCall({Map<String, dynamic>? dataBody});
+  Future<TicketResponseModel>postTicketDetailsApiCall({Map<String, dynamic>? dataBody});
+  Future<LeaveResponseModel>getLeavesApiCall({Map<String, dynamic>? dataBody});
   Future<SuperUsersResponseModel>getSuperUserApiCall({Map<String, dynamic>? dataBody});
   Future<AddTechnicianResponseModel>addTechnicialPostApiCall({Map<String, dynamic>? dataBody, parameters});
+  Future<FsrResponseModel>getfsrDetailsApiCall({Map<String, dynamic>? dataBody});
+  Future<CheckPointsResponseModel>postcheckPointStatusDetailsApiCall({Map<String, dynamic>? dataBody,});
 }

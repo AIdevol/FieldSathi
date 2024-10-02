@@ -201,13 +201,15 @@ class GraphViewScreen extends GetView<GraphViewController> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
-                LabelWidget(color: Colors.blue, label: 'First'),
+                LabelWidget(color: Colors.blue, label: 'Completed'),
                 SizedBox(height: 16),
-                LabelWidget(color: Colors.yellow, label: 'Second'),
+                LabelWidget(color: Colors.yellow, label: 'Ongoing'),
                 SizedBox(height: 16),
-                LabelWidget(color: Colors.purple, label: 'Third'),
+                LabelWidget(color: Colors.purple, label: 'Inactive'),
                 SizedBox(height: 16),
-                LabelWidget(color: Colors.green, label: 'Fourth'),
+                LabelWidget(color: Colors.green, label: 'Onhold'),
+                SizedBox(height: 16),
+                LabelWidget(color: Colors.red, label: 'Rejected'),
               ],
             ),
           ),
@@ -218,7 +220,7 @@ class GraphViewScreen extends GetView<GraphViewController> {
   }
 
   List<PieChartSectionData> showingSections() {
-    return List.generate(4, (i) {
+    return List.generate(5, (i) {
       final isTouched = i == controller.touchedIndex;
       final fontSize = isTouched ? 25.0 : 16.0;
       final radius = isTouched ? 60.0 : 50.0;
@@ -267,7 +269,20 @@ class GraphViewScreen extends GetView<GraphViewController> {
           return PieChartSectionData(
             color: Colors.green,
             value: 15,
-            title: '15%',
+            title: '10%',
+            radius: radius,
+            titleStyle: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              shadows: shadows,
+            ),
+          );
+        case 4:
+          return PieChartSectionData(
+            color: Colors.red,
+            value: 15,
+            title: '5%',
             radius: radius,
             titleStyle: TextStyle(
               fontSize: fontSize,

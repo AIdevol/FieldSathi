@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
+import 'package:tms_sathi/main.dart';
+import 'package:tms_sathi/page/Authentications/widgets/controller/add_fsr_view_controller.dart';
 import '../../../../constans/color_constants.dart';
 import '../../../../navigations/navigation.dart';
+import '../../../../response_models/fsr_response_model.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../../utilities/helper_widget.dart';
 import '../controllers/fsr_screen_controller.dart';
@@ -18,7 +21,10 @@ class FsrViewScreen extends GetView<FsrViewcontroller> {
               backgroundColor: appColor,
               title: Text(
                 'FSR',
-                style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 15),
+                style: MontserratStyles.montserratBoldTextStyle(
+                  color: blackColor,
+                  size: 15,
+                ),
               ),
               actions: [
                 IconButton(
@@ -33,11 +39,69 @@ class FsrViewScreen extends GetView<FsrViewcontroller> {
               children: [
                 _buildSearchBar(controller),
                 Expanded(
-                  child: _buildTicketList(controller),
+                  child: _mainDataRowAndColumn(
+                    context: context,
+                    controller: controller,
+                  ),
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _mainDataRowAndColumn({
+    required BuildContext context,
+    required FsrViewcontroller controller,
+  }) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          horizontalMargin: 50,
+          border: TableBorder(
+            horizontalInside: BorderSide(width: 1, color: Colors.grey.shade300),
+          ),
+          columnSpacing: 60,
+          headingRowColor: MaterialStateProperty.resolveWith<Color>(
+                (Set<MaterialState> states) {
+              return Colors.grey.shade100;
+            },
+          ),
+          columns: const [
+            DataColumn(label: Text('Sr. No.')),
+            DataColumn(label: Text('FSR Name')),
+            DataColumn(label: Text('FSR Categories')),
+            DataColumn(label: Text('Actions')),
+          ],
+          rows: controller.filteredTickets.asMap().entries.map((entry) {
+            final index = entry.key;
+            final FsrResponseModel fsrData = entry.value;
+
+            String categoryNames = fsrData.categories
+                ?.map((category) => category.name ?? '')
+                .where((name) => name.isNotEmpty)
+                .join(', ') ?? '';
+
+            return DataRow(
+              cells: [
+                DataCell(Text('${index + 1}')),
+                DataCell(Text(fsrData.fsrName ?? '')),
+                DataCell(Text(categoryNames)),
+                DataCell(
+                  IconButton(
+                    icon: Icon(Icons.info),
+                    onPressed: () {
+                      // Handle info button press
+                    },
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
         ),
       ),
     );
@@ -87,12 +151,16 @@ class FsrViewScreen extends GetView<FsrViewcontroller> {
         controller: controller.searchController,
         decoration: InputDecoration(
           hintText: "Search",
-          hintStyle: MontserratStyles.montserratSemiBoldTextStyle(color: Colors.grey),
+          hintStyle: MontserratStyles.montserratSemiBoldTextStyle(
+            color: Colors.grey,
+          ),
           prefixIcon: Icon(FeatherIcons.search, color: Colors.grey),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(vertical: 10),
         ),
-        style: MontserratStyles.montserratSemiBoldTextStyle(color: Colors.black),
+        style: MontserratStyles.montserratSemiBoldTextStyle(
+          color: Colors.black,
+        ),
         onChanged: (value) {
           controller.updateSearch(value);
         },
@@ -102,50 +170,73 @@ class FsrViewScreen extends GetView<FsrViewcontroller> {
 
   Widget _buildCheckpointStatusButton() {
     return ElevatedButton(
-      onPressed: () => _buildAlertButton(context: Get.context!),
+      onPressed: () => _buildAlertDialog(Get.context!),
       style: _buttonStyle(),
       child: Text(
         'CheckPoint Status',
-        style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),
+        style: MontserratStyles.montserratBoldTextStyle(
+          color: whiteColor,
+          size: 13,
+        ),
       ),
     );
   }
 
-  Widget _buildTicketList(FsrViewcontroller controller) {
-    return Obx(() => ListView.builder(
-      itemCount: controller.filteredTickets.length,
-      itemBuilder: (context, index) {
-        final ticket = controller.filteredTickets[index];
-        return Card(
-          margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-          child: ListTile(
-            title: Text(
-              'Name: ${ticket.Name}',
-              style: MontserratStyles.montserratSemiBoldTextStyle(color: blackColor, size: 14),
-            ),
-            subtitle: Text(
-              'Categories: ${ticket.Categories}',
-              style: MontserratStyles.montserratRegularTextStyle(color: Colors.grey, size: 12),
-            ),
-            trailing: ElevatedButton(
-              onPressed: () => controller.makeChanges(ticket.Name),
-              style: _buttonStyle(),
-              child: Text(
-                'Make Changes',
-                style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 12),
+  void _buildAlertDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Checkpoint Status",
+              style: MontserratStyles.montserratBoldTextStyle(
+                color: Colors.black,
+                size: 16,
               ),
             ),
-          ),
-        );
-      },
-    ));
+            vGap(20),
+            TextField(
+              controller: controller.checkPointStatusCheckingController,
+              focusNode: controller.checkPointStatusCheckingFocusNode,
+              decoration: InputDecoration(
+                hintText: 'Checkpoint status',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            vGap(20),
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton(
+                onPressed: () {
+                  controller.hitPostCheckingStatusApiCall();
+                  Navigator.of(context).pop();
+                },
+                style: _buttonStyle(),
+                child: Text(
+                  '+CheckPoint Status',
+                  style: MontserratStyles.montserratBoldTextStyle(
+                    color: whiteColor,
+                    size: 13,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   ButtonStyle _buttonStyle() {
     return ButtonStyle(
       backgroundColor: MaterialStateProperty.all(appColor),
       foregroundColor: MaterialStateProperty.all(Colors.white),
-      padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 15, vertical: 8)),
+      padding: MaterialStateProperty.all(
+        EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      ),
       elevation: MaterialStateProperty.all(3),
       shape: MaterialStateProperty.all(
         RoundedRectangleBorder(
@@ -155,54 +246,4 @@ class FsrViewScreen extends GetView<FsrViewcontroller> {
       shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.3)),
     );
   }
-}
-
-void _buildAlertButton({required BuildContext context}) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) => AlertDialog(
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Checkpoint Status",
-            style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 16),
-          ),
-          vGap(20),
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Checkpoint status',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          vGap(20),
-          Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton(
-              onPressed: () {
-                // Implement checkpoint status update logic here
-                Navigator.of(context).pop();
-              },
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(appColor),
-                foregroundColor: MaterialStateProperty.all(Colors.white),
-                padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
-                elevation: MaterialStateProperty.all(3),
-                shape: MaterialStateProperty.all(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-              child: Text(
-                '+CheckPoint Status',
-                style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
 }

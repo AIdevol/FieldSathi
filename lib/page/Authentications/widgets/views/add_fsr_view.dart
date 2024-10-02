@@ -1,14 +1,37 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tms_sathi/utilities/common_textFields.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
 import '../../../../constans/color_constants.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../controller/add_fsr_view_controller.dart';
 
-class AddFSRViewScreen extends StatelessWidget {
+class AddFSRViewScreen extends StatefulWidget {
+  @override
+  _AddFSRViewScreenState createState() => _AddFSRViewScreenState();
+}
+
+class _AddFSRViewScreenState extends State<AddFSRViewScreen> {
   final AddFSRViewController controller = Get.put(AddFSRViewController());
+
+  // List to hold dynamic description text field controllers
+  List<TextEditingController> descriptionControllers = [];
+
+  // Method to add a new description field
+  void _addNewDescriptionField() {
+    setState(() {
+      descriptionControllers.add(TextEditingController());
+    });
+  }
+
+  // Method to save all the description details
+  void _saveDetails() {
+    List<String> descriptions = descriptionControllers.map((controller) => controller.text).toList();
+    // Save or process the descriptions as needed
+    print("Saved descriptions: $descriptions");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,29 +64,67 @@ class AddFSRViewScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                           Text(
+                          Text(
                             'FSR Details',
                             style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 13),
                           ),
                           vGap(20),
-                           CupertinoTextField(
-                            placeholder: 'Enter FSR title',
-                            style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 13),
+                          CustomTextField(
+                            hintText: "First Name".tr,
+                            controller: controller.firstNameController,
+                            textInputType: TextInputType.text,
+                           // controller: ,
+                            labletext: 'First Name'.tr,
                           ),
                           vGap(20),
-                           CupertinoTextField(
-                            placeholder: 'Enter description',
+                          CustomTextField(
+                            hintText: 'Enter description'.tr,
+                            controller: controller.discriptionController,
                             maxLines: 3,
-                             style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 13),
+                            textInputType: TextInputType.text,
+                            labletext: 'Enter description'.tr,
                           ),
                           vGap(20),
+
+                          // List of dynamically added description fields
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: descriptionControllers.length,
+                              itemBuilder: (context, index) {
+                                return Column(
+                                  children: [
+                                    CustomTextField(
+                                      controller: descriptionControllers[index],
+                                      hintText: 'Enter additional description'.tr,
+                                      maxLines: 3,
+                                      labletext: 'Enter additional description'.tr,
+                                    ),
+                                    vGap(20),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+
+                          // Button to add new description field
                           CupertinoButton(
                             color: appColor,
-                              disabledColor: appColor,
-                            child: Text('Submit FSR', style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 15),),
-                            onPressed: () {
-                              // Handle FSR submission
-                            },
+                            onPressed: _addNewDescriptionField,
+                            child: Text(
+                              'Add New Description Field',
+                              style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 15),
+                            ),
+                          ),
+                          vGap(20),
+
+                          // Button to save details
+                          CupertinoButton(
+                            color: appColor,
+                            onPressed: ()=> controller.hitPostFsrDetailsApiCall(),
+                            child: Text(
+                              'Submit FSR',
+                              style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 15),
+                            ),
                           ),
                         ],
                       ),
@@ -80,5 +141,14 @@ class AddFSRViewScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // Dispose all the TextEditingControllers to avoid memory leaks
+    for (var controller in descriptionControllers) {
+      controller.dispose();
+    }
+    super.dispose();
   }
 }

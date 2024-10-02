@@ -5,6 +5,7 @@ import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 import '../../../../response_models/leaves_response_model.dart';
+import '../../../../response_models/super_user_response_model.dart';
 
 class SuperViewScreenController extends GetxController{
 

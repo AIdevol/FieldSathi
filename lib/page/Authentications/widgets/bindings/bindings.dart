@@ -6,6 +6,8 @@ import 'package:tms_sathi/page/Authentications/widgets/controller/calender_view_
 import 'package:tms_sathi/page/Authentications/widgets/controller/lead_form_field_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/principal_customer_view_controller.dart';
 
+import '../controller/ticket_list_creation_controller.dart';
+
 class WidgetBindings extends Bindings{
   @override
   void dependencies() {
@@ -15,6 +17,6 @@ class WidgetBindings extends Bindings{
     Get.lazyPut<CalenderViewAmcController>(() => CalenderViewAmcController());
     Get.lazyPut<LeadFormFieldController>(() => LeadFormFieldController());
     Get.lazyPut<AddTechnicianListController>(() => AddTechnicianListController());
+    Get.lazyPut<TicketListCreationController>(() => TicketListCreationController());
   }
-
 }

@@ -26,6 +26,7 @@ import 'package:tms_sathi/page/Authentications/widgets/views/add_fsr_view.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/add_technician_list.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/lead_form_field.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/principal_customer_view.dart';
+import 'package:tms_sathi/page/Authentications/widgets/views/ticket_list_creation.dart';
 import 'package:tms_sathi/page/home/bindings/home_bindings.dart';
 import 'package:tms_sathi/page/home/notification_service/views/notification_view_screen.dart';
 import 'package:tms_sathi/page/home/presentations/views/home_screen.dart';
@@ -182,6 +183,11 @@ class AppPages {
       name: AppRoutes.notificationsScreen,
       binding: AuthenticationBinding(),
       page: () => NotificationViewScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.ticketListCreationScreen,
+      binding: AuthenticationBinding(),
+      page: () => TicketListCreation(),
     ),
   ];
 }

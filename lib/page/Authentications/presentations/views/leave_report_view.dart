@@ -93,27 +93,36 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
             return Colors.grey.shade100;
           }),
           columns: const [
+            DataColumn(label: Text('Sr. No.')),
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Phone')),
-            DataColumn(label: Text('Profile')),
+            DataColumn(label: Text('Role')),
             DataColumn(label: Text('From Date')),
             DataColumn(label: Text('To Date')),
             DataColumn(label: Text('Days')),
             DataColumn(label: Text('Reason')),
             DataColumn(label: Text('Status')),
+            DataColumn(label: Text('Leave Type')),
             DataColumn(label: Text('Actions')),
           ],
-          rows: controller.filteredLeaves.map((leave) {
+          rows: controller.filteredLeaves.asMap().entries.map((entry) {
+            final index = entry.key;
+            final Results leave = entry.value;
             return DataRow(
               cells: [
-                DataCell(Text('${leave.userId.firstName} ${leave.userId.lastName}')),
-                DataCell(Text(leave.userId.phoneNumber)),
-                DataCell(Text(leave.userId.role)),
-                DataCell(Text(controller.formatDate(leave.startDate))),
-                DataCell(Text(controller.formatDate(leave.endDate))),
-                DataCell(Text(controller.calculateDays(leave.startDate, leave.endDate).toString())),
-                DataCell(Text(leave.reason)),
-                DataCell(Text(leave.status)),
+                DataCell(Text('${index + 1}')),
+                DataCell(Text('${leave.userId?.firstName ?? ''} ${leave.userId?.lastName ?? ''}')),
+                DataCell(Text(leave.userId?.phoneNumber ?? '')),
+                DataCell(Text(leave.userId?.role ?? '')),
+                DataCell(Text(controller.formatDate(DateTime.parse(leave.startDate ?? '')))),
+                DataCell(Text(controller.formatDate(DateTime.parse(leave.endDate ?? '')))),
+                DataCell(Text(controller.calculateDays(
+                    DateTime.parse(leave.startDate ?? ''),
+                    DateTime.parse(leave.endDate ?? '')
+                ).toString())),
+                DataCell(Text(leave.reason ?? '')),
+                DataCell(Text(leave.status ?? '')),
+                DataCell(Text(leave.leaveType ?? '')),
                 DataCell(
                   IconButton(
                     icon: Icon(Icons.info),

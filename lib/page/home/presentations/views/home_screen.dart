@@ -9,6 +9,7 @@ import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/profile_screen_controller.dart';
 import 'package:tms_sathi/page/home/presentations/controllers/home_screen_controller.dart';
+import 'package:tms_sathi/page/home/widget/amc_status_monitor_graph.dart';
 import 'package:tms_sathi/page/home/widget/drawer_screen.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
@@ -16,11 +17,13 @@ import '../../../../main.dart';
 import '../../../../main.dart';
 import '../../../../utilities/custom_loader.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
+import '../../widget/attendence_details_monitor_graph.dart';
 import '../../widget/bottom_sheets.dart';
-import '../../widget/graphs_view.dart';
+import '../../widget/Ticket_details_monitor_graph.dart';
 
 class HomeScreen extends GetView<HomeScreenController> {
   final GlobalKey<ScaffoldState> drawerkey = GlobalKey();
+  // final profileimg = Get.put(ProfileViewScreenController()).profileImageUrl.value;
 
   bool _isDialOpen = false;
   HomeScreen({super.key});
@@ -60,7 +63,7 @@ class HomeScreen extends GetView<HomeScreenController> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: CircleAvatar(
                     radius: 20,
-                    backgroundImage: NetworkImage('https://images.pexels.com/photos/1759531/pexels-photo-1759531.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'),
+                    backgroundImage: _getBackgroundImage(controller.profileImageUrl.value),
                   ),
                 ),
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -121,11 +124,11 @@ class HomeScreen extends GetView<HomeScreenController> {
       child: ListView(
         children: [
           vGap(40),
-          _graphVisualScreen(context, text: 'Ticket Details'),
+          _graphVisualScreen1(context, text: 'Ticket Details'),
           vGap(40),
-          _graphVisualScreen(context, text:"Today's Attendance"),
+          _graphVisualScreen2(context, text:"Today's Attendance"),
           vGap(40),
-          _graphVisualScreen(context, text: "AMC Status"),
+          _graphVisualScreen3(context, text: "AMC Status"),
           vGap(40),
         ],
       ),
@@ -234,14 +237,14 @@ class HomeScreen extends GetView<HomeScreenController> {
   }
 
 
-  _graphVisualScreen(BuildContext context, {required String text}){
+  _graphVisualScreen1(BuildContext context, {required String text}){
     final containerLength = MediaQuery.of(context).size * 1/2;
     return GestureDetector(
       onTap: (){
-        print("buttton tapped");
+      Get.toNamed(AppRoutes.ticketListScreen);
       },
       child: Container(
-          height: containerLength.height*0.63,
+          height: containerLength.height*0.7,
           width: Get.width*0.9,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
@@ -267,7 +270,9 @@ class HomeScreen extends GetView<HomeScreenController> {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: _buttonBuildContainer(onTap: (){}, text: "Create Ticket " ),
+                    child: _buttonBuildContainer(onTap: (){
+                      Get.toNamed(AppRoutes.ticketListCreationScreen);
+                    }, text: "Create Ticket " ),
                   )
                 ],
               ),
@@ -277,6 +282,97 @@ class HomeScreen extends GetView<HomeScreenController> {
     );
   }
 }
+_graphVisualScreen2(BuildContext context, {required String text}){
+  final containerLength = MediaQuery.of(context).size * 1/2;
+  return GestureDetector(
+    onTap: (){
+      Get.toNamed(AppRoutes.technicianListsScreen);
+      print("buttton tapped");
+    },
+    child: Container(
+        height: containerLength.height*0.63,
+        width: Get.width*0.9,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
+          color: whiteColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(text, style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: blackColor),),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: _buttonBuildContainer(onTap: (){
+                    Get.toNamed(AppRoutes.mapView);
+                  }, text: "Track All" ),
+                )
+              ],
+            ),
+            Expanded(child: AttendenceDetailsMonitorGraph()),
+          ],
+        )),
+  );
+}
+_graphVisualScreen3(BuildContext context, {required String text}){
+  final containerLength = MediaQuery.of(context).size * 1/2;
+  return GestureDetector(
+    onTap: (){
+      Get.toNamed(AppRoutes.amcScreen);
+      print("buttton tapped");
+    },
+    child: Container(
+        height: containerLength.height*0.63,
+        width: Get.width*0.9,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
+          color: whiteColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(text, style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: blackColor),),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: _buttonBuildContainer(onTap: (){
+                    Get.toNamed(AppRoutes.amcScreen);
+                  }, text: "Manage AMCs" ),
+                )
+              ],
+            ),
+            Expanded(child: AmcStatusMonitorGraph()),
+          ],
+        )),
+  );
+}
+
 
 
 Widget _buttonBuildContainer({required Function()? onTap, required String text}){
@@ -305,7 +401,10 @@ Widget _buttonBuildContainer({required Function()? onTap, required String text})
   ),);
 }
 
-
-
-
-
+ImageProvider _getBackgroundImage(String? imageUrl) {
+  if (imageUrl != null && imageUrl.isNotEmpty) {
+    return NetworkImage(imageUrl);
+  } else {
+    return NetworkImage("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png");
+  }
+}

@@ -1,22 +1,19 @@
 import 'dart:async';
 import 'dart:io';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:tms_sathi/response_models/otp_response_model.dart';
 
-import '../../../../constans/color_constants.dart';
 import '../../../../constans/const_local_keys.dart';
 import '../../../../main.dart';
 import '../../../../navigations/navigation.dart';
 import '../../../../services/APIs/auth_services/auth_api_services.dart';
 import '../../../../services/login_service.dart';
-import '../../../../utilities/helper_widget.dart';
-import '../views/otp_view_screen.dart';
 
 class ProfileViewScreenController extends GetxController {
   // Country selection
@@ -33,22 +30,54 @@ class ProfileViewScreenController extends GetxController {
 
   // Focus nodes
   late FocusNode companyNameFocusNode;
-  late FocusNode emailFocusNode ;
+  late FocusNode emailFocusNode;
   late FocusNode nameFocusNode;
-  late FocusNode employeesFocusNode ;
-  late FocusNode countryFocusNode ;
+  late FocusNode employeesFocusNode;
+  late FocusNode countryFocusNode;
   late FocusNode phoneFocusNode;
   late FocusNode addressFocusNode;
 
   // Observables
   final RxBool isLoggedOut = false.obs;
   final Rx<File?> profileImage = Rx<File?>(null);
+  final RxString profileImageUrl = RxString('');
+  final RxBool isLoading = false.obs;
 
   Timer? _timer;
 
   @override
+  void onInit() {
+    initializeControllers();
+    hituserDetailsApiCall();
+    super.onInit();
+  }
+
+  void initializeControllers() {
+    countryController = TextEditingController();
+    emailController = TextEditingController();
+    nameController = TextEditingController();
+    companyNameController = TextEditingController();
+    employeesController = TextEditingController();
+    phoneController = TextEditingController();
+    addressController = TextEditingController();
+
+    companyNameFocusNode = FocusNode();
+    emailFocusNode = FocusNode();
+    nameFocusNode = FocusNode();
+    employeesFocusNode = FocusNode();
+    countryFocusNode = FocusNode();
+    phoneFocusNode = FocusNode();
+    addressFocusNode = FocusNode();
+  }
+
+  @override
   void onClose() {
-    // Dispose of controllers and focus nodes
+    disposeControllers();
+    _timer?.cancel();
+    super.onClose();
+  }
+
+  void disposeControllers() {
     countryController.dispose();
     emailController.dispose();
     nameController.dispose();
@@ -57,98 +86,21 @@ class ProfileViewScreenController extends GetxController {
     phoneController.dispose();
     addressController.dispose();
 
-    countryFocusNode.dispose();
+    companyNameFocusNode.dispose();
     emailFocusNode.dispose();
     nameFocusNode.dispose();
-    phoneFocusNode.dispose();
     employeesFocusNode.dispose();
-    companyNameFocusNode.dispose();
+    countryFocusNode.dispose();
+    phoneFocusNode.dispose();
     addressFocusNode.dispose();
-
-    _timer?.cancel();
-    super.onClose();
   }
-@override
-  void onInit(){
-  countryController = TextEditingController();
-  emailController = TextEditingController();
-  nameController = TextEditingController();
-  companyNameController = TextEditingController();
-  employeesController = TextEditingController();
-  phoneController = TextEditingController();
-  addressController = TextEditingController();
 
-  companyNameFocusNode = FocusNode();
-  emailFocusNode = FocusNode();
-  nameFocusNode = FocusNode();
-  employeesFocusNode = FocusNode();
-  countryFocusNode = FocusNode();
-  phoneFocusNode = FocusNode();
-  addressFocusNode = FocusNode();
-
-  hituserDetailsApiCall();
-  super.onInit();
-}
-/*  void hitRegisterApiCall() {
-    if (emailController.text.isEmpty) {
-      toast('Please enter email or phone');
-      return;
-    }
-    customLoader.show();
-    FocusManager.instance.primaryFocus?.unfocus();
-
-    final loginReq = {
-      "email_or_phone": emailController.text,
-      "first_name": nameController.text,
-      "companyName": companyNameController.text,
-      "employees": employeesController.text,
-      "country": countryController.text
-    };
-
-    Get.find<AuthenticationApiService>().registerApiCall(dataBody: loginReq).then((value) async {
-      toast('Login successfully, enter your OTP');
-      _openForgotContainerBottomsheet();
-    }).onError((error, stackTrace) {
-      customLoader.hide();
-      toast(error.toString());
-    }).whenComplete(() => customLoader.hide());
-  }*/
-
-/*
-  void _openForgotContainerBottomsheet() {
-    Get.bottomSheet(
-      Container(
-        width: Get.width,
-        height: Get.height * 0.9,
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-          color: whiteColor,
-        ),
-        child: Column(
-          children: [
-            vGap(15),
-            Container(
-              height: 10,
-              width: 60,
-              decoration: BoxDecoration(color: Colors.black12, borderRadius: BorderRadius.circular(20)),
-            ),
-            vGap(15),
-             Expanded(child: OtpViewScreen()),
-          ],
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
-*/
-  // ==========================================================fetch profile data========================================
-  void refreshUserData() async {
-    // Clear all text controllers before fetching new data
+  void refreshUserData() {
     clearControllers();
     hituserDetailsApiCall();
   }
 
-void  clearControllers(){
+  void clearControllers() {
     nameController.clear();
     emailController.clear();
     companyNameController.clear();
@@ -156,61 +108,89 @@ void  clearControllers(){
     employeesController.clear();
     phoneController.clear();
     addressController.clear();
-}
-
-  void hituserDetailsApiCall(){
-    final id= storage.read(userId);
-    customLoader.show();
-    FocusManager.instance.primaryFocus?.unfocus();
-    Get.find<AuthenticationApiService>().userDetailsApiCall(id:id).then((value){
-     var userData = value;
-     nameController.text = userData.firstName??'';
-     emailController.text = userData.email??'';
-     phoneController.text = userData.phoneNumber??'';
-     companyNameController.text = userData.companyName??'';
-     countryController.text = userData.country??'';
-     employeesController.text = userData.employees??'';
-     addressController.text = userData.companyAddress??'';
-     print("userData= $userData");
-     customLoader.hide();
-     update();
-     toast("data successfully fetch");
-    }).onError((error, stackError) {
-      customLoader.hide();
-      toast(error.toString());
-    });
+    profileImageUrl.value = '';
+    profileImage.value = null;
   }
 
-  void hitUserupdateProfile(){
-    customLoader.show();
-    Get.put(GetLoginModalService());
+  Future<void> uploadProfileImage(File imageFile) async {
+    isLoading.value = true;
+    try {
+      final id = storage.read(userId);
+      final uri = Uri.parse('YOUR_API_ENDPOINT/update-profile-image/$id');
 
-    FocusManager.instance.primaryFocus?.unfocus();
-    final id = storage.read(userId);
+      var request = http.MultipartRequest('POST', uri)
+        ..files.add(await http.MultipartFile.fromPath('profile_image', imageFile.path));
 
-    var userUpdatedData = {
-      "first_name":nameController.text,
-      "email":emailController.text,
-      "company_name": companyNameController.text,
-      "employees":employeesController.text,
-      "country":countryController.text,
-      "phone_number": phoneController.text,
-      "": addressController.text
-    };
-    Get.find<AuthenticationApiService>().updateUserDetailsApiCall(id:id, dataBody: userUpdatedData).then((value){
-      var updateData = value;
-      Get.find<GetLoginModalService>().getUserDataModal(UserDataModel: value);
-      print("update data: ${updateData}");
-      refreshUserData();
-      customLoader.hide();
-      toast("Updated successfully your profile");
+      var response = await request.send();
+      var responseData = await response.stream.bytesToString();
+      var jsonResponse = json.decode(responseData);
+
+      if (response.statusCode == 200) {
+        profileImageUrl.value = jsonResponse['image_url'] ?? '';
+        toast("Profile image updated successfully");
+      } else {
+        throw Exception('Failed to upload image');
+      }
+    } catch (e) {
+      toast("Failed to upload image: $e");
+    } finally {
+      isLoading.value = false;
       update();
-    }).onError((error, stackError){
-      customLoader.hide();
+    }
+  }
+
+  void hituserDetailsApiCall() {
+    final id = storage.read(userId);
+    isLoading.value = true;
+
+    Get.find<AuthenticationApiService>().userDetailsApiCall(id: id).then((value) {
+      var userData = value;
+      nameController.text = userData.firstName ?? '';
+      emailController.text = userData.email ?? '';
+      phoneController.text = userData.phoneNumber ?? '';
+      companyNameController.text = userData.companyName ?? '';
+      countryController.text = userData.country ?? '';
+      employeesController.text = userData.employees ?? '';
+      addressController.text = userData.companyAddress ?? '';
+      profileImageUrl.value = userData.profileImage ?? '';
+
+      isLoading.value = false;
+      update();
+    }).onError((error, stackError) {
+      isLoading.value = false;
       toast(error.toString());
     });
   }
-  
+
+  void hitUserupdateProfile() {
+    isLoading.value = true;
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    final id = storage.read(userId);
+    var userUpdatedData = {
+      "first_name": nameController.text,
+      "email": emailController.text,
+      "company_name": companyNameController.text,
+      "employees": employeesController.text,
+      "country": countryController.text,
+      "phone_number": phoneController.text,
+      "company_address": addressController.text
+    };
+
+    Get.find<AuthenticationApiService>()
+        .updateUserDetailsApiCall(id: id, dataBody: userUpdatedData)
+        .then((value) {
+      var updateData = value;
+      Get.find<GetLoginModalService>().getUserDataModal(UserDataModel: updateData);
+      refreshUserData();
+      isLoading.value = false;
+      toast("Updated successfully your profile");
+    }).onError((error, stackError) {
+      isLoading.value = false;
+      toast(error.toString());
+    });
+  }
+
   Future<void> logout() async {
 
     if (isLoggedOut.value) return;
@@ -233,6 +213,7 @@ void  clearControllers(){
     }
   }
 
+
   Future<void> getImage(ImageSource source) async {
     final PermissionStatus status = await _requestPermission(source);
 
@@ -243,20 +224,19 @@ void  clearControllers(){
 
         if (image != null) {
           profileImage.value = File(image.path);
+          await uploadProfileImage(profileImage.value!);
         }
       } catch (e) {
         print('Error picking image: $e');
         Get.snackbar('Error', 'Failed to pick image. Please try again.',
             snackPosition: SnackPosition.BOTTOM);
       }
-    } else if (status.isDenied) {
-      Get.snackbar('Permission Denied',
-          'Please grant permission to access ${source == ImageSource.camera ? 'camera' : 'gallery'}.',
-          snackPosition: SnackPosition.BOTTOM);
     } else if (status.isPermanentlyDenied) {
-      Get.snackbar('Permission Permanently Denied',
-          'Please enable ${source == ImageSource.camera ? 'camera' : 'storage'} permission from app settings.',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Permission Permanently Denied',
+        'Please enable ${source == ImageSource.camera ? 'camera' : 'storage'} permission from app settings.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       await openAppSettings();
     }
   }

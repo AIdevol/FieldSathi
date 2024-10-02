@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
@@ -20,80 +19,156 @@ class TicketListController extends GetxController {
   ].obs;
 
   RxString selectedFilter = "Select By".obs;
-  RxList<TicketResponseModel> tickets = <TicketResponseModel>[].obs;
+  RxList<TicketResponseModel> ticketData = <TicketResponseModel>[].obs;
   RxBool isLoading = false.obs;
   RxString searchQuery = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchTickets();
+    fetchTicketsApiCall();
   }
 
-  Future<void> fetchTickets() async {
+  void fetchTicketsApiCall() async {
+    isLoading.value = true;
     customLoader.show();
-    FocusManager.instance.primaryFocus!.unfocus();
-    Get.find<AuthenticationApiService>().getticketDetailsApiCall().then((value){
-      var ticketData = value;
-      print("ticket details = ${ticketData.id}");
-      print("ticket details = ${ticketData.customerDetails.customerName}");
-      print("ticket details = ${ticketData.id}");
-      print("ticket details = ${ticketData.id}");
-      applyFilters();
-    }).onError((error, stackError){
-      customLoader.hide();
-      toast(error.toString());
-    });
-  }
+    FocusManager.instance.primaryFocus?.unfocus();
 
-  void updateSelectedFilter(String? newValue) {
-    if (newValue != null) {
-      selectedFilter.value = newValue;
+    try {
+      final tickets = await Get.find<AuthenticationApiService>().getticketDetailsApiCall();
+      ticketData.assignAll(tickets);
       applyFilters();
+    } catch (error) {
+      toast(error.toString());
+    } finally {
+      customLoader.hide();
+      isLoading.value = false;
     }
   }
 
-  void updateSearchQuery(String query) {
-    searchQuery.value = query;
-    applyFilters();
-  }
-
   void applyFilters() {
-    List<TicketResponseModel> filteredTickets = tickets;
+    List<TicketResponseModel> filteredTickets = List.from(ticketData);
 
     if (searchQuery.isNotEmpty) {
       filteredTickets = filteredTickets.where((ticket) {
         final query = searchQuery.toLowerCase();
-        return ticket.customerDetails.customerName!.toLowerCase().contains(query) ||
-            ticket.subCustomerDetails.customerName!.toLowerCase().contains(query) ||
-            ticket.assignTo.firstName!.toLowerCase().contains(query) ||
-            ticket.assignTo.lastName!.toLowerCase().contains(query);
+        return (ticket.customerDetails?.name?.toLowerCase().contains(query) ?? false) ||
+            (ticket.subCustomerDetails?.subCustomerName?.toLowerCase().contains(query) ?? false) ||
+            ((ticket.assignTo?.firstName?.toLowerCase().contains(query) ?? false) ||
+                (ticket.assignTo?.lastName?.toLowerCase().contains(query) ?? false));
       }).toList();
     }
 
-        if (selectedFilter.value != "Select By") {
+    if (selectedFilter.value != "Select By") {
       filteredTickets = filteredTickets.where((ticket) {
         switch (selectedFilter.value) {
           case "Customer Name":
-            return ticket.customerDetails.customerName!.toLowerCase().contains(searchQuery.toLowerCase());
+            return ticket.customerDetails?.name?.toLowerCase().contains(searchQuery.toLowerCase()) ?? false;
           case "Sub-Customer Name":
-            return ticket.subCustomerDetails.customerName!.toLowerCase().contains(searchQuery.toLowerCase());
+            return ticket.subCustomerDetails?.subCustomerName?.toLowerCase().contains(searchQuery.toLowerCase()) ?? false;
           case "Technician Name":
-            return '${ticket.assignTo.firstName} ${ticket.assignTo.lastName}'.toLowerCase().contains(searchQuery.toLowerCase());
+            final technicianName = '${ticket.assignTo?.firstName ?? ''} ${ticket.assignTo?.lastName ?? ''}'.trim().toLowerCase();
+            return technicianName.contains(searchQuery.toLowerCase());
           case "Status":
-            return ticket.status.toLowerCase() == searchQuery.toLowerCase();
+            return ticket.status?.toLowerCase() == searchQuery.toLowerCase();
           case "Region":
-            return ticket.ticketAddress.region?.toLowerCase() == searchQuery.toLowerCase();
+            return ticket.ticketAddress?.country?.toLowerCase() == searchQuery.toLowerCase();
           default:
             return true;
         }
       }).toList();
     }
 
-    tickets.value = filteredTickets;
+    ticketData.value = filteredTickets;
   }
+  void updateSelectedFilter(String? newValue) {
+    if (newValue != null) {
+      selectedFilter.value = newValue;
+      applyFilters();
+    }
+  }
+void updateSearchQuery(String query) {
+  searchQuery.value = query;
+  applyFilters();
+}
+// void toggleTicketSelection(TicketResponseModel ticket, bool isSelected) {
+//   final index = ticketData.indexWhere((t) => t.id == ticket.id);
+//   if (index != -1) {
+//     ticketData[index] = ticket.customerDetails! as TicketResponseModel;
+//     ticketData.refresh();
+//   }
+// }
+}
 
-  // Future<void> addTicket(Ticket newTicket) async {
+
+
+
+
+
+
+//   void toggleTicketSelection(TicketResponseModel ticket, bool isSelected) {
+//     final index = tickets.indexWhere((t) => t.id == ticket.id);
+//     if (index != -1) {
+//       tickets[index] = ticket.copyWith(isSelected: isSelected);
+//       tickets.refresh();
+//     }
+//   }
+// }
+
+// extension TicketResponseModelExtension on TicketResponseModel {
+//   TicketResponseModel copyWith({bool? isSelected}) {
+//     return TicketResponseModel(
+//       // ... copy all existing properties ...
+//       isSelected: isSelected ?? this.isSelected,
+//     );
+//   }
+// }
+//   void applyFilters() {
+//     List<TicketResponseModel> filteredTickets = List.from(ticketData);
+//
+//     if (searchQuery.isNotEmpty) {
+//       filteredTickets = filteredTickets.where((ticket) {
+//         final query = searchQuery.toLowerCase();
+//         return (ticket.customerDetails?.name?.toLowerCase().contains(query) ??
+//             false) ||
+//             (ticket.subCustomerDetails?.subCustomerName?.toLowerCase().contains(
+//                 query) ?? false) ||
+//             ((ticket.assignTo?.firstName?.toLowerCase().contains(query) ??
+//                 false) ||
+//                 (ticket.assignTo?.lastName?.toLowerCase().contains(query) ??
+//                     false));
+//       }).toList();
+//     }
+//
+//     if (selectedFilter.value != "Select By") {
+//       filteredTickets = filteredTickets.where((ticket) {
+//         switch (selectedFilter.value) {
+//           case "Customer Name":
+//             return ticket.customerDetails?.name?.toLowerCase().contains(
+//                 searchQuery.toLowerCase()) ?? false;
+//           case "Sub-Customer Name":
+//             return ticket.subCustomerDetails?.subCustomerName?.toLowerCase()
+//                 .contains(searchQuery.toLowerCase()) ?? false;
+//           case "Technician Name":
+//             final technicianName = '${ticket.assignTo?.firstName ?? ''} ${ticket
+//                 .assignTo?.lastName ?? ''}'.trim().toLowerCase();
+//             return technicianName.contains(searchQuery.toLowerCase());
+//           case "Status":
+//             return ticket.status?.toLowerCase() == searchQuery.toLowerCase();
+//           case "Region":
+//             return ticket.ticketAddress?.country?.toLowerCase() ==
+//                 searchQuery.toLowerCase();
+//           default:
+//             return true;
+//         }
+//       }).toList();
+//     }
+//
+//     ticketData.value = filteredTickets;
+//   }
+
+
+// Future<void> addTicket(Ticket newTicket) async {
   //   try {
   //     final response = await http.post(
   //       Uri.parse(API_ENDPOINT),
@@ -145,7 +220,7 @@ class TicketListController extends GetxController {
   //     Get.snackbar('Error', 'Failed to delete ticket. Please try again.');
   //   }
   // }
-}
+
 
 // import 'package:get/get.dart';
 // import '../../../../response_models/ticket_response_model.dart';

@@ -8,7 +8,6 @@ import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 import 'package:intl/intl.dart';
 
 class LeaveReportViewScreenController extends GetxController {
-  RxInt casualLeaves = 0.obs;
   RxList<String> filterTypes = [
     "Select Status",
     "Submitted",
@@ -16,27 +15,10 @@ class LeaveReportViewScreenController extends GetxController {
     "Rejected",
   ].obs;
 
-  void incrementCasualLeaves() {
-    casualLeaves.value++;
-  }
-
-  void decrementCasualLeaves() {
-    if (casualLeaves.value > 0) {
-      casualLeaves.value--;
-    }
-  }
-
-  RxList<String> roleTypes = [
-    "Agent",
-    "Technician",
-    "Manager",
-  ].obs;
-
-  RxString selectedRoleFilter = "Agent".obs;
   RxString selectedFilter = "Select Status".obs;
-  Rx<LeaveManagementResponseModel?> leaveManagementData = Rx<LeaveManagementResponseModel?>(null);
-  RxList<Result> filteredLeaves = <Result>[].obs;
-  RxBool isLoading = false.obs;
+  Rx<LeaveResponseModel?> leaveManagementData = Rx<LeaveResponseModel?>(null);
+  RxList<Results> filteredLeaves = <Results>[].obs;
+    RxBool isLoading = false.obs;
   RxString searchQuery = ''.obs;
 
   @override
@@ -45,22 +27,27 @@ class LeaveReportViewScreenController extends GetxController {
     hitLeavesApiCall();
   }
 
-  Future<void> hitLeavesApiCall() async {
+  void hitLeavesApiCall() {
     customLoader.show();
     isLoading.value = true;
     FocusManager.instance.primaryFocus?.unfocus();
-    try {
-      final response = await Get.find<AuthenticationApiService>().getLeavesApiCall();
-      leaveManagementData.value = leaveManagementFromJson(response.toString());
-      applyFilters();
-      toast("Fetched leaves successfully");
-    } catch (error) {
-      toast(error.toString());
-    } finally {
-      customLoader.hide();
+    Get.find<AuthenticationApiService>().getLeavesApiCall().then((value) {
+      var leavesData = value;
+      if (value is Map<String, dynamic>) {
+        // leaveManagementData.value = LeaveResponseModel.fromJson(leavesData);
+        applyFilters();
+        customLoader.hide();
+        toast("Fetched leaves successfully");
+      } else {
+        throw Exception('Unexpected response format');
+      }
       isLoading.value = false;
       update();
-    }
+    }).onError((error, stackError) {
+      customLoader.hide();
+      toast(error.toString());
+      isLoading.value = false;
+    });
   }
 
   void updateSelectedFilter(String? newValue) {
@@ -78,8 +65,8 @@ class LeaveReportViewScreenController extends GetxController {
   void applyFilters() {
     if (leaveManagementData.value == null) return;
 
-    filteredLeaves.value = leaveManagementData.value!.results.where((leave) {
-      final nameMatch = '${leave.userId.firstName} ${leave.userId.lastName}'
+    filteredLeaves.value = leaveManagementData.value!.results!.where((leave) {
+      final nameMatch = '${leave.userId?.firstName ?? ''} ${leave.userId?.lastName ?? ''}'
           .toLowerCase()
           .contains(searchQuery.value.toLowerCase());
       final statusMatch = selectedFilter.value == "Select Status" || leave.status == selectedFilter.value;
@@ -87,23 +74,28 @@ class LeaveReportViewScreenController extends GetxController {
     }).toList();
   }
 
-  void showLeaveDetails(Result leave) {
+  void showLeaveDetails(Results leave) {
     Get.dialog(
       AlertDialog(
         title: Text('Leave Details'),
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Name: ${leave.userId.firstName} ${leave.userId.lastName}'),
-            Text('Phone: ${leave.userId.phoneNumber}'),
-            Text('Profile: ${leave.userId.role}'),
-            Text('From Date: ${formatDate(leave.startDate)}'),
-            Text('To Date: ${formatDate(leave.endDate)}'),
-            Text('Days: ${calculateDays(leave.startDate, leave.endDate)}'),
-            Text('Reason: ${leave.reason}'),
-            Text('Status: ${leave.status}'),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Name: ${leave.userId?.firstName ?? ''} ${leave.userId?.lastName ?? ''}'),
+              Text('Phone: ${leave.userId?.phoneNumber ?? ''}'),
+              Text('Role: ${leave.userId?.role ?? ''}'),
+              Text('From Date: ${formatDate(DateTime.parse(leave.startDate ?? ''))}'),
+              Text('To Date: ${formatDate(DateTime.parse(leave.endDate ?? ''))}'),
+              Text('Days: ${calculateDays(DateTime.parse(leave.startDate ?? ''), DateTime.parse(leave.endDate ?? ''))}'),
+              Text('Reason: ${leave.reason ?? ''}'),
+              Text('Status: ${leave.status ?? ''}'),
+              Text('Leave Type: ${leave.leaveType ?? ''}'),
+              Text('Company: ${leave.userId?.companyName ?? ''}'),
+              Text('Email: ${leave.userId?.email ?? ''}'),
+            ],
+          ),
         ),
         actions: [
           TextButton(

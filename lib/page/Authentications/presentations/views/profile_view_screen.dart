@@ -1,17 +1,16 @@
 import 'dart:io';
-
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:tms_sathi/page/Authentications/presentations/controllers/profile_screen_controller.dart';
 
 import '../../../../constans/color_constants.dart';
 import '../../../../constans/string_const.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../../utilities/helper_widget.dart';
+import '../controllers/profile_screen_controller.dart';
 
 class ProfileViewScreen extends GetView<ProfileViewScreenController> {
   ProfileViewScreen({Key? key}) : super(key: key);
@@ -98,7 +97,6 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
               color: blackColor,
               size: 25,
             ),
-            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 15),
           Text(
@@ -107,79 +105,125 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
               color: Colors.grey,
               size: 16,
             ),
-            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
-          // _buildImagePickerWidget(),
+          _buildImagePickerWidget(),
           _buildForm(context),
         ],
       ),
     );
   }
 
+  Widget _buildImagePickerWidget() {
+    return GetBuilder<ProfileViewScreenController>(
+      builder: (controller) {
+        Widget imageWidget;
+
+        if (controller.profileImage.value != null) {
+          imageWidget = Image.file(
+            controller.profileImage.value!,
+            fit: BoxFit.cover,
+          );
+        } else if (controller.profileImageUrl.value.isNotEmpty) {
+          imageWidget = Image.network(
+            controller.profileImageUrl.value,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(Icons.camera_alt, size: 40, color: Colors.grey);
+            },
+          );
+        } else {
+          imageWidget = const Icon(Icons.camera_alt, size: 40, color: Colors.grey);
+        }
+
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            GestureDetector(
+              onTap: () => _showImagePickerOptions(Get.context!),
+              child: CircleAvatar(
+                radius: 60,
+                backgroundColor: Colors.grey[200],
+                child: ClipOval(
+                  child: SizedBox(
+                    width: 120,
+                    height: 120,
+                    child: imageWidget,
+                  ),
+                ),
+              ),
+            ),
+            if (controller.isLoading.value)
+              const CircularProgressIndicator(),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildForm(BuildContext context) {
     return Form(
-      key: _formKey,
-      child: Column(
+        key: _formKey,
+        child: Column(
         children: [
-          const SizedBox(height: 10),
-          _buildTextField(
-            hintText: "Name".tr,
-            controller: controller.nameController,
-            focusNode: controller.nameFocusNode,
-            nextFocusNode: controller.emailFocusNode,
-            icon: Icons.person,
-          ),
-          const SizedBox(height: 16),
-          _buildTextField(
-            hintText: "Email".tr,
-            controller: controller.emailController,
-            focusNode: controller.emailFocusNode,
-            nextFocusNode: controller.companyNameFocusNode,
-            icon: FeatherIcons.mail,
-            keyboardType: TextInputType.emailAddress,
-          ),
+        vGap(10),
+        _buildTextField(
+        hintText: "Name".tr,
+        controller: controller.nameController,
+        focusNode: controller.nameFocusNode,
+        nextFocusNode: controller.emailFocusNode,
+        icon: Icons.person,
+        ),
+    vGap(16),
+    _buildTextField(
+        hintText: "Email".tr,
+        controller: controller.emailController,
+        focusNode: controller.emailFocusNode,
+        nextFocusNode: controller.phoneFocusNode,
+        icon: FeatherIcons.mail,
+        keyboardType: TextInputType.emailAddress,
+        ),
+    vGap(16),
+    _buildTextField(
+        hintText: "Phone Number".tr,
+        controller: controller.phoneController,
+        focusNode: controller.phoneFocusNode,
+        nextFocusNode: controller.companyNameFocusNode,
+        icon: FeatherIcons.phone,
+        keyboardType: TextInputType.phone,
+        ),
+    vGap(16),
+    _buildTextField(
+        hintText: "Company Name".tr,
+        controller: controller.companyNameController,
+        focusNode: controller.companyNameFocusNode,
+        nextFocusNode: controller.addressFocusNode,
+        icon: FeatherIcons.briefcase,
+        ),
+    vGap(16),
+    _buildTextField(
+        hintText: "Address".tr,
+        controller: controller.addressController,
+        focusNode: controller.addressFocusNode,
+        nextFocusNode: controller.employeesFocusNode,
+        icon: FeatherIcons.mapPin,
+        ),
+    vGap(16),
+    _buildTextField(
+        hintText: "Employees".tr,
+        controller: controller.employeesController,
+        focusNode: controller.employeesFocusNode,
+        nextFocusNode: controller.countryFocusNode,
+        icon: FeatherIcons.users,
+        keyboardType: TextInputType.number,
+    ),
           vGap(16),
-          _buildTextField(
-            hintText: "Phone Number".tr,
-            controller: controller.phoneController,
-            focusNode: controller.phoneFocusNode,
-            nextFocusNode: controller.countryFocusNode,
-            icon: FeatherIcons.phone,
-            keyboardType: TextInputType.number,
-          ),
-
-          const SizedBox(height: 16),
-          _buildTextField(
-            hintText: "Company Name".tr,
-            controller: controller.companyNameController,
-            focusNode: controller.companyNameFocusNode,
-            nextFocusNode: controller.employeesFocusNode,
-            icon: FeatherIcons.briefcase,
-          ),
-          const SizedBox(height: 16),
-          _buildTextField(
-            hintText: "Address".tr,
-            controller: controller.addressController,
-            focusNode: controller.addressFocusNode,
-            nextFocusNode: controller.employeesFocusNode,
-            icon: FeatherIcons.briefcase,
-          ),
-          const SizedBox(height: 16),
-          _buildTextField(
-            hintText: "Employees".tr,
-            controller: controller.employeesController,
-            focusNode: controller.employeesFocusNode,
-            nextFocusNode: controller.countryFocusNode,
-            icon: FeatherIcons.users,
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 16),
           _buildCountryTextField(context),
-          const SizedBox(height: 20),
+          vGap(30),
           _buildUpdateButton(),
+          vGap(20),
         ],
-      ),
+        ),
     );
   }
 
@@ -209,9 +253,10 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
       controller: controller.countryController,
       focusNode: controller.countryFocusNode,
       labletext: "Country".tr,
+      readOnly: true,
       prefix: const Icon(FeatherIcons.globe, color: Colors.black),
       suffix: InkWell(
-        onTap: () => _showCountryPicker(context: context),
+        onTap: () => _showCountryPicker(context),
         child: Container(
           margin: const EdgeInsets.only(right: 10),
           child: const Icon(Icons.arrow_drop_down, color: Colors.black, size: 30),
@@ -222,9 +267,11 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
   }
 
   Widget _buildUpdateButton() {
-    return InkWell(
-      onTap: () {
-        if (_formKey.currentState!.validate()){
+    return Obx(() => InkWell(
+      onTap: controller.isLoading.value
+          ? null
+          : () {
+        if (_formKey.currentState!.validate()) {
           controller.hitUserupdateProfile();
         }
       },
@@ -233,41 +280,50 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
         width: Get.width,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(25),
-          color: appColor,
+          color: controller.isLoading.value ? Colors.grey : appColor,
         ),
         child: Center(
-          child: Text(
+          child: controller.isLoading.value
+              ? const CircularProgressIndicator(color: whiteColor)
+              : Text(
             'Update'.tr,
             style: MontserratStyles.montserratSemiBoldTextStyle(
               color: blackColor,
               size: 18,
             ),
-            textAlign: TextAlign.center,
           ),
         ),
       ),
-    );
+    ));
   }
 
-  // Widget _buildImagePickerWidget() {
-  //   return GetBuilder<ProfileViewScreenController>(
-  //     builder: (_) {
-  //       return GestureDetector(
-  //         onTap: () => _showImagePickerOptions(Get.context!),
-  //         child: CircleAvatar(
-  //           radius: 60,
-  //           backgroundColor: Colors.grey[200],
-  //           backgroundImage: controller.profileImage != null
-  //               ? FileImage(File(controller.profileImage.value))
-  //               : null,
-  //           child: controller.profileImage == null
-  //               ? const Icon(Icons.camera_alt, size: 40, color: Colors.grey)
-  //               : null,
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
+  void _showCountryPicker(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SizedBox(
+            width: double.maxFinite,
+            child: CountryCodePicker(
+              onChanged: (CountryCode countryCode) {
+                controller.countryController.text = countryCode.name ?? '';
+                controller.selectedCountry = countryCode;
+                controller.update();
+                Navigator.pop(context);
+              },
+              initialSelection: 'IN',
+              favorite: const ['+1', 'US', '+91', 'IN'],
+              showCountryOnly: true,
+              showOnlyCountryWhenClosed: true,
+              alignLeft: false,
+              showFlag: true,
+              showFlagDialog: true,
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   void _showImagePickerOptions(BuildContext context) {
     showModalBottomSheet(
@@ -279,7 +335,7 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
             children: <Widget>[
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Choose from Gallery'),
+                title: Text('Choose from Gallery'.tr),
                 onTap: () {
                   controller.getImage(ImageSource.gallery);
                   Navigator.of(context).pop();
@@ -287,7 +343,7 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo_camera),
-                title: const Text('Take a Photo'),
+                title: Text('Take a Photo'.tr),
                 onTap: () {
                   controller.getImage(ImageSource.camera);
                   Navigator.of(context).pop();
@@ -295,35 +351,6 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
               ),
             ],
           ),
-        );
-      },
-    );
-  }
-
-  Widget _showCountryPicker({required BuildContext context}) {
-    return CountryCodePicker(
-      onChanged: (CountryCode countryCode) {
-        controller.countryController.text = countryCode.name ?? '';
-        controller.selectedCountry = countryCode;
-        controller.update();
-        Navigator.pop(context);
-      },
-      initialSelection: 'IN',
-      favorite: const ['+1', 'US', '+91', 'IN'],
-      showCountryOnly: true,
-      showOnlyCountryWhenClosed: true,
-      alignLeft: false,
-      showFlag: true,
-      showFlagDialog: true,
-      builder: (CountryCode? countryCode) {
-        return ListTile(
-          leading: SizedBox(
-            width: 30,
-            height: 20,
-            child: countryCode != null ? Text(countryCode.flagUri ?? '') : const SizedBox(),
-          ),
-          title: Text(countryCode?.name ?? ''),
-          trailing: Text(countryCode?.dialCode ?? ''),
         );
       },
     );
