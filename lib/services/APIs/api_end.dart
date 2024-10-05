@@ -11,6 +11,10 @@ class ApiEnd{
   static const String leavesReportEnd = 'users/leaves/';
   static const String checkpointsCategoriesEnd = 'api/add-checkpoints/';
   static const String holidaysApiEnd = 'api/holidays/';
-  static const String fsrApiEnd = '/api/fsrs/';
+  static const String fsrApiEnd = 'api/fsrs/';
   static const String checkingPointStatusApiEnd = 'api/checkpointstatus/';
+  static const String leaveEditPeriodEnd = 'users/leave-allocations/';
+/*=======================================*/
+  static const String importTicketDataEnd = 'api/import-tickets/';
+  static const String amcEnd = 'api/amcs/';
 }

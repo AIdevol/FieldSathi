@@ -186,6 +186,7 @@ _addTechnician({required BuildContext context}){
       padding: EdgeInsets.symmetric(horizontal: 10),
       child: TextField(
         style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),
+        maxLines: 10,
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: 'Purpose *',
@@ -270,6 +271,7 @@ Widget _selectGroupViewform({required BuildContext context}){
         padding: EdgeInsets.symmetric(horizontal: 10),
         child: TextField(
           style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),
+          maxLines: 10,
           decoration: InputDecoration(
             border: InputBorder.none,
             hintText: 'Instructions *',

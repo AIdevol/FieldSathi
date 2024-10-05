@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:tms_sathi/page/Authentications/widgets/controller/add_amc_view_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/add_amc_view_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/add_fsr_view_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/add_technician_list_controller.dart';
@@ -18,5 +19,6 @@ class WidgetBindings extends Bindings{
     Get.lazyPut<LeadFormFieldController>(() => LeadFormFieldController());
     Get.lazyPut<AddTechnicianListController>(() => AddTechnicianListController());
     Get.lazyPut<TicketListCreationController>(() => TicketListCreationController());
+    Get.lazyPut<AddAmcViewController>(() => AddAmcViewController());
   }
 }

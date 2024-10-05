@@ -70,19 +70,19 @@ class _AddFSRViewScreenState extends State<AddFSRViewScreen> {
                           ),
                           vGap(20),
                           CustomTextField(
-                            hintText: "First Name".tr,
+                            hintText: "Name".tr,
                             controller: controller.firstNameController,
                             textInputType: TextInputType.text,
                            // controller: ,
-                            labletext: 'First Name'.tr,
+                            labletext: 'Name'.tr,
                           ),
                           vGap(20),
                           CustomTextField(
-                            hintText: 'Enter description'.tr,
+                            hintText: 'Categories'.tr,
                             controller: controller.discriptionController,
                             maxLines: 3,
                             textInputType: TextInputType.text,
-                            labletext: 'Enter description'.tr,
+                            labletext: 'Categories'.tr,
                           ),
                           vGap(20),
 

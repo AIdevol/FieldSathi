@@ -9,6 +9,8 @@ const String emailKey = 'emailKey';
 const String longitudeRealTime = 'longitude';
 const String latitudeRealTime = 'latitude';
 const String FsrId = 'fsr_id';
+const String leavesAllocationId = 'leaveAllocationId';
+const String leavesId = 'leavesId';
 
 // RememberMeModal? getRememberMe() {
 //   String? email = storage.read(emailKey);

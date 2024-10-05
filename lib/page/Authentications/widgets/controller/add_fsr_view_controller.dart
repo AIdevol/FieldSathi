@@ -35,14 +35,14 @@ class AddFSRViewController extends GetxController{
   }
 
   void hitPostFsrDetailsApiCall(){
-    final checkpointsdata = Get.put(FsrViewcontroller()).checkPointStatusCheckingController;
+    // final checkpointsdata = Get.put(FsrViewcontroller()).checkPointStatusCheckingController;
       customLoader.show();
       FocusManager.instance.primaryFocus!.context;
       var postData = {
         "fsrName": firstNameController.text,
         "categories": [
         {"name": discriptionController.text,
-        "checkpoints": checkpointsdata}
+        "checkpoints": ''}
       ]
       };
       Get.find<AuthenticationApiService>().postfsrDetailsApiCall(dataBody: postData).then((value){

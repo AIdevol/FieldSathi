@@ -38,7 +38,7 @@ dependencies:
   flutter_screenutil: ^5.9.3
   logger:
   get_storage:
-  get:
+  get: ^4.6.6
   fluttertoast: ^8.2.8
   country_code_picker:
   dio:
@@ -68,24 +68,23 @@ dependencies:
   permission_handler: ^11.3.1
   font_awesome_flutter: ^10.7.0
   fl_chart: ^0.69.0
-  syncfusion_flutter_datagrid: ^27.1.48
   file_picker: ^8.1.2
   geolocator: ^13.0.1
-  data_table_2: ^2.5.15
   pluto_grid: ^8.0.0
+  syncfusion_flutter_calendar: ^27.1.51
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: "^0.13.1"
+  flutter_launcher_icons: ^0.14.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

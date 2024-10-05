@@ -7,11 +7,15 @@ import 'package:tms_sathi/utilities/common_textFields.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
-class  LeaveUpdateScreen extends GetView<LeaveReportViewScreenController>{
+import '../presentations/controllers/leave_update_screen_controller.dart';
+
+class  LeaveUpdateScreen extends GetView<LeaveUpdateScreenController>{
 
   @override
   Widget build(BuildContext context){
-    return MyAnnotatedRegion(child: GetBuilder<LeaveReportViewScreenController>(builder: (controller)=>Scaffold(
+    return MyAnnotatedRegion(child: GetBuilder<LeaveUpdateScreenController>(
+      init: LeaveUpdateScreenController(),
+        builder: (controller)=>Scaffold(
       appBar: AppBar(
         backgroundColor: appColor,
         title: Text("Edit Assigned Leaves", style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),),
@@ -20,11 +24,11 @@ class  LeaveUpdateScreen extends GetView<LeaveReportViewScreenController>{
         padding: const EdgeInsets.all(8.0),
         child: ListView(children: [
           vGap(30),
-          // _agentRoleSelectdropDownVal(),
+          _sickLeaveSelectionWidget(),
           vGap(20),
-          // _SickleaveViewSelection(),
+          _casualLeaveSelection(),
           vGap(20),
-          // _casualLeaveSelection(),
+          _probationPeriodSelectionViewWidget(),
           vGap(20),
           _buttonViewSelection(),
         ],),
@@ -32,70 +36,84 @@ class  LeaveUpdateScreen extends GetView<LeaveReportViewScreenController>{
     )));
   }
 
-  // _agentRoleSelectdropDownVal(){
-  //   return Obx(() => DropdownButton<String>(
-  //     value: controller.selectedRoleFilter.value,
-  //     items: controller.roleTypes.map((String value) {
-  //       return DropdownMenuItem<String>(
-  //         value: value,
-  //         child: Text(value),
-  //       );
-  //     }).toList(),
-  //     onChanged: controller.updateSelectedFilter,
-  //   ));
-  // }
-  //
-  // _SickleaveViewSelection(){
-  //   return Obx(() => CustomTextField(
-  //     hintText: 'Sick leaves',
-  //     labletext: 'Sick leaves',
-  //     controller: TextEditingController(text: controller.casualLeaves.value.toString()),
-  //     // : TextInputType.number,
-  //     suffix: Column(
-  //       mainAxisAlignment: MainAxisAlignment.center,
-  //       children: [
-  //         InkWell(
-  //           onTap: () => controller.incrementCasualLeaves(),
-  //           child: Icon(Icons.arrow_drop_up, size: 18),
-  //         ),
-  //         InkWell(
-  //           onTap: () => controller.decrementCasualLeaves(),
-  //           child: Icon(Icons.arrow_drop_down, size: 18),
-  //         ),
-  //       ],
-  //     ),
-  //   )
-  //   );
-  //
-  // }
-  //
-  // Widget _casualLeaveSelection() {
-  //   return Obx(() => CustomTextField(
-  //     hintText: 'Casual leaves',
-  //     labletext: 'Casual leaves',
-  //     controller: TextEditingController(text: controller.casualLeaves.value.toString()),
-  //     // : TextInputType.number,
-  //     suffix: Column(
-  //       mainAxisAlignment: MainAxisAlignment.center,
-  //       children: [
-  //         InkWell(
-  //           onTap: () => controller.incrementCasualLeaves(),
-  //           child: Icon(Icons.arrow_drop_up, size: 18),
-  //         ),
-  //         InkWell(
-  //           onTap: () => controller.decrementCasualLeaves(),
-  //           child: Icon(Icons.arrow_drop_down, size: 18),
-  //         ),
-  //       ],
-  //     ),
-  //   ));
-  // }
+
+_sickLeaveSelectionWidget(){
+    return CustomTextField(
+      controller: controller.sickLeaveController,
+      hintText: 'Sick Leave',
+      labletext: 'Sick Leave',
+      suffix: Column(
+        children: [
+          GestureDetector(
+            onTap: (){
+              controller.increaseSickLeaves();
+              print('button tapped 1');
+              },
+              child: Icon(Icons.arrow_drop_up, size: 25,)),
+          GestureDetector(
+            onTap: (){
+              controller.decreaseSickLeaves();
+              print('button tapped 2');
+              },
+            child: Icon(Icons.arrow_drop_down, size: 25,),)],),
+    );
+}
+
+  _casualLeaveSelection(){
+    return CustomTextField(
+      controller: controller.casualLeaveController,
+      hintText: 'Casual Leave',
+      labletext: 'Casual Leave',
+      suffix: Column(
+        children: [
+          GestureDetector(
+              onTap: (){
+                controller.increaseCasualLeaves();
+                print('button tapped 1');
+                },
+              child: Icon(Icons.arrow_drop_up, size: 25,)),
+          GestureDetector(
+            onTap: (){
+              controller.decreaseCasualLeaves();
+              print('button tapped 2');},
+            child: Icon(Icons.arrow_drop_down, size: 25,),)],),
+    );
+  }
+
+  _probationPeriodSelectionViewWidget(){
+    return CustomTextField(
+      controller: controller.probationPeriodController,
+      hintText: 'Probation Period (In Months)',
+      labletext: 'Probation Period (In Months)',
+      suffix: Column(
+        children: [
+          GestureDetector(
+              onTap: (){
+                controller.increaseProbationPeriod();
+                print('button tapped 1');
+                },
+              child: Icon(Icons.arrow_drop_up, size: 25,)),
+          GestureDetector(
+            onTap: (){
+              controller.decreaseCasualLeaves();
+              print('button tapped 2');
+              },
+            child: Icon(Icons.arrow_drop_down, size: 25,),)],),
+    );
+  }
+
 
   _buttonViewSelection(){
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(backgroundColor: appColor),
-        onPressed: (){},
-        child: Text("Update Leave",
-          style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black),));
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: appColor),
+          onPressed: (){
+          controller.hitPutAssignedLeavesApiCall();
+          },
+          child: Text("Update Leave",
+            style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black),)
+      )..paddingAll(18.0),
+    );
   }
 }

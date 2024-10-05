@@ -21,6 +21,7 @@ import 'package:tms_sathi/page/Authentications/presentations/views/services_View
 import 'package:tms_sathi/page/Authentications/presentations/views/super_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/technician_list_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/ticket_list_screen.dart';
+import 'package:tms_sathi/page/Authentications/widgets/views/add_amc_calender_view.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/add_amc_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/add_fsr_view.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/add_technician_list.dart';
@@ -30,6 +31,7 @@ import 'package:tms_sathi/page/Authentications/widgets/views/ticket_list_creatio
 import 'package:tms_sathi/page/home/bindings/home_bindings.dart';
 import 'package:tms_sathi/page/home/notification_service/views/notification_view_screen.dart';
 import 'package:tms_sathi/page/home/presentations/views/home_screen.dart';
+import 'package:tms_sathi/page/home/widget/leave_update_screen.dart';
 
 import '../page/Authentications/presentations/views/account_view_screen.dart';
 import '../page/splash/bindings/splash_bindings.dart';
@@ -188,6 +190,16 @@ class AppPages {
       name: AppRoutes.ticketListCreationScreen,
       binding: AuthenticationBinding(),
       page: () => TicketListCreation(),
+    ),
+    GetPage(
+      name: AppRoutes.leaveUpdateScreen,
+      binding: AuthenticationBinding(),
+      page: () => LeaveUpdateScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.addAmcCallenderScreen,
+      binding: AuthenticationBinding(),
+      page: () => AddAmcCalenderView(),
     ),
   ];
 }

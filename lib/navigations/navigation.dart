@@ -32,6 +32,8 @@ abstract class AppRoutes {
   static const addtechnicianListScreen = '/addtechnicianListScreen';
   static const notificationsScreen = '/notificationsScreen';
   static const ticketListCreationScreen = '/ticketListCreationScreen';
+  static const leaveUpdateScreen= '/leaveUpdateScreen';
+  static const addAmcCallenderScreen = '/addAmcCallenderScreen';
 }
 
 class RoutesArgument {

@@ -1,17 +1,20 @@
-import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
+import 'package:tms_sathi/page/Authentications/widgets/views/ticket_model_data.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
+import 'package:tms_sathi/utilities/helper_widget.dart';
 import '../controllers/ticket_list_controller.dart';
 
 class TicketListScreen extends GetView<TicketListController> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MyAnnotatedRegion(child: GetBuilder<TicketListController>(builder: (controller)=>
+    SafeArea(child: Scaffold(
       appBar: AppBar(
         backgroundColor: appColor,
         title: Text('Ticket Details',
@@ -34,12 +37,12 @@ class TicketListScreen extends GetView<TicketListController> {
           Expanded(
             child: Obx(() =>
             controller.isLoading.value
-                ? Center(child: CircularProgressIndicator())
+                ? Center(child: Container())
                 : _buildTicketTable()),
           ),
         ],
       ),
-    );
+    ),)));
   }
 
   Widget _buildTopBar() {
@@ -272,6 +275,70 @@ class TicketListScreen extends GetView<TicketListController> {
           field: 'aging',
           type: PlutoColumnType.number(),
         ),
+        PlutoColumn(
+          title: 'Actions',
+          field: 'actions',
+          type: PlutoColumnType.number(),
+          renderer: (rendererContext) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: PopupMenuButton<String>(
+                  color: CupertinoColors.white,
+                  offset: Offset(0, 56),
+                  itemBuilder: (BuildContext context)=><PopupMenuEntry<String>>[
+                    PopupMenuItem<String>(
+                      value: 'Edit',
+                      onTap: (){
+                        // Get.toNamed(AppRoutes.editProfile);
+                      },
+                      child: const ListTile(
+                        leading: Icon(Icons.edit_calendar_outlined, size: 20, color: Colors.black,),
+                        title: Text('Edit'),
+                      ),
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'Delete',
+                      onTap: (){
+                        // Get.toNamed(AppRoutes.editProfile);
+                      },
+                      child: const ListTile(
+                        leading: Icon(Icons.delete, size: 20,color: Colors.red,),
+                        title: Text('Delete'),
+                      ),
+                    ),
+                  ],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Icon(Icons.more_horiz, size: 20,))
+                    // IconButton(onPressed: (){
+                    //   // _openWidgetshowModelView();
+                    // }, icon: Icon(Icons.more_vert, size: 20,)
+                    // ),
+                  ),
+                )
+               /* ElevatedButton(
+                  onPressed: () {
+                    // _openDropDownFieldforStatusSubmitions();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: appColor,
+                    minimumSize: Size(130, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Update Status',
+                    style: MontserratStyles.montserratSemiBoldTextStyle(
+                      size: 12,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),*/
+              );
+          },
+        ),
       ];
 
       // Define rows
@@ -290,6 +357,7 @@ class TicketListScreen extends GetView<TicketListController> {
           'status': PlutoCell(value: ticket.status ?? 'NA'),
           'ticket_date': PlutoCell(value: ticket.date ?? 'NA'),
           'aging': PlutoCell(value: ticket.aging?.toString() ?? 'NA'),
+          'actions':PlutoCell(value: '')
         });
       }).toList();
 
@@ -310,4 +378,30 @@ class TicketListScreen extends GetView<TicketListController> {
       );
     });
   }
+}
+
+_openWidgetshowModelView(){
+  return Get.dialog(
+    Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Container(
+        height: Get.height * 0.3,
+        child: Column(children: [
+        GestureDetector(
+          onTap: (){},
+          child: Row(children: [
+          Icon(Icons.edit_calendar_outlined, size:20),
+          Text("Edit", style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black),)
+        ],),),
+        GestureDetector(
+          onTap: (){},
+          child: Row(children: [
+            Icon(Icons.delete, size:20, color: Colors.red,),
+            Text("Delete", style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black),)
+          ],),),
+            ],),
+      ),)
+  );
 }

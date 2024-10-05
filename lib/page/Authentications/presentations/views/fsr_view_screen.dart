@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
+import 'package:overlay_support/overlay_support.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/add_fsr_view_controller.dart';
 import '../../../../constans/color_constants.dart';
@@ -30,6 +33,7 @@ class FsrViewScreen extends GetView<FsrViewcontroller> {
                 IconButton(
                   onPressed: () {
                     Get.toNamed(AppRoutes.addfsrScreen);
+                    toast("Add your New FSR");
                   },
                   icon: const Icon(FeatherIcons.plus),
                 ).paddingOnly(left: 20.0)
@@ -39,9 +43,10 @@ class FsrViewScreen extends GetView<FsrViewcontroller> {
               children: [
                 _buildSearchBar(controller),
                 Expanded(
-                  child: _mainDataRowAndColumn(
-                    context: context,
-                    controller: controller,
+                  child: Obx(() =>
+                  controller.isLoading.value
+                      ? Center(child: CircularProgressIndicator())
+                      : _buildPlutoGrid(controller),
                   ),
                 ),
               ],
@@ -52,56 +57,106 @@ class FsrViewScreen extends GetView<FsrViewcontroller> {
     );
   }
 
-  Widget _mainDataRowAndColumn({
-    required BuildContext context,
-    required FsrViewcontroller controller,
-  }) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          horizontalMargin: 50,
-          border: TableBorder(
-            horizontalInside: BorderSide(width: 1, color: Colors.grey.shade300),
-          ),
-          columnSpacing: 60,
-          headingRowColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
-              return Colors.grey.shade100;
-            },
-          ),
-          columns: const [
-            DataColumn(label: Text('Sr. No.')),
-            DataColumn(label: Text('FSR Name')),
-            DataColumn(label: Text('FSR Categories')),
-            DataColumn(label: Text('Actions')),
-          ],
-          rows: controller.filteredTickets.asMap().entries.map((entry) {
-            final index = entry.key;
-            final FsrResponseModel fsrData = entry.value;
-
-            String categoryNames = fsrData.categories
-                ?.map((category) => category.name ?? '')
-                .where((name) => name.isNotEmpty)
-                .join(', ') ?? '';
-
-            return DataRow(
-              cells: [
-                DataCell(Text('${index + 1}')),
-                DataCell(Text(fsrData.fsrName ?? '')),
-                DataCell(Text(categoryNames)),
-                DataCell(
-                  IconButton(
-                    icon: Icon(Icons.info),
-                    onPressed: () {
-                      // Handle info button press
-                    },
-                  ),
+  Widget _buildPlutoGrid(FsrViewcontroller controller) {
+    List<PlutoColumn> columns = [
+      PlutoColumn(
+        title: 'Sr. No.',
+        field: 'srNo',
+        type: PlutoColumnType.number(),
+      ),
+      PlutoColumn(
+        title: 'FSR Name',
+        field: 'fsrName',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
+        title: 'FSR Categories',
+        field: 'fsrCategories',
+        type: PlutoColumnType.text(),
+      ),
+      PlutoColumn(
+        title: 'Actions',
+        field: 'actions',
+        type: PlutoColumnType.number(),
+        renderer: (rendererContext) {
+          return Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: PopupMenuButton<String>(
+                    color: CupertinoColors.white,
+                    offset: Offset(0, 56),
+                    itemBuilder: (BuildContext context)=><PopupMenuEntry<String>>[
+                      PopupMenuItem<String>(
+                        value: 'Edit',
+                        onTap: (){
+                          // Get.toNamed(AppRoutes.editProfile);
+                        },
+                        child: const ListTile(
+                          leading: Icon(Icons.edit_calendar_outlined, size: 20, color: Colors.black,),
+                          title: Text('Edit'),
+                        ),
+                      ),
+                      PopupMenuItem<String>(
+                        value: 'Delete',
+                        onTap: (){
+                          // Get.toNamed(AppRoutes.editProfile);
+                        },
+                        child: const ListTile(
+                          leading: Icon(Icons.delete, size: 20,color: Colors.red,),
+                          title: Text('Delete'),
+                        ),
+                      ),
+                    ],
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Icon(Icons.more_vert, size: 20,))
                 ),
-              ],
-            );
-          }).toList(),
+              ),
+          );
+        },
+      ),
+    ];
+
+    List<PlutoRow> rows = controller.filteredTickets.asMap().entries.map((entry) {
+      final index = entry.key;
+      final FsrResponseModel fsrData = entry.value;
+
+      String categoryNames = fsrData.categories
+          .map((category) => category.name)
+          .where((name) => name.isNotEmpty)
+          .join(', ') ?? '';
+
+      return PlutoRow(
+        cells: {
+          'srNo': PlutoCell(value: index + 1),
+          'fsrName': PlutoCell(value: fsrData.fsrName),
+          'fsrCategories': PlutoCell(value: categoryNames),
+          'actions':PlutoCell(value: '')
+        },
+      );
+    }).toList();
+
+    return PlutoGrid(
+      columns: columns,
+      rows: rows,
+      onLoaded: (PlutoGridOnLoadedEvent event) {
+        // You can perform actions when the grid is loaded
+      },
+      onChanged: (PlutoGridOnChangedEvent event) {
+        // Handle changes in the grid
+      },
+      configuration: PlutoGridConfiguration(
+        columnFilter: PlutoGridColumnFilterConfig(
+          filters: const [
+            ...FilterHelper.defaultFilters,
+          ],
+          resolveDefaultColumnFilter: (column, resolver) {
+            if (column.field == 'number') {
+              return resolver<PlutoFilterTypeContains>() as PlutoFilterType;
+            }
+
+            return resolver<PlutoFilterTypeContains>() as PlutoFilterType;
+          },
         ),
       ),
     );

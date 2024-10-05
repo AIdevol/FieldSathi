@@ -3,6 +3,7 @@ import 'package:tms_sathi/page/home/presentations/controllers/amc_status_monitor
 import 'package:tms_sathi/page/home/presentations/controllers/attendance_graph_view_controller.dart';
 import 'package:tms_sathi/page/home/presentations/controllers/graph_view_controller.dart';
 import 'package:tms_sathi/page/home/presentations/controllers/home_screen_controller.dart';
+import 'package:tms_sathi/page/home/presentations/controllers/leave_update_screen_controller.dart';
 
 class HomeBinding extends Bindings{
   @override
@@ -11,6 +12,7 @@ class HomeBinding extends Bindings{
     Get.lazyPut<GraphViewController>(() => GraphViewController());
     Get.lazyPut<AttendanceGraphViewController>(() => AttendanceGraphViewController());
     Get.lazyPut<AmcStatusMonitorGraphController>(() => AmcStatusMonitorGraphController());
+    Get.lazyPut<LeaveUpdateScreenController>(() => LeaveUpdateScreenController());
   }
 
 }

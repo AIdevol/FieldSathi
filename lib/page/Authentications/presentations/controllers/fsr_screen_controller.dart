@@ -16,6 +16,8 @@ class FsrViewcontroller extends GetxController {
 
   List<FsrResponseModel> allFsr = <FsrResponseModel>[].obs;
 
+  RxBool isLoading = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -61,14 +63,18 @@ class FsrViewcontroller extends GetxController {
     // For example:
     // Get.to(() => EditTicketScreen(ticketId: id));
   }
-  void hitGetfsrDetailsApiCall(){
+  void hitGetfsrDetailsApiCall()async{
     customLoader.show();
     FocusManager.instance.primaryFocus!.context;
     Get.find<AuthenticationApiService>().getfsrDetailsApiCall().then((value)async{
-      var fsrDatalist = value;
+       allFsr.assignAll(value);
       customLoader.hide();
-      await storage.write(FsrId, fsrDatalist.id??"");
-      print('fsr_id: ${fsrDatalist.id}');
+
+      if (allFsr is FsrResponseModel){
+        var fsrid = allFsr.first.id.toString();
+        print('aldjfklasf= ${fsrid}');
+        await storage.write(FsrId, fsrid);
+      }
       toast('FSR Fetched Successfully');
       update();
     }).onError((error, stackError){

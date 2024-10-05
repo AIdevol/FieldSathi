@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/response_models/add_technician_response_model.dart';
+import 'package:tms_sathi/response_models/amc_response_model.dart';
 import 'package:tms_sathi/response_models/fsr_response_model.dart';
 import 'package:tms_sathi/response_models/leaves_response_model.dart';
 import 'package:tms_sathi/response_models/login_response_model.dart';
@@ -14,6 +16,7 @@ import 'package:tms_sathi/services/APIs/dio_client.dart';
 
 import '../../../response_models/check_points_response_model.dart';
 import '../../../response_models/holidays_calender_response_model.dart';
+import '../../../response_models/leave_allocation_response_model.dart';
 import '../../../response_models/register_response_model.dart';
 import '../../../response_models/resend_otp_api_call.dart';
 import '../../../response_models/super_user_response_model.dart';
@@ -168,6 +171,15 @@ implements AuthenticationApi{
       return Future.error(NetworkExceptions.getDioException(e));
     }
   }
+  @override
+  Future<LeaveResponseModel>putLeavesApiCall({Map<String, dynamic>? dataBody,id})async{
+    try{
+      final response = await dioClient!.put("${ApiEnd.leavesReportEnd}$id/", data: dataBody,skipAuth: false);
+      return LeaveResponseModel.fromJson(response);
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
 
   @override
   Future<SuperUsersResponseModel>getSuperUserApiCall({Map<String, dynamic>? dataBody, parameters})async{
@@ -190,14 +202,21 @@ implements AuthenticationApi{
   }
 
   @override
-  Future<FsrResponseModel>getfsrDetailsApiCall({Map<String, dynamic>? dataBody})async{
+  Future<List<FsrResponseModel>>getfsrDetailsApiCall({Map<String, dynamic>? dataBody})async{
     try{
       final response = await dioClient!.get("${ApiEnd.fsrApiEnd}", data: dataBody,skipAuth: false,);
-      return FsrResponseModel.fromJson(response);
+      if(response is List){
+        return response.map((item) => FsrResponseModel.fromJson(item)).toList();
+      }else if(response is Map<String, dynamic> && response.containsKey('data')){
+        final List<dynamic> data = response['data'];
+        return data.map((item) => FsrResponseModel.fromJson(item)).toList();
+      }
+      return [];
     }catch(e){
       return Future.error(NetworkExceptions.getDioException(e));
     }
   }
+
   @override
   Future<FsrResponseModel>postfsrDetailsApiCall({Map<String, dynamic>? dataBody, parameters})async{
     try{
@@ -217,5 +236,40 @@ implements AuthenticationApi{
       return Future.error(NetworkExceptions.getDioException(e));
     }
   }
+// ===========================================================Leaves Api Call=============================================================
+  @override
+  Future<List<LeaveAllocationResponseModel>> getLeavesALLocationApiCall({Map<String, dynamic>? dataBody})async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.leaveEditPeriodEnd}", data: dataBody);
+      if(response is List){
+        return response.map((item) => LeaveAllocationResponseModel.fromJson(item)).toList();
+      }else if(response is Map<String, dynamic> && response.containsKey('data')){
+        final List<dynamic> data = response['data'];
+        return data.map((item)=>LeaveAllocationResponseModel.fromJson(item)).toList();
+      }
+      return [];
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
 
+  @override
+  Future<LeaveAllocationResponseModel>putLeavesAllocationApiCall({Map<String, dynamic>? dataBody,id})async{
+    try{
+      final response = await dioClient!.put("${ApiEnd.leaveEditPeriodEnd}$id/", data: dataBody,);
+      return LeaveAllocationResponseModel.fromJson(response);
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+
+  @override
+  Future<AmcResponseModel>getAmcDetailsApiCall({Map<String, dynamic>? dataBody})async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.amcEnd}", data: dataBody,skipAuth: false);
+      return AmcResponseModel.fromJson(response);
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
 }

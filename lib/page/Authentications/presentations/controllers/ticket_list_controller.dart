@@ -33,7 +33,6 @@ class TicketListController extends GetxController {
     isLoading.value = true;
     customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
-
     try {
       final tickets = await Get.find<AuthenticationApiService>().getticketDetailsApiCall();
       ticketData.assignAll(tickets);

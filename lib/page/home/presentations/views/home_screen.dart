@@ -245,7 +245,7 @@ class HomeScreen extends GetView<HomeScreenController> {
       },
       child: Container(
           height: containerLength.height*0.7,
-          width: Get.width*0.9,
+          width: Get.width*0.8,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
             color: whiteColor,
@@ -291,7 +291,7 @@ _graphVisualScreen2(BuildContext context, {required String text}){
     },
     child: Container(
         height: containerLength.height*0.63,
-        width: Get.width*0.9,
+        width: Get.width*0.8,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
           color: whiteColor,
@@ -336,7 +336,7 @@ _graphVisualScreen3(BuildContext context, {required String text}){
     },
     child: Container(
         height: containerLength.height*0.63,
-        width: Get.width*0.9,
+        width: Get.width*0.8,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
           color: whiteColor,

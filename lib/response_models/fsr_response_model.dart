@@ -1,83 +1,65 @@
 class FsrResponseModel {
-  int? id;
-  List<Categories>? categories;
-  String? fsrName;
-  int? createdBy;
-  int? admin;
+  final int id;
+  final List<Category> categories;
+  final String fsrName;
+  final int createdBy;
+  final int admin;
 
-  FsrResponseModel(
-      {this.id, this.categories, this.fsrName, this.createdBy, this.admin});
+  FsrResponseModel({
+    required this.id,
+    required this.categories,
+    required this.fsrName,
+    required this.createdBy,
+    required this.admin,
+  });
 
-  FsrResponseModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    if (json['categories'] != null) {
-      categories = <Categories>[];
-      json['categories'].forEach((v) {
-        categories!.add(new Categories.fromJson(v));
-      });
-    }
-    fsrName = json['fsrName'];
-    createdBy = json['created_by'];
-    admin = json['admin'];
+  factory FsrResponseModel.fromJson(Map<String, dynamic> json) {
+    return FsrResponseModel(
+      id: json['id'],
+      categories: List<Category>.from(
+        json['categories'].map((category) => Category.fromJson(category)),
+      ),
+      fsrName: json['fsrName'],
+      createdBy: json['created_by'],
+      admin: json['admin'],
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    if (this.categories != null) {
-      data['categories'] = this.categories!.map((v) => v.toJson()).toList();
-    }
-    data['fsrName'] = this.fsrName;
-    data['created_by'] = this.createdBy;
-    data['admin'] = this.admin;
-    return data;
+    return {
+      'id': id,
+      'categories': List<dynamic>.from(categories.map((category) => category.toJson())),
+      'fsrName': fsrName,
+      'created_by': createdBy,
+      'admin': admin,
+    };
   }
 }
 
-class Categories {
-  int? id;
-  String? name;
-  List<Checkpoints>? checkpoints;
+class Category {
+  final int id;
+  final String name;
+  final List<dynamic> checkpoints;
 
-  Categories({this.id, this.name, this.checkpoints});
+  Category({
+    required this.id,
+    required this.name,
+    required this.checkpoints,
+  });
 
-  Categories.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    if (json['checkpoints'] != null) {
-      checkpoints = <Checkpoints>[];
-      json['checkpoints'].forEach((v) {
-        checkpoints!.add(new Checkpoints.fromJson(v));
-      });
-    }
+  factory Category.fromJson(Map<String, dynamic> json) {
+    return Category(
+      id: json['id'],
+      name: json['name'],
+      checkpoints: List<dynamic>.from(json['checkpoints']),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
-    if (this.checkpoints != null) {
-      data['checkpoints'] = this.checkpoints!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
-
-class Checkpoints {
-  int? id;
-  String? checkpointName;
-
-  Checkpoints({this.id, this.checkpointName});
-
-  Checkpoints.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    checkpointName = json['checkpoint_name'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['checkpoint_name'] = this.checkpointName;
-    return data;
+    return {
+      'id': id,
+      'name': name,
+      'checkpoints': List<dynamic>.from(checkpoints),
+    };
   }
 }
