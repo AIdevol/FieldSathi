@@ -32,3 +32,6 @@ const String exportIcon = "assets/export.png";
 const String forgotIcon = 'assets/forgot-password.png' ;
 const String otpicon = 'assets/one-time-password.png';
 const String resetIcon = 'assets/reset-password.png';
+const String userImageIcon ='assets/avatar_loader.png';
+const String SvgImagepricePlans = 'assets/icons/pricing-workspace.svg';
+const String wrongRoundedImage = 'assets/incorrect.png';

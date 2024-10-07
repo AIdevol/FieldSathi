@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
@@ -48,6 +49,17 @@ class _DrawerScreenState extends State<DrawerScreen>{
           title: "Dashboard",
           onTap: () {
             Get.back();
+          },
+        ),
+        divider(),
+        menuTile(
+        icon: Icons.price_change_rounded,
+          title: "Pricing Plans",
+          onTap: () async {
+            // customLoader.show();
+            // await Future.delayed(Duration(seconds: 1));
+            // Get.toNamed(AppRoutes.calendarScreen);
+            // customLoader.hide();
           },
         ),
         divider(),
@@ -120,7 +132,7 @@ class _DrawerScreenState extends State<DrawerScreen>{
         // )
       ],),);
   }
-  Widget menuTile({required IconData icon, required String title, required VoidCallback onTap}) {
+  Widget menuTile({ Widget? iconWidget, IconData? icon, required String title, required VoidCallback onTap,}) {
     return InkWell(
       onTap: onTap,
       child: Padding(

@@ -34,5 +34,5 @@ abstract class AuthenticationApi {
   Future<CheckPointsResponseModel>postcheckPointStatusDetailsApiCall({Map<String, dynamic>? dataBody,});
   Future<List<LeaveAllocationResponseModel>>getLeavesALLocationApiCall({Map<String, dynamic>? dataBody,});
   Future<LeaveAllocationResponseModel>putLeavesAllocationApiCall({Map<String, dynamic>? dataBody,id});
-  Future<AmcResponseModel>getAmcDetailsApiCall({Map<String, dynamic>? dataBody});
+  Future<SuperUsersResponseModel>getAgentDetailsApiCall({Map<String, dynamic>? dataBody,parameters} );
 }

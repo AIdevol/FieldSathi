@@ -264,10 +264,33 @@ implements AuthenticationApi{
   }
 
   @override
-  Future<AmcResponseModel>getAmcDetailsApiCall({Map<String, dynamic>? dataBody})async{
+  Future<List<AmcResponseModel>>getAmcDetailsApiCall({Map<String, dynamic>? dataBody})async{
     try{
       final response = await dioClient!.get("${ApiEnd.amcEnd}", data: dataBody,skipAuth: false);
-      return AmcResponseModel.fromJson(response);
+      if(response is List){
+        return response.map((item)=> AmcResponseModel.fromJson(item)).toList();
+      }else if (response is Map<String, dynamic>&& response.containsKey('data')){
+        final List<dynamic>data = response['data'];
+        return data.map((item)=> AmcResponseModel.fromJson(item)).toList();
+      }
+      return [];
+    }catch(e){
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+  // ==============================================================Agents details=============================================================================
+  @override
+  Future<SuperUsersResponseModel>getAgentDetailsApiCall({Map<String, dynamic>? dataBody,parameters} )async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.tmsUsersEnd}", data: dataBody,skipAuth: false, queryParameters: parameters);
+      return SuperUsersResponseModel.fromJson(response);
+      // if(response is List){
+      //   return response.map((item)=> SuperUsersResponseModel.fromJson(item)).toList();
+      // }else if (response is Map<String, dynamic>&& response.containsKey('data')){
+      //   final List<dynamic>data = response['data'];
+      //   return data.map((item)=> SuperUsersResponseModel.fromJson(item)).toList();
+      // }
+      // return [];
     }catch(e){
       return Future.error(NetworkExceptions.getDioException(e));
     }

@@ -21,43 +21,55 @@ class AMCViewScreen extends GetView<AMCScreenController> {
   @override
   Widget build(BuildContext context) {
     return MyAnnotatedRegion(
-      child: SafeArea(
-        child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: appColor,
-            title: Text(
-              'AMC',
-              style: MontserratStyles.montserratBoldTextStyle(
-                color: blackColor,
-                size: 15,
+        child: GetBuilder<AMCScreenController>(builder: (controller) =>
+            SafeArea(
+              child: Scaffold(
+                appBar: AppBar(
+                  backgroundColor: appColor,
+                  title: Text(
+                    'AMC',
+                    style: MontserratStyles.montserratBoldTextStyle(
+                      color: blackColor,
+                      size: 15,
+                    ),
+                  ),
+                  actions: [
+                    IconButton(
+                      onPressed: () {
+                        Get.toNamed(AppRoutes.addAmcCallenderScreen);
+                      },
+                      icon: Icon(Icons.calendar_month),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Get.toNamed(AppRoutes.createamcScreen);
+                      },
+                      icon: Icon(FeatherIcons.plus),
+                    ).paddingSymmetric(horizontal: 20.0),
+                  ],
+                ),
+                body: Column(
+                  children: [
+                    _buildTopBar(),
+                    vGap(10),
+                    _mainData(),
+                    vGap(10),
+                    _dataTableViewScreen(),
+                  ],
+                )
+               /* controller.isLoading.value
+                    ? Center(child: CircularProgressIndicator(),)
+                    : Column(
+                  children: [
+                    _buildTopBar(),
+                    vGap(10),
+                    _mainData(),
+                    vGap(10),
+                    _dataTableViewScreen(),
+                  ],
+                ),*/
               ),
-            ),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  Get.toNamed(AppRoutes.addAmcCallenderScreen);
-                },
-                icon: Icon(Icons.calendar_month),
-              ),
-              IconButton(
-                onPressed: () {
-                  Get.toNamed(AppRoutes.createamcScreen);
-                },
-                icon: Icon(FeatherIcons.plus),
-              ).paddingSymmetric(horizontal: 20.0),
-            ],
-          ),
-          body: Column(
-            children: [
-              _buildTopBar(),
-              vGap(10),
-              _mainData(),
-              vGap(10),
-              // Expanded(child: _buildTicketTable()),
-            ],
-          ),
-        ),
-      ),
+            ),)
     );
   }
 
@@ -76,6 +88,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
             _totalRenewalWidget(),
             hGap(20),
             _totalCompletedWidget(),
+
           ],
         ),
       ),
@@ -131,7 +144,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
               style: MontserratStyles.montserratBoldTextStyle(size: 18),
             ),
             vGap(20),
-          Text(
+            Text(
               '0',
               // controller.totalAmc.value.toString(),
               style: MontserratStyles.montserratBoldTextStyle(size: 18),
@@ -159,7 +172,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
               style: MontserratStyles.montserratBoldTextStyle(size: 18),
             ),
             vGap(20),
-           Text(
+            Text(
               '0',
               // controller.totalUpcoming.value.toString(),
               style: MontserratStyles.montserratBoldTextStyle(size: 18),
@@ -215,7 +228,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
               style: MontserratStyles.montserratBoldTextStyle(size: 18),
             ),
             vGap(20),
-             Text(
+            Text(
               '0',
               // controller.totalCompleted.value.toString(),
               style: MontserratStyles.montserratBoldTextStyle(size: 18),
@@ -304,7 +317,8 @@ class AMCViewScreen extends GetView<AMCScreenController> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
-                  FilePickerResult? result = await FilePicker.platform.pickFiles();
+                  FilePickerResult? result = await FilePicker.platform
+                      .pickFiles();
                   if (result != null) {
                     String fileName = result.files.single.name;
                     // controller.importFile(result); // Handle the file in controller
@@ -326,128 +340,115 @@ class AMCViewScreen extends GetView<AMCScreenController> {
     );
   }
 
- /* Widget _buildTicketTable() {
-    return Obx(() {
-      if (controller.amcData.isEmpty) {
-        return Center(child: Text('No AMC data found'));
-      }
+  _dataTableViewScreen() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Obx(() =>
+          DataTable(columns: [
+            DataColumn(label: Text('AMC ID/Name')),
+            DataColumn(label: Text('Date')),
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Customer Name')),
+            DataColumn(label: Text('Services')),
+            DataColumn(label: Text('Service Amount')),
+            DataColumn(label: Text('Service Occurrence')),
+            DataColumn(label: Text('Remaining Amount')),
+            DataColumn(label: Text('Remainder')),
+            DataColumn(label: Text('Status')),
+            DataColumn(label: Text(' ')),
+            DataColumn(label: Text(' ')),
+            DataColumn(label: Text(' ')),
+          ], rows: controller.amcData.map((amc) {
+            return DataRow(cells: [
+              DataCell(Text(amc.id.toString())),
+              DataCell(Text(amc.activationDate ?? 'N/A')),
+              DataCell(Text(amc.amcName ?? 'N/A')),
+              DataCell(Text(amc.customer!.customerName ?? 'N/A')),
+              DataCell(Text('${amc.serviceCompleted ?? 'N/A'}'+'${'/'}'+'${amc.createdBy ?? 'N/A'}')),
+              DataCell(Text(amc.serviceAmount.toString())),
+              DataCell(Text(amc.selectServiceOccurrence ?? 'N/A')),
+              DataCell(Text(amc.remainingAmount.toString())),
+              DataCell(Text(amc.remainder ?? 'N/A')),
+              DataCell(Text(amc.status ?? 'N/A')),
+              DataCell( _dropDownValueViews(controller)
+                  /*IconButton(onPressed: () {_dropDownValueViews(controller);}, icon: Icon(Icons.more_vert))*/),
+              DataCell(_viewDetailsButton(controller)),
+              DataCell(_addTicketViewButton(controller)),
+            ]);
+          }).toList())),
+    );
+  }
 
-      // Define columns
-      List<PlutoColumn> columns = [
-        PlutoColumn(
-          title: 'Name',
-          field: 'name',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Date',
-          field: 'date',
-          type: PlutoColumnType.date(),
-          // You can add a date format if needed
-        ),
-        PlutoColumn(
-          title: 'Customer Name',
-          field: 'customerName',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Services',
-          field: 'services',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Service Amount',
-          field: 'serviceAmount',
-          type: PlutoColumnType.number(),
-        ),
-        PlutoColumn(
-          title: 'Service Occurrence',
-          field: 'serviceOccurrence',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Remaining Amount',
-          field: 'remainingAmount',
-          type: PlutoColumnType.number(),
-        ),
-        PlutoColumn(
-          title: 'Remainder',
-          field: 'remainder',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Status',
-          field: 'status',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Actions',
-          field: 'actions',
-          type: PlutoColumnType.text(),
-          renderer: (rendererContext) {
-            return Center(
-              child: PopupMenuButton<String>(
-                color: CupertinoColors.white,
-                offset: Offset(0, 56),
-                onSelected: (value) {
-                  if (value == 'Edit') {
-                    // controller.editAmc(rendererContext.row);
-                  } else if (value == 'Delete') {
-                    // controller.deleteAmc(rendererContext.row);
-                  }
-                },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  PopupMenuItem<String>(
-                    value: 'Edit',
-                    child: ListTile(
-                      leading: Icon(Icons.edit_calendar_outlined, size: 20, color: Colors.black),
-                      title: Text('Edit'),
-                    ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'Delete',
-                    child: ListTile(
-                      leading: Icon(Icons.delete, size: 20, color: Colors.red),
-                      title: Text('Delete'),
-                    ),
-                  ),
-                ],
-                child: Icon(Icons.more_horiz, size: 20),
-              ),
-            );
-          },
-        ),
-      ];
 
-      // Define rows
-      List<PlutoRow> rows = controller.amcData.map((amc) {
-        return PlutoRow(cells: {
-          'name': PlutoCell(value: amc.amcName ?? 'NA'),
-          'date': PlutoCell(value: amc.activationDate != null ? amc.activationDate!.toString() : 'NA'),
-          'customerName': PlutoCell(value: amc.customer ?? 'NA'),
-          'services': PlutoCell(value: amc.selectServiceOccurrence ?? 'NA'),
-          'serviceAmount': PlutoCell(value: amc.serviceAmount ?? 0),
-          'serviceOccurrence': PlutoCell(value: amc.selectServiceOccurrence ?? 'NA'),
-          'remainingAmount': PlutoCell(value: amc.remainingAmount ?? 0),
-          'remainder': PlutoCell(value: amc.remainder ?? 'NA'),
-          'status': PlutoCell(value: amc.status ?? 'NA'),
-          'actions': PlutoCell(value: ''),
-        });
-      }).toList();
+  _viewDetailsButton(AMCScreenController controller) {
+    return ElevatedButton(onPressed: () {},
+        style: ElevatedButton.styleFrom(
+          backgroundColor: appColor,
+          minimumSize: Size(130, 40),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: Text("View Details",style: MontserratStyles.montserratBoldTextStyle(
+    color: whiteColor,
+    size: 13,)));
+  }
 
-      return PlutoGrid(
-        columns: columns,
-        rows: rows,
-        onLoaded: (PlutoGridOnLoadedEvent event) {
-          event.stateManager.setShowColumnFilter(true); // Enables column filtering
+  _addTicketViewButton(AMCScreenController controller) {
+    return ElevatedButton(onPressed: () {},
+        style: ElevatedButton.styleFrom(
+          backgroundColor: appColor,
+          minimumSize: Size(130, 40),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: Text("Add Ticket",style: MontserratStyles.montserratBoldTextStyle(
+    color: whiteColor,
+    size: 13,)));
+  }
+}
+
+_dropDownValueViews(AMCScreenController controller){
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child:  PopupMenuButton<String>(
+        icon: Icon(Icons.more_vert),
+        onSelected: (String result) {
+          switch (result) {
+            case 'Edit':
+            // Handle edit action
+              print('Edit selected');
+              break;
+            case 'Delete':
+            // Handle delete action
+              print('Delete selected');
+              break;
+          }
         },
-        onChanged: (PlutoGridOnChangedEvent event) {
-          print('Cell value changed: ${event.value}');
-        },
-        configuration: PlutoGridConfiguration(
-          enableMoveHorizontalInEditing: true,
-        ),
-      );
-    });
-  }*/
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+           PopupMenuItem<String>(
+            value: 'Edit',
+            child: ListTile(
+              leading: Icon(Icons.edit_calendar_outlined, size: 20, color: Colors.black),
+              title: Text('Edit',style: MontserratStyles.montserratBoldTextStyle(
+                color: blackColor,
+                size: 13,)),
+            ),
+          ),
+           PopupMenuItem<String>(
+            value: 'Delete',
+            child: ListTile(
+              leading: Icon(Icons.delete, size: 20, color: Colors.red),
+              title: Text('Delete',style: MontserratStyles.montserratBoldTextStyle(
+                color: blackColor,
+                size: 13,),
+            ),
+          ),
+           ),
+        ],
+      ),
+    ),
+  );
 }

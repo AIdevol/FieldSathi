@@ -119,7 +119,8 @@ class HomeScreen extends GetView<HomeScreenController> {
   }
 
   _buildWidgetView(BuildContext context){
-    return  Padding(
+    return
+      Padding(
       padding: const EdgeInsets.all(12.0),
       child: ListView(
         children: [
