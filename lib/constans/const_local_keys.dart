@@ -11,6 +11,10 @@ const String latitudeRealTime = 'latitude';
 const String FsrId = 'fsr_id';
 const String leavesAllocationId = 'leaveAllocationId';
 const String leavesId = 'leavesId';
+const String agentId = 'agentId';
+const String customerId = 'customerId';
+const String serviceCategoriesId = 'serviceCategoriesId';
+const String subServiceCategoriesId = 'subServiceCategoriesId';
 
 // RememberMeModal? getRememberMe() {
 //   String? email = storage.read(emailKey);

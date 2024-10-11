@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
@@ -141,16 +142,40 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
           children: [
             GestureDetector(
               onTap: () => _showImagePickerOptions(Get.context!),
-              child: CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.grey[200],
-                child: ClipOval(
-                  child: SizedBox(
-                    width: 120,
-                    height: 120,
-                    child: imageWidget,
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundColor: Colors.grey[200],
+                    child: ClipOval(
+                      child: SizedBox(
+                        width: 120,
+                        height: 120,
+                        child: imageWidget,
+                      ),
+                    ),
                   ),
-                ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemGrey4,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.transparent,
+                          width: 2,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.edit,
+                        color: Colors.black,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             if (controller.isLoading.value)

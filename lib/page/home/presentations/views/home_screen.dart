@@ -88,8 +88,9 @@ class HomeScreen extends GetView<HomeScreenController> {
                   PopupMenuItem<String>(
                     value: 'logout',
                     onTap: ()async{
-                      final controller = Get.put(ProfileViewScreenController());
-                      controller.logout();
+                      _loginShowPopUpView(controller, context);
+                      // final controller = Get.put(ProfileViewScreenController());
+                      // controller.logout();
                     },
                     child: ListTile(
                       leading: Icon(Icons.exit_to_app),
@@ -148,7 +149,7 @@ class HomeScreen extends GetView<HomeScreenController> {
       backgroundColor: appColor,
       foregroundColor: Colors.black,
       elevation: 8.0,
-      shape: RoundedRectangleBorder(
+      shape:  RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18.0),
       ),
       children: [
@@ -408,4 +409,54 @@ ImageProvider _getBackgroundImage(String? imageUrl) {
   } else {
     return NetworkImage("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png");
   }
+}
+
+_loginShowPopUpView(HomeScreenController controller,BuildContext context){
+  final GlobalKey<State> alertKey = GlobalKey();
+  final Controller = Get.put(ProfileViewScreenController());
+  // controller.logout();
+  return showDialog(context: context, builder: (controller)=>AlertDialog(
+    key: alertKey,
+    backgroundColor: CupertinoColors.white,
+    title: Text('Logout', style: MontserratStyles.montserratBoldTextStyle(size: 25, color: blackColor),),
+    content: Text("Are you sure want to Logout", style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: Colors.black),),
+    actions: [
+      ElevatedButton(
+        onPressed: () {
+          Get.back();
+        },
+        child: Text('Cancel',style: MontserratStyles.montserratBoldTextStyle(color: Colors.white, size: 13),),
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(appColor),
+          foregroundColor: WidgetStateProperty.all(Colors.white),
+          padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
+          elevation: WidgetStateProperty.all(5),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: BorderSide(strokeAlign: BorderSide.strokeAlignCenter)
+            ),
+          ),
+          shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.5)), // Shadow color
+        ),
+      ),
+      hGap(20),
+      ElevatedButton(
+        onPressed: () =>Controller.logout(),
+        child: Text('Logout',style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),),
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(appColor),
+          foregroundColor: WidgetStateProperty.all(Colors.white),
+          padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
+          elevation: WidgetStateProperty.all(5),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.5)), // Shadow color
+        ),
+      )
+    ],
+  ));
 }

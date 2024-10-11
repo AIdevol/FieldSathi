@@ -44,6 +44,8 @@ class ProfileViewScreenController extends GetxController {
   final RxBool isLoading = false.obs;
 
   Timer? _timer;
+  File? selectedImage ;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void onInit() {
@@ -138,7 +140,11 @@ class ProfileViewScreenController extends GetxController {
       update();
     }
   }
-
+// Future<void> hitUserUpdateProfileImage()async {
+//     customLoader.show();
+//     FocusManager.instance.primaryFocus!.context;
+//     Get.find<AuthenticationApiService>().userProfileImageUpdateApiCall().then((value){}).onError((error, stackError){});
+// }
   void hituserDetailsApiCall() {
     final id = storage.read(userId);
     isLoading.value = true;
@@ -192,11 +198,10 @@ class ProfileViewScreenController extends GetxController {
   }
 
   Future<void> logout() async {
-
     if (isLoggedOut.value) return;
-
     isLoggedOut.value = true;
     _timer?.cancel();
+    FocusManager.instance.primaryFocus!.context;
     try {
       await Future.wait([
         storage.remove(LOCALKEY_token),
@@ -205,10 +210,11 @@ class ProfileViewScreenController extends GetxController {
         storage.remove('isLoggedIn'),
         storage.remove('isVerified'),
       ]);
+      toast('logout successfully');
       Get.offAllNamed(AppRoutes.login);
+      update();
     } catch (e) {
       customLoader.hide();
-      print("Error during logout: $e");
       isLoggedOut.value = false; // Reset the flag if logout fails
     }
   }
@@ -216,31 +222,56 @@ class ProfileViewScreenController extends GetxController {
 
   Future<void> getImage(ImageSource source) async {
     final PermissionStatus status = await _requestPermission(source);
-
-    if (status.isGranted) {
+    if(status.isGranted){
       try {
-        final ImagePicker picker = ImagePicker();
-        final XFile? image = await picker.pickImage(source: source);
-
+        final XFile? image = await _picker.pickImage(
+            source: ImageSource.gallery);
         if (image != null) {
-          profileImage.value = File(image.path);
-          await uploadProfileImage(profileImage.value!);
+          selectedImage = File(image.path);
+          print("adfkladjfadjfkladjfklajsdfkladjsfajdsf>>>: $selectedImage");
+          update();
         }
-      } catch (e) {
-        print('Error picking image: $e');
-        Get.snackbar('Error', 'Failed to pick image. Please try again.',
-            snackPosition: SnackPosition.BOTTOM);
+      }catch (e){
+        toast('Failed to pick image. Please try again.');
+      };
+    }else if(status.isPermanentlyDenied){
+        toast( 'Permission Permanently Denied',);
       }
-    } else if (status.isPermanentlyDenied) {
-      Get.snackbar(
-        'Permission Permanently Denied',
-        'Please enable ${source == ImageSource.camera ? 'camera' : 'storage'} permission from app settings.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      await openAppSettings();
     }
-  }
+    // final PermissionStatus status = await _requestPermission(source);
+    //
+    // if (status.isGranted) {
+    //   try {
+    //     final ImagePicker picker = ImagePicker();
+    //     final XFile? image = await picker.pickImage(source: source);
+    //
+    //     if (image != null) {
+    //       profileImage.value = File(image.path);
+    //       await uploadProfileImage(profileImage.value!);
+    //     }
+    //   } catch (e) {
+    //     print('Error picking image: $e');
+    //     Get.snackbar('Error', 'Failed to pick image. Please try again.',
+    //         snackPosition: SnackPosition.BOTTOM);
+    //   }
+    // } else if (status.isPermanentlyDenied) {
+    //   Get.snackbar(
+    //     'Permission Permanently Denied',
+    //     'Please enable ${source == ImageSource.camera ? 'camera' : 'storage'} permission from app settings.',
+    //     snackPosition: SnackPosition.BOTTOM,
+    //   );
+    //   await openAppSettings();
+    // }
 
+  }
+  // Future<void> selectImage() async {
+  //   final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+  //   if (image != null) {
+  //     selectedImage = File(image.path);
+  //     print("adfkladjfadjfkladjfklajsdfkladjsfajdsf>>>: $selectedImage");
+  //     update();
+  //   }
+  // }
   Future<PermissionStatus> _requestPermission(ImageSource source) async {
     if (source == ImageSource.camera) {
       return await Permission.camera.request();
@@ -262,4 +293,3 @@ class ProfileViewScreenController extends GetxController {
     }
     return false;
   }
-}

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
+import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/super_view_screen_controller.dart';
 
 import '../../../../constans/color_constants.dart';
@@ -17,7 +18,9 @@ class SuperViewScreen extends GetView<SuperViewScreenController>{
         title: Text("Super User", style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),),
         backgroundColor: appColor,
         actions: [IconButton(onPressed: (){}, icon: Icon(FeatherIcons.search)),
-          IconButton(onPressed: (){}, icon: Icon(FeatherIcons.plus))],
+          IconButton(onPressed: (){
+            Get.toNamed(AppRoutes.addSuperuserViewScreen);
+          }, icon: Icon(FeatherIcons.plus))],
       ),
       body: Column(
         children: [

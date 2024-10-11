@@ -9,6 +9,7 @@ import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 import 'package:tms_sathi/utilities/cherry_toast_message_method.dart';
 
 import '../../../../constans/color_constants.dart';
+import '../../../../constans/const_local_keys.dart';
 import '../../../../navigations/navigation.dart';
 import '../../../../utilities/helper_widget.dart';
 import '../views/otp_view_screen.dart';
@@ -37,6 +38,7 @@ class LoginScreenController extends GetxController{
      toast('Please enter email or phone');
      return;
    }
+   storage.write(emailKey, emailcontroller.text);
   customLoader.show();
   FocusManager.instance.primaryFocus!.unfocus();
   var loginReq = {

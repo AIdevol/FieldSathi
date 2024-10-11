@@ -34,6 +34,8 @@ abstract class AppRoutes {
   static const ticketListCreationScreen = '/ticketListCreationScreen';
   static const leaveUpdateScreen= '/leaveUpdateScreen';
   static const addAmcCallenderScreen = '/addAmcCallenderScreen';
+  static const pricingScreenView = '/pricingScreenView';
+  static const addSuperuserViewScreen = '/addSuperuserViewScreen';
 }
 
 class RoutesArgument {

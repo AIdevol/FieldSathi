@@ -9,7 +9,7 @@ import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 import 'package:tms_sathi/utilities/custom_dialogue.dart';
 
 class HomeScreenController extends GetxController{
-  final RxString profileImageUrl = RxString('');
+  final RxString profileImageUrl = ''.obs;
 
   @override
   void onInit(){
@@ -39,8 +39,10 @@ class HomeScreenController extends GetxController{
   }
   void hitGetuserDetailsApiCall(){
     final userid = storage.read(userId);
+    print("userId++++: $userid");
     customLoader.show();
     FocusManager.instance.primaryFocus!.context;
+
     Get.find<AuthenticationApiService>().userDetailsApiCall(id: userid).then((value){
       var userData = value;
       customLoader.hide();

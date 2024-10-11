@@ -9,26 +9,30 @@ import 'package:tms_sathi/utilities/helper_widget.dart';
 
 import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
+import '../controller/add_agents_controller.dart';
 
-class AgentsListCreation extends GetView<AgentsViewScreenController> {
+class AgentsListCreation extends GetView<AgentsListController> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, size: 25, color: Colors.black,),
-            onPressed: () {
-              Get.back();
-            },),
-          backgroundColor: appColor,
-          middle: Text('Add Agent'),
-        ),
-        child: _form(context)
-    );
+    return MyAnnotatedRegion(child: GetBuilder<AgentsListController>(
+      init: AgentsListController(),
+        builder: (controller)=>
+        CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, size: 25, color: Colors.black,),
+                onPressed: () {
+                  Get.back();
+                },),
+              backgroundColor: appColor,
+              middle: Text('Add Agent'),
+            ),
+            child: _form(controller, context)
+        )));
   }
 }
-_form(BuildContext context) {
+_form(AgentsListController controller, BuildContext context) {
   return Container(
     height: Get.height,
     width: Get.width,
@@ -36,15 +40,15 @@ _form(BuildContext context) {
     child: Padding(
       padding: const EdgeInsets.all(18.0),
       child: ListView(children: [
-        _buildTaskName(context: context),
+        _buildTaskName(controller: controller, context: context),
         vGap(20),
-        _buildLastName(context: context),
+        _buildLastName(controller: controller,context: context),
         vGap(20),
-        _addTechnician(context: context),
+        _addTechnician(controller: controller,context: context),
         vGap(20),
-        _phoneNumber(context: context),
+        _phoneNumber(controller: controller,context: context),
         vGap(40),
-        _buildOptionbutton(context: context),
+        _buildOptionbutton(controller: controller ,context: context),
 
       ],),
     ),
@@ -52,12 +56,12 @@ _form(BuildContext context) {
   );
 }
 
-_buildTaskName({required BuildContext context}){
+_buildTaskName({required AgentsListController controller, required BuildContext context}){
   return CustomTextField(
     hintText: "First Name".tr,
-    // controller: controller.emailcontroller,
+    controller: controller.firstNameController,
     textInputType: TextInputType.text,
-    // focusNode: controller.phoneFocusNode,
+    focusNode: controller.lastNameFocusNode,
     onFieldSubmitted: (String? value) {
       // FocusScope.of(Get.context!)
       //     .requestFocus(controller.passwordFocusNode);
@@ -73,12 +77,12 @@ _buildTaskName({required BuildContext context}){
   );
 
 }
-_buildLastName({required BuildContext context}){
+_buildLastName({required AgentsListController controller,required BuildContext context}){
   return CustomTextField(
     hintText: "last Name".tr,
-    // controller: controller.emailcontroller,
+    controller: controller.lastNameController,
     textInputType: TextInputType.text,
-    // focusNode: controller.phoneFocusNode,
+    focusNode: controller.emailFocusnode,
     onFieldSubmitted: (String? value) {
       // FocusScope.of(Get.context!)
       //     .requestFocus(controller.passwordFocusNode);
@@ -95,12 +99,12 @@ _buildLastName({required BuildContext context}){
 
 }
 
-_addTechnician({required BuildContext context}){
+_addTechnician({required AgentsListController controller,required BuildContext context}){
   return CustomTextField(
     hintText: "Email".tr,
-    // controller: controller.emailcontroller,
+    controller: controller.emailController,
     textInputType: TextInputType.emailAddress,
-    // focusNode: controller.phoneFocusNode,
+    focusNode: controller.phoneFocusNode,
     onFieldSubmitted: (String? value) {
       // FocusScope.of(Get.context!)
       //     .requestFocus(controller.passwordFocusNode);
@@ -118,12 +122,12 @@ _addTechnician({required BuildContext context}){
 
 }
 
-_phoneNumber({required BuildContext context}){
+_phoneNumber({required AgentsListController controller,required BuildContext context}){
   return CustomTextField(
     hintText: "Phone Number".tr,
-    // controller: controller.emailcontroller,
+    controller:controller.phoneController,
     textInputType: TextInputType.phone,
-    // focusNode: controller.phoneFocusNode,
+    focusNode: controller.firstNameFocusNode,
     onFieldSubmitted: (String? value) {
       // FocusScope.of(Get.context!)
       //     .requestFocus(controller.passwordFocusNode);
@@ -141,13 +145,12 @@ _phoneNumber({required BuildContext context}){
 
 }
 
-_buildOptionbutton({required BuildContext context}){
+_buildOptionbutton({required AgentsListController controller,required BuildContext context}){
   return  Row(
     mainAxisAlignment: MainAxisAlignment.end,
     children: [
       ElevatedButton(
-        onPressed: () {},
-        child: Text('Cancel',style: MontserratStyles.montserratBoldTextStyle(color: Colors.white, size: 13),),
+        onPressed: () => Get.back(),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(appColor),
           foregroundColor: WidgetStateProperty.all(Colors.white),
@@ -160,10 +163,11 @@ _buildOptionbutton({required BuildContext context}){
           ),
           shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.5)), // Shadow color
         ),
+        child: Text('Cancel',style: MontserratStyles.montserratBoldTextStyle(color: Colors.white, size: 13),),
       ),
       hGap(20),
       ElevatedButton(
-        onPressed: () {},
+        onPressed: () =>controller.hitPostAgentsDetailsApiCall(),
         child: Text('Okay',style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),),
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(appColor),

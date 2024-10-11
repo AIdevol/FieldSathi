@@ -25,6 +25,7 @@ class SplashController extends GetxController {
       Get.offAndToNamed(AppRoutes.login);
     } else {
       Get.offAndToNamed(AppRoutes.login);
+      print("akdfjlakdjfalkdfjj tum per ho bhai++==");
     }
-  });
+  } );
 }

@@ -17,4 +17,8 @@ class ApiEnd{
 /*=======================================*/
   static const String importTicketDataEnd = 'api/import-tickets/';
   static const String amcEnd = 'api/amcs/';
+  static const String leadEnd = 'api/leads/';
+  static const String serviceEnd = 'api/services/';
+  static const String serviceCategories = 'api/service-categories/';
+  static const String serviceSubCategories = 'api/service-sub-categories/';
 }

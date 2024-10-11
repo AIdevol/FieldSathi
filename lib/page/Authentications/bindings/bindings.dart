@@ -17,6 +17,7 @@ import 'package:tms_sathi/page/Authentications/presentations/controllers/technic
 import 'package:tms_sathi/page/Authentications/presentations/controllers/ticket_list_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/bindings/bindings.dart';
 import 'package:tms_sathi/page/home/notification_service/bindings/notification_view_screen.dart';
+import 'package:tms_sathi/page/plans/bindings/pricing_bindings.dart';
 import '../presentations/controllers/account_view_screen_controller.dart';
 import '../presentations/controllers/lead_list_view_controller.dart';
 import '../presentations/controllers/register_screen_controller.dart';
@@ -27,6 +28,7 @@ class AuthenticationBinding extends Bindings {
   void dependencies() {
     // TODO: implement dependencies
     Get.lazyPut<WidgetBindings>(()=> WidgetBindings());
+    Get.lazyPut<PricingBindings>(()=>PricingBindings());
     Get.lazyPut<NotificationBindings>(()=> NotificationBindings());
     Get.lazyPut<LoginScreenController>(()=> LoginScreenController());
     Get.lazyPut<RegisterScreenController>(() => RegisterScreenController());

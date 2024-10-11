@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 import '../../../../constans/color_constants.dart';
+import '../../../../constans/const_local_keys.dart';
 import '../../../../main.dart';
 import '../../../../services/APIs/auth_services/auth_api_services.dart';
 import '../../../../utilities/helper_widget.dart';
@@ -41,6 +42,8 @@ class RegisterScreenController extends GetxController{
       toast('Please enter email or phone');
       return;
     }
+    storage.write(emailKey, emailController.text);
+    print("emailKey: ${emailController.text}");
     customLoader.show();
     FocusManager.instance.primaryFocus!.unfocus();
     var loginReq = {
@@ -49,6 +52,7 @@ class RegisterScreenController extends GetxController{
       "companyName": companyNameController.text,
       "employees":employeesController.text,
       "country":countryController.text
+
     };
     Get.find<AuthenticationApiService>().registerApiCall(dataBody: loginReq ).then((value)async {
       toast("your otp: ${value.otp}");

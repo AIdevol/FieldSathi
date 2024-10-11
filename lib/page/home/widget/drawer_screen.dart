@@ -56,10 +56,7 @@ class _DrawerScreenState extends State<DrawerScreen>{
         icon: Icons.price_change_rounded,
           title: "Pricing Plans",
           onTap: () async {
-            // customLoader.show();
-            // await Future.delayed(Duration(seconds: 1));
-            // Get.toNamed(AppRoutes.calendarScreen);
-            // customLoader.hide();
+            Get.toNamed(AppRoutes.pricingScreenView);
           },
         ),
         divider(),
