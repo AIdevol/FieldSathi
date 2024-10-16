@@ -33,8 +33,9 @@ class SuperViewScreenController extends GetxController{
       "role": "superuser"
     };
     Get.find<AuthenticationApiService>().getSuperUserApiCall(parameters: dataParameters).then((value){
-    var superData = value;
-    print("sueruser = $superData");
+     filteredData.assignAll(value.results);
+    List<String> managerIds= filteredData.map((manager)=>manager.id.toString()).toList();
+    print("sueruser = ${managerIds}");
     customLoader.hide();
     update();
     }).onError((error ,stackError){

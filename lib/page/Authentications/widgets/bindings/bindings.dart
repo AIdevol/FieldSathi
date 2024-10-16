@@ -7,6 +7,7 @@ import 'package:tms_sathi/page/Authentications/widgets/controller/add_technician
 import 'package:tms_sathi/page/Authentications/widgets/controller/calender_view_amc_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/lead_form_field_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/principal_customer_view_controller.dart';
+import 'package:tms_sathi/page/Authentications/widgets/controller/show_technician_data_controller.dart';
 
 import '../controller/ticket_list_creation_controller.dart';
 
@@ -22,5 +23,5 @@ class WidgetBindings extends Bindings{
     Get.lazyPut<TicketListCreationController>(() => TicketListCreationController());
     Get.lazyPut<AddAmcViewController>(() => AddAmcViewController());
     Get.lazyPut<AddSuperUserViewController>(() => AddSuperUserViewController());
-  }
+    Get.lazyPut<ShowTechnicianDataController>(() => ShowTechnicianDataController());  }
 }

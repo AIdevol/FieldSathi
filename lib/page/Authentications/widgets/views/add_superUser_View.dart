@@ -14,7 +14,7 @@ class AddSuperuserView extends GetView<AddSuperUserViewController>{
         init: AddSuperUserViewController(),
         builder: (controller)=>Scaffold(
           appBar: AppBar(backgroundColor: appColor,
-          title:  Text("Add SuperUser", style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),),),
+          title:  Text("Add Manager", style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),),),
         body: _mainScrenScreenFormManagingControllingWidget(controller, context),)
     ));
   }
@@ -48,44 +48,52 @@ _mainScrenScreenFormManagingControllingWidget(AddSuperUserViewController control
 
 _employeIdField(AddSuperUserViewController controller, BuildContext context){
   return CustomTextField(
+    controller: controller.employeeIdController,
     hintText: 'Employee Id',
     labletext: 'Employee Id',
     prefix: Icon(Icons.perm_identity),
-    // validator: ,
+    validator: (value){
+      if (value == null || value.isEmpty) {
+        return 'Please select a Employee Id';
+      };
+      return null;
+    },
   );
 }
 
-_joiningDateField(AddSuperUserViewController controller, BuildContext context){
+_joiningDateField(AddSuperUserViewController controller, BuildContext context) {
   return CustomTextField(
     controller: controller.joiningDateController,
     hintText: 'Joining date',
     labletext: 'Joining date',
-    validator: (value){
+    validator: (value) {
       if (value == null || value.isEmpty) {
-       return 'Please select a joining date';
-      };
+        return 'Please select a joining date';
+      }
       return null;
-      },
+    },
     suffix: IconButton(
-        onPressed: ()async{
-          final DateTime? picked = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime(2000),
-            lastDate: DateTime(2100),
-          );
-          if (picked != null) {
-            String formattedDate = "${picked.day}/${picked.month}/${picked.year}";
-            controller.joiningDateController.text = formattedDate;
-          }
-        }, icon: Icon(Icons.calendar_month_outlined
-      ),
+      onPressed: () async {
+        final DateTime? picked = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+        );
+        if (picked != null) {
+          String formattedDate = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";  /*YYYY-MM-D*/
+          controller.joiningDateController.text = formattedDate;
+        }
+      },
+      icon: Icon(Icons.calendar_month_outlined),
     ),
   );
 }
 
+
 _firstNameField(AddSuperUserViewController controller, BuildContext context){
   return CustomTextField(
+    controller: controller.firstNameController,
     hintText: 'First Name',
     labletext: 'First Name',
     // prefix: Icon(Icons.),
@@ -94,6 +102,7 @@ _firstNameField(AddSuperUserViewController controller, BuildContext context){
 
 _lastNameField(AddSuperUserViewController controller, BuildContext context){
   return CustomTextField(
+    controller: controller.lastNameController,
     hintText: 'Last Name',
     labletext: 'Last Name',
     // prefix: Icon(Icons.)
@@ -103,6 +112,7 @@ _lastNameField(AddSuperUserViewController controller, BuildContext context){
 
 _emailField(AddSuperUserViewController controller, BuildContext context){
   return CustomTextField(
+    controller: controller.emailController,
     hintText: 'Email',
     labletext: 'Email',
     prefix: Icon(Icons.email
@@ -112,8 +122,10 @@ _emailField(AddSuperUserViewController controller, BuildContext context){
 
 _phoneNumberField(AddSuperUserViewController controller, BuildContext context){
   return CustomTextField(
+    controller: controller.phoneController,
     hintText: 'Phone Number',
     labletext: 'Phone Number',
+    textInputType: TextInputType.phone,
     prefix: Icon(Icons.phone
     ),
   );
@@ -137,7 +149,7 @@ _buildOptionButtons(AddSuperUserViewController controller, BuildContext context)
       hGap(20),
       ElevatedButton(
         onPressed: () {
-          // controller.hitAddTechnicianApiCall();
+          controller.hitPostAddSupperApiCallApiCall();
         },
         child: Text(
           'Submit',

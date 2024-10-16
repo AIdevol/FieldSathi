@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -116,56 +117,74 @@ ButtonStyle _buttonStyle() {
 Widget _containerViewScreen(ExpenditureScreenController controller) {
   return Padding(
     padding: const EdgeInsets.all(8.0),
-    child: ListView.separated(
-      itemCount: 5,
-      separatorBuilder: (BuildContext context, int index) => SizedBox(height: 10),
-      itemBuilder: (context, index) => GestureDetector(
-        onTap: (){
-          _popUpScreenDetailsForAddingServiceScreen(controller);
-        },
-        child: Container(
-          height: Get.height * 0.1,
-          width: Get.width * 0.4,
-          decoration: BoxDecoration(color: whiteColor,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 1,
-                blurRadius: 5,
-                offset: Offset(0, 5),
-              ),
-            ],
-            border:Border.all(
-              width: 0.80,
-              color: Colors.black,
-            ),),
-          child: _listViewContainerElement(controller),
-        ),
-      ),
-    ),
+    child: Obx(()=>
+        ListView.separated(
+            itemCount: controller.results.length,
+            separatorBuilder: (BuildContext context, int index) => SizedBox(height: 10),
+            itemBuilder: (context, index){
+              var technician = controller.results[index];
+              return GestureDetector(
+                onTap: (){
+                  _popUpScreenDetailsForAddingServiceScreen(controller);
+                },
+                child: Container(
+                  height: Get.height * 0.1,
+                  width: Get.width * 0.4,
+                  decoration: BoxDecoration(color: whiteColor,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 1,
+                        blurRadius: 5,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
+                    border:Border.all(
+                      width: 0.80,
+                      color: Colors.black,
+                    ),),
+                  child: ListTile(
+                    title: Text('${technician.firstName} ${technician.lastName}'),
+                    subtitle: Text('${technician.role}'),
+                    leading: CircleAvatar(backgroundImage: AssetImage(userImageIcon)),
+                  )
+                ),
+              );
+
+            }
+        ),)
   );
 }
 
-_listViewContainerElement(ExpenditureScreenController controller){
-  return Row(children: [
-    Padding(
-      padding: const EdgeInsets.only( left: 10,right: 20),
-      child: CircleAvatar(radius: 40,
-          backgroundImage: AssetImage(userImageIcon,)),
-    ),
-    hGap(10),
-    Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(children: [
-        Text('Service Name', style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: blackColor),),
-        vGap(10),
-        Text('Sub-Service Name', style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: blackColor),),
-      ],),
-    )
-  ]);
-}
+_listViewContainerElement(ExpenditureScreenController controller, index){
+  final technicianData = controller.results[index];
+  return Obx((){
+    if(controller.isLoading.value){
+      return Center(child: CircularProgressIndicator(),);
+    }else if(controller.results.isEmpty){
+      return Center(child: Text("No Data Available"),);
+    }
+    return Row(
+        children: [
+      Padding(
+        padding: const EdgeInsets.only( left: 10,right: 20),
+        child: CircleAvatar(radius: 35,
+            backgroundImage: AssetImage(userImageIcon,)),
+      ),
+      hGap(10),
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(children: [
+          Text("${technicianData.firstName} ${technicianData.lastName}", style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: blackColor),),
+          vGap(10),
+          Text('${technicianData.role}', style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: blackColor),),
+        ],),
 
+      )
+    ]);
+  });
+}
 
 void _popUpScreenDetailsForAddingServiceScreen(ExpenditureScreenController controller) {
   Get.dialog(
@@ -173,104 +192,102 @@ void _popUpScreenDetailsForAddingServiceScreen(ExpenditureScreenController contr
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SingleChildScrollView(
         child: Container(
-          width: Get.width * 0.8,
+          width: Get.width * 0.8, // Ensures the dialog is responsive to screen size
           padding: EdgeInsets.all(24),
+          color: CupertinoColors.white,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Center(
-                child: Text(
-                  "Add Service Category",
-                  style: MontserratStyles.montserratBoldTextStyle(size: 24, color: blackColor),
-                ),
-              ),
-              SizedBox(height: 24),
-              Text(
-                "Category Name",
-                style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: "Enter category name",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-              ),
-              SizedBox(height: 24),
-              Text(
-                "Category Description",
-                style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                maxLines: 8,
-                decoration: InputDecoration(
-                  hintText: "Enter category description",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-              ),
-              SizedBox(height: 24),
-              Text(
-                "Category Icon",
-                style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
-              ),
-              SizedBox(height: 8),
+              // Header with Title and Download Button
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  InkWell(
-                    onTap: () {
-                      // Add icon selection logic here
-                    },
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(FontAwesomeIcons.upload, size: 32, color: appColor),
+                  Expanded(
+                    child: Text(
+                      "Expenditure",
+                      style: MontserratStyles.montserratBoldTextStyle(size: 24, color: blackColor),
+                      overflow: TextOverflow.ellipsis, // Prevent text overflow
                     ),
                   ),
-                  SizedBox(width: 16),
-                  Text(
-                    "Upload Image",
-                    style: MontserratStyles.montserratRegularTextStyle(size: 16, color: Colors.grey),
+                  IconButton(
+                    onPressed: () {
+                      // Add download logic here
+                    },
+                    icon: Icon(Icons.download, size: 24, color: Colors.black),
                   ),
                 ],
               ),
+              Divider(
+               color: Colors.grey,
+              ),
               SizedBox(height: 24),
+
+              // Horizontally Scrollable DataTable
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  columns: [
+                    DataColumn(label: Text('Expense ID	', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
+                    DataColumn(label: Text('Date', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
+                    DataColumn(label: Text('Expense Type', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
+                    DataColumn(label: Text('From', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
+                    DataColumn(label: Text('To', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
+                    DataColumn(label: Text('Amount', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
+                    DataColumn(label: Text('Approved Amount', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
+                    DataColumn(label: Text('Description', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
+                    DataColumn(label: Text('Status', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
+                    DataColumn(label: Text('Remark', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
+                    DataColumn(label: Text('Image', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
+
+                  ],
+                  rows: controller.expensesData.map((technician)=>DataRow(
+                    cells: [
+                      DataCell(Text('')),
+                      DataCell(Text('Category ')),
+                      DataCell(Text('Description for Category ')),
+                      DataCell(Text('Type ')),
+                      DataCell(Text('2024-10-')),
+                      DataCell(Text( 'Inactive')),
+                      DataCell(Text( 'Inactive')),
+                      DataCell(Text('Inactive')),
+                      DataCell(Text( 'Inactive')),
+                      DataCell(Text( 'Inactive')),
+                      DataCell(Text( 'Inactive')),
+                    ],
+                  ),).toList()
+                ),
+              ),
+              SizedBox(height: 24),
+
+              // Buttons for Cancel and Submit
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
-                    onPressed: () => Get.back(),
-                    child: Text(
-                      "Cancel",
-                      style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
+                  Flexible(
+                    child: TextButton(
+                      onPressed: () => Get.back(),
+                      child: Text(
+                        "Cancel",
+                        style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
+                      ),
                     ),
                   ),
                   SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Add save logic here
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: appColor,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    ),
-                    child: Text(
-                      "Submit",
-                      style: MontserratStyles.montserratBoldTextStyle(size: 16, color: Colors.white),
+                  Flexible(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Add save logic here
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: appColor,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                      child: Text(
+                        "Submit",
+                        style: MontserratStyles.montserratBoldTextStyle(size: 16, color: Colors.white),
+                      ),
                     ),
                   ),
                 ],
@@ -282,6 +299,123 @@ void _popUpScreenDetailsForAddingServiceScreen(ExpenditureScreenController contr
     ),
   );
 }
+
+// void _popUpScreenDetailsForAddingServiceScreen(ExpenditureScreenController controller) {
+//   Get.dialog(
+//     Dialog(
+//       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+//       child: SingleChildScrollView(
+//         child: Container(color: appColor,)
+//         // Container(
+//         //   width: Get.width * 0.8,
+//         //   padding: EdgeInsets.all(24),
+//         //   child: Column(
+//         //     crossAxisAlignment: CrossAxisAlignment.start,
+//         //     mainAxisSize: MainAxisSize.min,
+//         //     children: [
+//         //       Center(
+//         //         child: Text(
+//         //           "Add Service Category",
+//         //           style: MontserratStyles.montserratBoldTextStyle(size: 24, color: blackColor),
+//         //         ),
+//         //       ),
+//         //       SizedBox(height: 24),
+//         //       Text(
+//         //         "Category Name",
+//         //         style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
+//         //       ),
+//         //       SizedBox(height: 8),
+//         //       TextField(
+//         //         decoration: InputDecoration(
+//         //           hintText: "Enter category name",
+//         //           border: OutlineInputBorder(
+//         //             borderRadius: BorderRadius.circular(8),
+//         //           ),
+//         //           filled: true,
+//         //           fillColor: Colors.grey[100],
+//         //         ),
+//         //       ),
+//         //       SizedBox(height: 24),
+//         //       Text(
+//         //         "Category Description",
+//         //         style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
+//         //       ),
+//         //       SizedBox(height: 8),
+//         //       TextField(
+//         //         maxLines: 8,
+//         //         decoration: InputDecoration(
+//         //           hintText: "Enter category description",
+//         //           border: OutlineInputBorder(
+//         //             borderRadius: BorderRadius.circular(8),
+//         //           ),
+//         //           filled: true,
+//         //           fillColor: Colors.grey[100],
+//         //         ),
+//         //       ),
+//         //       SizedBox(height: 24),
+//         //       Text(
+//         //         "Category Icon",
+//         //         style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
+//         //       ),
+//         //       SizedBox(height: 8),
+//         //       Row(
+//         //         children: [
+//         //           InkWell(
+//         //             onTap: () {
+//         //               // Add icon selection logic here
+//         //             },
+//         //             child: Container(
+//         //               width: 80,
+//         //               height: 80,
+//         //               decoration: BoxDecoration(
+//         //                 color: Colors.grey[200],
+//         //                 borderRadius: BorderRadius.circular(8),
+//         //               ),
+//         //               child: Icon(FontAwesomeIcons.upload, size: 32, color: appColor),
+//         //             ),
+//         //           ),
+//         //           SizedBox(width: 16),
+//         //           Text(
+//         //             "Upload Image",
+//         //             style: MontserratStyles.montserratRegularTextStyle(size: 16, color: Colors.grey),
+//         //           ),
+//         //         ],
+//         //       ),
+//         //       SizedBox(height: 24),
+//         //       Row(
+//         //         mainAxisAlignment: MainAxisAlignment.end,
+//         //         children: [
+//         //           TextButton(
+//         //             onPressed: () => Get.back(),
+//         //             child: Text(
+//         //               "Cancel",
+//         //               style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
+//         //             ),
+//         //           ),
+//         //           SizedBox(width: 16),
+//         //           ElevatedButton(
+//         //             onPressed: () {
+//         //               // Add save logic here
+//         //             },
+//         //             style: ElevatedButton.styleFrom(
+//         //               backgroundColor: appColor,
+//         //               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+//         //               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+//         //             ),
+//         //             child: Text(
+//         //               "Submit",
+//         //               style: MontserratStyles.montserratBoldTextStyle(size: 16, color: Colors.white),
+//         //             ),
+//         //           ),
+//         //         ],
+//         //       ),
+//         //     ],
+//         //   ),
+//         // ),
+//       ),
+//     ),
+//   );
+// }
 
 void _popUpScreenDetailsForAddingSubServiceScreen(ExpenditureScreenController controller) {
   final List<String> categoryTypes = ['Type A', 'Type B', 'Type C', 'Type D'];

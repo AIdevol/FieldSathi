@@ -15,6 +15,10 @@ const String agentId = 'agentId';
 const String customerId = 'customerId';
 const String serviceCategoriesId = 'serviceCategoriesId';
 const String subServiceCategoriesId = 'subServiceCategoriesId';
+const String SuperUserId = 'SuperUserId';
+const String attendanceId = 'attendanceId';
+const String technicianId = 'technicianId';
+const String serviceRequestsId = 'serviceRequestsId';
 
 // RememberMeModal? getRememberMe() {
 //   String? email = storage.read(emailKey);

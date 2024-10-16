@@ -21,4 +21,8 @@ class ApiEnd{
   static const String serviceEnd = 'api/services/';
   static const String serviceCategories = 'api/service-categories/';
   static const String serviceSubCategories = 'api/service-sub-categories/';
+  static const String expensesEnd = 'api/expenses/';
+  static const String serviceRequestsEnd ='api/service-requests/';
+  static const String exportServiceRequestEnd = 'api/export-service-requests/';
+
 }

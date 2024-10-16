@@ -3,10 +3,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:tms_sathi/constans/const_local_keys.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/super_view_screen_controller.dart';
 
 import '../../../../constans/color_constants.dart';
+import '../../../../constans/string_const.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../../utilities/helper_widget.dart';
 
@@ -15,7 +18,7 @@ class SuperViewScreen extends GetView<SuperViewScreenController>{
   Widget build(BuildContext context){
     return MyAnnotatedRegion(child: GetBuilder<SuperViewScreenController>(builder: (controller)=>Scaffold(
       appBar: AppBar(
-        title: Text("Super User", style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),),
+        title: Text("Managers", style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),),
         backgroundColor: appColor,
         actions: [IconButton(onPressed: (){}, icon: Icon(FeatherIcons.search)),
           IconButton(onPressed: (){
@@ -100,17 +103,14 @@ Widget _mainData(SuperViewScreenController controller){
       DataColumn(label: Text('Email')),
       DataColumn(label: Text('Contact Number')),
       DataColumn(label: Text('Status')),
-      // DataColumn(label: Text('To Date')),
-      // DataColumn(label: Text('Days')),
-      // DataColumn(label: Text('Reason')),
-      // DataColumn(label: Text('Status')),
-      // DataColumn(label: Text('Actions')),
+      DataColumn(label: Text(" ")),
     ], rows: controller.filteredData.map((superData){
         return DataRow(cells: [
-          DataCell(Text("kadlfjasf")),
-          DataCell(Text("adfadsf")),
-          DataCell(Text("dfadsf")),
-          DataCell(Text("adsfasdf"))
+          DataCell(Text("${superData.firstName} ${superData.lastName}")),
+          DataCell(Text(superData.email)),
+          DataCell(Text(superData.phoneNumber)),
+          DataCell(_buildStatusIndicator(superData.isActive)),
+          DataCell(_dropDownValueViews(controller, SuperUserId))
         ],
         );
     }).toList()
@@ -153,7 +153,99 @@ Widget _mainData(SuperViewScreenController controller){
   //   ),
   // );
 }
-
+Widget _buildStatusIndicator(bool isActive) {
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    decoration: BoxDecoration(
+      color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(
+        color: isActive ? Colors.green : Colors.red,width: 1,
+      ),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isActive ? Colors.green : Colors.red,
+          ),
+        ),
+        SizedBox(width: 6),
+        Text(
+          isActive ? 'Active' : 'Inactive',
+          style: MontserratStyles.montserratSemiBoldTextStyle(
+            color: isActive ? Colors.green : Colors.red,
+            size: 12,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+Widget _dropDownValueViews(SuperViewScreenController controller, String agentId) {
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: PopupMenuButton<String>(
+        icon: Icon(Icons.more_vert),
+        onSelected: (String result) {
+          switch (result) {
+            case 'Edit':
+              // _editWidgetOfAgentsDialogValue(controller, Get.context!, agentId, agentData);
+              break;
+            case 'Deactivate':
+              // controller.hitUpdateStatusValue(agentId);
+              break;
+          }
+        },
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+          PopupMenuItem<String>(
+            value: 'Edit',
+            child: ListTile(
+              leading: Icon(Icons.edit_calendar_outlined, size: 20, color: Colors.black),
+              title: Text('Edit', style: MontserratStyles.montserratBoldTextStyle(
+                color: blackColor,
+                size: 13,
+              )),
+            ),
+          ),
+          PopupMenuItem<String>(
+            value: 'Deactivate',
+            child: ListTile(
+              leading: Image.asset(wrongRoundedImage, color: Colors.black, height: 25, width: 25,),
+              title: Text('Deactivate', style: MontserratStyles.montserratBoldTextStyle(
+                color: blackColor,
+                size: 13,
+              )),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+// void _editWidgetOfAgentsDialogValue(SuperViewScreenController controller, BuildContext context, String agentId, Result agentData) {
+//   controller.firstNameController.text = agentData.firstName ?? '';
+//   controller.lastNameController.text = agentData.lastName ?? '';
+//   controller.emailController.text = agentData.email ?? '';
+//   controller.phoneController.text = agentData.phoneNumber ?? '';
+//
+//   Get.dialog(
+//       Dialog(
+//         insetAnimationDuration: Duration(milliseconds: 3),
+//         child: Container(
+//           height: Get.height,
+//           width: Get.width,
+//           decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+//           child: _form(controller, context, agentId),
+//         ),
+//       )
+//   );
+// }
 void _showImportModelView(BuildContext context) {
   showDialog(
     context: context,

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/attendance_screen_controller.dart';
+import 'package:tms_sathi/utilities/hex_color.dart';
 
 import '../../../../constans/color_constants.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../../utilities/helper_widget.dart';
+import '../../widgets/views/show_technician_data.dart';
 
 class AttendanceScreen extends GetView<AttendanceScreenController>{
 
@@ -36,21 +39,23 @@ class AttendanceScreen extends GetView<AttendanceScreenController>{
 }
 
 _presentViewScreenWidget(AttendanceScreenController controller){
-  return Container(
-      height: Get.height * 0.2,
-      width: Get.width,
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
-      color: whiteColor,
+  return GestureDetector(onTap: (){
+    print('present button tapped');
+  },child: Container(
+    height: Get.height * 0.2,
+    width: Get.width,
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
+      color: lightgreens,
       boxShadow: [
-      BoxShadow(
-      color: Colors.grey.withOpacity(0.5),
-      spreadRadius: 1,
-      blurRadius: 5,
-      offset: Offset(0, 3),
-      ),
-    ],
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.5),
+          spreadRadius: 1,
+          blurRadius: 5,
+          offset: Offset(0, 3),
+        ),
+      ],
     ),
     child: Padding(
       padding: const EdgeInsets.only(top: 35.0),
@@ -62,17 +67,19 @@ _presentViewScreenWidget(AttendanceScreenController controller){
         ],),
       ),
     ),
-  );
+  ),);
 }
 
 _absentViewScreenWidget(AttendanceScreenController controller){
-  return Container(
+  return GestureDetector(onTap: (){
+    print('absent button tapped');
+  },child: Container(
     height: Get.height * 0.2,
     width: Get.width,
     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
-      color: whiteColor,
+      color: HexColor('E8C5AF'),
       boxShadow: [
         BoxShadow(
           color: Colors.grey.withOpacity(0.5),
@@ -92,17 +99,19 @@ _absentViewScreenWidget(AttendanceScreenController controller){
         ],),
       ),
     ),
-  );
+  ),);
 }
 
 _idleVieScreenWidget(AttendanceScreenController controller){
-  return Container(
+  return GestureDetector(onTap: (){
+    print('idle button tapped');
+  },child: Container(
     height: Get.height * 0.2,
     width: Get.width,
     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
-      color: whiteColor,
+      color: HexColor('FFEA94'),
       boxShadow: [
         BoxShadow(
           color: Colors.grey.withOpacity(0.5),
@@ -122,7 +131,7 @@ _idleVieScreenWidget(AttendanceScreenController controller){
         ],),
       ),
     ),
-  );
+  ),);
 }
 
 Widget _rowViewWidget(AttendanceScreenController controller) {
@@ -142,8 +151,7 @@ Widget _rowViewWidget(AttendanceScreenController controller) {
         flex: 1,
         child: GestureDetector(
           onTap: () {
-            // Add your "View All" functionality here
-          },
+         Get.toNamed(AppRoutes.showViewAllDataAttendanceScreen);},
           child: Text(
             "View All",
             style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black),
@@ -154,3 +162,7 @@ Widget _rowViewWidget(AttendanceScreenController controller) {
     ],
   );
 }
+
+_calculatePresent(){}
+_calculateAbsent(){}
+_calculateIdle(){}

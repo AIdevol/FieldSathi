@@ -36,6 +36,7 @@ abstract class AppRoutes {
   static const addAmcCallenderScreen = '/addAmcCallenderScreen';
   static const pricingScreenView = '/pricingScreenView';
   static const addSuperuserViewScreen = '/addSuperuserViewScreen';
+  static const showViewAllDataAttendanceScreen = '/showViewAllDataAttendanceScreen';
 }
 
 class RoutesArgument {
