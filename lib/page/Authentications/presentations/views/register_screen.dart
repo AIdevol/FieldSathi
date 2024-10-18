@@ -1,4 +1,5 @@
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -177,6 +178,7 @@ class RegisterScreen extends GetView<RegisterScreenController> {
           ),
           vGap(16),
           CustomTextField(
+            readOnly: true,
             hintText: "Country".tr,
             controller: controller.countryController,
             textInputType: TextInputType.text,
@@ -186,15 +188,7 @@ class RegisterScreen extends GetView<RegisterScreenController> {
             },
             labletext: "Country".tr,
             prefix: Icon(FeatherIcons.globe, color: Colors.black),
-            suffix: InkWell(
-              onTap: () {
-                _showCountryPicker(context: context);
-              },
-              child: Container(
-                margin: const EdgeInsets.only(right: 10),
-                child: const Icon(Icons.arrow_drop_down, color: Colors.black,size: 30,),
-              ),
-            ),
+            suffix: IconButton(onPressed:(){_openCountryPicker(context);},icon: const Icon(Icons.arrow_drop_down, color: Colors.black,size: 30,)),
             validator: (value) {
               return value?.isEmptyField(messageTitle: "country");
             },
@@ -259,7 +253,24 @@ class RegisterScreen extends GetView<RegisterScreenController> {
       ),
     );
   }
-
+  void _openCountryPicker(BuildContext context) {
+    showModalBottomSheet(
+      backgroundColor: CupertinoColors.white,
+      context: context,
+      builder: (context) => CountryCodePicker(
+        onChanged: (countryCode) {
+          // Set the selected country in the controller
+          controller.countryController.text = countryCode.name ?? '';
+          Navigator.of(context).pop(); // Close the modal after selection
+        },
+        initialSelection: controller.countryController.text,
+        showCountryOnly: true,
+        favorite: ['+1','US','+91', 'IN', ],
+        showOnlyCountryWhenClosed: true,
+        alignLeft: true,
+      ),
+    );
+  }
   Container _showCountryPicker({required BuildContext context}) {
     return Container(
       child: CountryCodePicker(

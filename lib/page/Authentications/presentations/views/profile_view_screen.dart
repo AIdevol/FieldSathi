@@ -280,13 +280,9 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
       labletext: "Country".tr,
       readOnly: true,
       prefix: const Icon(FeatherIcons.globe, color: Colors.black),
-      suffix: InkWell(
-        onTap: () => _showCountryPicker(context),
-        child: Container(
-          margin: const EdgeInsets.only(right: 10),
-          child: const Icon(Icons.arrow_drop_down, color: Colors.black, size: 30),
-        ),
-      ),
+      suffix: IconButton(onPressed: (){
+        _openCountryPicker(context);
+      },icon: const Icon(Icons.arrow_drop_down, color: Colors.black, size: 30)),
       validator: (value) => value?.isEmpty ?? true ? "Country is required" : null,
     );
   }
@@ -322,7 +318,25 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
     ));
   }
 
-  void _showCountryPicker(BuildContext context) {
+  void _openCountryPicker(BuildContext context) {
+    showModalBottomSheet(
+      backgroundColor: CupertinoColors.white,
+      context: context,
+      builder: (context) => CountryCodePicker(
+        onChanged: (countryCode) {
+          // Set the selected country in the controller
+          controller.countryController.text = countryCode.name ?? '';
+          Navigator.of(context).pop(); // Close the modal after selection
+        },
+        initialSelection: controller.countryController.text,
+        showCountryOnly: true,
+        favorite: ['+1','US','+91', 'IN', ],
+        showOnlyCountryWhenClosed: true,
+        alignLeft: true,
+      ),
+    );
+  }
+ /* void _showCountryPicker(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -348,7 +362,7 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
         );
       },
     );
-  }
+  }*/
 
   void _showImagePickerOptions(BuildContext context) {
     showModalBottomSheet(

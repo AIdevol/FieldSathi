@@ -34,8 +34,7 @@ abstract class AuthenticationApi {
   Future<OtpResponseModel> verifyOtpApiCall({Map<String, dynamic>? dataBody});
   Future<UserResponseModel>userDetailsApiCall({Map<String, dynamic>? dataBody, String? id});
   Future<UserResponseModel>updateUserDetailsApiCall({Map<String, dynamic>? dataBody, String? id});
-  Future<UserResponseModel> userProfileImageUpdateApiCall(
-      File imageFile, String? id);
+  Future<UserResponseModel> userProfileImageUpdateApiCall(File imageFile);
   Future<HolidaysCalenderResponseModel>holidaysCalenderApiCall({Map<String, dynamic>? dataBody});
   Future<List<TicketResponseModel>>getticketDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<TicketResponseModel>postTicketDetailsApiCall({Map<String, dynamic>? dataBody});

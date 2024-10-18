@@ -112,18 +112,17 @@ implements AuthenticationApi {
   }
 
   @override
-  Future<UserResponseModel> userProfileImageUpdateApiCall(File imageFile,
-      String? id) async {
+  Future<UserResponseModel> userProfileImageUpdateApiCall(File imageFile) async {
     try {
       String fileName = imageFile.path
           .split('/')
           .last;
       dioo.FormData formData = dioo.FormData.fromMap({
         "profile_image": await dioo.MultipartFile.fromFile(
-            imageFile.path, filename: fileName),
+            imageFile.path, filename: fileName,),
       });
-      final response = await dioClient!.get(
-          "${ApiEnd.tmsUsersEnd}/$id/", data: formData);
+      final response = await dioClient!.post(
+          "${ApiEnd.userProfileImageEnd}/", data: formData, skipAuth: false);
       return UserResponseModel.fromJson(response);
     } catch (e) {
       return Future.error(NetworkExceptions.getDioException(e));

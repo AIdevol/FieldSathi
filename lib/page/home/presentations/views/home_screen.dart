@@ -24,9 +24,24 @@ import '../../widget/Ticket_details_monitor_graph.dart';
 class HomeScreen extends GetView<HomeScreenController> {
   final GlobalKey<ScaffoldState> drawerkey = GlobalKey();
   // final profileimg = Get.put(ProfileViewScreenController()).profileImageUrl.value;
-
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
   bool _isDialOpen = false;
-  HomeScreen({super.key});
+  HomeScreen({super.key}){
+    // _controller = AnimationController(
+    //   // vsync: this._controller,
+    //   duration: const Duration(milliseconds: 500),
+    // );
+    //
+    // _slideAnimation = Tween<Offset>(
+    //   begin: const Offset(0.0, -1.0),
+    //   end: Offset.zero,
+    // ).animate(CurvedAnimation(
+    //   parent: _controller,
+    //   curve: Curves.easeInOut,
+    // ));
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -246,7 +261,7 @@ class HomeScreen extends GetView<HomeScreenController> {
       Get.toNamed(AppRoutes.ticketListScreen);
       },
       child: Container(
-          height: containerLength.height*0.7,
+          height: containerLength.height*0.8,
           width: Get.width*0.8,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
@@ -292,7 +307,7 @@ _graphVisualScreen2(BuildContext context, {required String text}){
       print("buttton tapped");
     },
     child: Container(
-        height: containerLength.height*0.63,
+        height: containerLength.height*0.8,
         width: Get.width*0.8,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
@@ -337,7 +352,7 @@ _graphVisualScreen3(BuildContext context, {required String text}){
       print("buttton tapped");
     },
     child: Container(
-        height: containerLength.height*0.63,
+        height: containerLength.height*0.8,
         width: Get.width*0.8,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),

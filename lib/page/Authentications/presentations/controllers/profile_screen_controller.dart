@@ -113,33 +113,6 @@ class ProfileViewScreenController extends GetxController {
     profileImageUrl.value = '';
     profileImage.value = null;
   }
-
-  Future<void> uploadProfileImage(File imageFile) async {
-    isLoading.value = true;
-    try {
-      final id = storage.read(userId);
-      final uri = Uri.parse('YOUR_API_ENDPOINT/update-profile-image/$id');
-
-      var request = http.MultipartRequest('POST', uri)
-        ..files.add(await http.MultipartFile.fromPath('profile_image', imageFile.path));
-
-      var response = await request.send();
-      var responseData = await response.stream.bytesToString();
-      var jsonResponse = json.decode(responseData);
-
-      if (response.statusCode == 200) {
-        profileImageUrl.value = jsonResponse['image_url'] ?? '';
-        toast("Profile image updated successfully");
-      } else {
-        throw Exception('Failed to upload image');
-      }
-    } catch (e) {
-      toast("Failed to upload image: $e");
-    } finally {
-      isLoading.value = false;
-      update();
-    }
-  }
 // Future<void> hitUserUpdateProfileImage()async {
 //     customLoader.show();
 //     FocusManager.instance.primaryFocus!.context;
@@ -157,7 +130,7 @@ class ProfileViewScreenController extends GetxController {
       companyNameController.text = userData.companyName ?? '';
       countryController.text = userData.country ?? '';
       employeesController.text = userData.employees ?? '';
-      addressController.text = userData.companyAddress ?? '';
+      addressController.text = userData.primaryAddress ?? '';
       profileImageUrl.value = userData.profileImage ?? '';
 
       isLoading.value = false;
@@ -178,6 +151,7 @@ class ProfileViewScreenController extends GetxController {
       "email": emailController.text,
       "company_name": companyNameController.text,
       "employees": employeesController.text,
+      "primary_address": addressController.text,
       "country": countryController.text,
       "phone_number": phoneController.text,
       "company_address": addressController.text
@@ -188,6 +162,7 @@ class ProfileViewScreenController extends GetxController {
         .then((value) {
       var updateData = value;
       Get.find<GetLoginModalService>().getUserDataModal(UserDataModel: updateData);
+      hitUploadProfileImage(profileImage.value!);
       refreshUserData();
       isLoading.value = false;
       toast("Updated successfully your profile");
@@ -219,25 +194,119 @@ class ProfileViewScreenController extends GetxController {
     }
   }
 
+ void getImage(ImageSource source) async {
+    try {
+      final PermissionStatus status = await _requestPermission(source);
 
-  Future<void> getImage(ImageSource source) async {
-    final PermissionStatus status = await _requestPermission(source);
-    if(status.isGranted){
-      try {
+      if (status.isGranted) {
         final XFile? image = await _picker.pickImage(
-            source: ImageSource.gallery);
+          source: source, imageQuality: 80, maxWidth: 1200, maxHeight: 1200,
+        );
         if (image != null) {
-          selectedImage = File(image.path);
-          print("adfkladjfadjfkladjfklajsdfkladjsfajdsf>>>: $selectedImage");
+          profileImage.value = File(image.path);
+          await hitUploadProfileImage(profileImage.value!);
           update();
         }
-      }catch (e){
-        toast('Failed to pick image. Please try again.');
-      };
-    }else if(status.isPermanentlyDenied){
-        toast( 'Permission Permanently Denied',);
+      } else if (status.isDenied) {
+        _showPermissionDialog();
+      } else if (status.isPermanentlyDenied) {
+        _showSettingsDialog();
       }
+    } catch (e) {
+      toast('Failed to pick image. Please try again.');
     }
+  }
+  void _showPermissionDialog() {
+    Get.dialog(
+      AlertDialog(
+        title: Text('Permission Required'.tr),
+        content: Text('Please grant the required permission to access photos/camera.'.tr),
+        actions: [
+          TextButton(
+            child: Text('Cancel'.tr),
+            onPressed: () => Get.back(),
+          ),
+          TextButton(
+            child: Text('Settings'.tr),
+            onPressed: () {
+              Get.back();
+              openAppSettings();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+  void _showSettingsDialog() {
+    Get.dialog(
+      AlertDialog(
+        title: Text('Permission Denied'.tr),
+        content: Text('Permission is permanently denied. Please enable it from app settings.'.tr),
+        actions: [
+          TextButton(
+            child: Text('Cancel'.tr),
+            onPressed: () => Get.back(),
+          ),
+          TextButton(
+            child: Text('Open Settings'.tr),
+            onPressed: () {
+              Get.back();
+              openAppSettings();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> hitUploadProfileImage(File imageFile)async {
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.context;
+    Get.find<AuthenticationApiService>().userProfileImageUpdateApiCall(imageFile).then((value){
+      profileImageUrl.value = value.profileImage ?? '';
+      customLoader.hide();
+      isLoading.value = false;
+      toast("Profile image updated successfully");
+      update();
+    }).onError((error, stackError){
+        customLoader.hide();
+        toast(error.toString());
+        isLoading.value = false;
+    });
+  }
+  // Future<void> uploadProfileImage(File imageFile) async {
+  //   try {
+  //     isLoading.value = true;
+  //     update();
+  //
+  //     final id = storage.read(userId);
+  //     if (id == null) throw Exception('User ID not found');
+  //
+  //     final uri = Uri.parse('YOUR_API_ENDPOINT/update-profile-image/$id');
+  //
+  //     var request = http.MultipartRequest('POST', uri);
+  //     request.files.add(
+  //         await http.MultipartFile.fromPath('profile_image', imageFile.path)
+  //     );
+  //
+  //     final streamedResponse = await request.send();
+  //     final response = await http.Response.fromStream(streamedResponse);
+  //
+  //     if (response.statusCode == 200) {
+  //       final jsonResponse = json.decode(response.body);
+  //       profileImageUrl.value = jsonResponse['image_url'] ?? '';
+  //       toast("Profile image updated successfully");
+  //     } else {
+  //       throw Exception('Server returned ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     toast("Failed to upload image: $e");
+  //   } finally {
+  //     isLoading.value = false;
+  //     update();
+  //   }
+  // }
     // final PermissionStatus status = await _requestPermission(source);
     //
     // if (status.isGranted) {

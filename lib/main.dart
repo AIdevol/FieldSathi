@@ -8,6 +8,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:logger/logger.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/OtpViewController.dart';
+import 'package:tms_sathi/page/home/role/enum/role_controller.dart';
 import 'package:tms_sathi/utilities/custom_loader.dart';
 
 import 'navigations/app_pages.dart';
@@ -23,6 +24,7 @@ bool isVerifyContact2 = false;
 bool isVerifyContact3 = false;
 
 void main() {
+  Get.put(RoleBasedRouteManager());
   WidgetsFlutterBinding.ensureInitialized();
   Get.put(OtpViewController());
   runApp(const OverlaySupport.global( child: MyApp(),));
