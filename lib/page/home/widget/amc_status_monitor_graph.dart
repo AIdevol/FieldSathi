@@ -1,164 +1,274 @@
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tms_sathi/page/home/presentations/controllers/amc_status_monitor_graph_controller.dart';
 
-import '../../../utilities/helper_widget.dart';
+import '../presentations/controllers/amc_status_monitor_graph_controller.dart';
 
-class AmcStatusMonitorGraph extends GetView<AmcStatusMonitorGraphController>{
+class AmcStatusMonitorGraph extends GetView<AmcStatusMonitorGraphController> {
   const AmcStatusMonitorGraph({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Pie chart on the right
-        Expanded(
-          flex: 3,
-          child: AspectRatio(
-            aspectRatio: 1,
-            child: Obx(() => PieChart(
-              PieChartData(
-                pieTouchData: PieTouchData(
-                  touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                    if (!event.isInterestedForInteractions ||
-                        pieTouchResponse == null ||
-                        pieTouchResponse.touchedSection == null) {
-                      controller.setTouchedIndex(-1);
-                      return;
-                    }
-                    controller.setTouchedIndex(
-                        pieTouchResponse.touchedSection!.touchedSectionIndex);
-                  },
-                ),
-                borderData: FlBorderData(show: false),
-                sectionsSpace: 0,
-                centerSpaceRadius: 40,
-                sections: showingSections(),
-              ),
-            )),
-          ),
+    return Obx(() => controller.isLoading.value
+        ? const Center(child: CircularProgressIndicator())
+        : AspectRatio(
+      aspectRatio: 1.6,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildLegend(),
+            const SizedBox(height: 16),
+            Expanded(child: _buildChart()),
+          ],
         ),
-        hGap(20),
-        // Labels on the left
-        const Expanded(
-          flex: 2,
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                LabelWidget(color: Colors.blue, label: 'Upcoming'),
-                SizedBox(height: 16),
-                LabelWidget(color: Colors.yellow, label: 'Renewal'),
-                SizedBox(height: 16),
-                LabelWidget(color: Colors.purple, label: 'Completed'),
-                SizedBox(height: 16),
-                LabelWidget(color: Colors.green, label: 'Total'),
-              ],
-            ),
-          ),
-        ),
+      ),
+    ));
+  }
 
+  Widget _buildLegend() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: const [
+        _LegendItem(
+          color: Colors.blue,
+          label: 'Upcoming',
+        ),
+        SizedBox(width: 16),
+        _LegendItem(
+          color: Colors.yellow,
+          label: 'Renewal',
+        ),
+        SizedBox(width: 16),
+        _LegendItem(
+          color: Colors.purple,
+          label: 'Completed',
+        ),
+        SizedBox(width: 16),
+        _LegendItem(
+          color: Colors.green,
+          label: 'Total',
+        ),
       ],
     );
   }
 
-  List<PieChartSectionData> showingSections() {
-    return List.generate(4, (i) {
-      final isTouched = i == controller.touchedIndex;
-      final fontSize = isTouched ? 25.0 : 16.0;
-      final radius = isTouched ? 60.0 : 50.0;
-      const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
-      switch (i) {
-        case 0:
-          return PieChartSectionData(
-            color: Colors.blue,
-            value: 40,
-            title: '40%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
+  Widget _buildChart() {
+    // Using percentage values for Y-axis max
+    const yAxisMax = 100.0;
+
+    return Obx(() => BarChart(
+      BarChartData(
+        alignment: BarChartAlignment.spaceAround,
+        maxY: yAxisMax,
+        barTouchData: _buildBarTouchData(),
+        titlesData: _buildTitlesData(),
+        gridData: _buildGridData(),
+        borderData: _buildBorderData(),
+        extraLinesData: _buildExtraLinesData(),
+        barGroups: [
+          _createBarData(
+            0,
+            controller.upcomingPercentage.value,
+            controller.upcomingCount.value,
+            Colors.blue,
+          ),
+          _createBarData(
+            1,
+            controller.renewalPercentage.value,
+            controller.renewalCount.value,
+            Colors.yellow,
+          ),
+          _createBarData(
+            2,
+            controller.completedPercentage.value,
+            controller.completedCount.value,
+            Colors.purple,
+          ),
+          _createBarData(
+            3,
+            controller.totalPercentage.value,
+            controller.totalCount.value,
+            Colors.green,
+          ),
+        ],
+      ),
+    ));
+  }
+
+  BarTouchData _buildBarTouchData() {
+    return BarTouchData(
+      enabled: true,
+      touchTooltipData: BarTouchTooltipData(
+        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+          return BarTooltipItem(
+            'Count: ${rod.rodStackItems.isEmpty ? rod.toY.toInt() : rod.rodStackItems.first.toY.toInt()}\n'
+                'Percentage: ${rod.toY.toStringAsFixed(1)}%',
+            const TextStyle(
               color: Colors.white,
-              shadows: shadows,
+              fontWeight: FontWeight.bold,
             ),
           );
-        case 1:
-          return PieChartSectionData(
-            color: Colors.yellow,
-            value: 30,
-            title: '30%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
+        },
+      ),
+    );
+  }
+
+  FlTitlesData _buildTitlesData() {
+    return FlTitlesData(
+      show: true,
+      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      bottomTitles: AxisTitles(
+        sideTitles: SideTitles(
+          showTitles: true,
+          getTitlesWidget: (value, meta) {
+            const categories = ['Upcoming', 'Renewal', 'Completed', 'Total'];
+            if (value.toInt() >= 0 && value.toInt() < categories.length) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  categories[value.toInt()],
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              );
+            }
+            return const Text('');
+          },
+        ),
+      ),
+      leftTitles: AxisTitles(
+        sideTitles: SideTitles(
+          showTitles: true,
+          reservedSize: 45,
+          interval: 20, // Show percentage intervals of 20
+          getTitlesWidget: (value, meta) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Text(
+                '${value.toInt()}%',
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  FlGridData _buildGridData() {
+    return FlGridData(
+      show: true,
+      drawVerticalLine: false,
+      horizontalInterval: 20, // Grid lines every 20%
+      getDrawingHorizontalLine: (value) {
+        return FlLine(
+          color: Colors.grey.shade300,
+          strokeWidth: 1,
+        );
+      },
+    );
+  }
+
+  FlBorderData _buildBorderData() {
+    return FlBorderData(
+      show: true,
+      border: Border.all(color: Colors.grey.shade300),
+    );
+  }
+
+  ExtraLinesData _buildExtraLinesData() {
+    return ExtraLinesData(
+      horizontalLines: [
+        HorizontalLine(
+          y: controller.upcomingTarget,
+          color: Colors.blue,
+          strokeWidth: 2,
+          dashArray: [5, 5],
+          label: HorizontalLineLabel(
+            show: true,
+            labelResolver: (line) => 'Target: ${controller.upcomingTarget}%',
+            alignment: Alignment.topRight,
+            style: const TextStyle(
+              color: Colors.blue,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: shadows,
             ),
-          );
-        case 2:
-          return PieChartSectionData(
-            color: Colors.purple,
-            value: 15,
-            title: '15%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
+          ),
+        ),
+        HorizontalLine(
+          y: controller.completedTarget,
+          color: Colors.purple,
+          strokeWidth: 2,
+          dashArray: [5, 5],
+          label: HorizontalLineLabel(
+            show: true,
+            labelResolver: (line) => 'Target: ${controller.completedTarget}%',
+            alignment: Alignment.topRight,
+            style: const TextStyle(
+              color: Colors.purple,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: shadows,
             ),
-          );
-        case 3:
-          return PieChartSectionData(
-            color: Colors.green,
-            value: 15,
-            title: '15%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: shadows,
-            ),
-          );
-        default:
-          throw Error();
-      }
-    });
+          ),
+        ),
+      ],
+    );
+  }
+
+  BarChartGroupData _createBarData(int x, double percentage, int count, Color color) {
+    return BarChartGroupData(
+      x: x,
+      barRods: [
+        BarChartRodData(
+          toY: percentage,
+          color: color,
+          width: 40,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(4),
+            topRight: Radius.circular(4),
+          ),
+        ),
+      ],
+      showingTooltipIndicators: [0],
+    );
   }
 }
 
-class LabelWidget extends StatelessWidget {
+class _LegendItem extends StatelessWidget {
   final Color color;
   final String label;
 
-  const LabelWidget({
-    Key? key,
+  const _LegendItem({
     required this.color,
     required this.label,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 16,
           height: 16,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
             color: color,
+            borderRadius: BorderRadius.circular(4),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 4),
         Text(
           label,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 12,
             fontWeight: FontWeight.bold,
           ),
         ),

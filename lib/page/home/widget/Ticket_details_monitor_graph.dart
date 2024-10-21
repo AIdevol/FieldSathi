@@ -1,334 +1,341 @@
-// import 'package:flutter/material.dart';
-// import 'package:fl_chart/fl_chart.dart';
-// import 'package:get/get.dart';
-// import 'package:tms_sathi/page/home/presentations/controllers/graph_view_controller.dart';
-//
-// class GraphViewScreen extends GetView<GraphViewController> {
-//   const GraphViewScreen({Key? key}) : super(key: key);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       children: [
-//         // Labels above the chart
-//         Padding(
-//           padding: const EdgeInsets.all(0),
-//           child: Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//             children: const [
-//               LabelWidget(color: Colors.blue, label: 'First'),
-//               LabelWidget(color: Colors.yellow, label: 'Second'),
-//               LabelWidget(color: Colors.purple, label: 'Third'),
-//               LabelWidget(color: Colors.green, label: 'Fourth'),
-//             ],
-//           ),
-//         ),
-//         // Pie chart
-//         AspectRatio(
-//           aspectRatio: 1.3,
-//           child: PieChart(
-//             PieChartData(
-//               pieTouchData: PieTouchData(
-//                 touchCallback: (FlTouchEvent event, pieTouchResponse) {
-//                   if (!event.isInterestedForInteractions ||
-//                       pieTouchResponse == null ||
-//                       pieTouchResponse.touchedSection == null) {
-//                     controller.setTouchedIndex(-1);
-//                     return;
-//                   }
-//                   controller.setTouchedIndex(
-//                       pieTouchResponse.touchedSection!.touchedSectionIndex);
-//                 },
-//               ),
-//               borderData: FlBorderData(show: false),
-//               sectionsSpace: 0,
-//               centerSpaceRadius: 40,
-//               sections: showingSections(),
-//             ),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-//
-//   List<PieChartSectionData> showingSections() {
-//     return List.generate(4, (i) {
-//       final isTouched = i == controller.touchedIndex;
-//       final fontSize = isTouched ? 25.0 : 16.0;
-//       final radius = isTouched ? 60.0 : 50.0;
-//       const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
-//       switch (i) {
-//         case 0:
-//           return PieChartSectionData(
-//             color: Colors.blue,
-//             value: 40,
-//             title: '40%',
-//             radius: radius,
-//             titleStyle: TextStyle(
-//               fontSize: fontSize,
-//               fontWeight: FontWeight.bold,
-//               color: Colors.white,
-//               shadows: shadows,
-//             ),
-//           );
-//         case 1:
-//           return PieChartSectionData(
-//             color: Colors.yellow,
-//             value: 30,
-//             title: '30%',
-//             radius: radius,
-//             titleStyle: TextStyle(
-//               fontSize: fontSize,
-//               fontWeight: FontWeight.bold,
-//               color: Colors.white,
-//               shadows: shadows,
-//             ),
-//           );
-//         case 2:
-//           return PieChartSectionData(
-//             color: Colors.purple,
-//             value: 15,
-//             title: '15%',
-//             radius: radius,
-//             titleStyle: TextStyle(
-//               fontSize: fontSize,
-//               fontWeight: FontWeight.bold,
-//               color: Colors.white,
-//               shadows: shadows,
-//             ),
-//           );
-//         case 3:
-//           return PieChartSectionData(
-//             color: Colors.green,
-//             value: 15,
-//             title: '15%',
-//             radius: radius,
-//             titleStyle: TextStyle(
-//               fontSize: fontSize,
-//               fontWeight: FontWeight.bold,
-//               color: Colors.white,
-//               shadows: shadows,
-//             ),
-//           );
-//         default:
-//           throw Error();
-//       }
-//     });
-//   }
-// }
-//
-// class LabelWidget extends StatelessWidget {
-//   final Color color;
-//   final String label;
-//
-//   const LabelWidget({
-//     Key? key,
-//     required this.color,
-//     required this.label,
-//   }) : super(key: key);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       children: [
-//         Container(
-//           width: 16,
-//           height: 16,
-//           decoration: BoxDecoration(
-//             shape: BoxShape.circle,
-//             color: color,
-//           ),
-//         ),
-//         const SizedBox(width: 4),
-//         Text(
-//           label,
-//           style: const TextStyle(
-//             fontSize: 14,
-//             fontWeight: FontWeight.bold,
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:get/get.dart';
-import 'package:tms_sathi/page/home/presentations/controllers/graph_view_controller.dart';
-import 'package:tms_sathi/utilities/helper_widget.dart';
+
+import '../presentations/controllers/graph_view_controller.dart';
 
 class GraphViewScreen extends GetView<GraphViewController> {
   const GraphViewScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Pie chart on the right
-        Expanded(
-          flex: 3,
-          child: AspectRatio(
-            aspectRatio: 1,
-            child: Obx(() => PieChart(
-              PieChartData(
-                pieTouchData: PieTouchData(
-                  touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                    if (!event.isInterestedForInteractions ||
-                        pieTouchResponse == null ||
-                        pieTouchResponse.touchedSection == null) {
-                      controller.setTouchedIndex(-1);
-                      return;
-                    }
-                    controller.setTouchedIndex(
-                        pieTouchResponse.touchedSection!.touchedSectionIndex);
-                  },
+    return GetBuilder<GraphViewController>(
+      init: GraphViewController(),
+      builder: (controller) => Scaffold(
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Obx(() => controller.isLoading.value
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+            children: [
+              // Pie Chart Section
+              Container(
+                height: 300,
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  children: [
+                    // Pie Chart
+                    Expanded(
+                      flex: 3,
+                      child: PieChart(
+                        PieChartData(
+                          pieTouchData: PieTouchData(
+                            touchCallback:
+                                (FlTouchEvent event, pieTouchResponse) {
+                              if (!event.isInterestedForInteractions ||
+                                  pieTouchResponse == null ||
+                                  pieTouchResponse.touchedSection == null) {
+                                controller.setTouchedIndex(-1);
+                                return;
+                              }
+                              controller.setTouchedIndex(pieTouchResponse
+                                  .touchedSection!.touchedSectionIndex);
+                            },
+                          ),
+                          borderData: FlBorderData(show: false),
+                          sectionsSpace: 2,
+                          centerSpaceRadius: 40,
+                          sections: showingSections(controller),
+                        ),
+                      ),
+                    ),
+                    // Legend
+                    // Expanded(
+                    //   flex: 2,
+                    //   child: Column(
+                    //     mainAxisAlignment: MainAxisAlignment.center,
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     children: [
+                    //       _buildLegendItem(
+                    //         Colors.blue.shade400,
+                    //         'Completed',
+                    //         controller.completedTicketsCount.value,
+                    //         controller.getPercentage(
+                    //             controller.completedTicketsCount.value),
+                    //       ),
+                    //       const SizedBox(height: 8),
+                    //       _buildLegendItem(
+                    //         Colors.amber.shade400,
+                    //         'Ongoing',
+                    //         controller.ongoingTicketsCount.value,
+                    //         controller.getPercentage(
+                    //             controller.ongoingTicketsCount.value),
+                    //       ),
+                    //       const SizedBox(height: 8),
+                    //       _buildLegendItem(
+                    //         Colors.purple.shade400,
+                    //         'Inactive',
+                    //         controller.inactiveTicketsCount.value,
+                    //         controller.getPercentage(
+                    //             controller.inactiveTicketsCount.value),
+                    //       ),
+                    //       const SizedBox(height: 8),
+                    //       _buildLegendItem(
+                    //         Colors.green.shade400,
+                    //         'On-Hold',
+                    //         controller.onHoldTicketsCount.value,
+                    //         controller.getPercentage(
+                    //             controller.onHoldTicketsCount.value),
+                    //       ),
+                    //       const SizedBox(height: 8),
+                    //       _buildLegendItem(
+                    //         Colors.red.shade400,
+                    //         'Rejected',
+                    //         controller.rejectedTicketsCount.value,
+                    //         controller.getPercentage(
+                    //             controller.rejectedTicketsCount.value),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                  ],
                 ),
-                borderData: FlBorderData(show: false),
-                sectionsSpace: 0,
-                centerSpaceRadius: 40,
-                sections: showingSections(),
               ),
-            )),
-          ),
-        ),
-        hGap(20),
-        // Labels on the left
-        Expanded(
-          flex: 2,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                LabelWidget(color: Colors.blue, label: 'Completed'),
-                SizedBox(height: 16),
-                LabelWidget(color: Colors.yellow, label: 'Ongoing'),
-                SizedBox(height: 16),
-                LabelWidget(color: Colors.purple, label: 'Inactive'),
-                SizedBox(height: 16),
-                LabelWidget(color: Colors.green, label: 'Onhold'),
-                SizedBox(height: 16),
-                LabelWidget(color: Colors.red, label: 'Rejected'),
-              ],
-            ),
-          ),
-        ),
+              // Divider
+              // const Divider(height: 10),
 
-      ],
+              // Grid View Section
+              Expanded(
+                child: SizedBox(
+                  height: Get.height*0.05,
+                  child: GridView.count(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16.0,
+                    crossAxisSpacing: 16.0,
+                    childAspectRatio: 1.5,
+                    children: [
+                      _buildStatCard(
+                        title: 'Completed',
+                        count: controller.completedTicketsCount.value,
+                        percentage: controller.getPercentage(
+                            controller.completedTicketsCount.value),
+                        icon: Icons.check_circle,
+                        backgroundColor: Colors.blue.shade50,
+                        iconColor: Colors.blue.shade400,
+                      ),
+                      _buildStatCard(
+                        title: 'Ongoing',
+                        count: controller.ongoingTicketsCount.value,
+                        percentage: controller.getPercentage(
+                            controller.ongoingTicketsCount.value),
+                        icon: Icons.timer,
+                        backgroundColor: Colors.amber.shade50,
+                        iconColor: Colors.amber.shade400,
+                      ),
+                      _buildStatCard(
+                        title: 'Inactive',
+                        count: controller.inactiveTicketsCount.value,
+                        percentage: controller.getPercentage(
+                            controller.inactiveTicketsCount.value),
+                        icon: Icons.block,
+                        backgroundColor: Colors.purple.shade50,
+                        iconColor: Colors.purple.shade400,
+                      ),
+                      _buildStatCard(
+                        title: 'On-Hold',
+                        count: controller.onHoldTicketsCount.value,
+                        percentage: controller.getPercentage(
+                            controller.onHoldTicketsCount.value),
+                        icon: Icons.pause_circle,
+                        backgroundColor: Colors.green.shade50,
+                        iconColor: Colors.green.shade400,
+                      ),
+                      _buildStatCard(
+                        title: 'Rejected',
+                        count: controller.rejectedTicketsCount.value,
+                        percentage: controller.getPercentage(
+                            controller.rejectedTicketsCount.value),
+                        icon: Icons.cancel,
+                        backgroundColor: Colors.red.shade50,
+                        iconColor: Colors.red.shade400,
+                      ),
+                      _buildStatCard(
+                        title: 'Total',
+                        count: controller.totalTicketsCount.value,
+                        percentage: 100.0,
+                        icon: Icons.rocket_launch,
+                        backgroundColor: Colors.grey.shade50,
+                        iconColor: Colors.grey.shade400,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          )),
+        ),
+      ),
     );
   }
 
-  List<PieChartSectionData> showingSections() {
-    return List.generate(5, (i) {
-      final isTouched = i == controller.touchedIndex;
-      final fontSize = isTouched ? 25.0 : 16.0;
-      final radius = isTouched ? 60.0 : 50.0;
-      const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
-      switch (i) {
-        case 0:
-          return PieChartSectionData(
-            color: Colors.blue,
-            value: 40,
-            title: '40%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: shadows,
-            ),
-          );
-        case 1:
-          return PieChartSectionData(
-            color: Colors.yellow,
-            value: 30,
-            title: '30%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: shadows,
-            ),
-          );
-        case 2:
-          return PieChartSectionData(
-            color: Colors.purple,
-            value: 15,
-            title: '15%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: shadows,
-            ),
-          );
-        case 3:
-          return PieChartSectionData(
-            color: Colors.green,
-            value: 15,
-            title: '10%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: shadows,
-            ),
-          );
-        case 4:
-          return PieChartSectionData(
-            color: Colors.red,
-            value: 15,
-            title: '5%',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: shadows,
-            ),
-          );
-        default:
-          throw Error();
-      }
-    });
-  }
-}
-
-class LabelWidget extends StatelessWidget {
-  final Color color;
-  final String label;
-
-  const LabelWidget({
-    Key? key,
-    required this.color,
-    required this.label,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildLegendItem(Color color, String label, int count, double percentage) {
     return Row(
       children: [
         Container(
-          width: 16,
-          height: 16,
+          width: 12,
+          height: 12,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: color,
           ),
         ),
         const SizedBox(width: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+        Expanded(
+          child: Text(
+            '$label: $count (${percentage.toStringAsFixed(1)}%)',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade700,
+            ),
           ),
         ),
       ],
     );
+  }
+
+  Widget _buildStatCard({
+    required String title,
+    required int count,
+    required double percentage,
+    required IconData icon,
+    required Color backgroundColor,
+    required Color iconColor,
+    // double? height,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16.0),
+          onTap: () {
+            // Handle tap event if needed
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Icon(
+                        icon,
+                        size: 32,
+                        color: iconColor,
+                      ),
+                      Text(
+                        '${percentage.toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: iconColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: iconColor,
+                    ),
+                  ),
+                  Text(
+                    '$count tickets',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<PieChartSectionData> showingSections(GraphViewController controller) {
+    if (controller.totalTicketsCount.value == 0) {
+      return [
+        PieChartSectionData(
+          color: Colors.grey.shade300,
+          value: 100,
+          title: 'No Data',
+          radius: 50,
+          titleStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black54,
+          ),
+        ),
+      ];
+    }
+
+    final sections = <PieChartSectionData>[];
+    final data = [
+      (Colors.blue.shade400, controller.completedTicketsCount.value, 'Completed'),
+      (Colors.amber.shade400, controller.ongoingTicketsCount.value, 'Ongoing'),
+      (Colors.purple.shade400, controller.inactiveTicketsCount.value, 'Inactive'),
+      (Colors.green.shade400, controller.onHoldTicketsCount.value, 'On-Hold'),
+      (Colors.red.shade400, controller.rejectedTicketsCount.value, 'Rejected'),
+    ];
+
+    for (var i = 0; i < data.length; i++) {
+      final isTouched = i == controller.touchedIndex;
+      final fontSize = isTouched ? 20.0 : 16.0;
+      final radius = isTouched ? 60.0 : 50.0;
+      final percentage = controller.getPercentage(data[i].$2);
+
+      if (percentage > 0) {
+        sections.add(
+          PieChartSectionData(
+            color: data[i].$1,
+            value: percentage,
+            title: '${percentage.toStringAsFixed(1)}%',
+            radius: radius,
+            titleStyle: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              shadows: const [
+                Shadow(color: Colors.black, blurRadius: 2),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+
+    return sections;
   }
 }

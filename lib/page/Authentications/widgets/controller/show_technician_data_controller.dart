@@ -30,11 +30,11 @@ class ShowTechnicianDataController extends GetxController {
       'role': 'technician'
     };
     Get.find<AuthenticationApiService>().getAttendanceApiCall(parameters: roleWiseData).then((value) async {
-      attendanceResponses.assignAll(value);
-      attendanceData.clear();
-      for (var response in attendanceResponses) {
-        attendanceData.addAll(response.results);
-      }
+      // attendanceResponses.assignAll(value);
+      // attendanceData.clear();
+      // for (var response in attendanceResponses) {
+      //   attendanceData.addAll(response.results);
+      // }
       print('ajdfjafj: ${attendanceData}');
       List<String> attendanceIds = attendanceData.map((technician) => technician.id.toString()).toList();
       await storage.write(attendanceId, attendanceIds);

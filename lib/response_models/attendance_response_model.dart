@@ -37,9 +37,9 @@ class AttendanceResponseModel {
 //======================================================================Tms Technician Role wise data fetched ==========================================
 
 class TechnicianAttendanceResponseModel {
-  final int count;
-  final int totalPages;
-  final List<TechnicianData> results;
+  final int? count;
+  final int? totalPages;
+  final List<TechnicianData?> results;
 
   TechnicianAttendanceResponseModel({
     required this.count,
@@ -61,7 +61,7 @@ class TechnicianAttendanceResponseModel {
     return {
       'count': count,
       'total_pages': totalPages,
-      'results': results.map((item) => item.toJson()).toList(),
+      'results': results.map((item) => item?.toJson()).toList(),
     };
   }
 }

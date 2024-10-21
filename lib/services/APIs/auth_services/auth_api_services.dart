@@ -558,7 +558,7 @@ implements AuthenticationApi {
   }
 
 // ===============================================================Get Technician Attendance Api Call ==========================================
-  @override
+/*  @override
   Future<List<TechnicianAttendanceResponseModel>> getAttendanceApiCall(
       {Map<String, dynamic>? dataBody, parameters}) async {
     try {
@@ -578,8 +578,16 @@ implements AuthenticationApi {
     } catch (error) {
       return Future.error(NetworkExceptions.getDioException(error));
     }
+  }*/
+  @override
+Future<TechnicianAttendanceResponseModel>getAttendanceApiCall({Map<String, dynamic>? dataBody, parameters})async{
+  try{
+    final response = await dioClient!.get(ApiEnd.tmsUsersEnd, data: dataBody, skipAuth: false, queryParameters: parameters);
+    return TechnicianAttendanceResponseModel.fromJson(response);
+  }catch(error){
+    return Future.error(NetworkExceptions.getDioException(error));
   }
-
+}
 // ============================================================================Get Expenses Api Call=================================================
   @override
 Future<List<ExpensesResponseModel>> getExpensesApiCall(

@@ -59,7 +59,8 @@ abstract class AuthenticationApi {
   Future<List<ServiceCategoriesResponseModel>>getServiceCategoriesApiCall({Map<String, dynamic>?dataBody});
   Future<ServicePostResponseModel>postServiceCategoriesApiCall({Map<String, dynamic>? dataBody});
   Future<SubService>getSub_ServiceCategoriesApiCall({Map<String, dynamic>? dataBody});
-  Future<List<TechnicianAttendanceResponseModel>>getAttendanceApiCall({Map<String, dynamic>? dataBody, parameters});
+  Future<TechnicianAttendanceResponseModel>getAttendanceApiCall({Map<String, dynamic>? dataBody, parameters});
+  // Future<List<TechnicianAttendanceResponseModel>>getAttendanceApiCall({Map<String, dynamic>? dataBody, parameters});
   Future<List<ExpensesResponseModel>>getExpensesApiCall({Map<String, dynamic>?dataBody, parameters});
   Future<List<ServiceRequestsResponseModel>> getServiceRequestsApiCall({Map<String, dynamic>?dataBody, parameters});
   Future<List<TechnicianResponseModel>> getTechnicianApiCall({Map<String, dynamic>? dataBody, parameters});

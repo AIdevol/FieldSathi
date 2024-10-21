@@ -25,6 +25,27 @@ class ApiEnd{
   static const String expensesEnd = 'api/expenses/';
   static const String serviceRequestsEnd ='api/service-requests/';
   static const String exportServiceRequestEnd = 'api/export-service-requests/';
+  static const String downloadSuperUserCSVEnd = 'api/download-superuser-csv/';
+  static const String downloadAgentCSVEnd = 'api/download-agent-csv/';
+  static const String downloadLeadxlsxEnd = 'api/download-lead-xlsx/';
+  static const String downloadAMCsvEnd = 'api/download-amc-csv/';
+  static const String downloadTicketCSVEnd = 'api/download-tickets-csv/';
+  static const String donwmnloadtechnicianListEnd = 'api/download-technician-csv/';
+  static const String downlaodCustomerListEnd = 'api/download-customer-csv/';
+/*
+  ==============================================================================================================================
+*/
+
+  static const String importCustomerEnd = 'api/import-customers/';
+  static const String importSuperUserEnd = 'api/import-superusers/';
+  static const String importAgentsEnd = 'api/import-superusers/';
+  static const String importTechniciansEnd = 'api/import-technicians/';
+  static const String importLeadEnd = 'api/import-leads/';
+  static const String importAMCsEnd = 'api/import-amcs/';
+  static const String importTicketsEnd = 'api/import-tickets/';
 
 
+/*============================================================= History Apis ==============================================================*/
+
+  static const String ticketHistoryViewEnd = 'api/ticket_history_view/';
 }

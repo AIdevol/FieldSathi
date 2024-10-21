@@ -37,3 +37,6 @@ const String SvgImagepricePlans = 'assets/icons/pricing-workspace.svg';
 const String wrongRoundedImage = 'assets/incorrect.png';
 const String whatsappIcon = 'assets/whatsapp.png';
 const String nullVisualImage = 'assets/nullDataVisual.jpg';
+const String verifiedPerson = 'assets/icons/verified.png';
+const String wrongPerson = 'assets/icons/wrong-person.png';
+const String idleImage = 'assets/icons/pause.png';

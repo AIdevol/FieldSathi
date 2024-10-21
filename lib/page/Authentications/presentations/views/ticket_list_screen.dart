@@ -51,7 +51,7 @@ class TicketListScreen extends GetView<TicketListController> {
       child: Row(
         children: [
           Expanded(child: _buildFilterDropdown()),
-          SizedBox(width: 8),
+          // SizedBox(width: 8),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: appColor),
             onPressed: () {

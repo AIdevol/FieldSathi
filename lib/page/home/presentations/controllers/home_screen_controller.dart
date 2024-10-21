@@ -5,9 +5,11 @@ import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/constans/const_local_keys.dart';
 import 'package:tms_sathi/main.dart';
+import 'package:tms_sathi/response_models/user_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 import 'package:tms_sathi/utilities/custom_dialogue.dart';
 
+import '../../../../constans/role_based_keys.dart';
 import '../../../../response_models/amc_response_model.dart';
 import '../../../../response_models/fsr_response_model.dart';
 import '../../../../response_models/lead_response_model.dart';
@@ -17,6 +19,7 @@ import '../../../../response_models/ticket_response_model.dart';
 class HomeScreenController extends GetxController{
   final RxString profileImageUrl = ''.obs;
   final RxBool isLoading = true.obs;
+  // UserResponseModel userData = UserResponseModel();
   List<FsrResponseModel> allFsr = <FsrResponseModel>[].obs;
   RxList<LeadGetResponseModel> leadListData = <LeadGetResponseModel>[].obs;
   RxList<AmcResponseModel> amcData = <AmcResponseModel>[].obs;
@@ -30,6 +33,7 @@ class HomeScreenController extends GetxController{
     hitGetuserDetailsApiCall();
     hitGetfsrDetailsApiCall();
     fetchedLeadListApiCall();
+    fetchTicketsApiCall();
     hitGetAmcDetailsApiCall();
     hitServiceCategoriesApiCall();
   }
@@ -59,13 +63,16 @@ class HomeScreenController extends GetxController{
     isLoading.value = true;
     final userid = storage.read(userId);
     print("userId++++: $userid");
-    customLoader.show();
+    // customLoader.show();
     FocusManager.instance.primaryFocus!.context;
 
-    Get.find<AuthenticationApiService>().userDetailsApiCall(id: userid).then((value){
+    Get.find<AuthenticationApiService>().userDetailsApiCall(id: userid).then((value)async{
       var userData = value;
       customLoader.hide();
       profileImageUrl.value = userData.profileImage ?? '';
+      await storage.write(userid, userData.id??'');
+      await storage.write(userRole, userData.role??'');
+      print("current user: ${await storage.read(userRole)}");
       toast('Details successfully fetched');
       update();
     }).onError((error, stackError){
@@ -82,7 +89,6 @@ class HomeScreenController extends GetxController{
     Get.find<AuthenticationApiService>().getfsrDetailsApiCall().then((value)async{
       allFsr.assignAll(value);
       customLoader.hide();
-
       if (allFsr is FsrResponseModel){
         var fsrid = allFsr.first.id.toString();
         print('aldjfklasf= ${fsrid}');
@@ -96,6 +102,7 @@ class HomeScreenController extends GetxController{
       isLoading.value = false;
     });
   }
+  
   void fetchedLeadListApiCall(){
     isLoading.value = true;
     // customLoader.show();
@@ -129,7 +136,8 @@ class HomeScreenController extends GetxController{
     // }
     Get.find<AuthenticationApiService>().getAmcDetailsApiCall().then((value){
       amcData.assignAll(value);
-      // List<String>amcIds=amcData.
+      List<String>amcIds=amcData.map((amcValue)=>amcValue.id.toString()).toList();
+      print("kya bhai amc ka Id bhi dekh liye: $amcIds");
       customLoader.hide();
       // toast("AMC successfully Fetched");
       update();
@@ -147,6 +155,11 @@ class HomeScreenController extends GetxController{
     try {
       final tickets = await Get.find<AuthenticationApiService>().getticketDetailsApiCall();
       ticketData.assignAll(tickets);
+      final List ticket = ticketData.map((ticketData)=>ticketData.id.toString()).toList();
+      final List ticketStatus = ticketData.map((ticketData)=>ticketData.status.toString()).toList();
+      await storage.write(ticketId, ticket);
+      print('hello bhai apka ticket data idhr hai: ${storage.read(ticketId)}');
+      print('hello bhai apks ticket status idhr hai: $ticketStatus');
       // applyFilters();
     } catch (error) {
       toast(error.toString());
@@ -178,4 +191,10 @@ class HomeScreenController extends GetxController{
       isLoading.value = false;
     }
   }
+
+
+  void _calculateTicketDetails(){
+
+  }
+  
 }

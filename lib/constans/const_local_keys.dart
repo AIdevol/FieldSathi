@@ -13,11 +13,13 @@ const String leavesAllocationId = 'leaveAllocationId';
 const String leavesId = 'leavesId';
 const String agentId = 'agentId';
 const String customerId = 'customerId';
+const String amcId = 'amcId';
 const String serviceCategoriesId = 'serviceCategoriesId';
 const String subServiceCategoriesId = 'subServiceCategoriesId';
 const String SuperUserId = 'SuperUserId';
 const String attendanceId = 'attendanceId';
 const String technicianId = 'technicianId';
+const String ticketId = 'ticketId';
 const String serviceRequestsId = 'serviceRequestsId';
 
 // RememberMeModal? getRememberMe() {

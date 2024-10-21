@@ -30,11 +30,11 @@ class AttendanceScreenController extends GetxController {
       'role': 'technician'
     };
     Get.find<AuthenticationApiService>().getAttendanceApiCall(parameters: roleWiseData).then((value) async {
-      attendanceResponses.assignAll(value);
-      attendanceData.clear();
-      for (var response in attendanceResponses) {
-        attendanceData.addAll(response.results);
-      }
+      // attendanceResponses.assignAll(value);
+      // attendanceData.clear();
+      // for (var response in attendanceResponses) {
+      //   attendanceData.addAll(response.results);
+      // }
       List<String> attendanceIds = attendanceData.map((technician) => technician.id.toString()).toList();
       await storage.write(attendanceId, attendanceIds);
       customLoader.hide();

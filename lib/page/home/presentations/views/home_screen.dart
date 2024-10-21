@@ -6,9 +6,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
+import 'package:tms_sathi/constans/role_based_keys.dart';
+import 'package:tms_sathi/constans/string_const.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/profile_screen_controller.dart';
 import 'package:tms_sathi/page/home/presentations/controllers/home_screen_controller.dart';
+import 'package:tms_sathi/page/home/presentations/views/agent_dashboard_homepage.dart';
+import 'package:tms_sathi/page/home/presentations/views/super_user_dashBoard_homePage.dart';
+import 'package:tms_sathi/page/home/presentations/views/technician_dashboard_homepage.dart';
 import 'package:tms_sathi/page/home/widget/amc_status_monitor_graph.dart';
 import 'package:tms_sathi/page/home/widget/drawer_screen.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
@@ -24,6 +29,7 @@ import '../../widget/Ticket_details_monitor_graph.dart';
 class HomeScreen extends GetView<HomeScreenController> {
   final GlobalKey<ScaffoldState> drawerkey = GlobalKey();
   // final profileimg = Get.put(ProfileViewScreenController()).profileImageUrl.value;
+  final userrole = storage.read(userRole);
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
   bool _isDialOpen = false;
@@ -47,6 +53,7 @@ class HomeScreen extends GetView<HomeScreenController> {
   Widget build(BuildContext context) {
     return MyAnnotatedRegion(
       child: GetBuilder<HomeScreenController>(
+        init: HomeScreenController(),
         builder: (controller) => Scaffold(
           floatingActionButton: _buildSpeedDial(context: context),
           extendBodyBehindAppBar: true,
@@ -128,10 +135,24 @@ class HomeScreen extends GetView<HomeScreenController> {
               hGap(10)
             ],
           ),
-          body: _buildWidgetView(context)
+          body: _getRoleBasedHomePage(context, userrole)
         ),
       ),
     );
+  }
+  Widget _getRoleBasedHomePage(BuildContext context, String userRole) {
+    switch (userRole) {
+      case adminRole:
+        return _buildWidgetView(context);  // This should call the admin view builder
+      case superUserRole:
+        return SuperUserDashboardHomepage();  // This should be your superuser page
+      case agentRole:
+        return AgentDashboardHomepage();
+      case technicianRole:
+        return TechnicianDashboardHomepage();  // This should be the technician's homepage
+      default:
+        return Center(child: Text("Unauthorized access or no role found"));
+    }
   }
 
   _buildWidgetView(BuildContext context){
@@ -255,13 +276,13 @@ class HomeScreen extends GetView<HomeScreenController> {
 
 
   _graphVisualScreen1(BuildContext context, {required String text}){
-    final containerLength = MediaQuery.of(context).size * 1/2;
+    final containerLength = MediaQuery.of(context).size ;
     return GestureDetector(
       onTap: (){
       Get.toNamed(AppRoutes.ticketListScreen);
       },
       child: Container(
-          height: containerLength.height*0.8,
+          height: containerLength.height*0.99,
           width: Get.width*0.8,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
@@ -300,14 +321,14 @@ class HomeScreen extends GetView<HomeScreenController> {
   }
 }
 _graphVisualScreen2(BuildContext context, {required String text}){
-  final containerLength = MediaQuery.of(context).size * 1/2;
+  final containerLength = MediaQuery.of(context).size ;
   return GestureDetector(
     onTap: (){
       Get.toNamed(AppRoutes.technicianListsScreen);
       print("buttton tapped");
     },
     child: Container(
-        height: containerLength.height*0.8,
+        height: containerLength.height*0.75,
         width: Get.width*0.8,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
@@ -348,7 +369,7 @@ _graphVisualScreen3(BuildContext context, {required String text}){
   final containerLength = MediaQuery.of(context).size * 1/2;
   return GestureDetector(
     onTap: (){
-      Get.toNamed(AppRoutes.amcScreen);
+      // Get.toNamed(AppRoutes.amcScreen);
       print("buttton tapped");
     },
     child: Container(
@@ -376,12 +397,12 @@ _graphVisualScreen3(BuildContext context, {required String text}){
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Text(text, style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: blackColor),),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: _buttonBuildContainer(onTap: (){
-                    Get.toNamed(AppRoutes.amcScreen);
-                  }, text: "Manage AMCs" ),
-                )
+                // Padding(
+                //   padding: const EdgeInsets.all(8.0),
+                //   child: _buttonBuildContainer(onTap: (){
+                //     Get.toNamed(AppRoutes.amcScreen);
+                //   }, text: "Manage AMCs" ),
+                // )
               ],
             ),
             Expanded(child: AmcStatusMonitorGraph()),
@@ -422,7 +443,7 @@ ImageProvider _getBackgroundImage(String? imageUrl) {
   if (imageUrl != null && imageUrl.isNotEmpty) {
     return NetworkImage(imageUrl);
   } else {
-    return NetworkImage("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png");
+    return AssetImage(userImageIcon);
   }
 }
 
@@ -467,6 +488,7 @@ _loginShowPopUpView(HomeScreenController controller,BuildContext context){
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
+                side: BorderSide(strokeAlign: BorderSide.strokeAlignCenter)
             ),
           ),
           shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.5)), // Shadow color
