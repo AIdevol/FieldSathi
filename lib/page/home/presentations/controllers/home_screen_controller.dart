@@ -22,8 +22,10 @@ class HomeScreenController extends GetxController{
   // UserResponseModel userData = UserResponseModel();
   List<FsrResponseModel> allFsr = <FsrResponseModel>[].obs;
   RxList<LeadGetResponseModel> leadListData = <LeadGetResponseModel>[].obs;
-  RxList<AmcResponseModel> amcData = <AmcResponseModel>[].obs;
+  // RxList<AmcResponseModel> amcData = <AmcResponseModel>[].obs;
+  RxList<AmcResult> amcResultData = <AmcResult>[].obs;
   RxList<TicketResponseModel> ticketData = <TicketResponseModel>[].obs;
+  RxList<TicketResult>ticketResultData = <TicketResult>[].obs;
   final RxList<ServiceCategoriesResponseModel> allServices = <ServiceCategoriesResponseModel>[].obs;
   final RxList<ServiceCategoriesResponseModel> filteredServices = <ServiceCategoriesResponseModel>[].obs;
 
@@ -135,8 +137,10 @@ class HomeScreenController extends GetxController{
     //   isLoading.value = false;
     // }
     Get.find<AuthenticationApiService>().getAmcDetailsApiCall().then((value){
-      amcData.assignAll(value);
-      List<String>amcIds=amcData.map((amcValue)=>amcValue.id.toString()).toList();
+      var amcData = value;
+      print('amc Data ${amcData}');
+      amcResultData.assignAll(value.results);
+      List<String>amcIds=amcResultData.map((amcValue)=>amcValue.id.toString()).toList();
       print("kya bhai amc ka Id bhi dekh liye: $amcIds");
       customLoader.hide();
       // toast("AMC successfully Fetched");
@@ -154,7 +158,7 @@ class HomeScreenController extends GetxController{
     FocusManager.instance.primaryFocus?.unfocus();
     try {
       final tickets = await Get.find<AuthenticationApiService>().getticketDetailsApiCall();
-      ticketData.assignAll(tickets);
+      var ticketData=(tickets.results);
       final List ticket = ticketData.map((ticketData)=>ticketData.id.toString()).toList();
       final List ticketStatus = ticketData.map((ticketData)=>ticketData.status.toString()).toList();
       await storage.write(ticketId, ticket);

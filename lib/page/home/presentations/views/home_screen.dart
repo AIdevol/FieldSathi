@@ -55,7 +55,10 @@ class HomeScreen extends GetView<HomeScreenController> {
       child: GetBuilder<HomeScreenController>(
         init: HomeScreenController(),
         builder: (controller) => Scaffold(
-          floatingActionButton: _buildSpeedDial(context: context),
+          floatingActionButton: userrole != technicianRole
+            ?_buildSpeedDial(context: context)
+            : null,
+
           extendBodyBehindAppBar: true,
           key: drawerkey,
           resizeToAvoidBottomInset: true,
@@ -108,6 +111,14 @@ class HomeScreen extends GetView<HomeScreenController> {
                     ),
                   ),
                   PopupMenuItem<String>(
+                    onTap: () => Get.toNamed(AppRoutes.pricingScreenView),
+                    value: 'Pricing Plans',
+                    child: ListTile(
+                      leading: Icon(Icons.price_change_rounded),
+                      title: Text('Pricing Plans'),
+                    ),
+                  ),
+                  PopupMenuItem<String>(
                     value: 'logout',
                     onTap: ()async{
                       _loginShowPopUpView(controller, context);
@@ -135,19 +146,20 @@ class HomeScreen extends GetView<HomeScreenController> {
               hGap(10)
             ],
           ),
-          body: _getRoleBasedHomePage(context, userrole)
+          body: /*_buildWidgetView(context)*/_getRoleBasedHomePage(context, userrole)
         ),
       ),
     );
   }
   Widget _getRoleBasedHomePage(BuildContext context, String userRole) {
+    print('current role working: $userrole');
     switch (userRole) {
       case adminRole:
         return _buildWidgetView(context);  // This should call the admin view builder
       case superUserRole:
-        return SuperUserDashboardHomepage();  // This should be your superuser page
+        return _buildWidgetView(context)/*SuperUserDashboardHomepage()*/;  // This should be your superuser page
       case agentRole:
-        return AgentDashboardHomepage();
+        return _buildWidgetView(context)/*AgentDashboardHomepage()*/;
       case technicianRole:
         return TechnicianDashboardHomepage();  // This should be the technician's homepage
       default:

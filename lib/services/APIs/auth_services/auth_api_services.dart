@@ -180,25 +180,33 @@ implements AuthenticationApi {
   }
 
   @override
-  Future<List<TicketResponseModel>> getticketDetailsApiCall(
-      {Map<String, dynamic>? dataBody}) async {
-    try {
-      final response = await dioClient!.get(
-          "${ApiEnd.get_ticketEnd}", data: dataBody);
-      print("inside api calling method: ${response}");
-      if (response is List) {
-        return response.map((item) => TicketResponseModel.fromJson(item))
-            .toList();
-      } else
-      if (response is Map<String, dynamic> && response.containsKey('data')) {
-        final List<dynamic> data = response['data'];
-        return data.map((item) => TicketResponseModel.fromJson(item)).toList();
-      }
-      throw Exception('Unexpected response format');
-    } catch (e) {
-      return Future.error(NetworkExceptions.getDioException(e));
+  Future<TicketResponseModel>getticketDetailsApiCall({Map<String, dynamic>? dataBody})async{
+    try{
+      final response = await dioClient!.get('${ApiEnd.get_ticketEnd}', data: dataBody, skipAuth: false);
+      return TicketResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
     }
   }
+  // Future<List<TicketResponseModel>> getticketDetailsApiCall(
+  //     {Map<String, dynamic>? dataBody}) async {
+  //   try {
+  //     final response = await dioClient!.get(
+  //         "${ApiEnd.get_ticketEnd}", data: dataBody);
+  //     print("inside api calling method: ${response}");
+  //     if (response is List) {
+  //       return response.map((item) => TicketResponseModel.fromJson(item))
+  //           .toList();
+  //     } else
+  //     if (response is Map<String, dynamic> && response.containsKey('data')) {
+  //       final List<dynamic> data = response['data'];
+  //       return data.map((item) => TicketResponseModel.fromJson(item)).toList();
+  //     }
+  //     throw Exception('Unexpected response format');
+  //   } catch (e) {
+  //     return Future.error(NetworkExceptions.getDioException(e));
+  //   }
+  // }
 
   @override
   Future<TicketResponseModel> postTicketDetailsApiCall(
@@ -358,26 +366,36 @@ implements AuthenticationApi {
     }
   }
 
+  // @override
+  // Future<List<AmcResponseModel>> getAmcDetailsApiCall(
+  //     {Map<String, dynamic>? dataBody}) async {
+  //   try {
+  //     final response = await dioClient!.get(
+  //         "${ApiEnd.amcEnd}", data: dataBody, skipAuth: false);
+  //     if (response is List) {
+  //       return response.map((item) => AmcResponseModel.fromJson(item)).toList();
+  //     } else
+  //     if (response is Map<String, dynamic> && response.containsKey('data')) {
+  //       final List<dynamic>data = response['data'];
+  //       return data.map((item) => AmcResponseModel.fromJson(item)).toList();
+  //     }
+  //     return [];
+  //   } catch (e) {
+  //     return Future.error(NetworkExceptions.getDioException(e));
+  //   }
+  // }
+
+  // ==============================================================Agents details=============================================================================
   @override
-  Future<List<AmcResponseModel>> getAmcDetailsApiCall(
-      {Map<String, dynamic>? dataBody}) async {
-    try {
-      final response = await dioClient!.get(
-          "${ApiEnd.amcEnd}", data: dataBody, skipAuth: false);
-      if (response is List) {
-        return response.map((item) => AmcResponseModel.fromJson(item)).toList();
-      } else
-      if (response is Map<String, dynamic> && response.containsKey('data')) {
-        final List<dynamic>data = response['data'];
-        return data.map((item) => AmcResponseModel.fromJson(item)).toList();
-      }
-      return [];
-    } catch (e) {
-      return Future.error(NetworkExceptions.getDioException(e));
+  Future<AmcResponseModel>getAmcDetailsApiCall({Map<String, dynamic>?dataBody})async{
+    try{
+      final response = await dioClient!.get('${ApiEnd.amcEnd}', data: dataBody, skipAuth: false);
+      return AmcResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
     }
   }
 
-  // ==============================================================Agents details=============================================================================
   @override
   Future<SuperUsersResponseModel> getAgentDetailsApiCall(
       {Map<String, dynamic>? dataBody, parameters}) async {

@@ -2,406 +2,562 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
-import 'package:pluto_grid/pluto_grid.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
-import 'package:tms_sathi/page/Authentications/widgets/views/ticket_model_data.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
+
 import '../controllers/ticket_list_controller.dart';
 
 class TicketListScreen extends GetView<TicketListController> {
+   TicketListScreen({Key? key}) : super(key: key);
+
+  // Define fixed column widths
+  final Map<String, double> columnWidths = {
+    'ID': 50,
+    'Customer Name': 150,
+    'Sub-Customer': 150,
+    'Technician': 150,
+    'Start Date/Time': 160,
+    'End Date/Time': 160,
+    'Total Time': 100,
+    'Address': 200,
+    'Region': 120,
+    'Purpose': 150,
+    'Status': 120,
+    'Ticket Date': 120,
+    'Aging': 100,
+    'Actions': 80,
+  };
+
   @override
   Widget build(BuildContext context) {
-    return MyAnnotatedRegion(child: GetBuilder<TicketListController>(builder: (controller)=>
-    SafeArea(child: Scaffold(
-      appBar: AppBar(
-        backgroundColor: appColor,
-        title: Text('Ticket Details',
-            style: MontserratStyles.montserratBoldTextStyle(
-                size: 18, color: Colors.black)),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: controller.fetchTicketsApiCall,
+    return MyAnnotatedRegion(
+      child: GetBuilder<TicketListController>(
+        builder: (controller) => SafeArea(
+          child: Scaffold(
+            appBar: _buildAppBar(),
+            body: Column(
+              children: [
+                _buildTopBar(),
+                _buildSearchBar(),
+                Expanded(
+                  child: Obx(() => controller.isLoading.value
+                      ? const Center(child: CircularProgressIndicator())
+                      : _buildTicketTable()),
+                ),
+              ],
+            ),
           ),
-          IconButton(onPressed: () {
+        ),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: appColor,
+      title: Text(
+        'Ticket Details',
+        style: MontserratStyles.montserratBoldTextStyle(
+          size: 18,
+          color: Colors.black,
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: controller.fetchTicketsApiCall,
+        ),
+        IconButton(
+          onPressed: () {
             Get.toNamed(AppRoutes.ticketListCreationScreen);
-          }, icon: Icon(FeatherIcons.plus))
-        ],
-      ),
-      body: Column(
-        children: [
-          _buildTopBar(),
-          _buildSearchBar(),
-          Expanded(
-            child: Obx(() =>
-            controller.isLoading.value
-                ? Center(child: Container())
-                : _buildTicketTable()),
-          ),
-        ],
-      ),
-    ),)));
+          },
+          icon: const Icon(FeatherIcons.plus),
+        ),
+      ],
+    );
   }
 
   Widget _buildTopBar() {
     return Container(
-      padding: EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      margin: const EdgeInsets.all(6),
       child: Row(
         children: [
           Expanded(child: _buildFilterDropdown()),
-          // SizedBox(width: 8),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: appColor),
-            onPressed: () {
-              /* Implement import functionality */
-            },
-            child: Text('Import',
-                style: MontserratStyles.montserratSemiBoldTextStyle(size: 13)),
-          ),
-          SizedBox(width: 8),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: appColor),
-            onPressed: () {
-              /* Implement export functionality */
-            },
-            child: Text('Export',
-                style: MontserratStyles.montserratSemiBoldTextStyle(size: 13)),
-          ),
+          const SizedBox(width: 16),
+          _buildActionButton('Import', Icons.file_download_outlined),
+          const SizedBox(width: 12),
+          _buildActionButton('Export', Icons.file_upload_outlined),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(String label, IconData icon) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: appColor,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      onPressed: () {
+        // Implement import/export functionality
+      },
+      icon: Icon(icon, size: 18),
+      label: Text(
+        label,
+        style: MontserratStyles.montserratSemiBoldTextStyle(size: 13),
       ),
     );
   }
 
   Widget _buildFilterDropdown() {
-    return Obx(() =>
-        DropdownButton<String>(
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Obx(
+            () => DropdownButton<String>(
           value: controller.selectedFilter.value,
+          isExpanded: true,
+          underline: Container(),
           items: controller.filterTypes.map((String value) {
             return DropdownMenuItem<String>(
               value: value,
-              child: Text(value),
+              child: Text(
+                value,
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 13,
+                  color: Colors.black87,
+                ),
+              ),
             );
           }).toList(),
           onChanged: controller.updateSelectedFilter,
-        ));
-  }
-
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextField(
-        onChanged: controller.updateSearchQuery,
-        decoration: const InputDecoration(
-          labelText: 'Search',
-          prefixIcon: Icon(Icons.search),
-          border: OutlineInputBorder(),
         ),
       ),
     );
   }
-//
-// Widget _buildTicketTable() {
-//   return Obx(() => DataTable2(
-//     columns: const [
-//       DataColumn2(label: Text('Select'), size: ColumnSize.S),
-//       DataColumn2(label: Text('Ticket ID'), size: ColumnSize.S),
-//       DataColumn2(label: Text('Customer Name'), size: ColumnSize.M),
-//       DataColumn2(label: Text('Sub-Customer Name'), size: ColumnSize.M),
-//       DataColumn2(label: Text('Technician Name'), size: ColumnSize.M),
-//       DataColumn2(label: Text('Start Date/Time'), size: ColumnSize.M),
-//       DataColumn2(label: Text('End Date/Time'), size: ColumnSize.M),
-//       DataColumn2(label: Text('Total Time'), size: ColumnSize.S),
-//       DataColumn2(label: Text('Address'), size: ColumnSize.L),
-//       DataColumn2(label: Text('Region'), size: ColumnSize.M),
-//       DataColumn2(label: Text('Purpose'), size: ColumnSize.M),
-//       DataColumn2(label: Text('Status'), size: ColumnSize.S),
-//       DataColumn2(label: Text('Ticket Date'), size: ColumnSize.M),
-//       DataColumn2(label: Text('Aging'), size: ColumnSize.S),
-//     ],
-//     rows: controller.ticketData.map((ticket) {
-//       return DataRow2(
-//         cells: [
-//           DataCell(Checkbox(
-//             value: ticket.isSelected ?? false,
-//             onChanged: (bool? value) {
-//               controller.toggleTicketSelection(ticket, value ?? false);
-//             },
-//           )),
-//           DataCell(Text(ticket.id?.toString() ?? 'Testing')),
-//           DataCell(Text(ticket.customerDetails?.name ?? '')),
-//           DataCell(Text(ticket.subCustomerDetails?.subCustomerName ?? '')),
-//           DataCell(Text('${ticket.assignTo?.firstName ?? ''} ${ticket.assignTo?.lastName ?? ''}')),
-//           DataCell(Text(ticket.startDateTime ?? '')),
-//           DataCell(Text(ticket.endDateTime ?? '')),
-//           DataCell(Text(ticket.totalTime ?? '')),
-//           DataCell(Text('${ticket.ticketAddress?.city ?? ''}, ${ticket.ticketAddress?.state ?? ''}')),
-//           DataCell(Text(ticket.ticketAddress?.country ?? '')),
-//           DataCell(Text(ticket.purpose ?? '')),
-//           DataCell(Text(ticket.status ?? '')),
-//           DataCell(Text(ticket.date ?? '')),
-//           DataCell(Text(ticket.aging?.toString() ?? '')),
-//         ],
-//       );
-//     }).toList(),
-//   ));
-// }
 
- /* Widget _buildTicketTable() {
-    return Obx(() {
-      // if (controller.ticketData.isEmpty) {
-      //   return Center(child: Text('No tickets found'));
-      // }
+  Widget _buildSearchBar() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: TextField(
+        onChanged: controller.updateSearchQuery,
+        style: MontserratStyles.montserratSemiBoldTextStyle(
+          size: 14,
+          color: Colors.black87,
+        ),
+        decoration: InputDecoration(
+          labelText: 'Search tickets',
+          labelStyle: MontserratStyles.montserratSemiBoldTextStyle(
+            size: 14,
+            color: Colors.grey,
+          ),
+          prefixIcon: const Icon(Icons.search, color: Colors.grey),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide(color: appColor),
+          ),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        ),
+      ),
+    );
+  }
 
-      return SingleChildScrollView(
+  Widget _buildTicketTable() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      margin: const EdgeInsets.all(16),
+      child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SingleChildScrollView(
-          child: DataTable(
-            border: TableBorder(
-              horizontalInside: BorderSide(width: 1, color: Colors.grey.shade300),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: MediaQuery.of(Get.context!).size.width - 32,
             ),
-            columnSpacing: 20,
-            headingRowColor: MaterialStateProperty.all(Colors.grey.shade100),
-            columns: [
-              DataColumn(label: Text('Ticket ID', style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black))),
-              DataColumn(label: Text('Customer Name', style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black))),
-              DataColumn(label: Text('Sub-Customer Name', style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: Colors.black))),
-              DataColumn(label: Text('Technician Name', style:MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: Colors.black))),
-              DataColumn(label: Text('Start Date/Time', style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: Colors.black))),
-              DataColumn(label: Text('End Date/Time', style:MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: Colors.black))),
-              DataColumn(label: Text('Total Time', style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: Colors.black))),
-              DataColumn(label: Text('Address', style:MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: Colors.black))),
-              DataColumn(label: Text('Region', style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: Colors.black))),
-              DataColumn(label: Text('Purpose', style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: Colors.black))),
-              DataColumn(label: Text('Status', style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: Colors.black))),
-              DataColumn(label: Text('Ticket Date', style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: Colors.black))),
-              DataColumn(label: Text('Aging', style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: Colors.black))),
-            ],
-            rows: controller.ticketData.map((ticket) {
-              return DataRow(
-                cells: [
-                  DataCell(Text(ticket.id?.toString() ?? 'NA')),
-                  DataCell(Text(ticket.customerDetails?.name ?? 'NA')),
-                  DataCell(Text(ticket.subCustomerDetails?.subCustomerName ?? 'NA')),
-                  DataCell(Text('${ticket.assignTo?.firstName ?? ''} ${ticket.assignTo?.lastName ?? ''}'.trim())),
-                  DataCell(Text(ticket.startDateTime ?? 'NA')),
-                  DataCell(Text(ticket.endDateTime ?? 'NA')),
-                  DataCell(Text(ticket.totalTime ?? 'NA')),
-                  DataCell(Text('${ticket.ticketAddress?.city ?? ''}, ${ticket.ticketAddress?.state ?? ''}'.trim())),
-                  DataCell(Text(ticket.ticketAddress?.country ?? 'NA')),
-                  DataCell(Text(ticket.purpose ?? 'NA')),
-                  DataCell(Text(ticket.status ?? 'NA')),
-                  DataCell(Text(ticket.date ?? 'NA')),
-                  DataCell(Text(ticket.aging?.toString() ?? 'NA')),
-                ],
-              );
-            }).toList(),
+            child: DataTable(
+              headingRowHeight: 60,
+              dataRowHeight: 65,
+              horizontalMargin: 20,
+              columnSpacing: 20,
+              border: TableBorder(
+                horizontalInside: BorderSide(width: 1, color: Colors.grey.shade200),
+                verticalInside: BorderSide(width: 1, color: Colors.grey.shade200),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              headingRowColor: MaterialStateProperty.all(Colors.grey.shade50),
+              columns: _buildTableColumns(),
+              rows: _buildTableRows(),
+            ),
           ),
         ),
-      );
-    });
-  }*/
-  Widget _buildTicketTable() {
-    return Obx(() {
-      // if (controller.ticketData.isEmpty) {
-      //   return Center(child: Text('No tickets found'));
-      // }
+      ),
+    );
+  }
 
-      // Define columns
-      List<PlutoColumn> columns = [
-        PlutoColumn(
-          title: 'Ticket ID',
-          field: 'ticket_id',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Customer Name',
-          field: 'customer_name',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Sub-Customer Name',
-          field: 'sub_customer_name',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Technician Name',
-          field: 'technician_name',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Start Date/Time',
-          field: 'start_datetime',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'End Date/Time',
-          field: 'end_datetime',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Total Time',
-          field: 'total_time',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Address',
-          field: 'address',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Region',
-          field: 'region',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Purpose',
-          field: 'purpose',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Status',
-          field: 'status',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Ticket Date',
-          field: 'ticket_date',
-          type: PlutoColumnType.text(),
-        ),
-        PlutoColumn(
-          title: 'Aging',
-          field: 'aging',
-          type: PlutoColumnType.number(),
-        ),
-        PlutoColumn(
-          title: 'Actions',
-          field: 'actions',
-          type: PlutoColumnType.number(),
-          renderer: (rendererContext) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: PopupMenuButton<String>(
-                  color: CupertinoColors.white,
-                  offset: Offset(0, 56),
-                  itemBuilder: (BuildContext context)=><PopupMenuEntry<String>>[
-                    PopupMenuItem<String>(
-                      value: 'Edit',
-                      onTap: (){
-                        // Get.toNamed(AppRoutes.editProfile);
-                      },
-                      child: const ListTile(
-                        leading: Icon(Icons.edit_calendar_outlined, size: 20, color: Colors.black,),
-                        title: Text('Edit'),
-                      ),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'Delete',
-                      onTap: (){
-                        // Get.toNamed(AppRoutes.editProfile);
-                      },
-                      child: const ListTile(
-                        leading: Icon(Icons.delete, size: 20,color: Colors.red,),
-                        title: Text('Delete'),
-                      ),
-                    ),
-                  ],
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Icon(Icons.more_horiz, size: 20,))
-                    // IconButton(onPressed: (){
-                    //   // _openWidgetshowModelView();
-                    // }, icon: Icon(Icons.more_vert, size: 20,)
-                    // ),
-                  ),
-                )
-               /* ElevatedButton(
-                  onPressed: () {
-                    // _openDropDownFieldforStatusSubmitions();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: appColor,
-                    minimumSize: Size(130, 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    'Update Status',
-                    style: MontserratStyles.montserratSemiBoldTextStyle(
-                      size: 12,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),*/
-              );
-          },
-        ),
-      ];
-
-      // Define rows
-      List<PlutoRow> rows = controller.ticketData.map((ticket) {
-        return PlutoRow(cells: {
-          'ticket_id': PlutoCell(value: ticket.id?.toString() ?? 'NA'),
-          'customer_name': PlutoCell(value: ticket.customerDetails?.name ?? 'NA'),
-          'sub_customer_name': PlutoCell(value: ticket.subCustomerDetails?.subCustomerName ?? 'NA'),
-          'technician_name': PlutoCell(value: '${ticket.assignTo?.firstName ?? ''} ${ticket.assignTo?.lastName ?? ''}'.trim()),
-          'start_datetime': PlutoCell(value: ticket.startDateTime ?? 'NA'),
-          'end_datetime': PlutoCell(value: ticket.endDateTime ?? 'NA'),
-          'total_time': PlutoCell(value: ticket.totalTime ?? 'NA'),
-          'address': PlutoCell(value: '${ticket.ticketAddress?.city ?? ''}, ${ticket.ticketAddress?.state ?? ''}'.trim()),
-          'region': PlutoCell(value: ticket.ticketAddress?.country ?? 'NA'),
-          'purpose': PlutoCell(value: ticket.purpose ?? 'NA'),
-          'status': PlutoCell(value: ticket.status ?? 'NA'),
-          'ticket_date': PlutoCell(value: ticket.date ?? 'NA'),
-          'aging': PlutoCell(value: ticket.aging?.toString() ?? 'NA'),
-          'actions':PlutoCell(value: '')
-        });
-      }).toList();
-
-      return PlutoGrid(
-        columns: columns,
-        rows: rows,
-        onLoaded: (PlutoGridOnLoadedEvent event) {
-          event.stateManager.setShowColumnFilter(true); // Enables column filtering
-        },
-        onChanged: (PlutoGridOnChangedEvent event) {
-          print('Cell value changed: ${event.value}');
-        },
-        configuration: PlutoGridConfiguration(
-          // enableColumnBorder: true,
-          // gridBorderRadius: BorderRadius.circular(5),
-          enableMoveHorizontalInEditing: true,
+  List<DataColumn> _buildTableColumns() {
+    return columnWidths.keys.map((header) {
+      return DataColumn(
+        label: Container(
+          width: columnWidths[header],
+          child: _buildHeaderCell(header),
         ),
       );
-    });
+    }).toList();
+  }
+
+  Widget _buildHeaderCell(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Text(
+        text,
+        style: MontserratStyles.montserratSemiBoldTextStyle(
+          size: 13,
+          color: Colors.black87,
+        ),
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  Widget _buildDataCell(String text, {double? maxWidth}) {
+    return Tooltip(
+      message: text,
+      child: Container(
+        width: maxWidth,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Text(
+          text,
+          style: MontserratStyles.montserratSemiBoldTextStyle(
+            size: 12,
+            color: Colors.black54,
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+        ),
+      ),
+    );
+  }
+
+  Widget _ticketBoxIcons(String ticketId) {
+    return Container(
+      width: columnWidths['Ticket ID'],
+      padding: const EdgeInsets.symmetric(horizontal:8, vertical: 4),
+      decoration: BoxDecoration(
+        color: normalBlue,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.blue.shade200,
+          width: 1,
+        ),
+      ),
+      child: Text(
+        '$ticketId',
+        style: MontserratStyles.montserratSemiBoldTextStyle(
+          size: 12,
+          color: Colors.white,
+        ),
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  List<DataRow> _buildTableRows() {
+    return controller.ticketResult.map((ticket) {
+      return DataRow(
+        cells: [
+          DataCell(_ticketBoxIcons(ticket.id?.toString() ?? 'NA')),
+          DataCell(_buildDataCell(
+            ticket.customerDetails?.name ?? 'NA',
+            maxWidth: columnWidths['Customer Name'],
+          )),
+          DataCell(_buildDataCell(
+            ticket.subCustomerDetails?.subCustomerName ?? 'NA',
+            maxWidth: columnWidths['Sub-Customer'],
+          )),
+          DataCell(_buildDataCell(
+            '${ticket.assignTo?.firstName ?? ''} ${ticket.assignTo?.lastName ?? ''}'.trim(),
+            maxWidth: columnWidths['Technician'],
+          )),
+          DataCell(_buildDataCell(
+            ticket.startDateTime ?? 'NA',
+            maxWidth: columnWidths['Start Date/Time'],
+          )),
+          DataCell(_buildDataCell(
+            ticket.endDateTime ?? 'NA',
+            maxWidth: columnWidths['End Date/Time'],
+          )),
+          DataCell(_buildDataCell(
+            ticket.totalTime ?? 'NA',
+            maxWidth: columnWidths['Total Time'],
+          )),
+          DataCell(_buildDataCell(
+            '${ticket.ticketAddress?.city ?? ''}, ${ticket.ticketAddress?.state ?? ''}'.trim(),
+            maxWidth: columnWidths['Address'],
+          )),
+          DataCell(_buildDataCell(
+            ticket.ticketAddress?.country ?? 'NA',
+            maxWidth: columnWidths['Region'],
+          )),
+          DataCell(_buildDataCell(
+            ticket.purpose ?? 'NA',
+            maxWidth: columnWidths['Purpose'],
+          )),
+          DataCell(_buildStatusCell(ticket.status ?? 'NA')),
+          DataCell(_buildDataCell(
+            ticket.date ?? 'NA',
+            maxWidth: columnWidths['Ticket Date'],
+          )),
+          DataCell(_buildAgingCell(ticket.aging?.toString() ?? 'NA')),
+          DataCell(_buildActionCell()),
+        ],
+      );
+    }).toList();
+  }
+
+  Widget _buildStatusCell(String status) {
+    Color backgroundColor;
+    Color textColor;
+    IconData statusIcon;
+
+    switch (status.toLowerCase()) {
+      case 'completed':
+        backgroundColor = Colors.green.shade50;
+        textColor = Colors.green.shade700;
+        statusIcon = Icons.check_circle_outline;
+        break;
+      case 'pending':
+        backgroundColor = Colors.orange.shade50;
+        textColor = Colors.orange.shade700;
+        statusIcon = Icons.pending_outlined;
+        break;
+      case 'in progress':
+        backgroundColor = Colors.blue.shade50;
+        textColor = Colors.blue.shade700;
+        statusIcon = Icons.sync;
+        break;
+      default:
+        backgroundColor = Colors.grey.shade50;
+        textColor = Colors.grey.shade700;
+        statusIcon = Icons.info_outline;
+    }
+
+    return Container(
+      width: columnWidths['Status'],
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(statusIcon, size: 14, color: textColor),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              status,
+              style: MontserratStyles.montserratMediumTextStyle(
+                size: 12,
+                color: textColor,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAgingCell(String aging) {
+    int? agingDays = int.tryParse(aging);
+    Color textColor = Colors.black54;
+    IconData icon = Icons.schedule;
+
+    if (agingDays != null) {
+      if (agingDays > 7) {
+        textColor = Colors.red.shade700;
+        icon = Icons.error_outline;
+      } else if (agingDays > 3) {
+        textColor = Colors.orange.shade700;
+        icon = Icons.warning_amber_rounded;
+      }
+    }
+
+    return Container(
+      width: columnWidths['Aging'],
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: textColor),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              '$aging days',
+              style: MontserratStyles.montserratMediumTextStyle(
+                size: 12,
+                color: textColor,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionCell() {
+    return Container(
+        width: columnWidths['Actions'],
+        child: PopupMenuButton<String>(
+        color: Colors.white,
+        offset: const Offset(0, 40),
+    shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+    ),
+    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+      _buildPopupMenuItem('Download', Icons.download, Colors.blue.shade700),
+    _buildPopupMenuItem('Edit', Icons.edit_outlined, Colors.blue.shade700),
+    _buildPopupMenuItem('Delete', Icons.delete_outline, Colors.red),
+    ],
+    child: Container(
+    padding: const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+    color: Colors.grey.shade50,
+      borderRadius: BorderRadius.circular(8),
+    ),
+      child: const Icon(
+        Icons.more_horiz,
+        size: 20,
+        color: Colors.black54,
+      ),
+    ),
+        ),
+    );
+  }
+
+  PopupMenuItem<String> _buildPopupMenuItem(
+      String text, IconData icon, Color iconColor) {
+    return PopupMenuItem<String>(
+      onTap: ()=>_showInbuildDialogValue(),
+      value: text,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: iconColor),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: MontserratStyles.montserratSemiBoldTextStyle(
+              size: 13,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
-_openWidgetshowModelView(){
-  return Get.dialog(
+
+_showInbuildDialogValue(){
+  Get.dialog(
     Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
       child: Container(
-        height: Get.height * 0.3,
-        child: Column(children: [
-        GestureDetector(
-          onTap: (){},
-          child: Row(children: [
-          Icon(Icons.edit_calendar_outlined, size:20),
-          Text("Edit", style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black),)
-        ],),),
-        GestureDetector(
-          onTap: (){},
-          child: Row(children: [
-            Icon(Icons.delete, size:20, color: Colors.red,),
-            Text("Delete", style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black),)
-          ],),),
-            ],),
-      ),)
+        height: Get.height,
+        width: Get.width,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+        child: _form(),
+      ),
+    )
   );
+}
+
+_form(){
+return Container(
+  height: Get.height,
+  width: Get.width,
+  color: whiteColor,
+  child: ListView(
+    children: [],
+  ),
+);
+}
+Widget _buildTopBarView({required TicketListController controller, required BuildContext context}) {
+  return Center(child: Text('ReAssign Ticket', style: MontserratStyles.montserratBoldTextStyle(size: 18, color: blackColor)));
+}
+// Add these extension methods to help with responsive sizing
+extension TicketListScreenExtensions on TicketListScreen {
+  double getResponsiveWidth(BuildContext context, double defaultWidth) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth < 600) {
+      return defaultWidth * 0.8; // Reduce width for small screens
+    } else if (screenWidth < 1200) {
+      return defaultWidth * 0.9; // Slightly reduce width for medium screens
+    }
+    return defaultWidth; // Use default width for large screens
+  }
+
+  // Helper method to format dates consistently
+  String formatDateTime(String? dateTime) {
+    if (dateTime == null || dateTime.isEmpty) return 'NA';
+    try {
+      final DateTime dt = DateTime.parse(dateTime);
+      return '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute}';
+    } catch (e) {
+      return dateTime;
+    }
+  }
+
+  // Helper method to calculate aging in days
+  String calculateAging(String? startDate) {
+    if (startDate == null || startDate.isEmpty) return 'NA';
+    try {
+      final DateTime start = DateTime.parse(startDate);
+      final DateTime now = DateTime.now();
+      return '${now.difference(start).inDays}';
+    } catch (e) {
+      return 'NA';
+    }
+  }
 }

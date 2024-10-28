@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
 
@@ -10,7 +11,9 @@ class AmcStatusMonitorGraphController extends GetxController {
   final _touchedIndex = (-1).obs;
   int get touchedIndex => _touchedIndex.value;
   void setTouchedIndex(int index) => _touchedIndex.value = index;
-  RxList<AmcResponseModel> amcData = <AmcResponseModel>[].obs;
+  // RxList<AmcResponseModel> amcData = <AmcResponseModel>[].obs;
+  RxList<AmcResult> amcResultData = <AmcResult>[].obs;
+
 
   // Observable values for graph data
   RxDouble upcomingPercentage = 0.0.obs;
@@ -32,15 +35,20 @@ class AmcStatusMonitorGraphController extends GetxController {
     hitGetAmcDetailsApiCall();
   }
 
-  void hitGetAmcDetailsApiCall() {
+  void hitGetAmcDetailsApiCall(){
     isLoading.value = true;
-    Get.find<AuthenticationApiService>().getAmcDetailsApiCall().then((value) async {
-      amcData.assignAll(value);
-      _calculateAmcPercentages();
+    // customLoader.show();
+    FocusManager.instance.primaryFocus!.context;
+    Get.find<AuthenticationApiService>().getAmcDetailsApiCall().then((value){
+      var amcData = value;
+      print('amc Data ${amcData}');
+      amcResultData.assignAll(value.results);
+      List<String>amcIds=amcResultData.map((amcValue)=>amcValue.id.toString()).toList();
+      print("kya bhai amc ka Id bhi dekh liye: $amcIds");
       customLoader.hide();
-      isLoading.value = false;
+      _calculateAmcPercentages();
       update();
-    }).onError((error, stackError) {
+    }).onError((error, stackError){
       customLoader.hide();
       toast(error.toString());
       isLoading.value = false;
@@ -48,15 +56,15 @@ class AmcStatusMonitorGraphController extends GetxController {
   }
 
   void _calculateAmcPercentages() {
-    if (amcData.isEmpty) return;
+    if (amcResultData.isEmpty) return;
 
-    int totalAmc = amcData.length;
+    int totalAmc = amcResultData.length;
     int upcomingCount = 0;
     int renewalCount = 0;
     int completedCount = 0;
 
-    for (var amc in amcData) {
-      switch (amc.status?.toLowerCase()) {
+    for (var amc in amcResultData) {
+      switch (amc.status.toString()) {
         case 'upcoming':
           upcomingCount++;
           break;
@@ -74,6 +82,6 @@ class AmcStatusMonitorGraphController extends GetxController {
     completedPercentage.value = (completedCount / totalAmc) * 100;
     totalPercentage.value = 100.0;
 
-    totalCount.value = amcData.length;
+    totalCount.value = amcResultData.length;
   }
 }

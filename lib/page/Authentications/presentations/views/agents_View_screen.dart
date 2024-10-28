@@ -645,7 +645,7 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
         rows: controller.agentsData.map((resultsData) {
           return DataRow(
             cells: [
-              DataCell(Text(resultsData.id?.toString() ?? 'N/A')),
+              DataCell(_ticketBoxIcons(resultsData.id.toString() ?? 'N/A')),
               DataCell(CircleAvatar(
                 backgroundImage: resultsData.profileImage != null
                     ? NetworkImage(resultsData.profileImage!)
@@ -742,10 +742,10 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
         padding: const EdgeInsets.all(18.0),
         child: ListView(
           children: [
-            vGap(40),
+            vGap(20),
             _buildTopBarView(controller: controller, context: context),
-            Divider(height: 1, color: Colors.black),
-            vGap(40),
+            Divider(thickness: 2, color: Colors.black),
+            vGap(20),
             _buildTaskName(context: context, controller: controller),
             vGap(20),
             _buildLastName(context: context, controller: controller),
@@ -762,7 +762,7 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
   }
 
   Widget _buildTopBarView({required AgentsViewScreenController controller, required BuildContext context}) {
-    return Center(child: Text('Edit Agent', style: MontserratStyles.montserratBoldTextStyle(size: 25, color: blackColor)));
+    return Center(child: Text('Edit Agent', style: MontserratStyles.montserratBoldTextStyle(size: 18, color: blackColor)));
   }
 
   Widget _buildTaskName({required AgentsViewScreenController controller, required BuildContext context}) {
@@ -940,4 +940,28 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
       },
     );
   }
+}
+
+Widget _ticketBoxIcons(String ticketId) {
+  return Center(
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color:normalBlue,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: Colors.blue.shade300,
+          width: 1,
+        ),
+      ),
+      child: Text(
+        '$ticketId',
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+        ),
+      ),
+    ),
+  );
 }

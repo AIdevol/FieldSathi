@@ -5,6 +5,7 @@ import '../utilities/hex_color.dart';
 
 final kPrimaryColor = HexColor('FF39A0');
 final ksecondaryColor = HexColor('343BAC');
+final normalBlue = HexColor('3b71ca');
 const whiteColor = Colors.white;
 const blackColor = Colors.black;
 final kyellowColor = HexColor('FEA64C');

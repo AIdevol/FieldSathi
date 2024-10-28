@@ -29,6 +29,10 @@ class RegisterScreenController extends GetxController{
   @override
   void onClose() {
     countryController.dispose();
+    emailController.dispose();
+    nameController.dispose();
+    companyNameController.dispose();
+    emailController.dispose();
     countryFocusNode.dispose();
     emailFocusNode.dispose();
     nameFocusNode.dispose();

@@ -15,8 +15,8 @@ class GraphViewController extends GetxController {
   final _touchedIndex = (-1).obs;
   int get touchedIndex => _touchedIndex.value;
   void setTouchedIndex(int index) => _touchedIndex.value = index;
-  RxList<TicketResponseModel> ticketData = <TicketResponseModel>[].obs;
-
+  RxList<TicketResult> ticketResult = <TicketResult>[].obs;
+  // var ticketData = TicketResponseModel();
 
   // Ticket counts
   final RxInt totalTicketsCount = 0.obs;
@@ -45,27 +45,27 @@ class GraphViewController extends GetxController {
     int inactive = 0;
     int onHold = 0;
 
-    for (var ticket in ticketData) {
+    for (var ticket in ticketResult) {
       total++;
-      String status = ticket.status.toString().toLowerCase();
+    String status  = ticket.status.toString();
       print("kya bhai kya kr rhe ho ye sb: $status");
 
       switch (status) {
-        case 'completed':
+        case 'Completed':
           completed++;
           break;
-        case 'ongoing':
+        case 'Ongoing':
         case 'in progress':
           ongoing++;
           break;
-        case 'rejected':
+        case 'Rejected':
           rejected++;
           break;
-        case 'inactive':
+        case 'Inactive':
           inactive++;
           break;
-        case 'on hold':
-        case 'onhold':
+        case 'On hold':
+        case 'Onhold':
           onHold++;
           break;
       }
@@ -86,7 +86,10 @@ class GraphViewController extends GetxController {
     isLoading.value = true;
     try {
       final tickets = await Get.find<AuthenticationApiService>().getticketDetailsApiCall();
-      ticketData.assignAll(tickets);
+      ticketResult.assignAll(tickets.results);
+      var ticketData = tickets;
+      print('tickets : $ticketData');
+      print("What happened to your data");
       _calculateTicketDetails();
     } catch (error) {
       toast(error.toString());

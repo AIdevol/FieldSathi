@@ -18,6 +18,6 @@ class HomeBinding extends Bindings{
     Get.lazyPut<AmcStatusMonitorGraphController>(() => AmcStatusMonitorGraphController());
     Get.lazyPut<LeaveUpdateScreenController>(() => LeaveUpdateScreenController());
     Get.lazyPut<GetLoginModalService>(() => GetLoginModalService());
-    Get.lazyPut<RoleManagerBindings>(()=> RoleManagerBindings());
+    // Get.lazyPut<RoleManagerBindings>(()=> RoleManagerBindings());
   }
 }

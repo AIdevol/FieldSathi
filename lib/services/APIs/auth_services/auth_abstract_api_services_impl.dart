@@ -36,7 +36,8 @@ abstract class AuthenticationApi {
   Future<UserResponseModel>updateUserDetailsApiCall({Map<String, dynamic>? dataBody, String? id});
   Future<UserResponseModel> userProfileImageUpdateApiCall(File imageFile);
   Future<HolidaysCalenderResponseModel>holidaysCalenderApiCall({Map<String, dynamic>? dataBody});
-  Future<List<TicketResponseModel>>getticketDetailsApiCall({Map<String, dynamic>? dataBody});
+  // Future<List<TicketResponseModel>>getticketDetailsApiCall({Map<String, dynamic>? dataBody});
+  Future<TicketResponseModel>getticketDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<TicketResponseModel>postTicketDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<LeaveResponseModel>getLeavesApiCall({Map<String, dynamic>? dataBody});
   Future<LeaveResponseModel>putLeavesApiCall({Map<String, dynamic>? dataBody,id});
@@ -64,4 +65,5 @@ abstract class AuthenticationApi {
   Future<List<ExpensesResponseModel>>getExpensesApiCall({Map<String, dynamic>?dataBody, parameters});
   Future<List<ServiceRequestsResponseModel>> getServiceRequestsApiCall({Map<String, dynamic>?dataBody, parameters});
   Future<List<TechnicianResponseModel>> getTechnicianApiCall({Map<String, dynamic>? dataBody, parameters});
+  Future<AmcResponseModel>getAmcDetailsApiCall({Map<String, dynamic>?dataBody});
 }
