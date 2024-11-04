@@ -25,6 +25,7 @@ const String STRING_demoExpired = "Demo Expired";
 const String STRING_appDemoExpiredDesc =
     "This application's demo is no longer available. Please reach out to the development team for latest version.";
 
+// String profile
 const String appIcon = "assets/YelloQrCode.jpeg";
 const String logoPark = "assets/15745-removebg-preview.png";
 const String importicon = "assets/import.png";

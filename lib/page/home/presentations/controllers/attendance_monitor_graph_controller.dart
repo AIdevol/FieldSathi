@@ -73,18 +73,11 @@ class AttendanceGraphViewController extends GetxController {
     isLoading.value = true;
     customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
-
-    var roleWiseData = {
-      'role': 'technician'
-    };
-
     Get.find<AuthenticationApiService>()
-        .getAttendanceApiCall(parameters: roleWiseData)
+        .getAttendanceApiCall()
         .then((value) async {
-      // Store the response
-      attendanceResponses = value;
-
-      // Calculate attendance statistics
+      var attendanceResponses = value;
+     print("attendanceResponse: :${attendanceResponses..results}");
       calculateAttendance();
 
       customLoader.hide();

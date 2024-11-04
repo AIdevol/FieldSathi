@@ -33,7 +33,7 @@ class AuthenticationBinding extends Bindings {
     Get.lazyPut<LoginScreenController>(()=> LoginScreenController());
     Get.lazyPut<RegisterScreenController>(() => RegisterScreenController());
     Get.lazyPut<CalendarController>(() => CalendarController());
-    Get.lazyPut<FsrViewcontroller>(()=> FsrViewcontroller());
+    Get.lazyPut<FsrViewController>(()=> FsrViewController());
     Get.lazyPut<AttendanceScreenController>(()=> AttendanceScreenController());
     Get.lazyPut<ExpenditureScreenController>(()=> ExpenditureScreenController());
     Get.lazyPut<ServiceRequestScreenController>(()=> ServiceRequestScreenController());

@@ -287,23 +287,31 @@ implements AuthenticationApi {
   }
 
   @override
-  Future<List<FsrResponseModel>> getfsrDetailsApiCall(
-      {Map<String, dynamic>? dataBody}) async {
-    try {
-      final response = await dioClient!.get(
-        "${ApiEnd.fsrApiEnd}", data: dataBody, skipAuth: false,);
-      if (response is List) {
-        return response.map((item) => FsrResponseModel.fromJson(item)).toList();
-      } else
-      if (response is Map<String, dynamic> && response.containsKey('data')) {
-        final List<dynamic> data = response['data'];
-        return data.map((item) => FsrResponseModel.fromJson(item)).toList();
-      }
-      return [];
-    } catch (e) {
-      return Future.error(NetworkExceptions.getDioException(e));
+  Future<FsrResponseModel>getfsrDetailsApiCall({Map<String, dynamic>? dataBody})async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.fsrApiEnd}", data: dataBody, skipAuth: false,);
+      return FsrResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
     }
   }
+  // Future<List<FsrResponseModel>> getfsrDetailsApiCall(
+  //     {Map<String, dynamic>? dataBody}) async {
+  //   try {
+  //     final response = await dioClient!.get(
+  //       "${ApiEnd.fsrApiEnd}", data: dataBody, skipAuth: false,);
+  //     if (response is List) {
+  //       return response.map((item) => FsrResponseModel.fromJson(item)).toList();
+  //     } else
+  //     if (response is Map<String, dynamic> && response.containsKey('data')) {
+  //       final List<dynamic> data = response['data'];
+  //       return data.map((item) => FsrResponseModel.fromJson(item)).toList();
+  //     }
+  //     return [];
+  //   } catch (e) {
+  //     return Future.error(NetworkExceptions.getDioException(e));
+  //   }
+  // }
 
   @override
   Future<FsrResponseModel> postfsrDetailsApiCall(
@@ -529,7 +537,7 @@ implements AuthenticationApi {
   }
 
 // ==================================================================================Service Categories api Call===============================================================
-  @override
+  /*@override
   Future<List<ServiceCategoriesResponseModel>> getServiceCategoriesApiCall(
       {Map<String, dynamic>?dataBody}) async {
     try {
@@ -549,14 +557,23 @@ implements AuthenticationApi {
       return Future.error(NetworkExceptions.getDioException(error));
     }
   }
-
+*/
+  Future<ServiceCategoryResponseModel>getServiceCategoriesApiCall({Map<String, dynamic>? dataBody})async{
+    try{
+        final response = await dioClient!.get(
+        "${ApiEnd.serviceCategories}", skipAuth: false, data: dataBody);
+        return ServiceCategoryResponseModel.fromJson(response);
+    }catch(error){
+          return Future.error(NetworkExceptions.getDioException(error));
+    }
+}
   @override
-  Future<ServicePostResponseModel> postServiceCategoriesApiCall(
+  Future<ServiceCategoryResponseModel> postServiceCategoriesApiCall(
       {Map<String, dynamic>? dataBody}) async {
     try {
       final response = await dioClient!.post(
           ApiEnd.serviceCategories, data: dataBody, skipAuth: false);
-      return ServicePostResponseModel.fromJson(response);
+      return ServiceCategoryResponseModel.fromJson(response);
     } catch (error) {
       return Future.error(NetworkExceptions.getDioException(error));
     }
@@ -576,6 +593,34 @@ implements AuthenticationApi {
   }
 
 // ===============================================================Get Technician Attendance Api Call ==========================================
+  @override
+  Future<TMSResponseModel>getuserDetailsApiCall({Map<String, dynamic>? dataBody})async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.tmsUsersEnd}", data: dataBody, skipAuth: false);
+      return TMSResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
+  // @override
+  // Future<List<TMSResponseModel>>getuserDetailsApiCall({Map<String, dynamic>? dataBody}) async{
+  //   try {
+  //     final response = await dioClient!.get("${ApiEnd.tmsUsersEnd}", data: dataBody, skipAuth: false);
+  //     if (response is List) {
+  //       return response.map((item) =>
+  //           TMSResponseModel.fromJson(item)).toList();
+  //     }else if (response is Map<String, dynamic> && response.containsKey('data')) {
+  //       final List<dynamic>data = response['data'];
+  //       return data.map((item) =>
+  //           TMSResponseModel.fromJson(item)).toList();
+  //     }
+  //     return [];
+  //     // return TMSResponseModel.fromJson(response);
+  //   } catch (e) {
+  //     return Future.error(NetworkExceptions.getDioException(e));
+  //   }
+  // }
 /*  @override
   Future<List<TechnicianAttendanceResponseModel>> getAttendanceApiCall(
       {Map<String, dynamic>? dataBody, parameters}) async {
@@ -598,9 +643,9 @@ implements AuthenticationApi {
     }
   }*/
   @override
-Future<TechnicianAttendanceResponseModel>getAttendanceApiCall({Map<String, dynamic>? dataBody, parameters})async{
+Future<TechnicianAttendanceResponseModel>getAttendanceApiCall({Map<String, dynamic>? dataBody , dynamic parameters})async{
   try{
-    final response = await dioClient!.get(ApiEnd.tmsUsersEnd, data: dataBody, skipAuth: false, queryParameters: parameters);
+    final response = await dioClient!.get(ApiEnd.tmsUsersEnd, data: dataBody, skipAuth: false, queryParameters: parameters );
     return TechnicianAttendanceResponseModel.fromJson(response);
   }catch(error){
     return Future.error(NetworkExceptions.getDioException(error));
@@ -661,28 +706,38 @@ Future<List<ExpensesResponseModel>> getExpensesApiCall(
   }
 //==================================================================================== technician api call ==============================================================================
 
-  @override
-  Future<List<TechnicianResponseModel>> getTechnicianApiCall(
-      {Map<String, dynamic>? dataBody, parameters}) async {
-    try {
+  // @override
+  // Future<List<TechnicianResponseModel>> getTechnicianApiCall(
+  //     {Map<String, dynamic>? dataBody, parameters}) async {
+  //   try {
+  //     final response = await dioClient!.get(ApiEnd.tmsUsersEnd, data: dataBody,
+  //         skipAuth: false,
+  //         queryParameters: parameters);
+  //     if (response is List) {
+  //       return response.map((item) =>
+  //           TechnicianResponseModel.fromJson(item)).toList();
+  //     } else
+  //     if (response is Map<String, dynamic> && response.containsKey('data')) {
+  //       final List<dynamic>data = response['data'];
+  //       return data.map((item) =>
+  //           TechnicianResponseModel.fromJson(item)).toList();
+  //     }
+  //     return [];
+  //   } catch (error) {
+  //     return Future.error(NetworkExceptions.getDioException(error));
+  //   }
+  // }
+ @override
+  Future<TechnicianResponseModel>getTechnicianApiCall({Map<String, dynamic>? dataBody, parameters})async{
+    try{
       final response = await dioClient!.get(ApiEnd.tmsUsersEnd, data: dataBody,
-          skipAuth: false,
-          queryParameters: parameters);
-      if (response is List) {
-        return response.map((item) =>
-            TechnicianResponseModel.fromJson(item)).toList();
-      } else
-      if (response is Map<String, dynamic> && response.containsKey('data')) {
-        final List<dynamic>data = response['data'];
-        return data.map((item) =>
-            TechnicianResponseModel.fromJson(item)).toList();
-      }
-      return [];
-    } catch (error) {
+              skipAuth: false,
+              queryParameters: parameters);
+      return TechnicianResponseModel.fromJson(response);
+    }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }
-  }
-
+ }
 //   =============================
 }
 

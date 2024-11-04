@@ -3,7 +3,7 @@ import 'dart:convert';
 class TechnicianResponseModel {
   final int count;
   final int totalPages;
-  final List<Results> results;
+  final List<TechnicianResults> results;
 
   TechnicianResponseModel({
     required this.count,
@@ -15,12 +15,12 @@ class TechnicianResponseModel {
     return TechnicianResponseModel(
       count: json['count'],
       totalPages: json['total_pages'],
-      results: (json['results'] as List).map((i) => Results.fromJson(i)).toList(),
+      results: (json['results'] as List).map((i) => TechnicianResults.fromJson(i)).toList(),
     );
   }
 }
 
-class Results {
+class TechnicianResults {
   final int id;
   final TodayAttendance? todayAttendance;
   final List<String> brandNames;
@@ -88,7 +88,7 @@ class Results {
   final int? customerId;
   final String? subscription;
 
-  Results({
+  TechnicianResults({
     required this.id,
     this.todayAttendance,
     required this.brandNames,
@@ -157,8 +157,8 @@ class Results {
     this.subscription,
   });
 
-  factory Results.fromJson(Map<String, dynamic> json) {
-    return Results(
+  factory TechnicianResults.fromJson(Map<String, dynamic> json) {
+    return TechnicianResults(
       id: json['id'],
       todayAttendance: json['today_attendance'] != null
           ? TodayAttendance.fromJson(json['today_attendance'])

@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
@@ -7,6 +8,8 @@ import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
+import '../../../../utilities/common_textFields.dart';
+import '../../widgets/views/principal_customer_view.dart';
 import '../controllers/ticket_list_controller.dart';
 
 class TicketListScreen extends GetView<TicketListController> {
@@ -29,17 +32,19 @@ class TicketListScreen extends GetView<TicketListController> {
     'Aging': 100,
     'Actions': 80,
   };
+  
 
   @override
   Widget build(BuildContext context) {
     return MyAnnotatedRegion(
       child: GetBuilder<TicketListController>(
+        init: TicketListController(),
         builder: (controller) => SafeArea(
           child: Scaffold(
             appBar: _buildAppBar(),
             body: Column(
               children: [
-                _buildTopBar(),
+                _buildTopBar(context),
                 _buildSearchBar(),
                 Expanded(
                   child: Obx(() => controller.isLoading.value
@@ -79,53 +84,67 @@ class TicketListScreen extends GetView<TicketListController> {
     );
   }
 
-  Widget _buildTopBar() {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      margin: const EdgeInsets.all(6),
-      child: Row(
-        children: [
-          Expanded(child: _buildFilterDropdown()),
-          const SizedBox(width: 16),
-          _buildActionButton('Import', Icons.file_download_outlined),
-          const SizedBox(width: 12),
-          _buildActionButton('Export', Icons.file_upload_outlined),
-        ],
-      ),
-    );
-  }
+   Widget _buildTopBar(BuildContext context) {
+     return Container(
+       padding: const EdgeInsets.all(16.0),
+       decoration: BoxDecoration(
+         color: Colors.white,
+         borderRadius: BorderRadius.circular(8),
+         boxShadow: [
+           BoxShadow(
+             color: Colors.grey.withOpacity(0.1),
+             spreadRadius: 1,
+             blurRadius: 3,
+             offset: const Offset(0, 2),
+           ),
+         ],
+       ),
+       margin: const EdgeInsets.all(6),
+       child: Row(
+         children: [
+           Expanded(child: _buildFilterDropdown()),
+           const SizedBox(width: 16),
+           _buildActionButton(
+             context,
+             'Import',
+             Icons.file_download_outlined,
+             onTap: () => _showImportModelView(context),
+           ),
+           const SizedBox(width: 12),
+           _buildActionButton(
+             context,
+             'Export',
+             Icons.file_upload_outlined,
+             onTap: () {},
+           ),
+         ],
+       ),
+     );
+   }
 
-  Widget _buildActionButton(String label, IconData icon) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: appColor,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      onPressed: () {
-        // Implement import/export functionality
-      },
-      icon: Icon(icon, size: 18),
-      label: Text(
-        label,
-        style: MontserratStyles.montserratSemiBoldTextStyle(size: 13),
-      ),
-    );
-  }
+
+   Widget _buildActionButton(
+       BuildContext context,
+       String label,
+       IconData icon,
+       {required VoidCallback onTap}
+       ) {
+     return ElevatedButton.icon(
+       style: ElevatedButton.styleFrom(
+         backgroundColor: appColor,
+         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+         shape: RoundedRectangleBorder(
+           borderRadius: BorderRadius.circular(8),
+         ),
+       ),
+       onPressed: onTap,
+       icon: Icon(icon, size: 18),
+       label: Text(
+         label,
+         style: MontserratStyles.montserratSemiBoldTextStyle(size: 13),
+       ),
+     );
+   }
 
   Widget _buildFilterDropdown() {
     return Container(
@@ -456,9 +475,9 @@ class TicketListScreen extends GetView<TicketListController> {
     borderRadius: BorderRadius.circular(12),
     ),
     itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-      _buildPopupMenuItem('Download', Icons.download, Colors.blue.shade700),
-    _buildPopupMenuItem('Edit', Icons.edit_outlined, Colors.blue.shade700),
-    _buildPopupMenuItem('Delete', Icons.delete_outline, Colors.red),
+      _buildPopupMenuItem('Download', Icons.download, Colors.blue.shade700, context, controller),
+      _buildPopupEditMenuItem('Edit', Icons.edit_outlined, Colors.blue.shade700, context, controller),
+      _buildPopupDeleteMenuItem('Delete', Icons.delete_outline, Colors.red, context, controller),
     ],
     child: Container(
     padding: const EdgeInsets.all(8),
@@ -477,9 +496,9 @@ class TicketListScreen extends GetView<TicketListController> {
   }
 
   PopupMenuItem<String> _buildPopupMenuItem(
-      String text, IconData icon, Color iconColor) {
+      String text, IconData icon, Color iconColor, BuildContext context, TicketListController controller) {
     return PopupMenuItem<String>(
-      onTap: ()=>_showInbuildDialogValue(),
+      onTap: (){},
       value: text,
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -497,29 +516,83 @@ class TicketListScreen extends GetView<TicketListController> {
       ),
     );
   }
+   PopupMenuItem<String> _buildPopupEditMenuItem(
+       String text, IconData icon, Color iconColor, BuildContext context, TicketListController controller) {
+     return PopupMenuItem<String>(
+       onTap: ()=>_showInbuildDialogValue(context, controller),
+       value: text,
+       child: Row(
+         mainAxisSize: MainAxisSize.min,
+         children: [
+           Icon(icon, size: 18, color: iconColor),
+           const SizedBox(width: 8),
+           Text(
+             text,
+             style: MontserratStyles.montserratSemiBoldTextStyle(
+               size: 13,
+               color: Colors.black87,
+             ),
+           ),
+         ],
+       ),
+     );
+   }
+   PopupMenuItem<String> _buildPopupDeleteMenuItem(
+       String text, IconData icon, Color iconColor, BuildContext context, TicketListController controller) {
+     return PopupMenuItem<String>(
+       onTap: (){},
+       value: text,
+       child: Row(
+         mainAxisSize: MainAxisSize.min,
+         children: [
+           Icon(icon, size: 18, color: iconColor),
+           const SizedBox(width: 8),
+           Text(
+             text,
+             style: MontserratStyles.montserratSemiBoldTextStyle(
+               size: 13,
+               color: Colors.black87,
+             ),
+           ),
+         ],
+       ),
+     );
+   }
 }
 
 
-_showInbuildDialogValue(){
+_showInbuildDialogValue(BuildContext context, TicketListController controller){
   Get.dialog(
     Dialog(
       child: Container(
         height: Get.height,
         width: Get.width,
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-        child: _form(),
+        child: _form(context, controller),
       ),
     )
   );
 }
 
-_form(){
-return Container(
-  height: Get.height,
-  width: Get.width,
-  color: whiteColor,
+_form(BuildContext context, TicketListController controller){
+return Padding(
+  padding: const EdgeInsets.all(18.0),
   child: ListView(
-    children: [],
+    children: [
+      Text('Reassign', style: MontserratStyles.montserratSemiBoldTextStyle(size: 18,color: Colors.black),),
+      Divider(height: 20,),
+      _buildTaskName(context: context),
+      vGap(20),
+      _addTechnician(context: context),
+      vGap(20),
+      _buildOptionbutton(context: context),
+      vGap(20),
+      _buildtextContainer(context: context),
+      vGap(20),
+      _dobView(context: context, controller:  controller),
+      vGap(20),
+      _selectGroupViewform(context: context)
+    ],
   ),
 );
 }
@@ -560,4 +633,356 @@ extension TicketListScreenExtensions on TicketListScreen {
       return 'NA';
     }
   }
+}
+_buildTaskName({required BuildContext context}){
+  return CustomTextField(
+    hintText: "Task Name".tr,
+    // controller: controller.emailcontroller,
+    textInputType: TextInputType.emailAddress,
+    // focusNode: controller.phoneFocusNode,
+    onFieldSubmitted: (String? value) {
+      // FocusScope.of(Get.context!)
+      //     .requestFocus(controller.passwordFocusNode);
+    },
+    labletext: "Task Name".tr,
+    prefix: Icon(Icons.add_task, color: Colors.black,),
+    // validator: (value) {
+    //   return value?.isEmptyField(messageTitle: "Email");
+    // },
+    inputFormatters:[
+      // LengthLimitingTextInputFormatter(10),
+    ],
+  );
+
+}
+
+_addTechnician({required BuildContext context}){
+  return CustomTextField(
+    hintText: "Assign To".tr,
+    // controller: controller.emailcontroller,
+    textInputType: TextInputType.emailAddress,
+    // focusNode: controller.phoneFocusNode,
+    onFieldSubmitted: (String? value) {
+      // FocusScope.of(Get.context!)
+      //     .requestFocus(controller.passwordFocusNode);
+    },
+    labletext: "Assign To".tr,
+    prefix: Icon(Icons.add_task, color: Colors.black,),
+    suffix: IconButton(onPressed: (){}, icon: Icon(Icons.add, color: Colors.black,),),
+    // validator: (value) {
+    //   return value?.isEmptyField(messageTitle: "Email");
+    // },
+    inputFormatters:[
+      // LengthLimitingTextInputFormatter(10),
+    ],
+  );
+
+}
+
+_buildOptionbutton({required BuildContext context}){
+  return  Column(
+    mainAxisAlignment: MainAxisAlignment.start,
+    children: [
+      ElevatedButton(
+        onPressed: () {},
+        child: Text('AMC',style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),),
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(appColor),
+          foregroundColor: WidgetStateProperty.all(Colors.white),
+          padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 120, vertical: 15)),
+          elevation: WidgetStateProperty.all(5),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.5)), // Shadow color
+        ),
+      ),
+      hGap(10),
+      Row(
+        children: [
+          ElevatedButton(
+            onPressed: () {},
+            child: Text('Rate',style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),),
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(appColor), // Background color
+              foregroundColor: WidgetStateProperty.all(Colors.white), // Text color
+              padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 55, vertical: 15)), // Padding
+              elevation: WidgetStateProperty.all(5), // Shadow elevation
+              shape: WidgetStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10), // Rounded corners
+                ),
+              ),
+              shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.5)), // Shadow color
+            ),
+          ),
+          hGap(10),
+          Container(
+            height: Get.height*0.06,
+            width: Get.width*0.30,
+            decoration: BoxDecoration(color: whiteColor,borderRadius: BorderRadius.circular(25),
+                border: Border.all(
+                    width:1,
+                    color: Colors.grey
+                  // _isFocused ? Colors.blue : Colors.black,
+
+                )),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: TextField(
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Rate *',
+                ),
+              ),
+            ),
+          ),
+        ],
+      )
+
+      // InkWell(onTap: (){},child: Container(height: 40,width: 120,color:appColor,),)
+    ],);
+  //   GetBuilder<TicketListController>(builder: (context){
+  //   return
+  // });
+}
+
+_buildtextContainer({required BuildContext context}){
+  return  Container(
+    height: Get.height*0.16,
+    width: Get.width*0.40,
+    decoration: BoxDecoration(color: whiteColor,borderRadius: BorderRadius.circular(25),
+        border: Border.all(
+            width:1,
+            color: Colors.grey
+          // _isFocused ? Colors.blue : Colors.black,
+
+        )),
+    child:  Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10),
+      child: TextField(
+        style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),
+        maxLines: 10,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: 'Purpose *',
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _dobView({required BuildContext context, required TicketListController controller}) {
+  // final controller = Get.put(TicketListController());
+  return CustomTextField(
+    hintText: "dd-month-yyyy".tr,
+    controller: controller.dateController,
+    textInputType: TextInputType.datetime,
+    focusNode: controller.focusNode,
+    onFieldSubmitted: (String? value) {
+      // Handle field submission if needed
+    },
+    labletext: "Date".tr,
+    prefix: IconButton(
+      onPressed: () => controller.selectDate(context),
+      icon: Icon(Icons.calendar_month, color: Colors.black),
+    ),
+  );
+}
+
+Widget _selectGroupViewform({required BuildContext context}){
+  return SizedBox(
+    height: Get.height,
+    width: Get.width,
+    child: ListView(
+      scrollDirection: Axis.vertical,
+      children: [
+        Text('Customer Details',    style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),),
+        _buildListCustomerDetails(context: context),
+        vGap(20),
+        Text('FSR Details',    style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),),
+        CustomTextField(
+          hintText: "FSR Details".tr,
+          // controller: controller.dateController,
+          textInputType: TextInputType.datetime,
+          // focusNode: controller.focusNode,
+          onFieldSubmitted: (String? value) {
+            // Handle field submission if needed
+          },
+          // labletext: "Date".tr,
+          prefix: IconButton(
+            onPressed: (){} /*=> controller.selectDate(context)*/,
+            icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30,),
+          ),
+        ),
+        vGap(20),
+        Text('Services Details',    style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),),
+        CustomTextField(
+          hintText: "Services Details".tr,
+          // controller: controller.dateController,
+          textInputType: TextInputType.datetime,
+          // focusNode: controller.focusNode,
+          onFieldSubmitted: (String? value) {
+            // Handle field submission if needed
+          },
+          // labletext: "Date".tr,
+          prefix: IconButton(
+            onPressed: (){} /*=> controller.selectDate(context)*/,
+            icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30,),
+          ),
+        ),
+        vGap(20),
+        Text('Instructions',    style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),),
+        Container(
+          height: Get.height*0.16,
+          width: Get.width*0.40,
+          decoration: BoxDecoration(color: whiteColor,borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                  width:1,
+                  color: Colors.grey
+                // _isFocused ? Colors.blue : Colors.black,
+
+              )),
+          child:  Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: TextField(
+              style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),
+              maxLines: 10,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Instructions *',
+              ),
+            ),
+          ),
+        ),
+        vGap(20),
+        _buildButtonView(context:  context)
+      ],),
+  );
+}
+
+Widget _buildListCustomerDetails({required BuildContext context}){
+  return Column(children: [
+    vGap(20),
+    CustomTextField(
+      hintText: "Customer Details".tr,
+      // controller: controller.dateController,
+      textInputType: TextInputType.datetime,
+      // focusNode: controller.focusNode,
+      onFieldSubmitted: (String? value) {
+        // Handle field submission if needed
+      },
+      labletext: "customer name".tr,
+      prefix: IconButton(
+        onPressed: () => _buildBottomsheet(context:  context),
+        icon: Icon(Icons.add, color: Colors.black),
+      ),
+    ),
+    CustomTextField(
+      hintText: "product name".tr,
+      // controller: controller.dateController,
+      textInputType: TextInputType.datetime,
+      // focusNode: controller.focusNode,
+      onFieldSubmitted: (String? value) {
+        // Handle field submission if needed
+      },
+      labletext: "product name".tr,
+      prefix: IconButton(
+        onPressed: () {}/*=> controller.selectDate(context)*/,
+        icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30,),
+      ),
+    ),
+    CustomTextField(
+      hintText: "model no".tr,
+      // controller: controller.dateController,
+      textInputType: TextInputType.datetime,
+      // focusNode: controller.focusNode,
+      onFieldSubmitted: (String? value) {
+        // Handle field submission if needed
+      },
+      labletext: "model no".tr,
+      prefix: IconButton(
+        onPressed: () {}/*=> controller.selectDate(context)*/,
+        icon: Icon(Icons.add, color: Colors.black),
+      ),
+    )
+  ],);
+}
+
+
+Widget _buildButtonView({required BuildContext context}){
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    // crossAxisAlignment: CrossAxisAlignment.end,
+    children: [
+      ElevatedButton(onPressed: ()=>Get.back(), child: Text('Cancel',style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),),style: ElevatedButton.styleFrom(
+        backgroundColor: appColor,
+        foregroundColor: Colors.white,           // Text and icon color
+        shadowColor: Colors.black,         // Shadow color
+        elevation: 5,                      // Elevation of the button
+        shape: RoundedRectangleBorder(     // Rounded corners
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),)),
+      hGap(20),
+      ElevatedButton(onPressed: (){}, child: Text("Add Ticket", style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: appColor,
+            foregroundColor: Colors.white,           // Text and icon color
+            shadowColor: Colors.black,         // Shadow color
+            elevation: 5,                      // Elevation of the button
+            shape: RoundedRectangleBorder(     // Rounded corners
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),))
+    ],
+  );
+}
+
+_buildBottomsheet({required BuildContext context}){
+  return showBottomSheet(context: context, builder: (BuildContext context){
+    return PrincipalCustomerView();
+  });
+}
+
+void _showImportModelView(BuildContext context) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Import File'),
+          content: SizedBox(
+            height: Get.height * 0.2,
+            width: Get.width * 0.8,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.upload_file, size: 60, color: appColor),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    FilePickerResult? result = await FilePicker.platform.pickFiles();
+                    if (result != null) {
+                      String fileName = result.files.single.name;
+                      Get.snackbar('File Selected', 'You selected: $fileName');
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  child: const Text('Select File from Local'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: appColor,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  });
 }

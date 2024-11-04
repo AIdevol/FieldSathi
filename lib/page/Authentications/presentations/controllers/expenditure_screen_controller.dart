@@ -13,7 +13,7 @@ class ExpenditureScreenController extends GetxController{
   final isSearching = false.obs;
   RxBool isLoading = true.obs;
   RxList<TechnicianResponseModel> technicianData =<TechnicianResponseModel>[].obs;
-  RxList<Results> results = <Results>[].obs;
+  RxList<TechnicianResults> results = <TechnicianResults>[].obs;
   final searchController = TextEditingController();
   final searchResults = <String>[].obs;
   RxList<ExpensesResponseModel> expensesData = <ExpensesResponseModel>[].obs;
@@ -38,7 +38,7 @@ class ExpenditureScreenController extends GetxController{
   @override
   void onInit(){
     super.onInit();
-    hitGetTechnicianApiCall();
+    // hitGetTechnicianApiCall();
     // hitGetExpenseResponseModel();
   }
   @override
@@ -48,31 +48,31 @@ class ExpenditureScreenController extends GetxController{
   }
 
 
-  void hitGetTechnicianApiCall() {
-    isLoading.value = true;
-    customLoader.show();
-    FocusManager.instance.primaryFocus?.unfocus();
-    var roleWiseData = {
-      'role': 'technician'
-    };
-    Get.find<AuthenticationApiService>().getTechnicianApiCall(parameters: roleWiseData).then((value) async {
-      technicianData.assignAll(value);
-      results.clear();
-      for (var technician in value) {
-        results.addAll(technician.results);
-      }
-      List<String> technicianIds = results.map((result) => result.id.toString()).toList();
-      await storage.write(attendanceId, technicianIds.join(','));
-      customLoader.hide();
-      toast('Technicians fetched successfully');
-      isLoading.value = false;
-      // hitGetExpenseResponseModel();
-        }).catchError((error, stackTrace) {
-      customLoader.hide();
-      toast(error.toString());
-      isLoading.value = false;
-    });
-  }
+  // void hitGetTechnicianApiCall() {
+  //   isLoading.value = true;
+  //   customLoader.show();
+  //   FocusManager.instance.primaryFocus?.unfocus();
+  //   var roleWiseData = {
+  //     'role': 'technician'
+  //   };
+  //   Get.find<AuthenticationApiService>().getTechnicianApiCall(parameters: roleWiseData).then((value) async {
+  //     technicianData.assignAll(value);
+  //     results.clear();
+  //     for (var technician in value) {
+  //       results.addAll(technician.results);
+  //     }
+  //     List<String> technicianIds = results.map((result) => result.id.toString()).toList();
+  //     await storage.write(attendanceId, technicianIds.join(','));
+  //     customLoader.hide();
+  //     toast('Technicians fetched successfully');
+  //     isLoading.value = false;
+  //     // hitGetExpenseResponseModel();
+  //       }).catchError((error, stackTrace) {
+  //     customLoader.hide();
+  //     toast(error.toString());
+  //     isLoading.value = false;
+  //   });
+  // }
 
 
 

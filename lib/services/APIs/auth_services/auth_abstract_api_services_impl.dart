@@ -44,7 +44,8 @@ abstract class AuthenticationApi {
   Future<SuperUsersResponseModel>getSuperUserApiCall({Map<String, dynamic>? dataBody});
   Future<SuperUsersResponseModel> postSuperUserApiCall({Map<String, dynamic>?dataBody});
   Future<AddTechnicianResponseModel>addTechnicialPostApiCall({Map<String, dynamic>? dataBody, parameters});
-  Future<List<FsrResponseModel>>getfsrDetailsApiCall({Map<String, dynamic>? dataBody});
+  // Future<List<FsrResponseModel>>getfsrDetailsApiCall({Map<String, dynamic>? dataBody});
+  Future<FsrResponseModel>getfsrDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<CheckPointsResponseModel>postcheckPointStatusDetailsApiCall({Map<String, dynamic>? dataBody,});
   Future<List<LeaveAllocationResponseModel>>getLeavesALLocationApiCall({Map<String, dynamic>? dataBody,});
   Future<LeaveAllocationResponseModel>putLeavesAllocationApiCall({Map<String, dynamic>? dataBody,id});
@@ -57,13 +58,14 @@ abstract class AuthenticationApi {
   Future<LeadPostResponseModel>postLeadListApiCall({Map<String, dynamic>?dataBody});
   Future<LeadPostResponseModel>delLeadListApiCall({Map<String, dynamic>?dataBody, String? id});
   Future<LeadPostResponseModel>putLeadListApiCall({Map<String, dynamic>?dataBody, String? id});
-  Future<List<ServiceCategoriesResponseModel>>getServiceCategoriesApiCall({Map<String, dynamic>?dataBody});
-  Future<ServicePostResponseModel>postServiceCategoriesApiCall({Map<String, dynamic>? dataBody});
+  Future<ServiceCategoryResponseModel>getServiceCategoriesApiCall({Map<String, dynamic>? dataBody});
+  Future<ServiceCategoryResponseModel>postServiceCategoriesApiCall({Map<String, dynamic>? dataBody});
   Future<SubService>getSub_ServiceCategoriesApiCall({Map<String, dynamic>? dataBody});
-  Future<TechnicianAttendanceResponseModel>getAttendanceApiCall({Map<String, dynamic>? dataBody, parameters});
-  // Future<List<TechnicianAttendanceResponseModel>>getAttendanceApiCall({Map<String, dynamic>? dataBody, parameters});
+  Future<TMSResponseModel>getuserDetailsApiCall({Map<String, dynamic>? dataBody});
+  // Future<List<TMSResponseModel>>getuserDetailsApiCall({Map<String, dynamic>? dataBody});
+  Future<TechnicianAttendanceResponseModel>getAttendanceApiCall({Map<String, dynamic>? dataBody , dynamic parameters});
   Future<List<ExpensesResponseModel>>getExpensesApiCall({Map<String, dynamic>?dataBody, parameters});
   Future<List<ServiceRequestsResponseModel>> getServiceRequestsApiCall({Map<String, dynamic>?dataBody, parameters});
-  Future<List<TechnicianResponseModel>> getTechnicianApiCall({Map<String, dynamic>? dataBody, parameters});
+  Future<TechnicianResponseModel>getTechnicianApiCall({Map<String, dynamic>? dataBody, parameters}) ;
   Future<AmcResponseModel>getAmcDetailsApiCall({Map<String, dynamic>?dataBody});
 }

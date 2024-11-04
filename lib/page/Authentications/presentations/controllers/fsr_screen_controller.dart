@@ -5,35 +5,43 @@ import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/response_models/fsr_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
-import '../../../../constans/const_local_keys.dart';
-
-class FsrViewcontroller extends GetxController {
+class FsrViewController extends GetxController {
   final TextEditingController searchController = TextEditingController();
-  late TextEditingController checkPointStatusCheckingController;
-  late FocusNode checkPointStatusCheckingFocusNode;
+  final TextEditingController checkPointStatusCheckingController = TextEditingController();
+  final FocusNode checkPointStatusCheckingFocusNode = FocusNode();
   final RxString searchQuery = ''.obs;
-  final RxList<FsrResponseModel> filteredTickets = <FsrResponseModel>[].obs;
+  // Data holders
+  final RxList<Result> allFsr = <Result>[].obs;
+  final RxList<Result> filteredFsr = <Result>[].obs;
+  final RxList<Category> categoryData = <Category>[].obs;
+  final RxList<Checkpoint>checkPointData = <Checkpoint>[].obs;
+  final RxBool isLoading = false.obs;
 
-  List<FsrResponseModel> allFsr = <FsrResponseModel>[].obs;
-
-  RxBool isLoading = false.obs;
+  // Pagination related variables
+  final RxInt currentPage = 0.obs;
+  final RxInt totalPages = 0.obs;
+  final RxInt totalCount = 0.obs;
 
   @override
   void onInit() {
     super.onInit();
-    checkPointStatusCheckingController = TextEditingController();
-    checkPointStatusCheckingFocusNode = FocusNode();
-    filteredTickets.assignAll(allFsr);
     searchController.addListener(_onSearchChanged);
-    hitGetfsrDetailsApiCall();
+    hitGetFsrDetailsApiCall();
   }
 
+  // @override
+  // void dispose(){
+  //   for (var controller in checkPointStatusCheckingController){
+  //     c
+  //   }
+  //   super.dispose();
+  // }
   @override
   void onClose() {
     searchController.removeListener(_onSearchChanged);
+    searchController.dispose();
     checkPointStatusCheckingController.dispose();
     checkPointStatusCheckingFocusNode.dispose();
-    searchController.dispose();
     super.onClose();
   }
 
@@ -43,61 +51,100 @@ class FsrViewcontroller extends GetxController {
 
   void updateSearch(String query) {
     searchQuery.value = query;
-    _filterTickets();
+    _filterFsr();
   }
 
-  void _filterTickets() {
+  void _filterFsr() {
     if (searchQuery.isEmpty) {
-      filteredTickets.assignAll(allFsr);
+      filteredFsr.assignAll(allFsr);
     } else {
-      filteredTickets.assignAll(allFsr.where((FsrData) =>
-          FsrData.fsrName!.toLowerCase().contains(searchQuery.toLowerCase())));
+      filteredFsr.assignAll(allFsr.where((fsr) =>
+      fsr.fsrName?.toLowerCase().contains(searchQuery.toLowerCase()) ?? false ||
+          _searchInCategories(fsr.categories ?? [], searchQuery.toLowerCase())
+      ));
     }
     update();
   }
 
-  void makeChanges(String id) {
-    // Implement the logic for making changes to a ticket
-    print('Making changes to ticket with ID: $id');
-    // You can navigate to a new screen or show a dialog for editing
-    // For example:
-    // Get.to(() => EditTicketScreen(ticketId: id));
+  bool _searchInCategories(List<Category> categories, String query) {
+    return categories.any((category) =>
+    category.name?.toLowerCase().contains(query) ?? false ||
+        _searchInCheckpoints(category.checkpoints ?? [], query)
+    );
   }
-  void hitGetfsrDetailsApiCall()async{
-    customLoader.show();
-    FocusManager.instance.primaryFocus!.context;
-    Get.find<AuthenticationApiService>().getfsrDetailsApiCall().then((value)async{
-       allFsr.assignAll(value);
-      customLoader.hide();
 
-      if (allFsr is FsrResponseModel){
-        var fsrid = allFsr.first.id.toString();
-        print('aldjfklasf= ${fsrid}');
-        await storage.write(FsrId, fsrid);
+  bool _searchInCheckpoints(List<Checkpoint> checkpoints, String query) {
+    return checkpoints.any((checkpoint) =>
+    checkpoint.checkpointName?.toLowerCase().contains(query) ?? false
+    );
+  }
+
+  Future<void> hitGetFsrDetailsApiCall() async {
+    isLoading.value = true;
+    customLoader.show();
+
+    try {
+      final response = await Get.find<AuthenticationApiService>().getfsrDetailsApiCall();
+
+      if (response != null) {
+        // Update pagination info
+        totalCount.value = response.count ?? 0;
+        totalPages.value = response.totalPages ?? 0;
+        currentPage.value = response.currentPage ?? 0;
+
+        // Update FSR data
+        if (response.results != null) {
+          allFsr.assignAll(response.results!);
+          filteredFsr.assignAll(response.results!);
+        }
+
+        toast('FSR data fetched successfully');
       }
-      toast('FSR Fetched Successfully');
+    } catch (error) {
+      toast('Error fetching FSR data: ${error.toString()}');
+    } finally {
+      isLoading.value = false;
+      customLoader.hide();
       update();
-    }).onError((error, stackError){
-        customLoader.hide();
-        toast(error.toString());
-    });
+    }
   }
 
-  void hitPostCheckingStatusApiCall(){
+  Future<void> hitPostCheckingStatusApiCall() async {
+    if (checkPointStatusCheckingController.text.isEmpty) {
+      toast('Please enter checkpoint status');
+      return;
+    }
     customLoader.show();
-    FocusManager.instance.primaryFocus!.context;
-      var checkPointData = {
-        "status_name":checkPointStatusCheckingController.text
+    try {
+      final checkPointData = {
+        "status_name": checkPointStatusCheckingController.text
       };
-      Get.find<AuthenticationApiService>().postcheckPointStatusDetailsApiCall(dataBody: checkPointData).then((value){
-        customLoader.hide();
-        toast('updated checking status');
-        update();
-      }).onError((error, stackError){
-        customLoader.hide();
-        toast(error.toString());
-      });
+      await Get.find<AuthenticationApiService>()
+          .postcheckPointStatusDetailsApiCall(dataBody: checkPointData);
+      toast('Checkpoint status updated successfully');
+      checkPointStatusCheckingController.clear();
+      await hitGetFsrDetailsApiCall();
+    } catch (error) {
+      toast('Error updating checkpoint status: ${error.toString()}');
+    } finally {
+      customLoader.hide();
+      update();
+    }
   }
 
+  // Helper method to get formatted category names for a FSR
+  String getCategoryNames(Result fsr) {
+    return fsr.categories
+        ?.map((category) => category.name)
+        .where((name) => name != null && name.isNotEmpty)
+        .join(', ') ?? '';
+  }
 
+  // Helper method to get checkpoint names for a category
+  String getCheckpointNames(Category category) {
+    return category.checkpoints
+        ?.map((checkpoint) => checkpoint.checkpointName)
+        .where((name) => name != null && name.isNotEmpty)
+        .join(', ') ?? '';
+  }
 }

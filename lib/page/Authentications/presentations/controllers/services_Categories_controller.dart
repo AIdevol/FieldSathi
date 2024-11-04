@@ -6,7 +6,7 @@ import 'package:tms_sathi/response_models/services_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 import '../../../../constans/const_local_keys.dart';
-import '../../../../response_models/sub_service_response_model.dart';
+// import '../../../../response_models/sub_service_response_model.dart';
 
 class ServiceCategoriesController extends GetxController {
 
@@ -14,10 +14,10 @@ class ServiceCategoriesController extends GetxController {
   final TextEditingController CategoryDescriptionController = TextEditingController();
   final isSearching = false.obs;
   final searchController = TextEditingController();
-  final RxList<ServiceCategoriesResponseModel> allServices = <ServiceCategoriesResponseModel>[].obs;
-  final RxList<ServiceCategoriesResponseModel> filteredServices = <ServiceCategoriesResponseModel>[].obs;
+  final RxList<ServiceCategory> allServices = <ServiceCategory>[].obs;
+  // final RxList<ServiceCategoriesResponseModel> filteredServices = <ServiceCategoriesResponseModel>[].obs;
   final RxBool isLoading = true.obs;
-  final SubServicesGetResponseModel SubServiceModel = SubServicesGetResponseModel();
+  // final SubServicesGetResponseModel SubServiceModel = SubServicesGetResponseModel();
 
   @override
   void onInit() {
@@ -30,23 +30,23 @@ class ServiceCategoriesController extends GetxController {
     isSearching.value = !isSearching.value;
     if (!isSearching.value) {
       searchController.clear();
-      filteredServices.clear();
-      filteredServices.addAll(allServices);
+      // filteredServices.clear();
+      // filteredServices.addAll(allServices);
     }
   }
 
-  void filterServices(String query) {
-    if (query.isEmpty) {
-      filteredServices.clear();
-      filteredServices.addAll(allServices);
-    } else {
-      filteredServices.value = allServices
-          .where((service) =>
-      service.serviceCategoryName.toLowerCase().contains(query.toLowerCase()) ||
-          service.id.toString().contains(query.toLowerCase()))
-          .toList();
-    }
-  }
+  // void filterServices(String query) {
+  //   if (query.isEmpty) {
+  //     filteredServices.clear();
+  //     filteredServices.addAll(allServices);
+  //   } else {
+  //     filteredServices.value = allServices
+  //         .where((service) =>
+  //     service?.serviceCategoryName.toLowerCase().contains(query.toLowerCase()) ||
+  //         service.id.toString().contains(query.toLowerCase()))
+  //         .toList();
+  //   }
+  // }
 
   @override
   void onClose() {
@@ -57,27 +57,37 @@ class ServiceCategoriesController extends GetxController {
   }
 
   Future<void> hitServiceCategoriesApiCall() async {
-    try {
-      isLoading.value = true;
-      customLoader.show();
-      FocusManager.instance.primaryFocus?.unfocus();
-
-      final value = await Get.find<AuthenticationApiService>().getServiceCategoriesApiCall();
-      allServices.assignAll(value);
-      filteredServices.assignAll(value);
-
-      final serviceCatIds = allServices.map((services) => services.id.toString()).toList();
-      await storage.write(serviceCategoriesId, serviceCatIds);
-
+    isLoading.value = true;
+    // customLoader.show();
+    FocusManager.instance.primaryFocus?.unfocus();
+    Get.find<AuthenticationApiService>().getServiceCategoriesApiCall().then((value){
+      allServices.assignAll(value.results);
+      // filteredServices.assignAll(value);
       customLoader.hide();
-      toast("Services fetched successfully");
-      update();
-    } catch (error) {
-      customLoader.hide();
-      toast(error.toString());
-    } finally {
+      toast('Fetch Service Categories');
       isLoading.value = false;
-    }
+    }).onError((error, stackError){
+        customLoader.hide();
+        toast(error.toString());
+        isLoading.value = false;
+    });
+    // try {
+    //   final value = await Get.find<AuthenticationApiService>().getServiceCategoriesApiCall();
+    //   allServices.assignAll(value);
+    //   filteredServices.assignAll(value);
+    //
+    //   final serviceCatIds = allServices.map((services) => services.id.toString()).toList();
+    //   await storage.write(serviceCategoriesId, serviceCatIds);
+    //
+    //   customLoader.hide();
+    //   toast("Services fetched successfully");
+    //   update();
+    // } catch (error) {
+    //   customLoader.hide();
+    //   toast(error.toString());
+    // } finally {
+    //   isLoading.value = false;
+    // }
   }
 
   void hitPostServiceCategoriesApiCall(){

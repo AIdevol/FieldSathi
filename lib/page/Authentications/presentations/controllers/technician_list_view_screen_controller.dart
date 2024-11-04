@@ -1,17 +1,26 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:overlay_support/overlay_support.dart';
 
-class TechnicianListViewScreenController extends GetxController{
+import '../../../../constans/const_local_keys.dart';
+import '../../../../main.dart';
+import '../../../../response_models/technician_response_model.dart';
+import '../../../../services/APIs/auth_services/auth_api_services.dart';
+
+class TechnicianListViewScreenController extends GetxController {
   final searchController = TextEditingController();
-  List<Technician> allTechnicians = [];
-  List<Technician> filteredTechnicians = [];
+  RxBool isLoading = true.obs;
+  RxList<TechnicianResults> allTechnicians = <TechnicianResults>[].obs;
+  RxList<TodayAttendance> TechnicianAttendance = <TodayAttendance>[].obs;
+  RxList<TechnicianResults> filteredTechnicians = <TechnicianResults>[].obs;
 
-  get filteredLeaves => null;
+  // Add this line to fix the null issue
+  RxBool isTableView = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchTechnicians();
+    hitGetTechnicianApiCall();
   }
 
   @override
@@ -21,29 +30,49 @@ class TechnicianListViewScreenController extends GetxController{
   }
 
   void fetchTechnicians() {
-    // TODO: Implement API call to fetch technicians
-    // For now, we'll use dummy data
-    allTechnicians = [
-    ];
-    filteredTechnicians = allTechnicians;
-    update();
-  }
-
-  void searchTechnicians(String query) {
-    if (query.isEmpty) {
-      filteredTechnicians = allTechnicians;
-    } else {
-      filteredTechnicians = allTechnicians
-          .where((technician) =>
-      technician.name.toLowerCase().contains(query.toLowerCase()) ||
-          technician.specialization.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    }
+    filteredTechnicians.assignAll(allTechnicians);
     update();
   }
 
   void refreshList() {
-    fetchTechnicians();
+    hitGetTechnicianApiCall();
+  }
+
+  void hitGetTechnicianApiCall() {
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus?.unfocus();
+    var roleWiseData = {
+      'role': 'technician'
+    };
+
+    Get.find<AuthenticationApiService>()
+        .getTechnicianApiCall(parameters: roleWiseData)
+        .then((value) async {
+      allTechnicians.assignAll(value.results);
+      TechnicianAttendance.clear();
+
+      // Extract attendance data from each technician
+      for (var technician in allTechnicians) {
+        if (technician.todayAttendance != null) {
+          TechnicianAttendance.add(technician.todayAttendance!);
+        }
+      }
+
+      List<String> technicianIds = allTechnicians
+          .map((result) => result.id.toString())
+          .toList();
+      await storage.write(attendanceId, technicianIds.join(','));
+      print("technician Data: ${storage.read(attendanceId)}");
+
+      customLoader.hide();
+      toast('Technicians fetched successfully');
+      isLoading.value = false;
+    }).catchError((error, stackTrace) {
+      customLoader.hide();
+      toast(error.toString());
+      isLoading.value = false;
+    });
   }
 
   void importTechnicians() {
@@ -54,14 +83,9 @@ class TechnicianListViewScreenController extends GetxController{
     // TODO: Implement export functionality
   }
 
-  void showTechnicianOptions(Technician technician) {
-    // TODO: Implement options menu for each technician
+  // Update the toggleView method to use the RxBool
+  void toggleView(bool isTable) {
+    isTableView.value = isTable;
+    update();
   }
-}
-
-class Technician {
-  final String name;
-  final String specialization;
-
-  Technician({required this.name, required this.specialization});
 }

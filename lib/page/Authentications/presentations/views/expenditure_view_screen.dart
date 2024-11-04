@@ -122,7 +122,7 @@ Widget _containerViewScreen(ExpenditureScreenController controller) {
             itemCount: controller.results.length,
             separatorBuilder: (BuildContext context, int index) => SizedBox(height: 10),
             itemBuilder: (context, index){
-              var technician = controller.results[index];
+              // var technician = controller.results[index];
               return GestureDetector(
                 onTap: (){
                   _popUpScreenDetailsForAddingServiceScreen(controller);
@@ -145,8 +145,8 @@ Widget _containerViewScreen(ExpenditureScreenController controller) {
                       color: Colors.black,
                     ),),
                   child: ListTile(
-                    title: Text('${technician.firstName} ${technician.lastName}'),
-                    subtitle: Text('${technician.role}'),
+                    title: Text(/*${technician.firstName} ${technician.lastName}*/""),
+                    subtitle: Text(/*${technician.role}*/""),
                     leading: CircleAvatar(backgroundImage: AssetImage(userImageIcon)),
                   )
                 ),

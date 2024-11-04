@@ -321,7 +321,9 @@
 //   }
 // }
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
@@ -342,6 +344,10 @@ class TicketListController extends GetxController {
   RxList<TicketResult> ticketResult = <TicketResult>[].obs;
   RxBool isLoading = false.obs;
   RxString searchQuery = ''.obs;
+  Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
+
+  TextEditingController dateController = TextEditingController();
+  FocusNode focusNode = FocusNode();
 
   @override
   void onInit() {
@@ -355,7 +361,8 @@ class TicketListController extends GetxController {
     FocusManager.instance.primaryFocus?.unfocus();
 
     try {
-      final response = await Get.find<AuthenticationApiService>().getticketDetailsApiCall();
+      final response = await Get.find<AuthenticationApiService>()
+          .getticketDetailsApiCall();
       if (response != null) {
         ticketResult.assignAll(response.results);
         applyFilters(); // Apply initial filters
@@ -379,23 +386,31 @@ class TicketListController extends GetxController {
       filteredTickets = filteredTickets.where((ticket) {
         switch (selectedFilter.value) {
           case "Customer Name":
-            return ticket.customerDetails.name?.toLowerCase().contains(query) ?? false;
+            return ticket.customerDetails.name?.toLowerCase().contains(query) ??
+                false;
           case "Sub-Customer Name":
-            return ticket.subCustomerDetails?.subCustomerName?.toLowerCase().contains(query) ?? false;
+            return ticket.subCustomerDetails?.subCustomerName?.toLowerCase()
+                .contains(query) ?? false;
           case "Technician Name":
-            final techName = '${ticket.assignTo.firstName ?? ''} ${ticket.assignTo.lastName ?? ''}'.trim().toLowerCase();
+            final techName = '${ticket.assignTo.firstName ?? ''} ${ticket
+                .assignTo.lastName ?? ''}'.trim().toLowerCase();
             return techName.contains(query);
           case "Status":
             return ticket.status.toLowerCase().contains(query);
           case "Region":
-            return ticket.ticketAddress.country?.toLowerCase().contains(query) ?? false;
+            return ticket.ticketAddress.country?.toLowerCase().contains(
+                query) ?? false;
           default:
           // Search across all fields when no specific filter is selected
-            return (ticket.customerDetails.name?.toLowerCase().contains(query) ?? false) ||
-                (ticket.subCustomerDetails?.subCustomerName?.toLowerCase().contains(query) ?? false) ||
+            return (ticket.customerDetails.name?.toLowerCase().contains(
+                query) ?? false) ||
+                (ticket.subCustomerDetails?.subCustomerName?.toLowerCase()
+                    .contains(query) ?? false) ||
                 (ticket.status.toLowerCase().contains(query)) ||
-                (ticket.ticketAddress.country?.toLowerCase().contains(query) ?? false) ||
-                ('${ticket.assignTo.firstName ?? ''} ${ticket.assignTo.lastName ?? ''}'.trim().toLowerCase().contains(query));
+                (ticket.ticketAddress.country?.toLowerCase().contains(query) ??
+                    false) ||
+                ('${ticket.assignTo.firstName ?? ''} ${ticket.assignTo
+                    .lastName ?? ''}'.trim().toLowerCase().contains(query));
         }
       }).toList();
     }
@@ -415,21 +430,20 @@ class TicketListController extends GetxController {
     applyFilters();
   }
 
-  // Helper method to format date/time strings
   String formatDateTime(String? dateTime) {
     if (dateTime == null || dateTime.isEmpty) return 'N/A';
     // Add your date formatting logic here if needed
     return dateTime;
   }
 
-  // Helper method to get full name
+
   String getFullName(User user) {
     final firstName = user.firstName ?? '';
     final lastName = user.lastName ?? '';
     return '$firstName $lastName'.trim();
   }
 
-  // Helper method to get formatted address
+
   String getFormattedAddress(TicketAddress address) {
     final components = [
       address.city,
@@ -441,11 +455,24 @@ class TicketListController extends GetxController {
     return components.isEmpty ? 'N/A' : components.join(', ');
   }
 
-  // Method to handle edit action
   void handleEditTicket(TicketResult ticket) {
     // Implement edit functionality
     // Example: Get.toNamed(AppRoutes.editTicket, arguments: ticket);
   }
+
+  void selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate.value ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != selectedDate.value) {
+      selectedDate.value = picked;
+      dateController.text = DateFormat('dd-MMM-yyyy').format(picked);
+    }
+  }
+
 
   // Method to handle delete action
   Future<void> handleDeleteTicket(TicketResult ticket) async {

@@ -15,6 +15,9 @@ class ApiEnd{
   static const String fsrApiEnd = 'api/fsrs/';
   static const String checkingPointStatusApiEnd = 'api/checkpointstatus/';
   static const String leaveEditPeriodEnd = 'users/leave-allocations/';
+  static const String punchinApiEnd = 'users/attendance/punch_in/';
+
+// /*http://192.168.1.13:8000/*/
 /*=======================================*/
   static const String importTicketDataEnd = 'api/import-tickets/';
   static const String amcEnd = 'api/amcs/';

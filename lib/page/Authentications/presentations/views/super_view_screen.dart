@@ -106,7 +106,17 @@ Widget _mainData(SuperViewScreenController controller){
       DataColumn(label: Text(" ")),
     ], rows: controller.filteredData.map((superData){
         return DataRow(cells: [
-          DataCell(Text("${superData.firstName} ${superData.lastName}")),
+          DataCell(Row(
+            children: [
+              CircleAvatar(
+                backgroundImage: (superData.profileImage != null && superData.profileImage!.isNotEmpty)
+                    ?AssetImage(userImageIcon)
+                    :null,
+              ),
+              hGap(10),
+              Text("${superData.firstName} ${superData.lastName}"),
+            ],
+          )),
           DataCell(Text(superData.email)),
           DataCell(Text(superData.phoneNumber)),
           DataCell(_buildStatusIndicator(superData.isActive)),

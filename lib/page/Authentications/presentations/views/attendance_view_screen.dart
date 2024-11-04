@@ -29,6 +29,8 @@ class AttendanceScreen extends GetView<AttendanceScreenController>{
       children: [
         _rowViewWidget(controller),
       vGap(30),
+        _totalViewScreenWidget(controller),
+      vGap(30),
       _presentViewScreenWidget(controller),
         vGap(30),
         _absentViewScreenWidget(controller),
@@ -36,6 +38,38 @@ class AttendanceScreen extends GetView<AttendanceScreenController>{
         _idleVieScreenWidget(controller)
     ],);
   }
+}
+
+_totalViewScreenWidget(AttendanceScreenController controller){
+  return GestureDetector(onTap: (){
+    print('present button tapped');
+  },child: Container(
+    height: Get.height * 0.2,
+    width: Get.width,
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
+      color: HexColor('F6CFFC'),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.5),
+          spreadRadius: 1,
+          blurRadius: 5,
+          offset: Offset(0, 3),
+        ),
+      ],
+    ),
+    child: Padding(
+      padding: const EdgeInsets.only(top: 35.0),
+      child: Center(
+        child: Column(children: [
+          Text(controller.totalUsers.value.toString(), style: MontserratStyles.montserratBoldTextStyle(size:18,color: Colors.black),),
+          vGap(20),
+          Text("Total Users", style: MontserratStyles.montserratBoldTextStyle(size:18,color: Colors.black),),
+        ],),
+      ),
+    ),
+  ),);
 }
 
 _presentViewScreenWidget(AttendanceScreenController controller){
@@ -61,7 +95,7 @@ _presentViewScreenWidget(AttendanceScreenController controller){
       padding: const EdgeInsets.only(top: 35.0),
       child: Center(
         child: Column(children: [
-          Text("0", style: MontserratStyles.montserratBoldTextStyle(size:18,color: Colors.black),),
+          Text(controller.totalPresent.value.toString(), style: MontserratStyles.montserratBoldTextStyle(size:18,color: Colors.black),),
           vGap(20),
           Text("Present", style: MontserratStyles.montserratBoldTextStyle(size:18,color: Colors.black),),
         ],),
@@ -93,7 +127,7 @@ _absentViewScreenWidget(AttendanceScreenController controller){
       padding: const EdgeInsets.only(top: 35.0),
       child: Center(
         child: Column(children: [
-          Text("0", style: MontserratStyles.montserratBoldTextStyle(size:18,color: Colors.black),),
+          Text(controller.totalAbsent.value.toString(), style: MontserratStyles.montserratBoldTextStyle(size:18,color: Colors.black),),
           vGap(20),
           Text("Absent", style: MontserratStyles.montserratBoldTextStyle(size:18,color: Colors.black),),
         ],),
@@ -125,7 +159,7 @@ _idleVieScreenWidget(AttendanceScreenController controller){
       padding: const EdgeInsets.only(top: 35.0),
       child: Center(
         child: Column(children: [
-          Text("0", style: MontserratStyles.montserratBoldTextStyle(size:18,color: Colors.black),),
+          Text(controller.totalIdle.value.toString(), style: MontserratStyles.montserratBoldTextStyle(size:18,color: Colors.black),),
           vGap(20),
           Text("Idle", style: MontserratStyles.montserratBoldTextStyle(size:18,color: Colors.black),),
         ],),

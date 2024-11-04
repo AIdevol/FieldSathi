@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
@@ -376,7 +377,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
               DataCell(Text(amc.status ?? 'N/A')),
               DataCell( _dropDownValueViews(controller,amc)
                   /*IconButton(onPressed: () {_dropDownValueViews(controller);}, icon: Icon(Icons.more_vert))*/),
-              DataCell(_viewDetailsButton(controller)),
+              DataCell(_viewDetailsButton(controller, amc)),
               DataCell(_addTicketViewButton(controller)),
             ]);
           }).toList())),
@@ -384,8 +385,10 @@ class AMCViewScreen extends GetView<AMCScreenController> {
   }
 
 
-  _viewDetailsButton(AMCScreenController controller) {
-    return ElevatedButton(onPressed: () {},
+  _viewDetailsButton(AMCScreenController controller, AmcResult amcData) {
+    return ElevatedButton(onPressed: () {
+      _detailsViewsWidget(controller, amcData);
+    },
         style: ElevatedButton.styleFrom(
           backgroundColor: appColor,
           minimumSize: Size(130, 40),
@@ -399,7 +402,9 @@ class AMCViewScreen extends GetView<AMCScreenController> {
   }
 
   _addTicketViewButton(AMCScreenController controller) {
-    return ElevatedButton(onPressed: () {},
+    return ElevatedButton(onPressed: () {
+      Get.toNamed(AppRoutes.ticketListCreationScreen);
+    },
         style: ElevatedButton.styleFrom(
           backgroundColor: appColor,
           minimumSize: Size(130, 40),
@@ -758,4 +763,222 @@ Widget _buildtextContainer({required BuildContext context}) {
 
 _updateTextName(BuildContext context){
   return Text('Edit Amc details', style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),);
+}
+
+
+
+_detailsViewsWidget(AMCScreenController controller, AmcResult amcData) {
+  return Get.dialog(
+    Dialog(
+      child: Container(
+        height: Get.height,
+        width: Get.width,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ListView(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "AMC Report Details",
+                    style: MontserratStyles.montserratBoldTextStyle(
+                      size: 20,
+                      color: Colors.black,
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      // Implement download functionality
+                    },
+                    label: Text(''),
+                    icon: Icon(
+                      Icons.download,
+                      color: appColor,
+                    ),
+                  )
+                ],
+              ),
+              Divider(height: 20),
+              vGap(20),
+              Text(
+                "Customer Details",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 18,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Customer Name: ${amcData.customer.customerName ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Customer Number: ${amcData.customer.phoneNumber ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Customer Email: ${amcData.customer.email ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Landmark: ${amcData.customer.landmarkPaci ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Address: ${amcData.customer.primaryAddress ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Divider(height: 20),
+              vGap(20),
+              Text(
+                "Product Details",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 18,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Product Brand: ${amcData.productBrand ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Product Name: ${amcData.productName ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Serial Number: ${amcData.serialModelNo ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Service Amount: ${amcData.serviceAmount?.toString() ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Remaining Amount: ${amcData.remainder ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Divider(height: 20),
+              vGap(20),
+              Text(
+                "AMC Details",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 18,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "AMC Name: ${amcData.amcName ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Activation Date: ${amcData.activationDate ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Expiry Date: ${amcData.expiry ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "No. of Services: ${amcData.noOfService?.toString() ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Reminder: ${amcData.remainder ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Service Occurrence: ${amcData.selectServiceOccurence ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Service Completed: ${amcData.serviceCompleted ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                "Status: ${amcData.status ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Divider(height: 20),
+              vGap(20),
+              Text(
+                "Note:\n\n${amcData.note ?? 'N/A'}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              vGap(40),
+              ElevatedButton(
+                onPressed: () {
+                  Get.back();
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: appColor),
+                child: Text(
+                  "Cancel",
+                  style: MontserratStyles.montserratSemiBoldTextStyle(
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }

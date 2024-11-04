@@ -46,6 +46,7 @@ class AMCScreenController extends GetxController {
   RxList<AmcResult> amcResultData = <AmcResult>[].obs;
   RxList<AmcResult> filteredAmcData = <AmcResult>[].obs;
 
+
   // Counters for different AMC states
   RxInt totalAmcCount = 0.obs;
   RxInt upcomingCount = 0.obs;
@@ -225,4 +226,7 @@ class AMCScreenController extends GetxController {
       customLoader.hide();
     }
   }
+
+
+
 }

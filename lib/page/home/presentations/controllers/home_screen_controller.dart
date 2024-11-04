@@ -26,8 +26,8 @@ class HomeScreenController extends GetxController{
   RxList<AmcResult> amcResultData = <AmcResult>[].obs;
   RxList<TicketResponseModel> ticketData = <TicketResponseModel>[].obs;
   RxList<TicketResult>ticketResultData = <TicketResult>[].obs;
-  final RxList<ServiceCategoriesResponseModel> allServices = <ServiceCategoriesResponseModel>[].obs;
-  final RxList<ServiceCategoriesResponseModel> filteredServices = <ServiceCategoriesResponseModel>[].obs;
+  final RxList<ServiceCategoryResponseModel> allServices = <ServiceCategoryResponseModel>[].obs;
+  final RxList<ServiceCategoryResponseModel> filteredServices = <ServiceCategoryResponseModel>[].obs;
 
   @override
   void onInit(){
@@ -89,12 +89,12 @@ class HomeScreenController extends GetxController{
     // customLoader.show();
     FocusManager.instance.primaryFocus!.context;
     Get.find<AuthenticationApiService>().getfsrDetailsApiCall().then((value)async{
-      allFsr.assignAll(value);
+      // allFsr.assignAll(value);
       customLoader.hide();
       if (allFsr is FsrResponseModel){
-        var fsrid = allFsr.first.id.toString();
-        print('aldjfklasf= ${fsrid}');
-        await storage.write(FsrId, fsrid);
+        // var fsrid = allFsr.first.id.toString();
+        // print('aldjfklasf= ${fsrid}');
+        // await storage.write(FsrId, fsrid);
       }
       // toast('FSR Fetched Successfully');
       update();
@@ -180,10 +180,11 @@ class HomeScreenController extends GetxController{
       FocusManager.instance.primaryFocus?.unfocus();
 
       final value = await Get.find<AuthenticationApiService>().getServiceCategoriesApiCall();
-      allServices.assignAll(value);
-      filteredServices.assignAll(value);
 
-      final serviceCatIds = allServices.map((services) => services.id.toString()).toList();
+      // allServices.assignAll(value.results);
+      // filteredServices.assignAll(value);
+
+      final serviceCatIds = allServices.map((services) => services.results.toString()).toList();
       await storage.write(serviceCategoriesId, serviceCatIds);
 
       customLoader.hide();
