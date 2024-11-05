@@ -229,19 +229,20 @@ class _DrawerScreenState extends State<DrawerScreen> {
         },
         'roles': ['admin','superuser', 'agent'],  // only visible to admin
       },
+
+      {
+        'icon': Icons.person_search,
+        'title': "Manager",
+        'onTap': () async {
+          Get.toNamed(AppRoutes.agentsScreen);
+        },
+        'roles': ['admin','superuser', 'agent'],  // only visible to admin
+      },
       {
         'icon': Icons.amp_stories,
         'title': "AMC",
         'onTap': () async {
           Get.toNamed(AppRoutes.amcScreen);
-        },
-        'roles': ['admin','superuser', 'agent'],  // only visible to admin
-      },
-      {
-        'icon': Icons.person_search,
-        'title': "Agents",
-        'onTap': () async {
-          Get.toNamed(AppRoutes.agentsScreen);
         },
         'roles': ['admin','superuser', 'agent'],  // only visible to admin
       },

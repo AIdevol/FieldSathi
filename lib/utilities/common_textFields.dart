@@ -115,6 +115,7 @@ class CustomTextField extends StatelessWidget {
   String? Function(String?)? validator;
   TextInputAction? textInputAction = TextInputAction.next;
   TextInputType? textInputType = TextInputType.text;
+  TextCapitalization? textCapitalization;
   Widget? prefix;
   Widget? suffix;
   List<TextInputFormatter>? inputFormatters;
@@ -143,6 +144,7 @@ class CustomTextField extends StatelessWidget {
         this.textColor,
         this.labletext,
         this.textInputAction,
+        this.textCapitalization,
         this.inputFormatters,
         this.textInputType,
         this.onFieldSubmitted,

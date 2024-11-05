@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -101,7 +102,7 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
           ),
           const SizedBox(height: 15),
           Text(
-            'Create your profile'.tr,
+            'Update your profile'.tr,
             style: MontserratStyles.montserratSemiBoldTextStyle(
               color: Colors.grey,
               size: 16,
@@ -188,67 +189,72 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
 
   Widget _buildForm(BuildContext context) {
     return Form(
-        key: _formKey,
-        child: Column(
+      key: _formKey,
+      child: Column(
         children: [
-        vGap(10),
-        _buildTextField(
-        hintText: "Name".tr,
-        controller: controller.nameController,
-        focusNode: controller.nameFocusNode,
-        nextFocusNode: controller.emailFocusNode,
-        icon: Icons.person,
-        ),
-    vGap(16),
-    _buildTextField(
-        hintText: "Email".tr,
-        controller: controller.emailController,
-        focusNode: controller.emailFocusNode,
-        nextFocusNode: controller.phoneFocusNode,
-        icon: FeatherIcons.mail,
-        keyboardType: TextInputType.emailAddress,
-        ),
-    vGap(16),
-    _buildTextField(
-        hintText: "Phone Number".tr,
-        controller: controller.phoneController,
-        focusNode: controller.phoneFocusNode,
-        nextFocusNode: controller.companyNameFocusNode,
-        icon: FeatherIcons.phone,
-        keyboardType: TextInputType.phone,
-        ),
-    vGap(16),
-    _buildTextField(
-        hintText: "Company Name".tr,
-        controller: controller.companyNameController,
-        focusNode: controller.companyNameFocusNode,
-        nextFocusNode: controller.addressFocusNode,
-        icon: FeatherIcons.briefcase,
-        ),
-    vGap(16),
-    _buildTextField(
-        hintText: "Address".tr,
-        controller: controller.addressController,
-        focusNode: controller.addressFocusNode,
-        nextFocusNode: controller.employeesFocusNode,
-        icon: FeatherIcons.mapPin,
-        ),
-    vGap(16),
-    _buildTextField(
-        hintText: "Employees".tr,
-        controller: controller.employeesController,
-        focusNode: controller.employeesFocusNode,
-        nextFocusNode: controller.countryFocusNode,
-        icon: FeatherIcons.users,
-        keyboardType: TextInputType.number,
-    ),
+          vGap(10),
+          _buildTextField(
+            onIconPressed: (){},
+            hintText: "Name".tr,
+            controller: controller.nameController,
+            focusNode: controller.nameFocusNode,
+            nextFocusNode: controller.emailFocusNode,
+            icon: Icons.person,
+          ),
+          vGap(16),
+          _buildTextField(
+            onIconPressed: (){},
+            hintText: "Email".tr,
+            controller: controller.emailController,
+            focusNode: controller.emailFocusNode,
+            nextFocusNode: controller.phoneFocusNode,
+            icon: FeatherIcons.mail,
+            keyboardType: TextInputType.emailAddress,
+          ),
+          vGap(16),
+          _buildPhoneTextField(
+            onIconPressed: (){},
+            hintText: "Phone Number".tr,
+            Controller: controller.phoneController,
+            focusNode: controller.phoneFocusNode,
+            nextFocusNode: controller.companyNameFocusNode,
+            // icon: FeatherIcons.phone,
+          ),
+          vGap(16),
+          _buildTextField(
+            onIconPressed: (){},
+            hintText: "Company Name".tr,
+            controller: controller.companyNameController,
+            focusNode: controller.companyNameFocusNode,
+            nextFocusNode: controller.addressFocusNode,
+            icon: FeatherIcons.briefcase,
+          ),
+          vGap(16),
+          _buildTextField(
+            onIconPressed: (){},
+            hintText: "Address".tr,
+            controller: controller.addressController,
+            focusNode: controller.addressFocusNode,
+            nextFocusNode: controller.employeesFocusNode,
+            icon: FeatherIcons.mapPin,
+          ),
+          vGap(16),
+          _buildTextField(
+            onIconPressed: (){},
+            hintText: "Employees".tr,
+            controller: controller.employeesController,
+            focusNode: controller.employeesFocusNode,
+            nextFocusNode: controller.countryFocusNode,
+            icon: FeatherIcons.users,
+            keyboardType: TextInputType.number,
+          ),
           vGap(16),
           _buildCountryTextField(context),
           vGap(30),
           _buildUpdateButton(),
           vGap(20),
         ],
-        ),
+      ),
     );
   }
 
@@ -257,6 +263,7 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
     required TextEditingController controller,
     required FocusNode focusNode,
     required FocusNode nextFocusNode,
+    required VoidCallback onIconPressed,
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
   }) {
@@ -264,6 +271,7 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
       hintText: hintText,
       controller: controller,
       textInputType: keyboardType,
+      textCapitalization: TextCapitalization.words,
       focusNode: focusNode,
       onFieldSubmitted: (_) => FocusScope.of(Get.context!).requestFocus(nextFocusNode),
       labletext: hintText,
@@ -271,6 +279,104 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
       validator: (value) => value?.isEmpty ?? true ? "$hintText is required" : null,
     );
   }
+  
+
+  Widget _buildPhoneTextField({
+    required String hintText,
+    required TextEditingController Controller,
+    required FocusNode focusNode,
+    required FocusNode nextFocusNode,
+    required VoidCallback onIconPressed,
+  }) {
+    return CustomTextField(
+      hintText: hintText,
+      controller: Controller,
+      textInputType: TextInputType.number,
+      focusNode: focusNode,
+      onFieldSubmitted: (_) => FocusScope.of(Get.context!).requestFocus(nextFocusNode),
+      labletext: hintText,
+      prefix: Container(  margin: const EdgeInsets.only(right: 10),
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                topLeft: Radius.circular(30)),
+            // color: Colors.white,
+            border: Border.all(color: Colors.grey.shade300, width: 0.5),
+          ),child: CountryCodePicker(
+            flagWidth: 15.0,
+            initialSelection: 'IN',
+            boxDecoration: const BoxDecoration(color: Colors.transparent),
+            showCountryOnly: true,
+            onChanged: (value) {
+              controller.phoneCountryCode.value = value.dialCode.toString();
+              // controller.update();
+            }),) ,
+            validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter phone number'.tr;
+            }
+            if (value.length != 10) {
+              return 'Phone number must be 10 digits'.tr;
+            }
+            return null;
+          },
+          inputFormatters: [
+          LengthLimitingTextInputFormatter(10),
+          FilteringTextInputFormatter.digitsOnly,
+          ],
+    );
+    /*Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          // CountryCodePicker widget
+          Obx(() => CountryCodePicker(
+            onChanged: (code) {
+              // Update phone country code in the controller
+              controller.phoneCountryCode.value = code.dialCode ?? '+91';
+            },
+            initialSelection: controller.phoneCountryCode.value.isEmpty
+                ? 'IN' // Default selection if not set
+                : controller.phoneCountryCode.value,
+            favorite: const ['IN'],
+            showCountryOnly: false,
+            showOnlyCountryWhenClosed: false,
+            alignLeft: false,
+            padding: EdgeInsets.zero,
+            dialogTextStyle: TextStyle(color: Colors.black),
+          )),
+          Expanded(
+            child: CustomTextField(
+              hintText: hintText,
+              controller: controller,
+              textInputType: TextInputType.phone,
+              focusNode: focusNode,
+              onFieldSubmitted: (_) => FocusScope.of(Get.context!).requestFocus(nextFocusNode),
+              labletext: hintText,
+              prefix: Icon(FeatherIcons.phone, color: Colors.black),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter phone number'.tr;
+                }
+                if (value.length != 10) {
+                  return 'Phone number must be 10 digits'.tr;
+                }
+                return null;
+              },
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(10),
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+            ),
+          ),
+        ],
+      ),
+    );*/
+  }
+
 
   Widget _buildCountryTextField(BuildContext context) {
     return CustomTextField(
@@ -280,9 +386,12 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
       labletext: "Country".tr,
       readOnly: true,
       prefix: const Icon(FeatherIcons.globe, color: Colors.black),
-      suffix: IconButton(onPressed: (){
-        _openCountryPicker(context);
-      },icon: const Icon(Icons.arrow_drop_down, color: Colors.black, size: 30)),
+      suffix: IconButton(
+        onPressed: () {
+          _openCountryPicker(context);
+        },
+        icon: const Icon(Icons.arrow_drop_down, color: Colors.black, size: 30),
+      ),
       validator: (value) => value?.isEmpty ?? true ? "Country is required" : null,
     );
   }
@@ -324,45 +433,17 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
       context: context,
       builder: (context) => CountryCodePicker(
         onChanged: (countryCode) {
-          // Set the selected country in the controller
           controller.countryController.text = countryCode.name ?? '';
-          Navigator.of(context).pop(); // Close the modal after selection
+          Navigator.of(context).pop();
         },
         initialSelection: controller.countryController.text,
         showCountryOnly: true,
-        favorite: ['+1','US','+91', 'IN', ],
+        favorite: ['+1', 'US', '+91', 'IN'],
         showOnlyCountryWhenClosed: true,
         alignLeft: true,
       ),
     );
   }
- /* void _showCountryPicker(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: SizedBox(
-            width: double.maxFinite,
-            child: CountryCodePicker(
-              onChanged: (CountryCode countryCode) {
-                controller.countryController.text = countryCode.name ?? '';
-                controller.selectedCountry = countryCode;
-                controller.update();
-                Navigator.pop(context);
-              },
-              initialSelection: 'IN',
-              favorite: const ['+1', 'US', '+91', 'IN'],
-              showCountryOnly: true,
-              showOnlyCountryWhenClosed: true,
-              alignLeft: false,
-              showFlag: true,
-              showFlagDialog: true,
-            ),
-          ),
-        );
-      },
-    );
-  }*/
 
   void _showImagePickerOptions(BuildContext context) {
     showModalBottomSheet(
@@ -395,3 +476,4 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
     );
   }
 }
+

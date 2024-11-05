@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/expenditure_screen_controller.dart';
+import 'package:tms_sathi/response_models/technician_response_model.dart';
 
 import '../../../../constans/color_constants.dart';
 import '../../../../constans/string_const.dart';
+import '../../../../response_models/expenses_response_model.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../../utilities/helper_widget.dart';
 
@@ -72,7 +74,7 @@ Widget _buildTopBar(ExpenditureScreenController controller) {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              'Technician',
+              'Users',
               style: MontserratStyles.montserratSemiBoldTextStyle(
                   size: 17,
                   color: Colors.black
@@ -117,457 +119,160 @@ ButtonStyle _buttonStyle() {
 Widget _containerViewScreen(ExpenditureScreenController controller) {
   return Padding(
     padding: const EdgeInsets.all(8.0),
-    child: Obx(()=>
-        ListView.separated(
-            itemCount: controller.results.length,
-            separatorBuilder: (BuildContext context, int index) => SizedBox(height: 10),
-            itemBuilder: (context, index){
-              // var technician = controller.results[index];
-              return GestureDetector(
-                onTap: (){
-                  _popUpScreenDetailsForAddingServiceScreen(controller);
-                },
-                child: Container(
-                  height: Get.height * 0.1,
-                  width: Get.width * 0.4,
-                  decoration: BoxDecoration(color: whiteColor,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 1,
-                        blurRadius: 5,
-                        offset: Offset(0, 5),
-                      ),
-                    ],
-                    border:Border.all(
-                      width: 0.80,
-                      color: Colors.black,
-                    ),),
-                  child: ListTile(
-                    title: Text(/*${technician.firstName} ${technician.lastName}*/""),
-                    subtitle: Text(/*${technician.role}*/""),
-                    leading: CircleAvatar(backgroundImage: AssetImage(userImageIcon)),
-                  )
-                ),
-              );
-
-            }
-        ),)
+    child: ListView.separated(
+      itemCount: controller.technicianresults.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 10),
+      itemBuilder: (context, index) => Container(
+        height: Get.height * 0.1,
+        width: Get.width * 0.4,
+        decoration: BoxDecoration(
+          color: whiteColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 5),
+            ),
+          ],
+          border: Border.all(
+            width: 0.80,
+            color: Colors.black,
+          ),
+        ),
+        child: _listViewContainerElement(controller, index),
+      ),
+    ),
   );
 }
 
-_listViewContainerElement(ExpenditureScreenController controller, index){
-  final technicianData = controller.results[index];
-  return Obx((){
-    if(controller.isLoading.value){
-      return Center(child: CircularProgressIndicator(),);
-    }else if(controller.results.isEmpty){
-      return Center(child: Text("No Data Available"),);
+Widget _listViewContainerElement(ExpenditureScreenController controller, index) {
+  final technicianData = controller.technicianresults[index];
+  String technicianId = technicianData.id.toString();
+  return Obx(() {
+    if (controller.isLoading.value) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (controller.hasError.value) {
+      return Center(child: Text('Error loading data'));
+    } else if (controller.technicianresults.isEmpty) {
+      return Center(child: Text('No data available'));
+    } else {
+      return InkWell(
+        onTap: ()=>_popUpScreenDetailsForAddingServiceScreen(controller, technicianId ) ,
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 10, right: 20),
+              child: CircleAvatar(
+                radius: 35,
+                backgroundImage: technicianData.profileImage != null && technicianData.profileImage.isNotEmpty
+                    ? NetworkImage(technicianData.profileImage)
+                    : null,
+                child: technicianData.profileImage == null || technicianData.profileImage.isEmpty
+                    ? const Icon(Icons.person, size: 35)
+                    : null,
+              ),
+            ),
+            hGap(10),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "${technicianData.firstName} ${technicianData.lastName}",
+                      style: MontserratStyles.montserratSemiBoldTextStyle(
+                        size: 15,
+                        color: blackColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    vGap(10),
+                    Text(
+                      '${technicianData.role}'.toUpperCase(),
+                      style: MontserratStyles.montserratSemiBoldTextStyle(
+                        size: 13,
+                        color: blackColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
     }
-    return Row(
-        children: [
-      Padding(
-        padding: const EdgeInsets.only( left: 10,right: 20),
-        child: CircleAvatar(radius: 35,
-            backgroundImage: AssetImage(userImageIcon,)),
-      ),
-      hGap(10),
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(children: [
-          Text("${technicianData.firstName} ${technicianData.lastName}", style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: blackColor),),
-          vGap(10),
-          Text('${technicianData.role}', style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: blackColor),),
-        ],),
-
-      )
-    ]);
   });
 }
 
-void _popUpScreenDetailsForAddingServiceScreen(ExpenditureScreenController controller) {
+
+void _popUpScreenDetailsForAddingServiceScreen(ExpenditureScreenController controller, String technicianId) {
+  controller.hitGetExpenseApiCallDetails(technicianId);
   Get.dialog(
     Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: SingleChildScrollView(
-        child: Container(
-          width: Get.width * 0.8, // Ensures the dialog is responsive to screen size
-          padding: EdgeInsets.all(24),
-          color: CupertinoColors.white,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with Title and Download Button
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      "Expenditure",
-                      style: MontserratStyles.montserratBoldTextStyle(size: 24, color: blackColor),
-                      overflow: TextOverflow.ellipsis, // Prevent text overflow
-                    ),
+      child: Container(
+        width: Get.width * 0.9,
+        height: Get.height * 0.8,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Expenditure",
+                  style: MontserratStyles.montserratBoldTextStyle(
+                    size: 24,
+                    color: blackColor,
                   ),
-                  IconButton(
-                    onPressed: () {
-                      // Add download logic here
-                    },
-                    icon: Icon(Icons.download, size: 24, color: Colors.black),
-                  ),
-                ],
-              ),
-              Divider(
-               color: Colors.grey,
-              ),
-              SizedBox(height: 24),
-
-              // Horizontally Scrollable DataTable
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columns: [
-                    DataColumn(label: Text('Expense ID	', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
-                    DataColumn(label: Text('Date', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
-                    DataColumn(label: Text('Expense Type', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
-                    DataColumn(label: Text('From', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
-                    DataColumn(label: Text('To', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
-                    DataColumn(label: Text('Amount', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
-                    DataColumn(label: Text('Approved Amount', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
-                    DataColumn(label: Text('Description', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
-                    DataColumn(label: Text('Status', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
-                    DataColumn(label: Text('Remark', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
-                    DataColumn(label: Text('Image', style: MontserratStyles.montserratBoldTextStyle(size: 16,color: Colors.black))),
-
-                  ],
-                  rows: controller.expensesData.map((technician)=>DataRow(
-                    cells: [
-                      DataCell(Text('')),
-                      DataCell(Text('Category ')),
-                      DataCell(Text('Description for Category ')),
-                      DataCell(Text('Type ')),
-                      DataCell(Text('2024-10-')),
-                      DataCell(Text( 'Inactive')),
-                      DataCell(Text( 'Inactive')),
-                      DataCell(Text('Inactive')),
-                      DataCell(Text( 'Inactive')),
-                      DataCell(Text( 'Inactive')),
-                      DataCell(Text( 'Inactive')),
-                    ],
-                  ),).toList()
                 ),
-              ),
-              SizedBox(height: 24),
-
-              // Buttons for Cancel and Submit
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Flexible(
-                    child: TextButton(
-                      onPressed: () => Get.back(),
-                      child: Text(
-                        "Cancel",
-                        style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Flexible(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Add save logic here
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: appColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      ),
-                      child: Text(
-                        "Submit",
-                        style: MontserratStyles.montserratBoldTextStyle(size: 16, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-// void _popUpScreenDetailsForAddingServiceScreen(ExpenditureScreenController controller) {
-//   Get.dialog(
-//     Dialog(
-//       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-//       child: SingleChildScrollView(
-//         child: Container(color: appColor,)
-//         // Container(
-//         //   width: Get.width * 0.8,
-//         //   padding: EdgeInsets.all(24),
-//         //   child: Column(
-//         //     crossAxisAlignment: CrossAxisAlignment.start,
-//         //     mainAxisSize: MainAxisSize.min,
-//         //     children: [
-//         //       Center(
-//         //         child: Text(
-//         //           "Add Service Category",
-//         //           style: MontserratStyles.montserratBoldTextStyle(size: 24, color: blackColor),
-//         //         ),
-//         //       ),
-//         //       SizedBox(height: 24),
-//         //       Text(
-//         //         "Category Name",
-//         //         style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
-//         //       ),
-//         //       SizedBox(height: 8),
-//         //       TextField(
-//         //         decoration: InputDecoration(
-//         //           hintText: "Enter category name",
-//         //           border: OutlineInputBorder(
-//         //             borderRadius: BorderRadius.circular(8),
-//         //           ),
-//         //           filled: true,
-//         //           fillColor: Colors.grey[100],
-//         //         ),
-//         //       ),
-//         //       SizedBox(height: 24),
-//         //       Text(
-//         //         "Category Description",
-//         //         style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
-//         //       ),
-//         //       SizedBox(height: 8),
-//         //       TextField(
-//         //         maxLines: 8,
-//         //         decoration: InputDecoration(
-//         //           hintText: "Enter category description",
-//         //           border: OutlineInputBorder(
-//         //             borderRadius: BorderRadius.circular(8),
-//         //           ),
-//         //           filled: true,
-//         //           fillColor: Colors.grey[100],
-//         //         ),
-//         //       ),
-//         //       SizedBox(height: 24),
-//         //       Text(
-//         //         "Category Icon",
-//         //         style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
-//         //       ),
-//         //       SizedBox(height: 8),
-//         //       Row(
-//         //         children: [
-//         //           InkWell(
-//         //             onTap: () {
-//         //               // Add icon selection logic here
-//         //             },
-//         //             child: Container(
-//         //               width: 80,
-//         //               height: 80,
-//         //               decoration: BoxDecoration(
-//         //                 color: Colors.grey[200],
-//         //                 borderRadius: BorderRadius.circular(8),
-//         //               ),
-//         //               child: Icon(FontAwesomeIcons.upload, size: 32, color: appColor),
-//         //             ),
-//         //           ),
-//         //           SizedBox(width: 16),
-//         //           Text(
-//         //             "Upload Image",
-//         //             style: MontserratStyles.montserratRegularTextStyle(size: 16, color: Colors.grey),
-//         //           ),
-//         //         ],
-//         //       ),
-//         //       SizedBox(height: 24),
-//         //       Row(
-//         //         mainAxisAlignment: MainAxisAlignment.end,
-//         //         children: [
-//         //           TextButton(
-//         //             onPressed: () => Get.back(),
-//         //             child: Text(
-//         //               "Cancel",
-//         //               style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
-//         //             ),
-//         //           ),
-//         //           SizedBox(width: 16),
-//         //           ElevatedButton(
-//         //             onPressed: () {
-//         //               // Add save logic here
-//         //             },
-//         //             style: ElevatedButton.styleFrom(
-//         //               backgroundColor: appColor,
-//         //               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-//         //               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-//         //             ),
-//         //             child: Text(
-//         //               "Submit",
-//         //               style: MontserratStyles.montserratBoldTextStyle(size: 16, color: Colors.white),
-//         //             ),
-//         //           ),
-//         //         ],
-//         //       ),
-//         //     ],
-//         //   ),
-//         // ),
-//       ),
-//     ),
-//   );
-// }
-
-void _popUpScreenDetailsForAddingSubServiceScreen(ExpenditureScreenController controller) {
-  final List<String> categoryTypes = ['Type A', 'Type B', 'Type C', 'Type D'];
-  String selectedType = categoryTypes[0];
-  Get.dialog(
-    Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: SingleChildScrollView(
-        child: Container(
-          width: Get.width * 0.8,
-          padding: EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
+                IconButton(
+                  onPressed: () {
+                    // Add download logic here
+                  },
+                  icon: const Icon(Icons.download, size: 24),
+                ),
+              ],
+            ),
+            const Divider(),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Obx(() => ExpenseDataTable(
+                expenses: controller.expenseResult,
+                isLoading: controller.isLoading.value,
+                hasError: controller.hasError.value,
+              )),
+            ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  controller.clearExpenseResults();
+                  Get.back();
+                },
                 child: Text(
-                  "Add Sub-Service Category",
-                  style: MontserratStyles.montserratBoldTextStyle(size: 24, color: blackColor),
-                ),
-              ),
-              SizedBox(height: 24),
-              Text(
-                "Sub-Category Name",
-                style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: "Enter sub-category name",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-              ),
-              SizedBox(height: 24),
-              Text(
-                "Sub-Category Description",
-                style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                maxLines: 8,
-                decoration: InputDecoration(
-                  hintText: "Enter Sub-category description",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-              ),
-              SizedBox(height: 24),
-              Text(
-                "Category Type",
-                style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
-              ),
-              SizedBox(height: 8),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey[300]!),
-                  color: Colors.grey[100],
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    value: selectedType,
-                    items: categoryTypes.map((String type) {
-                      return DropdownMenuItem<String>(
-                        value: type,
-                        child: Text(type),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        selectedType = newValue;
-                        // You might want to use setState here if this is a StatefulWidget
-                        // or use a state management solution like GetX to update the UI
-                      }
-                    },
+                  "Close",
+                  style: MontserratStyles.montserratMediumTextStyle(
+                    size: 16,
+                    color: Colors.grey,
                   ),
                 ),
               ),
-              SizedBox(height: 24),
-              Text(
-                "Category Icon",
-                style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      // Add icon selection logic here
-                    },
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(FontAwesomeIcons.upload, size: 32, color: appColor),
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Text(
-                    "Upload Image",
-                    style: MontserratStyles.montserratRegularTextStyle(size: 16, color: Colors.grey),
-                  ),
-                ],
-              ),
-              SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Get.back(),
-                    child: Text(
-                      "Cancel",
-                      style: MontserratStyles.montserratMediumTextStyle(size: 16, color: Colors.grey),
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Add save logic here
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: appColor,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    ),
-                    child: Text(
-                      "Submit",
-                      style: MontserratStyles.montserratBoldTextStyle(size: 16, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     ),
   );
-}
-
+}/*,*/
 _searchScreen(ExpenditureScreenController controller){
   return Obx(() => controller.isSearching.value
       ? _buildSearchResults(controller)
@@ -596,72 +301,255 @@ Widget _buildNormalContent(ExpenditureScreenController controller) {
 }
 
 
-// class ServiceRequestSearchDelegate extends SearchDelegate<String> {
-//   final ServiceRequestScreenController controller;
-//
-//   ServiceRequestSearchDelegate(this.controller);
-//
-//   @override
-//   List<Widget> buildActions(BuildContext context) {
-//     return [
-//       IconButton(
-//         icon: const Icon(Icons.clear),
-//         onPressed: () {
-//           query = '';
-//         },
-//       ),
-//     ];
-//   }
-//
-//   @override
-//   Widget buildLeading(BuildContext context) {
-//     return IconButton(
-//       icon: const Icon(Icons.arrow_back),
-//       onPressed: () {
-//         close(context, '');
-//       },
-//     );
-//   }
-//
-//   @override
-//   Widget buildResults(BuildContext context) {
-//     // Implement your search results here
-//     return Container();
-//   }
-//
-//   @override
-//   Widget buildSuggestions(BuildContext context) {
-//     // Implement your search suggestions here
-//     return Container();
-//   }
-// }
-//
+class ExpenseDataTable extends StatelessWidget {
+  final List<ExpenseResult> expenses;
+  final bool isLoading;
+  final bool hasError;
 
+  const ExpenseDataTable({
+    Key? key,
+    required this.expenses,
+    required this.isLoading,
+    required this.hasError,
+  }) : super(key: key);
 
-//   Widget _mainScreenWidget(ExpenditureScreenController controller){
-//      return  Padding(
-//        padding: const EdgeInsets.all(12.0),
-//        child: Column(children: [
-//          _searchBarscaffoldViewWidget(controller)
-//        ],),
-//      );
-//   }
-// }
-// _searchBarscaffoldViewWidget(ExpenditureScreenController controller){
-//     return Container(
-//       height: Get.height * 0.2,
-//       width: Get.width,
-//       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-//       decoration: BoxDecoration(
-//         color: whiteColor,
-//         boxShadow: [
-//           BoxShadow(
-//             color: Colors.grey.withOpacity(0.5),
-//             spreadRadius: 1,
-//             blurRadius: 5,
-//             offset: Offset(0, 3),
-//           ),
-//         ],
-//       ),
-//
-//     );
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (hasError) {
+      return const Center(child: Text('No expenses found'));
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SingleChildScrollView(
+        child: DataTable(
+          columnSpacing: 20,
+          headingRowHeight: 50,
+          dataRowHeight: 60,
+          columns: _buildColumns(),
+          rows: _buildRows(),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<DataColumn> _buildColumns() {
+    final headerStyle = TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 14,
+      color: Colors.black87,
+    );
+
+    return [
+      DataColumn(
+        label: Text('ID', style: headerStyle),
+        tooltip: 'Expense ID',
+      ),
+      DataColumn(
+        label: Text('Date', style: headerStyle),
+        tooltip: 'Expense Date',
+      ),
+      DataColumn(
+        label: Text('Type', style: headerStyle),
+        tooltip: 'Expense Type',
+      ),
+      DataColumn(
+        label: Text('From', style: headerStyle),
+        tooltip: 'Starting Location',
+      ),
+      DataColumn(
+        label: Text('To', style: headerStyle),
+        tooltip: 'Destination',
+      ),
+      DataColumn(
+        label: Text('Amount', style: headerStyle),
+        tooltip: 'Expense Amount',
+        numeric: true,
+      ),
+      DataColumn(
+        label: Text('Approved', style: headerStyle),
+        tooltip: 'Approved Amount',
+        numeric: true,
+      ),
+      DataColumn(
+        label: Text('Status', style: headerStyle),
+        tooltip: 'Expense Status',
+      ),
+      DataColumn(
+        label: Text('Actions', style: headerStyle),
+        tooltip: 'Available Actions',
+      ),
+    ];
+  }
+
+  List<DataRow> _buildRows() {
+    return expenses.map((expense) {
+      return DataRow(
+        cells: [
+          DataCell(Text('#${expense.id}')),
+          DataCell(Text(_formatDate(expense.date))),
+          DataCell(Text(expense.expenseType)),
+          DataCell(Text(expense.fromField)),
+          DataCell(Text(expense.to)),
+          DataCell(Text('₹${expense.amount}')),
+          DataCell(Text(expense.approvedAmount ?? '-')),
+          DataCell(_buildStatusCell(expense.status)),
+          DataCell(_buildActionsCell(expense)),
+        ],
+      );
+    }).toList();
+  }
+
+  Widget _buildStatusCell(String status) {
+    Color backgroundColor;
+    Color textColor = Colors.white;
+
+    switch (status.toLowerCase()) {
+      case 'approved':
+        backgroundColor = Colors.green;
+        break;
+      case 'pending':
+        backgroundColor = Colors.orange;
+        break;
+      case 'rejected':
+        backgroundColor = Colors.red;
+        break;
+      default:
+        backgroundColor = Colors.grey;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        status,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionsCell(ExpenseResult expense) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.visibility, size: 20),
+          onPressed: () => _viewExpenseDetails(expense),
+          tooltip: 'View Details',
+        ),
+        if (expense.image.isNotEmpty)
+          IconButton(
+            icon: const Icon(Icons.image, size: 20),
+            onPressed: () => _viewExpenseImage(expense),
+            tooltip: 'View Receipt',
+          ),
+      ],
+    );
+  }
+
+  String _formatDate(String date) {
+    try {
+      final DateTime dateTime = DateTime.parse(date);
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    } catch (e) {
+      return date;
+    }
+  }
+
+  void _viewExpenseDetails(ExpenseResult expense) {
+    Get.dialog(
+      AlertDialog(
+        title: Text('Expense Details #${expense.id}'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildDetailRow('Date', _formatDate(expense.date)),
+              _buildDetailRow('Type', expense.expenseType),
+              _buildDetailRow('From', expense.fromField),
+              _buildDetailRow('To', expense.to),
+              _buildDetailRow('Amount', '₹${expense.amount}'),
+              _buildDetailRow('Status', expense.status),
+              _buildDetailRow('Description', expense.description),
+              if (expense.approvedAmount != null)
+                _buildDetailRow('Approved Amount', '₹${expense.approvedAmount}'),
+              if (expense.paidRemark != null)
+                _buildDetailRow('Remarks', expense.paidRemark!),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(child: Text(value)),
+        ],
+      ),
+    );
+  }
+
+  void _viewExpenseImage(ExpenseResult expense) {
+    Get.dialog(
+      Dialog(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppBar(
+              title: Text('Receipt #${expense.id}'),
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Get.back(),
+              ),
+            ),
+            Flexible(
+              child: Image.network(
+                expense.image,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(
+                    child: Text('Failed to load image'),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

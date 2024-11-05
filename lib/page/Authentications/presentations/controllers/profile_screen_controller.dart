@@ -14,6 +14,7 @@ import '../../../../main.dart';
 import '../../../../navigations/navigation.dart';
 import '../../../../services/APIs/auth_services/auth_api_services.dart';
 import '../../../../services/login_service.dart';
+import '../../../../utilities/permissions.dart';
 
 class ProfileViewScreenController extends GetxController {
   // Country selection
@@ -42,7 +43,8 @@ class ProfileViewScreenController extends GetxController {
   final Rx<File?> profileImage = Rx<File?>(null);
   final RxString profileImageUrl = RxString('');
   final RxBool isLoading = false.obs;
-
+  // final RxString phoneCountryCode= '+91'.obs;
+  var phoneCountryCode = ''.obs;
   Timer? _timer;
   File? selectedImage ;
   final ImagePicker _picker = ImagePicker();
@@ -142,6 +144,7 @@ class ProfileViewScreenController extends GetxController {
   }
 
   void hitUserupdateProfile() {
+    // String fullNumber =  '$phoneCountryCode${phoneController.text}';
     isLoading.value = true;
     FocusManager.instance.primaryFocus?.unfocus();
 
@@ -153,7 +156,7 @@ class ProfileViewScreenController extends GetxController {
       "employees": employeesController.text,
       "primary_address": addressController.text,
       "country": countryController.text,
-      "phone_number": phoneController.text,
+      "phone_number": phoneCountryCode.value + phoneController.text.trim(),
       "company_address": addressController.text
     };
 
@@ -162,7 +165,7 @@ class ProfileViewScreenController extends GetxController {
         .then((value) {
       var updateData = value;
       Get.find<GetLoginModalService>().getUserDataModal(UserDataModel: updateData);
-      hitUploadProfileImage(profileImage.value!);
+      // hitUploadProfileImage(profileImage.value!);
       refreshUserData();
       isLoading.value = false;
       toast("Updated successfully your profile");
@@ -190,32 +193,50 @@ class ProfileViewScreenController extends GetxController {
       update();
     } catch (e) {
       customLoader.hide();
-      isLoggedOut.value = false; // Reset the flag if logout fails
+      isLoggedOut.value = false;
     }
   }
 
- void getImage(ImageSource source) async {
+  void getImage(ImageSource source) async {
     try {
-      final PermissionStatus status = await _requestPermission(source);
+      final File? image = await ImagePickerHelper.pickImageFromSource(
+        source,
+        Get.context!,
+      );
 
-      if (status.isGranted) {
-        final XFile? image = await _picker.pickImage(
-          source: source, imageQuality: 80, maxWidth: 1200, maxHeight: 1200,
-        );
-        if (image != null) {
-          profileImage.value = File(image.path);
-          await hitUploadProfileImage(profileImage.value!);
-          update();
-        }
-      } else if (status.isDenied) {
-        _showPermissionDialog();
-      } else if (status.isPermanentlyDenied) {
-        _showSettingsDialog();
+      if (image != null) {
+        profileImage.value = image;
+        await hitUploadProfileImage(profileImage.value!);
+        update();
       }
     } catch (e) {
+      debugPrint('Error in getImage: $e');
       toast('Failed to pick image. Please try again.');
     }
   }
+
+ // void getImage(ImageSource source) async {
+ //    try {
+ //      final PermissionStatus status = await _requestPermission(source);
+ //
+ //      if (status.isGranted) {
+ //        final XFile? image = await _picker.pickImage(
+ //          source: source, imageQuality: 80, maxWidth: 1200, maxHeight: 1200,
+ //        );
+ //        if (image != null) {
+ //          profileImage.value = File(image.path);
+ //          await hitUploadProfileImage(profileImage.value!);
+ //          update();
+ //        }
+ //      } else if (status.isDenied) {
+ //        _showPermissionDialog();
+ //      } else if (status.isPermanentlyDenied) {
+ //        _showSettingsDialog();
+ //      }
+ //    } catch (e) {
+ //      toast('Failed to pick image. Please try again.');
+ //    }
+ //  }
   void _showPermissionDialog() {
     Get.dialog(
       AlertDialog(

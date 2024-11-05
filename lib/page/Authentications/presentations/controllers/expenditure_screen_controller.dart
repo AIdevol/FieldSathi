@@ -7,16 +7,20 @@ import '../../../../constans/const_local_keys.dart';
 import '../../../../main.dart';
 import '../../../../response_models/attendance_response_model.dart';
 import '../../../../response_models/technician_response_model.dart';
+import '../../../../response_models/ticket_response_model.dart';
 import '../../../../services/APIs/auth_services/auth_api_services.dart';
 
 class ExpenditureScreenController extends GetxController{
   final isSearching = false.obs;
   RxBool isLoading = true.obs;
   RxList<TechnicianResponseModel> technicianData =<TechnicianResponseModel>[].obs;
-  RxList<TechnicianResults> results = <TechnicianResults>[].obs;
+  RxList<TechnicianResults> technicianresults = <TechnicianResults>[].obs;
   final searchController = TextEditingController();
+
+  final hasError = false.obs;
   final searchResults = <String>[].obs;
   RxList<ExpensesResponseModel> expensesData = <ExpensesResponseModel>[].obs;
+  RxList<ExpenseResult> expenseResult =<ExpenseResult>[].obs;
   void toggleSearch() {
     isSearching.value = !isSearching.value;
     if (!isSearching.value) {
@@ -38,7 +42,7 @@ class ExpenditureScreenController extends GetxController{
   @override
   void onInit(){
     super.onInit();
-    // hitGetTechnicianApiCall();
+    initializeData();
     // hitGetExpenseResponseModel();
   }
   @override
@@ -47,38 +51,67 @@ class ExpenditureScreenController extends GetxController{
     super.onClose();
   }
 
+  Future<void> initializeData() async {
+    isLoading.value = true;
+    hasError.value = false;
+    try {
+      await hitGetTechnicianApiCall();
+      isLoading.value = false;
+    } catch (e) {
+      hasError.value = true;
+      isLoading.value = false;
+      print('Error initializing data: $e');
+    }
+  }
 
-  // void hitGetTechnicianApiCall() {
+  Future<void> hitGetTechnicianApiCall() async{
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus?.unfocus();
+    var roleWiseData = {
+      'role': ['technician', 'sales']
+    };
+    Get.find<AuthenticationApiService>().getTechnicianApiCall(parameters: roleWiseData).then((value) async {
+      technicianresults.assignAll(value.results);
+      List<String> technicianIds = technicianresults.map((result) => result.id.toString()).toList();
+      await storage.write(attendanceId, technicianIds.join(','));
+      print("technician data: ${storage.read(attendanceId)}");
+      customLoader.hide();
+      toast('Technicians fetched successfully');
+      update();
+      // hitGetExpenseResponseModel();
+        }).catchError((error, stackTrace) {
+      customLoader.hide();
+      toast(error.toString());
+      isLoading.value = false;
+    });
+  }
+
+
+  // void fetchTechnicianDetailsApiCall() async {
   //   isLoading.value = true;
   //   customLoader.show();
   //   FocusManager.instance.primaryFocus?.unfocus();
-  //   var roleWiseData = {
-  //     'role': 'technician'
+  //   var parametersData = <String, dynamic>{
+  //     'role':["technician", "sales"],
+  //     // 'role':'sales',
   //   };
-  //   Get.find<AuthenticationApiService>().getTechnicianApiCall(parameters: roleWiseData).then((value) async {
-  //     technicianData.assignAll(value);
-  //     results.clear();
-  //     for (var technician in value) {
-  //       results.addAll(technician.results);
+  //   try {
+  //     final response = await Get.find<AuthenticationApiService>()
+  //         .getTechnicianDetailsApiCall(parameters: parametersData);
+  //     if (response != null) {
+  //       // ticketResult.assignAll(response.results);
+  //       // applyFilters(); // Apply initial filters
   //     }
-  //     List<String> technicianIds = results.map((result) => result.id.toString()).toList();
-  //     await storage.write(attendanceId, technicianIds.join(','));
+  //   } catch (error) {
+  //     toast('Error fetching ticket details: ${error.toString()}');
+  //   } finally {
   //     customLoader.hide();
-  //     toast('Technicians fetched successfully');
   //     isLoading.value = false;
-  //     // hitGetExpenseResponseModel();
-  //       }).catchError((error, stackTrace) {
-  //     customLoader.hide();
-  //     toast(error.toString());
-  //     isLoading.value = false;
-  //   });
+  //   }
   // }
 
-
-
-
-  void hitGetExpenseResponseModel()async{
-    final technicianId = await storage.read(attendanceId);
+  void hitGetExpenseApiCallDetails(String technicianId)async{
     isLoading.value = true;
     // customLoader.show();
     FocusManager.instance.primaryFocus!.context;
@@ -86,7 +119,7 @@ class ExpenditureScreenController extends GetxController{
       'technician': technicianId
     };
     Get.find<AuthenticationApiService>().getExpensesApiCall(parameters: expencesData).then((value){
-      // expencesData.assignAll(value);
+      expenseResult.assignAll(value.results);
       customLoader.hide();
       toast('Expenses fetched successfully');
       update();
@@ -95,6 +128,13 @@ class ExpenditureScreenController extends GetxController{
       toast(error.toString());
       isLoading.value= false;
     });
+  }
+
+
+  void clearExpenseResults() {
+    expenseResult.clear();
+    update();
+    hitGetTechnicianApiCall();
   }
 }
 
