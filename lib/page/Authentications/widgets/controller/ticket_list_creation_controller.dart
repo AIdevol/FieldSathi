@@ -31,7 +31,20 @@ class TicketListCreationController extends GetxController {
   FocusNode focusNode = FocusNode();
   RxBool isFocused = false.obs;
   Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
+  bool isAmcSelected = false;
+  bool isRateSelected = false;
 
+  void toggleAmc() {
+    isAmcSelected = true;
+    isRateSelected = false;
+    update();
+  }
+
+  void toggleRate() {
+    isAmcSelected = false;
+    isRateSelected = true;
+    update();
+  }
 
   @override
   void onInit() {

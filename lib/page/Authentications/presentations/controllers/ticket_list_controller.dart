@@ -325,6 +325,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:tms_sathi/constans/const_local_keys.dart';
 import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 import '../../../../response_models/ticket_response_model.dart';
@@ -348,6 +349,20 @@ class TicketListController extends GetxController {
 
   TextEditingController dateController = TextEditingController();
   FocusNode focusNode = FocusNode();
+  bool isAmcSelected = false;
+  bool isRateSelected = false;
+
+  void toggleAmc() {
+    isAmcSelected = true;
+    isRateSelected = false;
+    update();
+  }
+
+  void toggleRate() {
+    isAmcSelected = false;
+    isRateSelected = true;
+    update();
+  }
 
   @override
   void onInit() {
@@ -367,6 +382,8 @@ class TicketListController extends GetxController {
         ticketResult.assignAll(response.results);
         applyFilters(); // Apply initial filters
       }
+      List<String> ticketids = ticketResult.map((ids)=> ids.id.toString()).toList();
+      await storage.write(ticketId, ticketids);
     } catch (error) {
       toast('Error fetching ticket details: ${error.toString()}');
     } finally {
@@ -386,10 +403,10 @@ class TicketListController extends GetxController {
       filteredTickets = filteredTickets.where((ticket) {
         switch (selectedFilter.value) {
           case "Customer Name":
-            return ticket.customerDetails.name?.toLowerCase().contains(query) ??
+            return ticket.customerDetails.customerName?.toLowerCase().contains(query) ??
                 false;
           case "Sub-Customer Name":
-            return ticket.subCustomerDetails?.subCustomerName?.toLowerCase()
+            return ticket.subCustomerDetails?.customerName?.toLowerCase()
                 .contains(query) ?? false;
           case "Technician Name":
             final techName = '${ticket.assignTo.firstName ?? ''} ${ticket
@@ -402,9 +419,9 @@ class TicketListController extends GetxController {
                 query) ?? false;
           default:
           // Search across all fields when no specific filter is selected
-            return (ticket.customerDetails.name?.toLowerCase().contains(
+            return (ticket.customerDetails.customerName?.toLowerCase().contains(
                 query) ?? false) ||
-                (ticket.subCustomerDetails?.subCustomerName?.toLowerCase()
+                (ticket.subCustomerDetails?.customerName?.toLowerCase()
                     .contains(query) ?? false) ||
                 (ticket.status.toLowerCase().contains(query)) ||
                 (ticket.ticketAddress.country?.toLowerCase().contains(query) ??
@@ -437,7 +454,7 @@ class TicketListController extends GetxController {
   }
 
 
-  String getFullName(User user) {
+  String getFullName(UserModel user) {
     final firstName = user.firstName ?? '';
     final lastName = user.lastName ?? '';
     return '$firstName $lastName'.trim();
@@ -449,7 +466,7 @@ class TicketListController extends GetxController {
       address.city,
       address.state,
       address.country,
-      address.pincode
+      address.zipcode
     ].where((component) => component != null && component.isNotEmpty);
 
     return components.isEmpty ? 'N/A' : components.join(', ');
@@ -504,5 +521,20 @@ class TicketListController extends GetxController {
     } catch (error) {
       toast('Error deleting ticket: ${error.toString()}');
     }
+  }
+
+  void downloadTicketData(String? tickId){
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus?.unfocus();
+    Get.find<AuthenticationApiService>().downLoadTicketDatabyUserName(id: tickId).then((value){
+      toast("Ticket details downloaded successfully");
+      customLoader.hide();
+      update();
+    }).onError((error, stackError){
+      isLoading.value = false;
+      customLoader.hide();
+      toast(error.toString());
+    });
   }
 }

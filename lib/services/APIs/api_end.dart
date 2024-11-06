@@ -1,5 +1,5 @@
 class ApiEnd{
-  static const String baseUrl = 'https://fieldsathi.com:92/';
+  static const String baseUrl ='https://fieldsathi.com:92/'; /*'http://192.168.1.29:8000/'*/
   static const String loginEnd = 'users/login/';
   static const String signUpEnd = 'users/signup/';
   static const String verifyotpEnd = 'users/verify_otp/';
@@ -49,6 +49,6 @@ class ApiEnd{
 
 
 /*============================================================= History Apis ==============================================================*/
-
+  // static const String downLoadTicketData = 'api/'
   static const String ticketHistoryViewEnd = 'api/ticket_history_view/';
 }

@@ -333,14 +333,6 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
       textAlign: PlutoColumnTextAlign.center,
     ),
     PlutoColumn(
-      title: 'Status',
-      field: 'status',
-      type: PlutoColumnType.text(),
-      width: 120,
-      titleTextAlign: PlutoColumnTextAlign.center,
-      textAlign: PlutoColumnTextAlign.center,
-    ),
-    PlutoColumn(
       title: 'Leave',
       field: 'leaveType',
       type: PlutoColumnType.text(),
@@ -349,39 +341,48 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
       textAlign: PlutoColumnTextAlign.center,
     ),
     PlutoColumn(
-      title: 'Actions',
-      field: 'actions',
+      title: 'Status',
+      field: 'status',
       type: PlutoColumnType.text(),
-      width: 150,
+      width: 120,
       titleTextAlign: PlutoColumnTextAlign.center,
       textAlign: PlutoColumnTextAlign.center,
-      renderer: (rendererContext) {
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: ElevatedButton(
-              onPressed: () {
-                _openDropDownFieldforStatusSubmitions();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: appColor,
-                minimumSize: Size(130, 40),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                'Update Status',
-                style: MontserratStyles.montserratSemiBoldTextStyle(
-                  size: 12,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     ),
+
+    // PlutoColumn(
+    //   title: 'Actions',
+    //   field: 'actions',
+    //   type: PlutoColumnType.text(),
+    //   width: 150,
+    //   titleTextAlign: PlutoColumnTextAlign.center,
+    //   textAlign: PlutoColumnTextAlign.center,
+    //   renderer: (rendererContext) {
+    //     return Center(
+    //       child: Padding(
+    //         padding: const EdgeInsets.symmetric(horizontal: 4.0),
+    //         child: ElevatedButton(
+    //           onPressed: () {
+    //             _openDropDownFieldforStatusSubmitions();
+    //           },
+    //           style: ElevatedButton.styleFrom(
+    //             backgroundColor: appColor,
+    //             minimumSize: Size(130, 40),
+    //             shape: RoundedRectangleBorder(
+    //               borderRadius: BorderRadius.circular(8),
+    //             ),
+    //           ),
+    //           child: Text(
+    //             'Update Status',
+    //             style: MontserratStyles.montserratSemiBoldTextStyle(
+    //               size: 12,
+    //               color: Colors.black,
+    //             ),
+    //           ),
+    //         ),
+    //       ),
+    //     );
+    //   },
+    // ),
   ];
 
   List<PlutoRow> getRows(List<Results> leaves) {
@@ -400,9 +401,9 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
           DateTime.parse(leave.endDate ?? ''),
         )),
         'reason': PlutoCell(value: leave.reason ?? ''),
-        'status': PlutoCell(value: leave.status ?? ''),
         'leaveType': PlutoCell(value: leave.leaveType ?? ''),
-        'actions': PlutoCell(value: ''),
+        'status': PlutoCell(value: leave.status ?? ''),
+        // 'actions': PlutoCell(value: ''),
       });
     }).toList();
   }
@@ -613,7 +614,9 @@ _openDropDownFieldforStatusSubmitions(){
             Text("Update Status", style: MontserratStyles.montserratBoldTextStyle(size: 20, color: Colors.black),),
             vGap(30),
             CustomTextField(
-              controller: controller.statusController,
+              controller: TextEditingController(
+                  text: controller.defaultSelectedStatus.value
+              ),
               hintText: 'Select Status',
               labletext: 'Select Status',
               suffix: Padding(

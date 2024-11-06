@@ -3,35 +3,21 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:tms_sathi/main.dart';
+import 'package:tms_sathi/response_models/holidays_calender_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
-class Event {
-  final String title;
-  final String description;
-  final bool isHoliday;
-  final Color color;
-  final DateTime start;
-  final DateTime end;
-
-  Event(this.title, this.description, {
-    this.isHoliday = false,
-    required this.color,
-    required this.start,
-    required this.end,
-  });
-}
 
 class CalendarController extends GetxController {
   final Rx<DateTime> focusedDay = DateTime.now().obs;
   final Rx<DateTime?> selectedDay = Rx<DateTime?>(null);
   final Rx<CalendarFormat> calendarFormat = CalendarFormat.month.obs;
-  final RxList<Event> selectedEvents = <Event>[].obs;
-
-  final RxMap<DateTime, List<Event>> events = <DateTime, List<Event>>{}.obs;
+  final RxList<Result> selectedEventsResult = <Result>[].obs;
+  final RxMap<DateTime, List<Result>> events = RxMap<DateTime, List<Result>>({});
 
   @override
   void onInit() {
     super.onInit();
+    selectedDay.value = DateTime.now();
     hitHolidayApiCall();
   }
 
@@ -39,7 +25,7 @@ class CalendarController extends GetxController {
     if (!isSameDay(this.selectedDay.value, selectedDay)) {
       this.selectedDay.value = selectedDay;
       this.focusedDay.value = focusedDay;
-      selectedEvents.value = getEventsForDay(selectedDay);
+      selectedEventsResult.value = getEventsForDay(selectedDay);
     }
   }
 
@@ -49,55 +35,51 @@ class CalendarController extends GetxController {
     }
   }
 
-  List<Event> getEventsForDay(DateTime day) {
-    return events[day] ?? [];
-  }
-
-  void onEventTapped(Event event) {
-    print('Event tapped: ${event.title}');
-  }
-
-  void deleteEvent(Event event) {
-    selectedEvents.remove(event);
-    events.forEach((key, value) {
-      value.remove(event);
-    });
-    update();
+  List<Result> getEventsForDay(DateTime day) {
+    return events[DateTime(day.year, day.month, day.day)] ?? [];
   }
 
   void hitHolidayApiCall() {
     customLoader.show();
     Get.find<AuthenticationApiService>().holidaysCalenderApiCall().then((value) {
-      _addEventFromApi(value);
-      print("calender id: ${value.id}");
+      if (value is HolidaysCalendarResponseModel) {
+        for (var result in value.results) {
+          _addEventFromApi(result);
+        }
+      }
       customLoader.hide();
-    }).onError((error, stackError) {
+    }).onError((error, stackTrace) {
       customLoader.hide();
       toast(error.toString());
     });
   }
 
-  void _addEventFromApi(dynamic calendarData) {
-    final start = DateTime.parse(calendarData.start);
-    final end = DateTime.parse(calendarData.end);
-    final event = Event(
-      calendarData.title,
-      'Holiday',
-      isHoliday: true,
-      color: Color(int.parse(calendarData.color.replaceAll('#', '0xFF'))),
-      start: start,
-      end: end,
-    );
+  void _addEventFromApi(Result holidayData) {
+    try {
+      if (holidayData.start == null || holidayData.end == null) return;
 
-    // Add the event to all days between start and end
-    for (var day = start; day.isBefore(end.add(Duration(days: 1))); day = day.add(Duration(days: 1))) {
-      if (events[day] == null) {
-        events[day] = [event];
-      } else {
-        events[day]!.add(event);
+      final start = DateTime.parse(holidayData.start!);
+      final end = DateTime.parse(holidayData.end!);
+
+      // Add the event to all days between start and end
+      for (var day = start;
+      day.isBefore(end.add(const Duration(days: 1)));
+      day = day.add(const Duration(days: 1))) {
+        final dateKey = DateTime(day.year, day.month, day.day);
+        events.update(dateKey, (existingEvents) {
+          existingEvents.add(holidayData);
+          return existingEvents;
+        }, ifAbsent: () => [holidayData]);
       }
-    }
 
-    update();
+      // Update selected events if the current selected day has this event
+      if (selectedDay.value != null) {
+        selectedEventsResult.value = getEventsForDay(selectedDay.value!);
+      }
+
+      update();
+    } catch (e) {
+      print('Error adding event: $e');
+    }
   }
 }

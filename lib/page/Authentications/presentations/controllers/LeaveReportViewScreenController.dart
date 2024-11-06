@@ -23,7 +23,7 @@ class LeaveReportViewScreenController extends GetxController {
     "Rejected",
   ].obs;
 
-  RxString defaultSelectedStatus = 'Select Status'.obs;
+  RxString defaultSelectedStatus = 'Submitted'.obs;
   RxString selectedFilter = "Select Status".obs;
   Rx<LeaveResponseModel> leaveManagementData = LeaveResponseModel().obs;
   RxList<Results> filteredLeaves = <Results>[].obs;
@@ -74,7 +74,7 @@ class LeaveReportViewScreenController extends GetxController {
     customLoader.show();
     FocusManager.instance.primaryFocus!.context;
     var statusValue={
-      "status": statusController.text
+      "status": defaultSelectedStatus
     };
     Get.find<AuthenticationApiService>().putLeavesApiCall(dataBody: statusValue, id: leaveId).then((value){
        leaveManagementData.value = value;

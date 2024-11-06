@@ -1,28 +1,75 @@
-class HolidaysCalenderResponseModel {
-  int? id;
-  String? start;
-  String? end;
-  String? title;
-  String? color;
+class HolidaysCalendarResponseModel {
+  final int count;
+  final int totalPages;
+  final int currentPage;
+  final List<Result> results;
 
-  HolidaysCalenderResponseModel(
-      {this.id, this.start, this.end, this.title, this.color});
+  HolidaysCalendarResponseModel({
+    required this.count,
+    required this.totalPages,
+    required this.currentPage,
+    required this.results,
+  });
 
-  HolidaysCalenderResponseModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    start = json['start'];
-    end = json['end'];
-    title = json['title'];
-    color = json['color'];
+  factory HolidaysCalendarResponseModel.fromJson(Map<String, dynamic> json) {
+    return HolidaysCalendarResponseModel(
+      count: json['count'],
+      totalPages: json['total_pages'],
+      currentPage: json['current_page'],
+      results: List<Result>.from(json['results'].map((x) => Result.fromJson(x))),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['start'] = this.start;
-    data['end'] = this.end;
-    data['title'] = this.title;
-    data['color'] = this.color;
-    return data;
+    return {
+      'count': count,
+      'total_pages': totalPages,
+      'current_page': currentPage,
+      'results': results.map((x) => x.toJson()).toList(),
+    };
+  }
+}
+
+class Result {
+  final int? id;
+  final String? start;
+  final String? end;
+  final String? title;
+  final String? color;
+  final String? createdBy;
+  final String? admin;
+
+  Result( {
+    this.id,
+    this.start,
+    this.end,
+    this.title,
+    this.color,
+    this.createdBy,
+    this.admin,
+  });
+
+  factory Result.fromJson(Map<String, dynamic> json) {
+    return Result(
+      id: json['id'],
+      start: json['start'],
+      end: json['end'],
+      title: json['title'],
+      color: json['color'],
+      createdBy: json['created_by'],
+      admin: json['admin'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'start': start,
+      'end': end,
+      'title': title,
+      'color': color,
+      'created_by': createdBy,
+      'admin': admin,
+    };
   }
 }

@@ -168,12 +168,12 @@ implements AuthenticationApi {
 
 // =====================================================Page ApI's=======================================================================
   @override
-  Future<HolidaysCalenderResponseModel> holidaysCalenderApiCall(
+  Future<HolidaysCalendarResponseModel> holidaysCalenderApiCall(
       {Map<String, dynamic>? dataBody}) async {
     try {
       final response = await dioClient!.get(
-          "${ApiEnd.holidaysApiEnd}", data: dataBody);
-      return HolidaysCalenderResponseModel.fromJson(response);
+          "${ApiEnd.holidaysApiEnd}", data: dataBody, skipAuth: false);
+      return HolidaysCalendarResponseModel.fromJson(response);
     } catch (e) {
       return Future.error(NetworkExceptions.getDioException(e));
     }
@@ -220,6 +220,15 @@ implements AuthenticationApi {
     }
   }
 
+  @override
+  Future<String>downLoadTicketDatabyUserName({Map<String, dynamic>? dataBody, id})async{
+    try{
+      final response = await dioClient!.get("api/ticket/$id/pdf/",data: dataBody, skipAuth: false);
+      return response;
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
   @override
   Future<LeaveResponseModel> getLeavesApiCall(
       {Map<String, dynamic>? dataBody}) async {
@@ -352,32 +361,41 @@ implements AuthenticationApi {
 
 // ===========================================================Leaves Api Call=============================================================
   @override
-  Future<List<LeaveAllocationResponseModel>> getLeavesALLocationApiCall(
-      {Map<String, dynamic>? dataBody}) async {
-    try {
+  Future<LeaveAllocationResponseModel>getLeavesALLocationApiCall({Map<String, dynamic>? dataBody})async{
+    try{
       final response = await dioClient!.get(
-          "${ApiEnd.leaveEditPeriodEnd}", data: dataBody);
-      if (response is List) {
-        return response.map((item) =>
-            LeaveAllocationResponseModel.fromJson(item)).toList();
-      } else
-      if (response is Map<String, dynamic> && response.containsKey('data')) {
-        final List<dynamic> data = response['data'];
-        return data.map((item) => LeaveAllocationResponseModel.fromJson(item))
-            .toList();
-      }
-      return [];
-    } catch (e) {
-      return Future.error(NetworkExceptions.getDioException(e));
+                "${ApiEnd.leaveEditPeriodEnd}", data: dataBody);
+      return LeaveAllocationResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error) );
     }
   }
+  // Future<List<LeaveAllocationResponseModel>> getLeavesALLocationApiCall(
+  //     {Map<String, dynamic>? dataBody}) async {
+  //   try {
+  //     final response = await dioClient!.get(
+  //         "${ApiEnd.leaveEditPeriodEnd}", data: dataBody);
+  //     if (response is List) {
+  //       return response.map((item) =>
+  //           LeaveAllocationResponseModel.fromJson(item)).toList();
+  //     } else
+  //     if (response is Map<String, dynamic> && response.containsKey('data')) {
+  //       final List<dynamic> data = response['data'];
+  //       return data.map((item) => LeaveAllocationResponseModel.fromJson(item))
+  //           .toList();
+  //     }
+  //     return [];
+  //   } catch (e) {
+  //     return Future.error(NetworkExceptions.getDioException(e));
+  //   }
+  // }
 
   @override
   Future<LeaveAllocationResponseModel> putLeavesAllocationApiCall(
       {Map<String, dynamic>? dataBody, id}) async {
     try {
       final response = await dioClient!.put(
-        "${ApiEnd.leaveEditPeriodEnd}$id/", data: dataBody,);
+        "${ApiEnd.leaveEditPeriodEnd}$id/", data: dataBody,skipAuth: false);
       return LeaveAllocationResponseModel.fromJson(response);
     } catch (e) {
       return Future.error(NetworkExceptions.getDioException(e));

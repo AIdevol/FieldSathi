@@ -1,27 +1,69 @@
 class LeaveAllocationResponseModel {
-  int? id;
-  int? months;
-  int? allocatedSickLeave;
-  int? allocatedCasualLeave;
+  final int count;
+  final int totalPages;
+  final int currentPage;
+  final List<LeaveAllocationResult> results;
 
-  LeaveAllocationResponseModel({this.id,
-    this.months,
-    this.allocatedSickLeave,
-    this.allocatedCasualLeave});
+  LeaveAllocationResponseModel({
+    required this.count,
+    required this.totalPages,
+    required this.currentPage,
+    required this.results,
+  });
 
-  LeaveAllocationResponseModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    months = json['months'];
-    allocatedSickLeave = json['allocated_sick_leave'];
-    allocatedCasualLeave = json['allocated_casual_leave'];
+  factory LeaveAllocationResponseModel.fromJson(Map<String, dynamic> json) {
+    return LeaveAllocationResponseModel(
+      count: json['count'],
+      totalPages: json['total_pages'],
+      currentPage: json['current_page'],
+      results: (json['results'] as List)
+          .map((item) => LeaveAllocationResult.fromJson(item))
+          .toList(),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['months'] = this.months;
-    data['allocated_sick_leave'] = this.allocatedSickLeave;
-    data['allocated_casual_leave'] = this.allocatedCasualLeave;
-    return data;
+    return {
+      'count': count,
+      'total_pages': totalPages,
+      'current_page': currentPage,
+      'results': results.map((item) => item.toJson()).toList(),
+    };
+  }
+}
+
+class LeaveAllocationResult {
+  final int id;
+  final int adminUser;
+  final int months;
+  final int allocatedSickLeave;
+  final int allocatedCasualLeave;
+
+  LeaveAllocationResult({
+    required this.id,
+    required this.adminUser,
+    required this.months,
+    required this.allocatedSickLeave,
+    required this.allocatedCasualLeave,
+  });
+
+  factory LeaveAllocationResult.fromJson(Map<String, dynamic> json) {
+    return LeaveAllocationResult(
+      id: json['id'],
+      adminUser: json['admin_user'],
+      months: json['months'],
+      allocatedSickLeave: json['allocated_sick_leave'],
+      allocatedCasualLeave: json['allocated_casual_leave'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'admin_user': adminUser,
+      'months': months,
+      'allocated_sick_leave': allocatedSickLeave,
+      'allocated_casual_leave': allocatedCasualLeave,
+    };
   }
 }

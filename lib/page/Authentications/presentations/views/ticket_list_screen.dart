@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
+import 'package:tms_sathi/constans/const_local_keys.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
+import 'package:tms_sathi/response_models/ticket_response_model.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
@@ -18,6 +20,7 @@ class TicketListScreen extends GetView<TicketListController> {
   // Define fixed column widths
   final Map<String, double> columnWidths = {
     'ID': 50,
+    'Task Name': 150,
     'Customer Name': 150,
     'Sub-Customer': 150,
     'Technician': 150,
@@ -41,6 +44,7 @@ class TicketListScreen extends GetView<TicketListController> {
         init: TicketListController(),
         builder: (controller) => SafeArea(
           child: Scaffold(
+            resizeToAvoidBottomInset: true,
             appBar: _buildAppBar(),
             body: Column(
               children: [
@@ -49,7 +53,7 @@ class TicketListScreen extends GetView<TicketListController> {
                 Expanded(
                   child: Obx(() => controller.isLoading.value
                       ? const Center(child: CircularProgressIndicator())
-                      : _buildTicketTable()),
+                      : _buildTicketTable(controller)),
                 ),
               ],
             ),
@@ -212,7 +216,8 @@ class TicketListScreen extends GetView<TicketListController> {
     );
   }
 
-  Widget _buildTicketTable() {
+  Widget _buildTicketTable(TicketListController controller) {
+    final resultData = controller.ticketResult.map((Ids)=> Ids.id);
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -246,7 +251,7 @@ class TicketListScreen extends GetView<TicketListController> {
               ),
               headingRowColor: MaterialStateProperty.all(Colors.grey.shade50),
               columns: _buildTableColumns(),
-              rows: _buildTableRows(),
+              rows: _buildTableRows(controller),
             ),
           ),
         ),
@@ -321,17 +326,18 @@ class TicketListScreen extends GetView<TicketListController> {
     );
   }
 
-  List<DataRow> _buildTableRows() {
+  List<DataRow> _buildTableRows(TicketListController controller) {
     return controller.ticketResult.map((ticket) {
       return DataRow(
         cells: [
           DataCell(_ticketBoxIcons(ticket.id?.toString() ?? 'NA')),
+          DataCell(_buildDataCell(ticket.taskName?.toString() ?? 'NA')),
           DataCell(_buildDataCell(
-            ticket.customerDetails?.name ?? 'NA',
+            ticket.customerDetails.customerName ?? 'NA',
             maxWidth: columnWidths['Customer Name'],
           )),
           DataCell(_buildDataCell(
-            ticket.subCustomerDetails?.subCustomerName ?? 'NA',
+            ticket.subCustomerDetails.customerName ?? 'NA',
             maxWidth: columnWidths['Sub-Customer'],
           )),
           DataCell(_buildDataCell(
@@ -368,7 +374,7 @@ class TicketListScreen extends GetView<TicketListController> {
             maxWidth: columnWidths['Ticket Date'],
           )),
           DataCell(_buildAgingCell(ticket.aging?.toString() ?? 'NA')),
-          DataCell(_buildActionCell()),
+          DataCell(_buildActionCell(controller, ticket.id.toString())),
         ],
       );
     }).toList();
@@ -465,7 +471,7 @@ class TicketListScreen extends GetView<TicketListController> {
     );
   }
 
-  Widget _buildActionCell() {
+  Widget _buildActionCell(TicketListController controller, String? tickId) {
     return Container(
         width: columnWidths['Actions'],
         child: PopupMenuButton<String>(
@@ -474,9 +480,9 @@ class TicketListScreen extends GetView<TicketListController> {
     shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(12),
     ),
-    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-      _buildPopupMenuItem('Download', Icons.download, Colors.blue.shade700, context, controller),
-      _buildPopupEditMenuItem('Edit', Icons.edit_outlined, Colors.blue.shade700, context, controller),
+    itemBuilder: (BuildContext context,) => <PopupMenuEntry<String>>[
+      _buildPopupMenuItem('Download', Icons.download, Colors.blue.shade700, context, controller, tickId),
+      _buildPopupEditMenuItem('Reassign', Icons.edit_outlined, Colors.blue.shade700, context, controller),
       _buildPopupDeleteMenuItem('Delete', Icons.delete_outline, Colors.red, context, controller),
     ],
     child: Container(
@@ -496,9 +502,9 @@ class TicketListScreen extends GetView<TicketListController> {
   }
 
   PopupMenuItem<String> _buildPopupMenuItem(
-      String text, IconData icon, Color iconColor, BuildContext context, TicketListController controller) {
+      String text, IconData icon, Color iconColor, BuildContext context, TicketListController controller, String? tickId) {
     return PopupMenuItem<String>(
-      onTap: (){},
+      onTap: ()=> controller.downloadTicketData(tickId),
       value: text,
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -574,27 +580,36 @@ _showInbuildDialogValue(BuildContext context, TicketListController controller){
   );
 }
 
-_form(BuildContext context, TicketListController controller){
-return Padding(
-  padding: const EdgeInsets.all(18.0),
-  child: ListView(
-    children: [
-      Text('Reassign', style: MontserratStyles.montserratSemiBoldTextStyle(size: 18,color: Colors.black),),
-      Divider(height: 20,),
-      _buildTaskName(context: context),
-      vGap(20),
-      _addTechnician(context: context),
-      vGap(20),
-      _buildOptionbutton(context: context),
-      vGap(20),
-      _buildtextContainer(context: context),
-      vGap(20),
-      _dobView(context: context, controller:  controller),
-      vGap(20),
-      _selectGroupViewform(context: context)
-    ],
-  ),
-);
+_form(BuildContext context, TicketListController controller) {
+  return Padding(
+    padding: const EdgeInsets.all(18.0),
+    child: SingleChildScrollView(  // Changed from ListView to SingleChildScrollView
+      child: Column(  // Changed to Column for better layout control
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Reassign',
+            style: MontserratStyles.montserratSemiBoldTextStyle(
+                size: 18,
+                color: Colors.black
+            ),
+          ),
+          Divider(height: 20),
+          _buildTaskName(context: context),
+          vGap(20),
+          _addTechnician(context: context),
+          vGap(20),
+          _buildOptionbutton(context: context),
+          vGap(20),
+          _buildtextContainer(context: context),
+          vGap(20),
+          _dobView(context: context, controller: controller),
+          vGap(20),
+          _buildGroupForm(context: context)  // Renamed and restructured
+        ],
+      ),
+    ),
+  );
 }
 Widget _buildTopBarView({required TicketListController controller, required BuildContext context}) {
   return Center(child: Text('ReAssign Ticket', style: MontserratStyles.montserratBoldTextStyle(size: 18, color: blackColor)));
@@ -679,59 +694,95 @@ _addTechnician({required BuildContext context}){
 
 }
 
-_buildOptionbutton({required BuildContext context}){
-  return  Column(
-    mainAxisAlignment: MainAxisAlignment.start,
-    children: [
-      ElevatedButton(
-        onPressed: () {},
-        child: Text('AMC',style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),),
-        style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(appColor),
-          foregroundColor: WidgetStateProperty.all(Colors.white),
-          padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 120, vertical: 15)),
-          elevation: WidgetStateProperty.all(5),
-          shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+Widget _buildOptionbutton({required BuildContext context}) {
+  return GetBuilder<TicketListController>(
+    builder: (controller) => Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        // AMC Button
+        ElevatedButton(
+          onPressed: () => controller.toggleAmc(),
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(
+              controller.isAmcSelected ? appColor : Colors.white,
             ),
-          ),
-          shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.5)), // Shadow color
-        ),
-      ),
-      hGap(10),
-      Row(
-        children: [
-          ElevatedButton(
-            onPressed: () {},
-            child: Text('Rate',style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),),
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(appColor), // Background color
-              foregroundColor: WidgetStateProperty.all(Colors.white), // Text color
-              padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 55, vertical: 15)), // Padding
-              elevation: WidgetStateProperty.all(5), // Shadow elevation
-              shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10), // Rounded corners
+            foregroundColor: MaterialStateProperty.all(
+              controller.isAmcSelected ? Colors.white : Colors.black,
+            ),
+            padding: MaterialStateProperty.all(
+              const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+            ),
+            elevation: MaterialStateProperty.all(5),
+            shape: MaterialStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: controller.isAmcSelected ? appColor : Colors.grey,
+                  width: 1,
                 ),
               ),
-              shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.5)), // Shadow color
+            ),
+            shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
+          ),
+          child: Text(
+            'AMC',
+            style: MontserratStyles.montserratBoldTextStyle(
+              color: controller.isAmcSelected ? whiteColor : Colors.black,
+              size: 13,
             ),
           ),
-          hGap(10),
-          Container(
-            height: Get.height*0.06,
-            width: Get.width*0.30,
-            decoration: BoxDecoration(color: whiteColor,borderRadius: BorderRadius.circular(25),
-                border: Border.all(
-                    width:1,
-                    color: Colors.grey
-                  // _isFocused ? Colors.blue : Colors.black,
-
-                )),
+        ),
+        const SizedBox(width: 10),
+        ElevatedButton(
+          onPressed: () => controller.toggleRate(),
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(
+              controller.isRateSelected ? appColor : Colors.white,
+            ),
+            foregroundColor: MaterialStateProperty.all(
+              controller.isRateSelected ? Colors.white : Colors.black,
+            ),
+            padding: MaterialStateProperty.all(
+              const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+            ),
+            elevation: MaterialStateProperty.all(5),
+            shape: MaterialStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: controller.isRateSelected ? appColor : Colors.grey,
+                  width: 1,
+                ),
+              ),
+            ),
+            shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
+          ),
+          child: Text(
+            'Rate',
+            style: MontserratStyles.montserratBoldTextStyle(
+              color: controller.isRateSelected ? whiteColor : Colors.black,
+              size: 13,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        if (controller.isRateSelected)
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height: Get.height * 0.06,
+            width: Get.width * 0.30,
+            decoration: BoxDecoration(
+              color: whiteColor,
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(
+                width: 1,
+                color: Colors.grey,
+              ),
+            ),
             child: const Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
               child: TextField(
+                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: 'Rate *',
@@ -739,35 +790,34 @@ _buildOptionbutton({required BuildContext context}){
               ),
             ),
           ),
-        ],
-      )
-
-      // InkWell(onTap: (){},child: Container(height: 40,width: 120,color:appColor,),)
-    ],);
-  //   GetBuilder<TicketListController>(builder: (context){
-  //   return
-  // });
+      ],
+    ),
+  );
 }
+
 
 _buildtextContainer({required BuildContext context}){
   return  Container(
-    height: Get.height*0.16,
-    width: Get.width*0.40,
-    decoration: BoxDecoration(color: whiteColor,borderRadius: BorderRadius.circular(25),
+    height: Get.height * 0.16,
+    decoration: BoxDecoration(
+        color: whiteColor,
+        borderRadius: BorderRadius.circular(25),
         border: Border.all(
-            width:1,
+            width: 1,
             color: Colors.grey
-          // _isFocused ? Colors.blue : Colors.black,
-
-        )),
-    child:  Padding(
+        )
+    ),
+    child: Padding(
       padding: EdgeInsets.symmetric(horizontal: 10),
       child: TextField(
-        style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),
+        style: MontserratStyles.montserratBoldTextStyle(
+            color: Colors.black,
+            size: 13
+        ),
         maxLines: 10,
         decoration: InputDecoration(
           border: InputBorder.none,
-          hintText: 'Purpose *',
+          hintText: 'Purpose*',
         ),
       ),
     ),
@@ -792,159 +842,191 @@ Widget _dobView({required BuildContext context, required TicketListController co
   );
 }
 
-Widget _selectGroupViewform({required BuildContext context}){
-  return SizedBox(
-    height: Get.height,
-    width: Get.width,
-    child: ListView(
-      scrollDirection: Axis.vertical,
-      children: [
-        Text('Customer Details',    style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),),
-        _buildListCustomerDetails(context: context),
-        vGap(20),
-        Text('FSR Details',    style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),),
-        CustomTextField(
-          hintText: "FSR Details".tr,
-          // controller: controller.dateController,
-          textInputType: TextInputType.datetime,
-          // focusNode: controller.focusNode,
-          onFieldSubmitted: (String? value) {
-            // Handle field submission if needed
-          },
-          // labletext: "Date".tr,
-          prefix: IconButton(
-            onPressed: (){} /*=> controller.selectDate(context)*/,
-            icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30,),
-          ),
-        ),
-        vGap(20),
-        Text('Services Details',    style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),),
-        CustomTextField(
-          hintText: "Services Details".tr,
-          // controller: controller.dateController,
-          textInputType: TextInputType.datetime,
-          // focusNode: controller.focusNode,
-          onFieldSubmitted: (String? value) {
-            // Handle field submission if needed
-          },
-          // labletext: "Date".tr,
-          prefix: IconButton(
-            onPressed: (){} /*=> controller.selectDate(context)*/,
-            icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30,),
-          ),
-        ),
-        vGap(20),
-        Text('Instructions',    style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),),
-        Container(
-          height: Get.height*0.16,
-          width: Get.width*0.40,
-          decoration: BoxDecoration(color: whiteColor,borderRadius: BorderRadius.circular(25),
-              border: Border.all(
-                  width:1,
-                  color: Colors.grey
-                // _isFocused ? Colors.blue : Colors.black,
 
-              )),
-          child:  Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            child: TextField(
-              style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),
-              maxLines: 10,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: 'Instructions *',
-              ),
-            ),
-          ),
-        ),
-        vGap(20),
-        _buildButtonView(context:  context)
-      ],),
-  );
-}
-
-Widget _buildListCustomerDetails({required BuildContext context}){
-  return Column(children: [
-    vGap(20),
-    CustomTextField(
-      hintText: "Customer Details".tr,
-      // controller: controller.dateController,
-      textInputType: TextInputType.datetime,
-      // focusNode: controller.focusNode,
-      onFieldSubmitted: (String? value) {
-        // Handle field submission if needed
-      },
-      labletext: "customer name".tr,
-      prefix: IconButton(
-        onPressed: () => _buildBottomsheet(context:  context),
-        icon: Icon(Icons.add, color: Colors.black),
-      ),
-    ),
-    CustomTextField(
-      hintText: "product name".tr,
-      // controller: controller.dateController,
-      textInputType: TextInputType.datetime,
-      // focusNode: controller.focusNode,
-      onFieldSubmitted: (String? value) {
-        // Handle field submission if needed
-      },
-      labletext: "product name".tr,
-      prefix: IconButton(
-        onPressed: () {}/*=> controller.selectDate(context)*/,
-        icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30,),
-      ),
-    ),
-    CustomTextField(
-      hintText: "model no".tr,
-      // controller: controller.dateController,
-      textInputType: TextInputType.datetime,
-      // focusNode: controller.focusNode,
-      onFieldSubmitted: (String? value) {
-        // Handle field submission if needed
-      },
-      labletext: "model no".tr,
-      prefix: IconButton(
-        onPressed: () {}/*=> controller.selectDate(context)*/,
-        icon: Icon(Icons.add, color: Colors.black),
-      ),
-    )
-  ],);
-}
-
-
-Widget _buildButtonView({required BuildContext context}){
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.end,
-    // crossAxisAlignment: CrossAxisAlignment.end,
+Widget _buildGroupForm({required BuildContext context}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      ElevatedButton(onPressed: ()=>Get.back(), child: Text('Cancel',style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),),style: ElevatedButton.styleFrom(
-        backgroundColor: appColor,
-        foregroundColor: Colors.white,           // Text and icon color
-        shadowColor: Colors.black,         // Shadow color
-        elevation: 5,                      // Elevation of the button
-        shape: RoundedRectangleBorder(     // Rounded corners
-          borderRadius: BorderRadius.circular(12),
+      Text(
+        'Customer Details',
+        style: MontserratStyles.montserratBoldTextStyle(
+            color: Colors.black,
+            size: 13
         ),
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),)),
-      hGap(20),
-      ElevatedButton(onPressed: (){}, child: Text("Add Ticket", style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: appColor,
-            foregroundColor: Colors.white,           // Text and icon color
-            shadowColor: Colors.black,         // Shadow color
-            elevation: 5,                      // Elevation of the button
-            shape: RoundedRectangleBorder(     // Rounded corners
-              borderRadius: BorderRadius.circular(12),
-            ),
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),))
+      ),
+      _buildListCustomerDetails(context: context),
+      vGap(20),
+      Text(
+        'FSR Details',
+        style: MontserratStyles.montserratBoldTextStyle(
+            color: Colors.black,
+            size: 13
+        ),
+      ),
+      _buildFSRDetails(),
+      vGap(20),
+      Text(
+        'Services Details',
+        style: MontserratStyles.montserratBoldTextStyle(
+            color: Colors.black,
+            size: 13
+        ),
+      ),
+      _buildServicesDetails(),
+      vGap(20),
+      Text(
+        'Instructions',
+        style: MontserratStyles.montserratBoldTextStyle(
+            color: Colors.black,
+            size: 13
+        ),
+      ),
+      _buildInstructionsField(),
+      vGap(20),
+      _buildButtonView(context: context)
     ],
   );
 }
 
+Widget _buildFSRDetails() {
+  return CustomTextField(
+    hintText: "FSR Details".tr,
+    textInputType: TextInputType.text,
+    onFieldSubmitted: (String? value) {},
+    prefix: IconButton(
+      onPressed: () {},
+      icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30),
+    ),
+  );
+}
+
+Widget _buildServicesDetails() {
+  return CustomTextField(
+    hintText: "Services Details".tr,
+    textInputType: TextInputType.text,
+    onFieldSubmitted: (String? value) {},
+    prefix: IconButton(
+      onPressed: () {},
+      icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30),
+    ),
+  );
+}
+
+// New widget for Instructions field
+Widget _buildInstructionsField() {
+  return Container(
+    height: Get.height * 0.16,
+    decoration: BoxDecoration(
+        color: whiteColor,
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(
+            width: 1,
+            color: Colors.grey
+        )
+    ),
+    child: Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10),
+      child: TextField(
+        style: MontserratStyles.montserratBoldTextStyle(
+            color: Colors.black,
+            size: 13
+        ),
+        maxLines: 10,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: 'Instructions *',
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _buildListCustomerDetails({required BuildContext context}) {
+  return Column(
+    children: [
+      vGap(20),
+      CustomTextField(
+        hintText: "Customer Details".tr,
+        textInputType: TextInputType.text,
+        labletext: "customer name".tr,
+        prefix: IconButton(
+          onPressed: () => _buildBottomsheet(context: context),
+          icon: Icon(Icons.add, color: Colors.black),
+        ),
+      ),
+      CustomTextField(
+        hintText: "product name".tr,
+        textInputType: TextInputType.text,
+        labletext: "product name".tr,
+        prefix: IconButton(
+          onPressed: () {},
+          icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30),
+        ),
+      ),
+      CustomTextField(
+        hintText: "model no".tr,
+        textInputType: TextInputType.text,
+        labletext: "model no".tr,
+        prefix: IconButton(
+          onPressed: () {},
+          icon: Icon(Icons.add, color: Colors.black),
+        ),
+      )
+    ],
+  );
+}
 _buildBottomsheet({required BuildContext context}){
   return showBottomSheet(context: context, builder: (BuildContext context){
     return PrincipalCustomerView();
   });
+}
+
+Widget _buildButtonView({required BuildContext context}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 16.0),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        ElevatedButton(
+          onPressed: () => Get.back(),
+          child: Text(
+            'Cancel',
+            style: MontserratStyles.montserratBoldTextStyle(
+                color: Colors.black,
+                size: 13
+            ),
+          ),
+          style: _buttonStyle(),
+        ),
+        hGap(20),
+        ElevatedButton(
+          onPressed: () {},
+          child: Text(
+            "Add Ticket",
+            style: MontserratStyles.montserratBoldTextStyle(
+                color: Colors.black,
+                size: 13
+            ),
+          ),
+          style: _buttonStyle(),
+        )
+      ],
+    ),
+  );
+}
+
+// Extracted button style for consistency
+ButtonStyle _buttonStyle() {
+  return ElevatedButton.styleFrom(
+    backgroundColor: appColor,
+    foregroundColor: Colors.white,
+    shadowColor: Colors.black,
+    elevation: 5,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+  );
 }
 
 void _showImportModelView(BuildContext context) {

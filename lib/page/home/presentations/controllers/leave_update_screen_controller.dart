@@ -1,3 +1,4 @@
+// LeaveUpdateScreenController.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
@@ -8,22 +9,25 @@ import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 import '../../../../constans/const_local_keys.dart';
 
 class LeaveUpdateScreenController extends GetxController {
- late TextEditingController sickLeaveController;
- late TextEditingController casualLeaveController;
- late TextEditingController probationPeriodController;
+  late TextEditingController sickLeaveController;
+  late TextEditingController casualLeaveController;
+  late TextEditingController probationPeriodController;
 
- late FocusNode sickLeaveFocusNode;
- late FocusNode casualLeaveFocusNode;
- late FocusNode probationLeaveFocusNode;
- RxList<LeaveAllocationResponseModel> leavesAllocationData = <LeaveAllocationResponseModel>[].obs;
- RxBool  isLoading = false.obs;
+  late FocusNode sickLeaveFocusNode;
+  late FocusNode casualLeaveFocusNode;
+  late FocusNode probationLeaveFocusNode;
 
-  int _probationPeriod = 0;
-  int _casualLeaveCount = 0;
-  int _sickLeaveCount = 0;
+  RxList<LeaveAllocationResult> leavesAllocationsResult = <LeaveAllocationResult>[].obs;
+  RxBool isLoading = false.obs;
+
+  // Track actual numeric values
+  RxInt sickLeaveCount = 0.obs;
+  RxInt casualLeaveCount = 0.obs;
+  RxInt probationPeriod = 0.obs;
 
   @override
   void onInit() {
+    super.onInit();
     sickLeaveController = TextEditingController();
     casualLeaveController = TextEditingController();
     probationPeriodController = TextEditingController();
@@ -31,14 +35,14 @@ class LeaveUpdateScreenController extends GetxController {
     sickLeaveFocusNode = FocusNode();
     casualLeaveFocusNode = FocusNode();
     probationLeaveFocusNode = FocusNode();
-    super.onInit();
-    sickLeaveController.text = _sickLeaveCount.toString();
-    casualLeaveController.text = _casualLeaveCount.toString();
-    probationPeriodController.text = _probationPeriod.toString();
+
+    // Initialize with default values
+    _updateControllerTexts();
     hitGetAssignedLeavesApiCall();
   }
 
-void onClose(){
+  @override
+  void onClose() {
     sickLeaveController.dispose();
     casualLeaveController.dispose();
     probationPeriodController.dispose();
@@ -47,114 +51,114 @@ void onClose(){
     casualLeaveFocusNode.dispose();
     probationLeaveFocusNode.dispose();
     super.onClose();
-}
+  }
+
+  void _updateControllerTexts() {
+    sickLeaveController.text = sickLeaveCount.value.toString();
+    casualLeaveController.text = casualLeaveCount.value.toString();
+    probationPeriodController.text = probationPeriod.value.toString();
+  }
+
   void increaseProbationPeriod() {
-      _probationPeriod++;
-      probationPeriodController.text = _probationPeriod.toString();
-      update();
+    probationPeriod++;
+    probationPeriodController.text = probationPeriod.value.toString();
+    update();
   }
 
   void decreaseProbationPeriod() {
-    if (_probationPeriod > 0) {
-      _probationPeriod--;
-      probationPeriodController.text = _probationPeriod.toString();
+    if (probationPeriod.value > 0) {
+      probationPeriod--;
+      probationPeriodController.text = probationPeriod.value.toString();
       update();
     }
   }
 
- void increaseCasualLeaves() {
-   _casualLeaveCount++;
-   casualLeaveController.text = _casualLeaveCount.toString();
-   update();
- }
+  void increaseCasualLeaves() {
+    casualLeaveCount++;
+    casualLeaveController.text = casualLeaveCount.value.toString();
+    update();
+  }
 
- void decreaseCasualLeaves() {
-   if (_casualLeaveCount > 0) {
-     _casualLeaveCount--;
-     probationPeriodController.text = _casualLeaveCount.toString();
-     update();
-   }
- }
-
- void increaseSickLeaves() {
-   _sickLeaveCount++;
-   sickLeaveController.text = _sickLeaveCount.toString();
-   update();
- }
-
- void decreaseSickLeaves() {
-   if (_sickLeaveCount > 0) {
-     _sickLeaveCount--;
-     sickLeaveController.text = _sickLeaveCount.toString();
-     update();
-   }
- }
-
-
- void hitGetAssignedLeavesApiCall()async{
-  //   isLoading.value = true;
-  //   customLoader.show();
-  //   FocusManager.instance.primaryFocus!.context;
-  //   try{
-  //     final responseData = await Get.find<AuthenticationApiService>().getLeavesALLocationApiCall();
-  //     leavesAllocationData.assignAll(responseData);
-  //    if (leavesAllocationData.isNotEmpty){
-  //      LeaveAllocationResponseModel data = leavesAllocationData[0];
-  //      sickLeaveController.text = data.allocatedSickLeave.toString();
-  //      casualLeaveController.text = data.allocatedCasualLeave.toString();
-  //      probationPeriodController.text = data.months.toString();
-  //    }
-  //   }
-  //   catch(error){
-  //       toast(error.toString());
-  //   }finally{
-  //     customLoader.hide();
-  //     isLoading.value = false;
-  //   }
-  // }
-     isLoading.value = true;
-     customLoader.show();
-     FocusManager.instance.primaryFocus!.context;
-   Get.find<AuthenticationApiService>().getLeavesALLocationApiCall().then((value)async{
-       leavesAllocationData.assignAll(value);
-
-        if (leavesAllocationData.isNotEmpty){
-          LeaveAllocationResponseModel data = leavesAllocationData[0];
-          await storage.write(leavesAllocationId, data.id.toString());
-          print('leavesid = ${data.id.toString()}');
-          sickLeaveController.text = data.allocatedSickLeave.toString();
-          casualLeaveController.text = data.allocatedCasualLeave.toString();
-          probationPeriodController.text = data.months.toString();
-        }
-      customLoader.hide();
-      toast("leaves Period Located succeffully");
+  void decreaseCasualLeaves() {
+    if (casualLeaveCount.value > 0) {
+      casualLeaveCount--;
+      casualLeaveController.text = casualLeaveCount.value.toString();
       update();
-    }).onError((error, stackError){
+    }
+  }
+
+  void increaseSickLeaves() {
+    sickLeaveCount++;
+    sickLeaveController.text = sickLeaveCount.value.toString();
+    update();
+  }
+
+  void decreaseSickLeaves() {
+    if (sickLeaveCount.value > 0) {
+      sickLeaveCount--;
+      sickLeaveController.text = sickLeaveCount.value.toString();
+      update();
+    }
+  }
+
+  void hitGetAssignedLeavesApiCall() {
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    Get.find<AuthenticationApiService>().getLeavesALLocationApiCall().then((value) async {
+      leavesAllocationsResult.assignAll(value.results);
+
+      List<String> leaveAllocationids = leavesAllocationsResult
+          .map((leavesData) => leavesData.id.toString())
+          .toList();
+      await storage.write(leavesAllocationId, leaveAllocationids);
+      print("ajdfjadsfj: ${storage.read(leavesAllocationId)}");
+      if (leavesAllocationsResult.isNotEmpty) {
+        LeaveAllocationResult result = leavesAllocationsResult.first;
+        // Update Rx values
+        sickLeaveCount.value = result.allocatedSickLeave;
+        casualLeaveCount.value = result.allocatedCasualLeave;
+        probationPeriod.value = result.months;
+        // Update controller texts
+        _updateControllerTexts();
+      }
+
+      customLoader.hide();
+      toast("Leaves Period Located successfully");
+      update();
+    }).onError((error, stackTrace) {
       isLoading.value = false;
       customLoader.hide();
       toast(error.toString());
     });
- }
+  }
 
- void hitPutAssignedLeavesApiCall()async{
-    final allocationId= await storage.read(leavesAllocationId);
+  void hitPutAssignedLeavesApiCall() async {
+    final allocationIds = await storage.read(leavesAllocationId);
+    final allocationId = allocationIds is List ? allocationIds.first : allocationIds;
+    print('allocationid ${allocationId}');
+    isLoading.value = true;
     customLoader.show();
-    FocusManager.instance.primaryFocus!.context;
+    FocusManager.instance.primaryFocus?.unfocus();
+
     var leavesData = {
-      'months':probationPeriodController.text,
-      'allocated_sick_leave':sickLeaveController.text,
-      'allocated_casual_leave': casualLeaveController.text
+      'months': probationPeriod.value.toString(),
+      'allocated_sick_leave': sickLeaveCount.value.toString(),
+      'allocated_casual_leave': casualLeaveCount.value.toString()
     };
-    Get.find<AuthenticationApiService>().putLeavesAllocationApiCall(dataBody:leavesData,id:allocationId).then((value){
-      var leavesAllocationData = value;
-      customLoader.hide();
-      print(leavesAllocationData);
+
+    Get.find<AuthenticationApiService>()
+        .putLeavesAllocationApiCall(dataBody: leavesData, id: allocationId)
+        .then((value) {
       hitGetAssignedLeavesApiCall();
-      toast('update successfully leaves allocation');
+      customLoader.hide();
+      toast('Updated leaves allocation successfully');
       update();
-    }).onError((error, stackError){
+    }).onError((error, stackTrace) {
+      isLoading.value = false;
       customLoader.hide();
       toast(error.toString());
     });
- }
+  }
 }
