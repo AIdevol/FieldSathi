@@ -1,10 +1,9 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 import '../../../../constans/const_local_keys.dart';
 import '../../../../main.dart';
-import '../../../../response_models/attendance_response_model.dart';
 import '../../../../response_models/technician_response_model.dart';
 import '../../../../services/APIs/auth_services/auth_api_services.dart';
 
@@ -12,16 +11,15 @@ class TechnicianListViewScreenController extends GetxController {
   final searchController = TextEditingController();
   RxBool isLoading = true.obs;
   RxList<TechnicianResults> allTechnicians = <TechnicianResults>[].obs;
-  RxList<TodayAttendance> TechnicianAttendance = <TodayAttendance>[].obs;
   RxList<TechnicianResults> filteredTechnicians = <TechnicianResults>[].obs;
-
-  // Add this line to fix the null issue
-  RxBool isTableView = false.obs;
+  RxBool isTableView = true.obs; // Set default to true since we're using DataTable
 
   @override
   void onInit() {
     super.onInit();
     hitGetTechnicianApiCall();
+    // Listen to search controller changes
+    searchController.addListener(_onSearchChanged);
   }
 
   @override
@@ -30,63 +28,90 @@ class TechnicianListViewScreenController extends GetxController {
     super.onClose();
   }
 
-  void fetchTechnicians() {
-    filteredTechnicians.assignAll(allTechnicians);
+  void _onSearchChanged() {
+    final query = searchController.text.toLowerCase();
+    if (query.isEmpty) {
+      filteredTechnicians.assignAll(allTechnicians);
+    } else {
+      filteredTechnicians.assignAll(allTechnicians.where((technician) =>
+      technician.firstName.toLowerCase().contains(query) ||
+          technician.lastName.toLowerCase().contains(query) ||
+          technician.email.toLowerCase().contains(query) ||
+          technician.phoneNumber.toLowerCase().contains(query)));
+    }
     update();
+  }
+
+  Future<void> hitGetTechnicianApiCall() async {
+    try {
+      isLoading.value = true;
+      customLoader.show();
+      FocusManager.instance.primaryFocus?.unfocus();
+
+      final roleWiseData = {'role': 'technician'};
+
+      final response = await Get.find<AuthenticationApiService>()
+          .getTechnicianApiCall(parameters: roleWiseData);
+
+      // Update both lists
+      allTechnicians.assignAll(response.results);
+      filteredTechnicians.assignAll(response.results); // Initialize filtered list
+
+      // Store technician IDs
+      final technicianIds = response.results.map((e) => e.id.toString()).toList();
+      await storage.write(attendanceId, technicianIds.join(','));
+
+      customLoader.hide();
+      toast('Technicians fetched successfully');
+    } catch (error, stackTrace) {
+      print('Error fetching technicians: $error');
+      print('Stack trace: $stackTrace');
+      customLoader.hide();
+      toast('Error fetching technicians: ${error.toString()}');
+    } finally {
+      isLoading.value = false;
+      update(); // Ensure UI updates
+    }
   }
 
   void refreshList() {
     hitGetTechnicianApiCall();
   }
 
-  void hitGetTechnicianApiCall() {
-    isLoading.value = true;
-    customLoader.show();
-    FocusManager.instance.primaryFocus?.unfocus();
-    var roleWiseData = {
-      'role': 'technician'
-    };
+  // Add method to handle technician deletion
+  Future<void> deleteTechnician(int technicianId) async {
+    try {
+      // Add your API call to delete technician here
+      // await Get.find<AuthenticationApiService>().deleteTechnician(technicianId);
 
-    Get.find<AuthenticationApiService>()
-        .getTechnicianApiCall(parameters: roleWiseData)
-        .then((value) async {
-      allTechnicians.assignAll(value.results);
-      TechnicianAttendance.clear();
+      // Remove from lists
+      allTechnicians.removeWhere((tech) => tech.id == technicianId);
+      filteredTechnicians.removeWhere((tech) => tech.id == technicianId);
 
-      // Extract attendance data from each technician
-      for (var technician in allTechnicians) {
-        if (technician.todayAttendance != null) {
-          TechnicianAttendance.add(technician.todayAttendance!);
-        }
-      }
+      toast('Technician deleted successfully');
+      update();
+    } catch (error) {
+      toast('Error deleting technician: ${error.toString()}');
+    }
+  }
 
-      List<String> technicianIds = allTechnicians
-          .map((result) => result.id.toString())
-          .toList();
-      await storage.write(attendanceId, technicianIds.join(','));
-      print("technician Data: ${storage.read(attendanceId)}");
-
-      customLoader.hide();
-      toast('Technicians fetched successfully');
-      isLoading.value = false;
-    }).catchError((error, stackTrace) {
-      customLoader.hide();
-      toast(error.toString());
-      isLoading.value = false;
-    });
+  // Add method to handle technician editing
+  void editTechnician(TechnicianResults technician) {
+    // Navigate to edit screen or show edit dialog
+    // Get.toNamed('/edit-technician', arguments: technician);
   }
 
   void importTechnicians() {
-    // TODO: Implement import functionality
+    // Implement import functionality
   }
 
   void exportTechnicians() {
-    // TODO: Implement export functionality
+    // Implement export functionality
   }
 
-  // Update the toggleView method to use the RxBool
-  void toggleView(bool isTable) {
-    isTableView.value = isTable;
-    update();
+  // Method to handle search
+  void updateSearch(String query) {
+    searchController.text = query;
+    // _onSearchChanged will be called automatically due to listener
   }
 }

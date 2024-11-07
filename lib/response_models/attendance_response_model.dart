@@ -387,3 +387,73 @@ class TodayAttendance {
     };
   }
 }
+//=========================================================================== userAttendance ================================================================================
+class AttendanceUserResponseModel {
+  int? count;
+  int? totalPages;
+  int? currentPage;
+  List<UserAttendanceResults>? results;
+
+  AttendanceUserResponseModel(
+      {this.count, this.totalPages, this.currentPage, this.results});
+
+  AttendanceUserResponseModel.fromJson(Map<String, dynamic> json) {
+    count = json['count'];
+    totalPages = json['total_pages'];
+    currentPage = json['current_page'];
+    if (json['results'] != null) {
+      results = <UserAttendanceResults>[];
+      json['results'].forEach((v) {
+        results!.add(new UserAttendanceResults.fromJson(v));
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['count'] = this.count;
+    data['total_pages'] = this.totalPages;
+    data['current_page'] = this.currentPage;
+    if (this.results != null) {
+      data['results'] = this.results!.map((v) => v?.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class UserAttendanceResults {
+  int? id;
+  int? user;
+  String? punchIn;
+  String? punchOut;
+  String? status;
+  String? date;
+
+  UserAttendanceResults(
+      {this.id,
+        this.user,
+        this.punchIn,
+        this.punchOut,
+        this.status,
+        this.date});
+
+  UserAttendanceResults.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    user = json['user'];
+    punchIn = json['punch_in'];
+    punchOut = json['punch_out'];
+    status = json['status'];
+    date = json['date'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['user'] = this.user;
+    data['punch_in'] = this.punchIn;
+    data['punch_out'] = this.punchOut;
+    data['status'] = this.status;
+    data['date'] = this.date;
+    return data;
+  }
+}

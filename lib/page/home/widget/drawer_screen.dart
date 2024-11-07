@@ -232,7 +232,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
 
       {
         'icon': Icons.person_search,
-        'title': "Manager",
+        'title': "Executive",
         'onTap': () async {
           Get.toNamed(AppRoutes.agentsScreen);
         },

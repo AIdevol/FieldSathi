@@ -508,36 +508,38 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
     return MyAnnotatedRegion(
       child: SafeArea(
         child: GetBuilder<AgentsViewScreenController>(
-          builder: (controller) => Scaffold(
-              appBar: AppBar(
-                backgroundColor: appColor,
-                title: Text(
-                  'Agents',
-                  style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 15),
-                ),
-                actions: [
-                  IconButton(
-                    onPressed: () {
-                      Get.to(() => AgentsListCreation());
-                    },
-                    icon: Icon(FeatherIcons.plus),
-                  ).paddingOnly(left: 20.0)
-                ],
+          builder: (controller) =>
+              Scaffold(
+                  appBar: AppBar(
+                    backgroundColor: appColor,
+                    title: Text(
+                      'Executives',
+                      style: MontserratStyles.montserratBoldTextStyle(
+                          color: blackColor, size: 15),
+                    ),
+                    actions: [
+                      IconButton(
+                        onPressed: () {
+                          Get.to(() => AgentsListCreation());
+                        },
+                        icon: Icon(FeatherIcons.plus),
+                      ).paddingOnly(left: 20.0)
+                    ],
+                  ),
+                  body: ListView(
+                    children: [
+                      _viewTopBar(context,controller),
+                      SizedBox(height: 20),
+                      _dataTableViewScreen(controller),
+                    ],
+                  )
               ),
-              body: ListView(
-                children: [
-                  _viewTopBar(controller),
-                  SizedBox(height: 20),
-                  _dataTableViewScreen(controller),
-                ],
-              )
-          ),
         ),
       ),
     );
   }
 
-  Widget _viewTopBar(AgentsViewScreenController controller) {
+  Widget _viewTopBar(BuildContext context, AgentsViewScreenController controller) {
     return Container(
       height: Get.height * 0.07,
       width: Get.width,
@@ -558,36 +560,44 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
           Expanded(child: _buildSearchField(controller)),
           hGap(10),
           ElevatedButton(
-            onPressed: () => _showImportModelView(Get.context!),
-            child: Text('Import', style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13)),
+            onPressed: () => _showImportModelView(context, controller),
+            child: Text('Import',
+                style: MontserratStyles.montserratBoldTextStyle(
+                    color: whiteColor, size: 13)),
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(appColor),
               foregroundColor: MaterialStateProperty.all(Colors.white),
-              padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
+              padding: MaterialStateProperty.all(
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
               elevation: MaterialStateProperty.all(5),
               shape: MaterialStateProperty.all(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
+              shadowColor: MaterialStateProperty.all(
+                  Colors.black.withOpacity(0.5)),
             ),
           ),
           hGap(10),
           ElevatedButton(
             onPressed: () {},
-            child: Text('Export', style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13)),
+            child: Text('Export',
+                style: MontserratStyles.montserratBoldTextStyle(
+                    color: whiteColor, size: 13)),
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(appColor),
               foregroundColor: MaterialStateProperty.all(Colors.white),
-              padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
+              padding: MaterialStateProperty.all(
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
               elevation: MaterialStateProperty.all(5),
               shape: MaterialStateProperty.all(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
+              shadowColor: MaterialStateProperty.all(
+                  Colors.black.withOpacity(0.5)),
             ),
           ),
           hGap(10),
@@ -631,47 +641,54 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
   Widget _dataTableViewScreen(AgentsViewScreenController controller) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Obx(() => DataTable(
-        columns: [
-          DataColumn(label: Text('ID')),
-          DataColumn(label: Text('Profile')),
-          DataColumn(label: Text('Name')),
-          DataColumn(label: Text('Email')),
-          DataColumn(label: Text('Contact Number')),
-          DataColumn(label: Text('Date of joining')),
-          DataColumn(label: Text('Status')),
-          DataColumn(label: Text('')),
-        ],
-        rows: controller.agentsData.map((resultsData) {
-          return DataRow(
-            cells: [
-              DataCell(_ticketBoxIcons(resultsData.id.toString() ?? 'N/A')),
-              DataCell(CircleAvatar(
-                backgroundImage: resultsData.profileImage != null
-                    ? NetworkImage(resultsData.profileImage!)
-                    : AssetImage(userImageIcon) as ImageProvider,
-              )),
-              DataCell(Text('${resultsData.firstName ?? ''} ${resultsData.lastName ?? ''}'.trim())),
-              DataCell(Text(resultsData.email ?? 'N/A')),
-              DataCell(Text(resultsData.phoneNumber ?? 'N/A')),
-              DataCell(Text(_formatDate(resultsData.dateJoined))),
-              DataCell(_buildStatusIndicator(resultsData.isActive)),
-              DataCell(_dropDownValueViews(controller, resultsData.id.toString() ?? '', resultsData)),
+      child: Obx(() =>
+          DataTable(
+            columns: [
+              DataColumn(label: Text('ID')),
+              DataColumn(label: Text('Profile')),
+              DataColumn(label: Text('Name')),
+              DataColumn(label: Text('Email')),
+              DataColumn(label: Text('Contact Number')),
+              DataColumn(label: Text('Date of joining')),
+              DataColumn(label: Text('Status')),
+              DataColumn(label: Text('')),
             ],
-              onSelectChanged: (selected) {
-                if (selected == true) {
-                  _editWidgetOfAgentsDialogValue(
-                      controller, Get.context!, resultsData.id.toString() ?? '',
-                      resultsData);
-                }
-              }
-          );
-        }).toList(),
-      )),
+            rows: controller.agentsData.map((resultsData) {
+              return DataRow(
+                  cells: [
+                    DataCell(
+                        _ticketBoxIcons(resultsData.id.toString() ?? 'N/A')),
+                    DataCell(CircleAvatar(
+                      backgroundImage: resultsData.profileImage != null
+                          ? NetworkImage(resultsData.profileImage!)
+                          : AssetImage(userImageIcon) as ImageProvider,
+                    )),
+                    DataCell(Text('${resultsData.firstName ?? ''} ${resultsData
+                        .lastName ?? ''}'.trim())),
+                    DataCell(Text(resultsData.email ?? 'N/A')),
+                    DataCell(Text(resultsData.phoneNumber ?? 'N/A')),
+                    DataCell(Text(_formatDate(resultsData.dateJoined))),
+                    DataCell(_buildStatusIndicator(resultsData.isActive)),
+                    DataCell(_dropDownValueViews(
+                        controller, resultsData.id.toString() ?? '',
+                        resultsData)),
+                  ],
+                  onSelectChanged: (selected) {
+                    if (selected == true) {
+                      _editWidgetOfAgentsDialogValue(
+                          controller, Get.context!,
+                          resultsData.id.toString() ?? '',
+                          resultsData);
+                    }
+                  }
+              );
+            }).toList(),
+          )),
     );
   }
 
-  Widget _dropDownValueViews(AgentsViewScreenController controller, String agentId, Result agentData) {
+  Widget _dropDownValueViews(AgentsViewScreenController controller,
+      String agentId, Result agentData) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -680,32 +697,53 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
           onSelected: (String result) {
             switch (result) {
               case 'Edit':
-                _editWidgetOfAgentsDialogValue(controller, Get.context!, agentId, agentData);
+                _editWidgetOfAgentsDialogValue(
+                    controller, Get.context!, agentId, agentData);
+                break;
+              case 'Delete':
+                controller.hitDeleteStatuApiValue(agentId);
                 break;
               case 'Deactivate':
                 controller.hitUpdateStatusValue(agentId);
                 break;
             }
           },
-          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+          itemBuilder: (BuildContext context) =>
+          <PopupMenuEntry<String>>[
             PopupMenuItem<String>(
               value: 'Edit',
               child: ListTile(
-                leading: Icon(Icons.edit_calendar_outlined, size: 20, color: Colors.black),
-                title: Text('Edit', style: MontserratStyles.montserratBoldTextStyle(
+                leading: Icon(Icons.edit_calendar_outlined, size: 20,
+                    color: Colors.black),
+                title: Text(
+                    'Edit', style: MontserratStyles.montserratBoldTextStyle(
                   color: blackColor,
                   size: 13,
                 )),
               ),
             ),
             PopupMenuItem<String>(
+              value: 'Delete',
+              child: ListTile(
+                leading: Icon(Icons.delete,color: Colors.red,size: 20),
+                title: Text('Delete',
+                    style: MontserratStyles.montserratBoldTextStyle(
+                      color: blackColor,
+                      size: 13,
+                    )),
+              ),
+            ),
+            PopupMenuItem<String>(
               value: 'Deactivate',
               child: ListTile(
-                leading: Image.asset(wrongRoundedImage, color: Colors.black, height: 25, width: 25,),
-                title: Text('Deactivate', style: MontserratStyles.montserratBoldTextStyle(
-                  color: blackColor,
-                  size: 13,
-                )),
+                leading: Image.asset(wrongRoundedImage, color: Colors.black,
+                  height: 25,
+                  width: 25,),
+                title: Text('Deactivate',
+                    style: MontserratStyles.montserratBoldTextStyle(
+                      color: blackColor,
+                      size: 13,
+                    )),
               ),
             ),
           ],
@@ -714,7 +752,8 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
     );
   }
 
-  void _editWidgetOfAgentsDialogValue(AgentsViewScreenController controller, BuildContext context, String agentId, Result agentData) {
+  void _editWidgetOfAgentsDialogValue(AgentsViewScreenController controller,
+      BuildContext context, String agentId, Result agentData) {
     controller.firstNameController.text = agentData.firstName ?? '';
     controller.lastNameController.text = agentData.lastName ?? '';
     controller.emailController.text = agentData.email ?? '';
@@ -733,7 +772,8 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
     );
   }
 
-  Widget _form(AgentsViewScreenController controller, BuildContext context, String agentId) {
+  Widget _form(AgentsViewScreenController controller, BuildContext context,
+      String agentId) {
     return Container(
       height: Get.height,
       width: Get.width,
@@ -754,18 +794,23 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
             vGap(20),
             _phoneNumber(context: context, controller: controller),
             vGap(40),
-            _buildOptionbutton(context: context, controller: controller, agentId: agentId),
+            _buildOptionbutton(
+                context: context, controller: controller, agentId: agentId),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTopBarView({required AgentsViewScreenController controller, required BuildContext context}) {
-    return Center(child: Text('Edit Agent', style: MontserratStyles.montserratBoldTextStyle(size: 18, color: blackColor)));
+  Widget _buildTopBarView(
+      {required AgentsViewScreenController controller, required BuildContext context}) {
+    return Center(child: Text('Edit Agent',
+        style: MontserratStyles.montserratBoldTextStyle(
+            size: 18, color: blackColor)));
   }
 
-  Widget _buildTaskName({required AgentsViewScreenController controller, required BuildContext context}) {
+  Widget _buildTaskName(
+      {required AgentsViewScreenController controller, required BuildContext context}) {
     return CustomTextField(
       hintText: "First Name".tr,
       controller: controller.firstNameController,
@@ -776,7 +821,8 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
     );
   }
 
-  Widget _buildLastName({required AgentsViewScreenController controller, required BuildContext context}) {
+  Widget _buildLastName(
+      {required AgentsViewScreenController controller, required BuildContext context}) {
     return CustomTextField(
       hintText: "Last Name".tr,
       controller: controller.lastNameController,
@@ -787,7 +833,8 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
     );
   }
 
-  Widget _addTechnician({required AgentsViewScreenController controller, required BuildContext context}) {
+  Widget _addTechnician(
+      {required AgentsViewScreenController controller, required BuildContext context}) {
     return CustomTextField(
       hintText: "Email".tr,
       controller: controller.emailController,
@@ -798,7 +845,8 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
     );
   }
 
-  Widget _phoneNumber({required AgentsViewScreenController controller, required BuildContext context}) {
+  Widget _phoneNumber(
+      {required AgentsViewScreenController controller, required BuildContext context}) {
     return CustomTextField(
       hintText: "Phone Number".tr,
       controller: controller.phoneController,
@@ -809,7 +857,8 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
     );
   }
 
-  Widget _buildOptionbutton({required AgentsViewScreenController controller, required BuildContext context, required String agentId}) {
+  Widget _buildOptionbutton(
+      {required AgentsViewScreenController controller, required BuildContext context, required String agentId}) {
     return Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -817,35 +866,43 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
             onPressed: () {
               Get.back();
             },
-            child: Text('Cancel', style: MontserratStyles.montserratBoldTextStyle(color: Colors.white, size: 13)),
+            child: Text('Cancel',
+                style: MontserratStyles.montserratBoldTextStyle(
+                    color: Colors.white, size: 13)),
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(appColor),
               foregroundColor: MaterialStateProperty.all(Colors.white),
-              padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
+              padding: MaterialStateProperty.all(
+                  EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
               elevation: MaterialStateProperty.all(5),
               shape: MaterialStateProperty.all(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
+              shadowColor: MaterialStateProperty.all(
+                  Colors.black.withOpacity(0.5)),
             ),
           ),
           hGap(20),
           ElevatedButton(
             onPressed: () => controller.hitPutAgentsDetailsApiCall(agentId),
-            child: Text('Update', style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13)),
+            child: Text('Update',
+                style: MontserratStyles.montserratBoldTextStyle(
+                    color: whiteColor, size: 13)),
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(appColor),
               foregroundColor: MaterialStateProperty.all(Colors.white),
-              padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
+              padding: MaterialStateProperty.all(
+                  EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
               elevation: MaterialStateProperty.all(5),
               shape: MaterialStateProperty.all(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
+              shadowColor: MaterialStateProperty.all(
+                  Colors.black.withOpacity(0.5)),
             ),
           )
         ]
@@ -871,14 +928,15 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
 
   Widget _buildStatusIndicator(bool isActive) {
     return Container(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-        color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
-    borderRadius: BorderRadius.circular(20),
-    border: Border.all(
-    color: isActive ? Colors.green : Colors.red,width: 1,
-    ),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: isActive ? Colors.green.withOpacity(0.1) : Colors.red
+            .withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isActive ? Colors.green : Colors.red, width: 1,
         ),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -903,65 +961,231 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
     );
   }
 
-  void _showImportModelView(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Import File'),
-          content: Container(
-            height: Get.height * 0.2,
-            width: Get.width * 0.8,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.upload_file, size: 60, color: appColor),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () async {
-                    FilePickerResult? result = await FilePicker.platform.pickFiles();
-                    if (result != null) {
-                      String fileName = result.files.single.name;
-                      Get.snackbar('File Selected', 'You selected: $fileName');
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  child: Text('Select File from Local'),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: appColor,
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  ),
-                ),
-              ],
+  void _showImportModelView(BuildContext context,
+      AgentsViewScreenController controller) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: Get.height * 0.8,
+                maxWidth: Get.width * 0.8,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header with close button
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Import File',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close),
+                          splashRadius: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Scrollable content
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Rules section at the top
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey[300]!),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: const [
+                                    Icon(Icons.info_outline, size: 20),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Import Rules',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                RichText(
+                                  text: TextSpan(
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[800],
+                                      height: 1.5,
+                                    ),
+                                    children: const [
+                                      TextSpan(
+                                        text: 'Required Fields:\n',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      TextSpan(text: '• Name\n'),
+                                      TextSpan(text: '• Email\n'),
+                                      // TextSpan(text: '• Phone Number\n\n'),
+                                      TextSpan(
+                                        text: 'Optional Fields:\n',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      TextSpan(text: '• Address'),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Additional information or instructions can go here
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.blue[50],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: const [
+                                Icon(Icons.lightbulb_outline,
+                                    color: Colors.blue),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Upload your file in CSV or Excel format. Make sure all required fields are properly filled.',
+                                    style: TextStyle(color: Colors.blue),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Fixed bottom section with upload button
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      border: Border(
+                        top: BorderSide(color: Colors.grey[200]!),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.cloud_upload_outlined,
+                          size: 48,
+                          color: appColor,
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              FilePickerResult? result = await FilePicker
+                                  .platform.pickFiles();
+                              if (result != null) {
+                                String fileName = result.files.single.name;
+                                Get.snackbar(
+                                  'Success',
+                                  'Selected file: $fileName',
+                                  backgroundColor: Colors.green[100],
+                                  colorText: Colors.green[800],
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  margin: const EdgeInsets.all(16),
+                                );
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: appColor,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 16,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.folder_open, color: Colors.white),
+                                SizedBox(width: 12),
+                                Text(
+                                  'Choose File to Import',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    });
+  }
+
+  Widget _ticketBoxIcons(String ticketId) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: normalBlue,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: Colors.blue.shade300,
+            width: 1,
           ),
-        );
-      },
+        ),
+        child: Text(
+          '$ticketId',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+        ),
+      ),
     );
   }
-}
-
-Widget _ticketBoxIcons(String ticketId) {
-  return Center(
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color:normalBlue,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: Colors.blue.shade300,
-          width: 1,
-        ),
-      ),
-      child: Text(
-        '$ticketId',
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-          fontSize: 13,
-        ),
-      ),
-    ),
-  );
 }

@@ -235,4 +235,11 @@ class AgentsViewScreenController extends GetxController {
       toast(error.toString());
     });
   }
+
+  void hitDeleteStatuApiValue(String agentId){
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+
+  }
 }

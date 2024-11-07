@@ -16,7 +16,7 @@ class ApiEnd{
   static const String checkingPointStatusApiEnd = 'api/checkpointstatus/';
   static const String leaveEditPeriodEnd = 'users/leave-allocations/';
   static const String punchinApiEnd = 'users/attendance/punch_in/';
-
+  static const String userAttendanceCalendarApiEnd = 'users/attendance/';
 // /*http://192.168.1.13:8000/*/
 /*=======================================*/
   static const String importTicketDataEnd = 'api/import-tickets/';
@@ -46,6 +46,8 @@ class ApiEnd{
   static const String importLeadEnd = 'api/import-leads/';
   static const String importAMCsEnd = 'api/import-amcs/';
   static const String importTicketsEnd = 'api/import-tickets/';
+  ///
+  static const String exportTicketEnd = 'api/export-tickets/';
 
 
 /*============================================================= History Apis ==============================================================*/

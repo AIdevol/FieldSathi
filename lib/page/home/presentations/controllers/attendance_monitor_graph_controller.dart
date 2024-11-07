@@ -79,7 +79,6 @@ class AttendanceGraphViewController extends GetxController {
       var attendanceResponses = value;
      print("attendanceResponse: :${attendanceResponses..results}");
       calculateAttendance();
-
       customLoader.hide();
       toast('Attendance fetched successfully');
       isLoading.value = false;

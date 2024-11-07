@@ -20,14 +20,14 @@ class SuperViewScreen extends GetView<SuperViewScreenController>{
       appBar: AppBar(
         title: Text("Managers", style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),),
         backgroundColor: appColor,
-        actions: [IconButton(onPressed: (){}, icon: Icon(FeatherIcons.search)),
+        actions: [
           IconButton(onPressed: (){
             Get.toNamed(AppRoutes.addSuperuserViewScreen);
           }, icon: Icon(FeatherIcons.plus))],
       ),
       body: Column(
         children: [
-          _buildTopBar(controller),
+          _viewTopBar(context,controller),
           Expanded(
             child: Obx(() => controller.isLoading.value
                 ? Center(child: Container())
@@ -37,9 +37,9 @@ class SuperViewScreen extends GetView<SuperViewScreenController>{
       ),
     )));
   }
-  Widget _buildTopBar(SuperViewScreenController controller) {
+  Widget _viewTopBar(BuildContext context, SuperViewScreenController controller) {
     return Container(
-      height: Get.height * 0.09,
+      height: Get.height * 0.07,
       width: Get.width,
       decoration: BoxDecoration(
         color: whiteColor,
@@ -55,24 +55,48 @@ class SuperViewScreen extends GetView<SuperViewScreenController>{
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // _buildSearchBar(controller),
+          Expanded(child: _buildSearchField(controller)),
           hGap(10),
           ElevatedButton(
-            onPressed: () => _showImportModelView(Get.context!),
-            style: _buttonStyle(),
-            child: Text(
-              'Import',
-              style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),
+            onPressed: () => _showImportModelView(context, controller),
+            child: Text('Import',
+                style: MontserratStyles.montserratBoldTextStyle(
+                    color: whiteColor, size: 13)),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(appColor),
+              foregroundColor: MaterialStateProperty.all(Colors.white),
+              padding: MaterialStateProperty.all(
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
+              elevation: MaterialStateProperty.all(5),
+              shape: MaterialStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              shadowColor: MaterialStateProperty.all(
+                  Colors.black.withOpacity(0.5)),
             ),
           ),
-          hGap(30),
+          hGap(10),
           ElevatedButton(
             onPressed: () {},
-            child: Text(
-              'Export',
-              style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),
+            child: Text('Export',
+                style: MontserratStyles.montserratBoldTextStyle(
+                    color: whiteColor, size: 13)),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(appColor),
+              foregroundColor: MaterialStateProperty.all(Colors.white),
+              padding: MaterialStateProperty.all(
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
+              elevation: MaterialStateProperty.all(5),
+              shape: MaterialStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              shadowColor: MaterialStateProperty.all(
+                  Colors.black.withOpacity(0.5)),
             ),
-            style: _buttonStyle(),
           ),
           hGap(10),
         ],
@@ -94,7 +118,37 @@ class SuperViewScreen extends GetView<SuperViewScreenController>{
     );
   }
 }
-
+Widget _buildSearchField(SuperViewScreenController controller) {
+  return Container(
+    height: Get.height * 0.05,
+    margin: EdgeInsets.symmetric(horizontal: 10),
+    decoration: BoxDecoration(
+      color: whiteColor,
+      borderRadius: BorderRadius.circular(25),
+      border: Border.all(
+        width: 1,
+        color: Colors.grey,
+      ),
+    ),
+    child: TextField(
+      decoration: InputDecoration(
+        hintText: "Search",
+        hintStyle: MontserratStyles.montserratSemiBoldTextStyle(
+          color: Colors.grey,
+        ),
+        prefixIcon: Icon(FeatherIcons.search, color: Colors.grey),
+        border: InputBorder.none,
+        contentPadding: EdgeInsets.symmetric(vertical: 10),
+      ),
+      style: MontserratStyles.montserratSemiBoldTextStyle(
+        color: Colors.black,
+      ),
+      onChanged: (value) {
+        // Implement search functionality
+      },
+    ),
+  );
+}
 Widget _mainData(SuperViewScreenController controller){
   return SingleChildScrollView(
     scrollDirection: Axis.horizontal,
@@ -109,9 +163,9 @@ Widget _mainData(SuperViewScreenController controller){
           DataCell(Row(
             children: [
               CircleAvatar(
-                backgroundImage: (superData.profileImage != null && superData.profileImage!.isNotEmpty)
-                    ?AssetImage(userImageIcon)
-                    :null,
+                backgroundImage: superData.profileImage != null
+                    ? NetworkImage(superData.profileImage!)
+                    : AssetImage(userImageIcon) as ImageProvider,
               ),
               hGap(10),
               Text("${superData.firstName} ${superData.lastName}"),
@@ -207,6 +261,9 @@ Widget _dropDownValueViews(SuperViewScreenController controller, String agentId)
             case 'Edit':
               // _editWidgetOfAgentsDialogValue(controller, Get.context!, agentId, agentData);
               break;
+            case 'Delete':
+            // controller.hitUpdateStatusValue(agentId);
+              break;
             case 'Deactivate':
               // controller.hitUpdateStatusValue(agentId);
               break;
@@ -218,6 +275,16 @@ Widget _dropDownValueViews(SuperViewScreenController controller, String agentId)
             child: ListTile(
               leading: Icon(Icons.edit_calendar_outlined, size: 20, color: Colors.black),
               title: Text('Edit', style: MontserratStyles.montserratBoldTextStyle(
+                color: blackColor,
+                size: 13,
+              )),
+            ),
+          ),
+          PopupMenuItem<String>(
+            value: 'Delete',
+            child: ListTile(
+              leading: Icon(Icons.delete, color: Colors.red,size: 20,),
+              title: Text('Delete', style: MontserratStyles.montserratBoldTextStyle(
                 color: blackColor,
                 size: 13,
               )),
@@ -256,39 +323,206 @@ Widget _dropDownValueViews(SuperViewScreenController controller, String agentId)
 //       )
 //   );
 // }
-void _showImportModelView(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Import File'),
-        content: Container(
-          height: Get.height * 0.2,
-          width: Get.width * 0.8,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.upload_file, size: 60, color: appColor),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  FilePickerResult? result = await FilePicker.platform.pickFiles();
-                  if (result != null) {
-                    String fileName = result.files.single.name;
-                    Get.snackbar('File Selected', 'You selected: $fileName');
-                    Navigator.of(context).pop();
-                  }
-                },
-                child: Text('Select File from Local'),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white, backgroundColor: appColor,
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                ),
-              ),
-            ],
+void _showImportModelView(BuildContext context,
+    SuperViewScreenController controller) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-        ),
-      );
-    },
-  );
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: Get.height * 0.8,
+              maxWidth: Get.width * 0.8,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header with close button
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Import File',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                        splashRadius: 20,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Scrollable content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Rules section at the top
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[300]!),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: const [
+                                  Icon(Icons.info_outline, size: 20),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Import Rules',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              RichText(
+                                text: TextSpan(
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[800],
+                                    height: 1.5,
+                                  ),
+                                  children: const [
+                                    TextSpan(
+                                      text: 'Required Fields:\n',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    TextSpan(text: '• Name\n'),
+                                    TextSpan(text: '• Email\n'),
+                                    // TextSpan(text: '• Phone Number\n\n'),
+                                    TextSpan(
+                                      text: 'Optional Fields:\n',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    TextSpan(text: '• Address'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Additional information or instructions can go here
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.blue[50],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: const [
+                              Icon(Icons.lightbulb_outline,
+                                  color: Colors.blue),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Upload your file in CSV or Excel format. Make sure all required fields are properly filled.',
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Fixed bottom section with upload button
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    border: Border(
+                      top: BorderSide(color: Colors.grey[200]!),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.cloud_upload_outlined,
+                        size: 48,
+                        color: appColor,
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            FilePickerResult? result = await FilePicker
+                                .platform.pickFiles();
+                            if (result != null) {
+                              String fileName = result.files.single.name;
+                              Get.snackbar(
+                                'Success',
+                                'Selected file: $fileName',
+                                backgroundColor: Colors.green[100],
+                                colorText: Colors.green[800],
+                                snackPosition: SnackPosition.BOTTOM,
+                                margin: const EdgeInsets.all(16),
+                              );
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: appColor,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.folder_open, color: Colors.white),
+                              SizedBox(width: 12),
+                              Text(
+                                'Choose File to Import',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  });
 }

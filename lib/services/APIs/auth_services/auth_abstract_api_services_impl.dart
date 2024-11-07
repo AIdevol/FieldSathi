@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import '../../../response_models/add_technician_response_model.dart';
 import '../../../response_models/agents_response_model.dart';
@@ -45,7 +46,7 @@ abstract class AuthenticationApi {
   Future<SuperUsersResponseModel> postSuperUserApiCall({Map<String, dynamic>?dataBody});
   Future<AddTechnicianResponseModel>addTechnicialPostApiCall({Map<String, dynamic>? dataBody, parameters});
   Future<TechnicianResponseModel>getTechnicianDetailsApiCall({Map<String, dynamic>? dataBody, parameters});
-  // Future<List<FsrResponseModel>>getfsrDetailsApiCall({Map<String, dynamic>? dataBody});
+  Future<AttendanceUserResponseModel>getCalenderViewUserAttendanceApiCall({Map<String, dynamic>? dataBody, parameter});
   Future<FsrResponseModel>getfsrDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<CheckPointsResponseModel>postcheckPointStatusDetailsApiCall({Map<String, dynamic>? dataBody,});
   Future<LeaveAllocationResponseModel>getLeavesALLocationApiCall({Map<String, dynamic>? dataBody});
@@ -63,7 +64,8 @@ abstract class AuthenticationApi {
   Future<ServiceCategoryResponseModel>postServiceCategoriesApiCall({Map<String, dynamic>? dataBody});
   Future<SubService>getSub_ServiceCategoriesApiCall({Map<String, dynamic>? dataBody});
   Future<TMSResponseModel>getuserDetailsApiCall({Map<String, dynamic>? dataBody});
-  Future<String>downLoadTicketDatabyUserName({Map<String, dynamic>? dataBody,id});
+  Future<Uint8List> downloadTicketDataByUsername({Map<String, dynamic>? dataBody, String? id});
+  Future<Uint8List> exportTicketDataByDate({Map<String, dynamic>? dataBody, parameter});
   // Future<List<TMSResponseModel>>getuserDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<TechnicianAttendanceResponseModel>getAttendanceApiCall({Map<String, dynamic>? dataBody , dynamic parameters});
   Future<ExpensesResponseModel>getExpensesApiCall({Map<String, dynamic>? dataBody, parameters});

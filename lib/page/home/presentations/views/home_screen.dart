@@ -249,7 +249,7 @@ class HomeScreen extends GetView<HomeScreenController> {
         SpeedDialChild(
           child: const Icon(Icons.person_pin),
           backgroundColor: appColor,
-          label: 'Super user',
+          label: 'Manager',
           onTap: () => Get.toNamed(AppRoutes.SuperAgentsScreen),
         ),
         SpeedDialChild(
@@ -332,97 +332,326 @@ class HomeScreen extends GetView<HomeScreenController> {
     );
   }
 }
-_graphVisualScreen2(BuildContext context, {required String text}){
-  final containerLength = MediaQuery.of(context).size ;
-  return GestureDetector(
-    onTap: (){
-      Get.toNamed(AppRoutes.technicianListsScreen);
-      print("buttton tapped");
-    },
-    child: Container(
-        height: containerLength.height*0.75,
-        width: Get.width*0.8,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
-          color: whiteColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: Offset(0, 5),
+Widget _graphVisualScreen2(BuildContext context, {required String text}) {
+  // Get screen size
+  final Size screenSize = MediaQuery.of(context).size;
+
+  // Calculate responsive dimensions
+  final double containerHeight = _getResponsiveHeight(screenSize);
+  final double containerWidth = _getResponsiveWidth(screenSize);
+  final double fontSize = _getResponsiveFontSize(screenSize);
+  final double padding = _getResponsivePadding(screenSize);
+  final double borderRadius = _getResponsiveBorderRadius(screenSize);
+
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      return SingleChildScrollView(
+        child: GestureDetector(
+          onTap: () {
+            Get.toNamed(AppRoutes.technicianListsScreen);
+            print("button tapped");
+          },
+          child: Container(
+            height: containerHeight,
+            width: containerWidth,
+            margin: EdgeInsets.symmetric(
+              horizontal: padding,
+              vertical: padding / 2,
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(text, style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: blackColor),),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(borderRadius),
+                bottomRight: Radius.circular(borderRadius),
+              ),
+              color: whiteColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 1,
+                  blurRadius: 5,
+                  offset: Offset(0, 5),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: _buttonBuildContainer(onTap: (){
-                    Get.toNamed(AppRoutes.mapView);
-                  }, text: "Track All" ),
-                )
               ],
             ),
-            Expanded(child: AttendenceDetailsMonitorGraph()),
-          ],
-        )),
-  );
-}
-_graphVisualScreen3(BuildContext context, {required String text}){
-  final containerLength = MediaQuery.of(context).size * 1/2;
-  return GestureDetector(
-    onTap: (){
-      // Get.toNamed(AppRoutes.amcScreen);
-      print("buttton tapped");
-    },
-    child: Container(
-        height: containerLength.height*0.8,
-        width: Get.width*0.8,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(20),bottomRight: Radius.circular(20)),
-          color: whiteColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(text, style: MontserratStyles.montserratSemiBoldTextStyle(size: 13,color: blackColor),),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(left: padding),
+                        child: Text(
+                          text,
+                          style: MontserratStyles.montserratSemiBoldTextStyle(
+                            size: fontSize,
+                            color: blackColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(padding),
+                      child: _buttonBuildContainer(
+                        onTap: () {
+                          Get.toNamed(AppRoutes.mapView);
+                        },
+                        text: "Track All",
+                      ),
+                    ),
+                  ],
                 ),
-                // Padding(
-                //   padding: const EdgeInsets.all(8.0),
-                //   child: _buttonBuildContainer(onTap: (){
-                //     Get.toNamed(AppRoutes.amcScreen);
-                //   }, text: "Manage AMCs" ),
-                // )
+                Expanded(
+                  child: AttendenceDetailsMonitorGraph(),
+                ),
               ],
             ),
-            Expanded(child: AmcStatusMonitorGraph()),
-          ],
-        )),
+          ),
+        ),
+      );
+    },
   );
 }
 
+// Helper methods for responsive calculations
+// double _getResponsiveHeight(Size screenSize) {
+//   // For different device sizes
+//   if (screenSize.width < 600) {
+//     // Mobile
+//     return screenSize.height * 0.75;
+//   } else if (screenSize.width < 900) {
+//     // Tablet
+//     return screenSize.height * 0.7;
+//   } else {
+//     // Desktop
+//     return screenSize.height * 0.75;
+//   }
+// }
+//
+// double _getResponsiveWidth(Size screenSize) {
+//   // For different device sizes
+//   if (screenSize.width < 600) {
+//     // Mobile
+//     return screenSize.width * 0.95;
+//   } else if (screenSize.width < 900) {
+//     // Tablet
+//     return screenSize.width * 0.85;
+//   } else {
+//     // Desktop
+//     return screenSize.width * 0.8;
+//   }
+// }
+//
+// double _getResponsiveFontSize(Size screenSize) {
+//   // For different device sizes
+//   if (screenSize.width < 600) {
+//     return 12;
+//   } else if (screenSize.width < 900) {
+//     return 13;
+//   } else {
+//     return 14;
+//   }
+// }
+//
+// double _getResponsivePadding(Size screenSize) {
+//   // For different device sizes
+//   if (screenSize.width < 600) {
+//     return 8.0;
+//   } else if (screenSize.width < 900) {
+//     return 12.0;
+//   } else {
+//     return 16.0;
+//   }
+// }
+//
+// double _getResponsiveBorderRadius(Size screenSize) {
+//   // For different device sizes
+//   if (screenSize.width < 600) {
+//     return 15.0;
+//   } else if (screenSize.width < 900) {
+//     return 20.0;
+//   } else {
+//     return 25.0;
+//   }
+// }
+
+Widget _graphVisualScreen3(BuildContext context, {required String text}) {
+  // Get screen size
+  final Size screenSize = MediaQuery.of(context).size;
+
+  // Calculate responsive dimensions
+  final double containerHeight = _getResponsiveHeight(screenSize);
+  final double containerWidth = _getResponsiveWidth(screenSize);
+  final double fontSize = _getResponsiveFontSize(screenSize);
+  final double padding = _getResponsivePadding(screenSize);
+  final double borderRadius = _getResponsiveBorderRadius(screenSize);
+
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      return SingleChildScrollView(
+        child: GestureDetector(
+          onTap: () {
+            // Get.toNamed(AppRoutes.amcScreen);
+            print("button tapped");
+          },
+          child: Container(
+            height: containerHeight,
+            width: containerWidth,
+            margin: EdgeInsets.symmetric(
+              horizontal: padding,
+              vertical: padding / 2,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(borderRadius),
+                bottomRight: Radius.circular(borderRadius),
+              ),
+              color: whiteColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: _getResponsiveSpreadRadius(screenSize),
+                  blurRadius: _getResponsiveBlurRadius(screenSize),
+                  offset: Offset(0, _getResponsiveShadowOffset(screenSize)),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: padding,
+                    vertical: padding / 2,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          text,
+                          style: MontserratStyles.montserratSemiBoldTextStyle(
+                            size: fontSize,
+                            color: blackColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      // Uncomment if you want to add the button back
+                      /*
+                      Padding(
+                        padding: EdgeInsets.all(padding),
+                        child: _buttonBuildContainer(
+                          onTap: () {
+                            Get.toNamed(AppRoutes.amcScreen);
+                          },
+                          text: "Manage AMCs",
+                        ),
+                      ),
+                      */
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: AmcStatusMonitorGraph(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+// Helper methods for responsive calculations
+double _getResponsiveHeight(Size screenSize) {
+  if (screenSize.width < 600) {
+    // Mobile
+    return screenSize.height * 0.75;
+  } else if (screenSize.width < 900) {
+    // Tablet
+    return screenSize.height * 0.6;
+  } else {
+    // Desktop
+    return screenSize.height * 0.8;
+  }
+}
+
+double _getResponsiveWidth(Size screenSize) {
+  if (screenSize.width < 600) {
+    // Mobile
+    return screenSize.width * 0.95;
+  } else if (screenSize.width < 900) {
+    // Tablet
+    return screenSize.width * 0.85;
+  } else {
+    // Desktop
+    return screenSize.width * 0.8;
+  }
+}
+
+double _getResponsiveFontSize(Size screenSize) {
+  if (screenSize.width < 600) {
+    return 11;
+  } else if (screenSize.width < 900) {
+    return 13;
+  } else {
+    return 15;
+  }
+}
+
+double _getResponsivePadding(Size screenSize) {
+  if (screenSize.width < 600) {
+    return 8.0;
+  } else if (screenSize.width < 900) {
+    return 12.0;
+  } else {
+    return 16.0;
+  }
+}
+
+double _getResponsiveBorderRadius(Size screenSize) {
+  if (screenSize.width < 600) {
+    return 15.0;
+  } else if (screenSize.width < 900) {
+    return 20.0;
+  } else {
+    return 25.0;
+  }
+}
+
+double _getResponsiveSpreadRadius(Size screenSize) {
+  if (screenSize.width < 600) {
+    return 0.5;
+  } else if (screenSize.width < 900) {
+    return 1.0;
+  } else {
+    return 1.5;
+  }
+}
+
+double _getResponsiveBlurRadius(Size screenSize) {
+  if (screenSize.width < 600) {
+    return 3.0;
+  } else if (screenSize.width < 900) {
+    return 5.0;
+  } else {
+    return 7.0;
+  }
+}
+
+double _getResponsiveShadowOffset(Size screenSize) {
+  if (screenSize.width < 600) {
+    return 3.0;
+  } else if (screenSize.width < 900) {
+    return 5.0;
+  } else {
+    return 7.0;
+  }
+}
 
 
 Widget _buttonBuildContainer({required Function()? onTap, required String text}){

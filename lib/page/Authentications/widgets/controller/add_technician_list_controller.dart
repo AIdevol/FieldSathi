@@ -7,12 +7,14 @@ import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 class AddTechnicianListController extends GetxController{
 
+  late TextEditingController employeeIdController;
   late TextEditingController emailController;
   late TextEditingController firstNameController;
   late TextEditingController lastNameController;
   late TextEditingController phoneController;
-  late TextEditingController dobController;
+  late TextEditingController dateJoiningController;
 
+  late FocusNode employeeIdFocusNode;
   late FocusNode emailFocusNode;
   late FocusNode firstFocusNode;
   late FocusNode lastFocusNode;
@@ -20,12 +22,14 @@ class AddTechnicianListController extends GetxController{
 
   @override
   void onInit(){
+    employeeIdController = TextEditingController();
     emailController = TextEditingController();
     firstNameController = TextEditingController();
     lastNameController = TextEditingController();
     phoneController = TextEditingController();
-    dobController = TextEditingController();
+    dateJoiningController = TextEditingController();
 
+    employeeIdFocusNode = FocusNode();
     emailFocusNode = FocusNode();
     firstFocusNode = FocusNode();
     lastFocusNode = FocusNode();
@@ -35,11 +39,12 @@ class AddTechnicianListController extends GetxController{
 
   @override
   void onClose(){
+    employeeIdController.dispose();
     emailController.dispose();
     firstNameController.dispose();
     lastNameController.dispose();
     phoneController.dispose();
-    dobController.dispose();
+    dateJoiningController.dispose();
     super.onClose();
   }
 
@@ -51,7 +56,7 @@ class AddTechnicianListController extends GetxController{
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      dobController.text = DateFormat('yyyy-MM-dd').format(picked);
+      dateJoiningController.text = DateFormat('yyyy-MM-dd').format(picked);
       update();
     }
   }
@@ -64,7 +69,7 @@ class AddTechnicianListController extends GetxController{
       "last_name": lastNameController.text,
       "email": emailController.text,
       "phone_number":phoneController.text,
-      "dob": dobController.text
+      "dob": dateJoiningController.text
     };
     var parameterBody = {
       "role": "technician"

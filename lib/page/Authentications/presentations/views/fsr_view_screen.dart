@@ -45,7 +45,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
                 Expanded(
                   child: Obx(() =>
                   controller.isLoading.value
-                      ? Center(child: CircularProgressIndicator())
+                      ? Center(child: Container())
                       : _buildDataTable(controller),
                   ),
                 ),
@@ -80,7 +80,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
               ),          // FSR Categories
               DataCell(
                 PopupMenuButton<String>(
-                  color: CupertinoColors.white,
+                  color: Colors.white,
                   offset: Offset(0, 56),
                   itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                     PopupMenuItem<String>(
@@ -573,7 +573,7 @@ Widget _fsrCategoriesData(Result entry) {
           ),
         ),
         const SizedBox(width: 4),
-        const Text('Categories '),
+        const Text('FSRs '),
         const Icon(Icons.arrow_drop_down),
       ],
     ),

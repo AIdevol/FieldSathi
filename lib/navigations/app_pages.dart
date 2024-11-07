@@ -52,7 +52,8 @@ class AppPages {
     binding: SplashBinding(),
     page: () => SplashScreen(),
   ),
-     GetPage(
+
+    GetPage(
       name: AppRoutes.homeScreen,
       binding: HomeBinding(),
       page: () => HomeScreen(),

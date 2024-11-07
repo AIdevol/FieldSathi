@@ -55,7 +55,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
                 ),
                 body: Column(
                   children: [
-                    _buildTopBar(),
+                    _buildTopBar(context, controller),
                     vGap(10),
                     _mainData(),
                     vGap(10),
@@ -244,7 +244,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(BuildContext context, AMCScreenController controller) {
     return Container(
       height: Get.height * 0.07,
       width: Get.width,
@@ -265,7 +265,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
           Expanded(child: _buildSearchField()),
           hGap(10),
           ElevatedButton(
-            onPressed: () => _showImportModelView(),
+            onPressed: () => _showImportModelView(context, controller),
             style: _buttonStyle(),
             child: Text(
               'Import',
@@ -308,41 +308,202 @@ class AMCViewScreen extends GetView<AMCScreenController> {
     );
   }
 
-  void _showImportModelView() {
-    Get.dialog(
-      AlertDialog(
-        title: Text('Import File'),
-        content: SizedBox(
-          height: Get.height * 0.2,
-          width: Get.width * 0.8,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.upload_file, size: 60, color: appColor),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  FilePickerResult? result = await FilePicker.platform
-                      .pickFiles();
-                  if (result != null) {
-                    String fileName = result.files.single.name;
-                    // controller.importFile(result); // Handle the file in controller
-                    Get.snackbar('File Selected', 'You selected: $fileName');
-                    Get.back(); // Close the dialog
-                  }
-                },
-                child: Text('Select File from Local'),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: appColor,
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                ),
+  void _showImportModelView(BuildContext context,AMCScreenController controller) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: Get.height * 0.8,
+                maxWidth: Get.width * 0.8,
               ),
-            ],
-          ),
-        ),
-      ),
-    );
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header with close button
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Import File',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close),
+                          splashRadius: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Scrollable content
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Rules section at the top
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey[300]!),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: const [
+                                    Icon(Icons.info_outline, size: 20),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Import Rules',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                RichText(
+                                  text: TextSpan(
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[800],
+                                      height: 1.5,
+                                    ),
+                                    children: const [
+                                      TextSpan(
+                                        text: 'Required Fields:\n',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      TextSpan(text: '• Customer\'s Name\n'),
+                                      TextSpan(text: '• AMC Name\n'),
+                                      // TextSpan(
+                                      //   text: 'Optional Fields:\n',
+                                      //   style: TextStyle(fontWeight: FontWeight.bold),
+                                      // ),
+                                      // TextSpan(text: '• Landmark'),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Additional information or instructions can go here
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.blue[50],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: const [
+                                Icon(Icons.lightbulb_outline, color: Colors.blue),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Upload your file in CSV or Excel format. Make sure all required fields are properly filled.',
+                                    style: TextStyle(color: Colors.blue),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Fixed bottom section with upload button
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      border: Border(
+                        top: BorderSide(color: Colors.grey[200]!),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.cloud_upload_outlined,
+                          size: 48,
+                          color: appColor,
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              FilePickerResult? result = await FilePicker.platform.pickFiles();
+                              if (result != null) {
+                                String fileName = result.files.single.name;
+                                Get.snackbar(
+                                  'Success',
+                                  'Selected file: $fileName',
+                                  backgroundColor: Colors.green[100],
+                                  colorText: Colors.green[800],
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  margin: const EdgeInsets.all(16),
+                                );
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: appColor,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 16,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.folder_open, color: Colors.white),
+                                SizedBox(width: 12),
+                                Text(
+                                  'Choose File to Import',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    });
   }
 
   _dataTableViewScreen(amcIds) {
@@ -982,3 +1143,4 @@ _detailsViewsWidget(AMCScreenController controller, AmcResult amcData) {
     ),
   );
 }
+

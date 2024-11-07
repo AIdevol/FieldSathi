@@ -48,11 +48,11 @@ class TicketListScreen extends GetView<TicketListController> {
             appBar: _buildAppBar(),
             body: Column(
               children: [
-                _buildTopBar(context),
+                _buildTopBar(context, controller),
                 _buildSearchBar(),
                 Expanded(
                   child: Obx(() => controller.isLoading.value
-                      ? const Center(child: CircularProgressIndicator())
+                      ?  Center(child: Container())
                       : _buildTicketTable(controller)),
                 ),
               ],
@@ -88,7 +88,7 @@ class TicketListScreen extends GetView<TicketListController> {
     );
   }
 
-   Widget _buildTopBar(BuildContext context) {
+   Widget _buildTopBar(BuildContext context, TicketListController controller) {
      return Container(
        padding: const EdgeInsets.all(16.0),
        decoration: BoxDecoration(
@@ -112,7 +112,7 @@ class TicketListScreen extends GetView<TicketListController> {
              context,
              'Import',
              Icons.file_download_outlined,
-             onTap: () => _showImportModelView(context),
+             onTap: () => _showImportModelView(context, controller),
            ),
            const SizedBox(width: 12),
            _buildActionButton(
@@ -471,35 +471,63 @@ class TicketListScreen extends GetView<TicketListController> {
     );
   }
 
-  Widget _buildActionCell(TicketListController controller, String? tickId) {
-    return Container(
-        width: columnWidths['Actions'],
-        child: PopupMenuButton<String>(
-        color: Colors.white,
-        offset: const Offset(0, 40),
-    shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(12),
-    ),
-    itemBuilder: (BuildContext context,) => <PopupMenuEntry<String>>[
-      _buildPopupMenuItem('Download', Icons.download, Colors.blue.shade700, context, controller, tickId),
-      _buildPopupEditMenuItem('Reassign', Icons.edit_outlined, Colors.blue.shade700, context, controller),
-      _buildPopupDeleteMenuItem('Delete', Icons.delete_outline, Colors.red, context, controller),
-    ],
-    child: Container(
-    padding: const EdgeInsets.all(8),
-    decoration: BoxDecoration(
-    color: Colors.grey.shade50,
-      borderRadius: BorderRadius.circular(8),
-    ),
-      child: const Icon(
-        Icons.more_horiz,
-        size: 20,
-        color: Colors.black54,
-      ),
-    ),
-        ),
-    );
-  }
+   Widget _buildActionCell(TicketListController controller, String? tickId) {
+     return Container(
+       width: columnWidths['Actions'],
+       child: PopupMenuButton<String>(
+         color: Colors.white,
+         offset: const Offset(0, 40),
+         shape: RoundedRectangleBorder(
+           borderRadius: BorderRadius.circular(12),
+         ),
+         itemBuilder: (BuildContext context) => _buildMenuItems(context, controller, tickId),
+         child: Container(
+           padding: const EdgeInsets.all(8),
+           decoration: BoxDecoration(
+             color: Colors.grey.shade50,
+             borderRadius: BorderRadius.circular(8),
+           ),
+           child: const Icon(
+             Icons.more_horiz,
+             size: 20,
+             color: Colors.black54,
+           ),
+         ),
+       ),
+     );
+   }
+
+   List<PopupMenuEntry<String>> _buildMenuItems(BuildContext context, TicketListController controller, String? tickId) {
+     // Find the ticket by ID to get its status
+     final ticket = controller.ticketResult.firstWhere(
+           (ticket) => ticket.id.toString() == tickId,
+       // orElse: () => null, // Handle case where ticket is not found
+     );
+
+     final status = ticket?.status?.toLowerCase() ?? '';
+
+     List<PopupMenuEntry<String>> menuItems = [
+       _buildPopupMenuItem('Download', Icons.download, Colors.blue.shade700, context, controller, tickId),
+     ];
+
+     // Add either Reassign or Edit based on status
+     if (status == 'completed') {
+       menuItems.add(
+         _buildPopupEditMenuItem('Reassign', Icons.edit_outlined, Colors.blue.shade700, context, controller),
+       );
+     } else {
+       menuItems.add(
+         _buildPopupEditMenuItem('Edit', Icons.edit_outlined, Colors.blue.shade700, context, controller),
+       );
+     }
+
+     // Add Delete option
+     menuItems.add(
+       _buildPopupDeleteMenuItem('Delete', Icons.delete_outline, Colors.red, context, controller),
+     );
+
+     return menuItems;
+   }
 
   PopupMenuItem<String> _buildPopupMenuItem(
       String text, IconData icon, Color iconColor, BuildContext context, TicketListController controller, String? tickId) {
@@ -1029,35 +1057,194 @@ ButtonStyle _buttonStyle() {
   );
 }
 
-void _showImportModelView(BuildContext context) {
+void _showImportModelView(BuildContext context,TicketListController controller) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Import File'),
-          content: SizedBox(
-            height: Get.height * 0.2,
-            width: Get.width * 0.8,
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: Get.height * 0.8,
+              maxWidth: Get.width * 0.8,
+            ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.upload_file, size: 60, color: appColor),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () async {
-                    FilePickerResult? result = await FilePicker.platform.pickFiles();
-                    if (result != null) {
-                      String fileName = result.files.single.name;
-                      Get.snackbar('File Selected', 'You selected: $fileName');
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  child: const Text('Select File from Local'),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: appColor,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                // Header with close button
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Import File',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                        splashRadius: 20,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Scrollable content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Rules section at the top
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[300]!),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: const [
+                                  Icon(Icons.info_outline, size: 20),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Import Rules',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              RichText(
+                                text: TextSpan(
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[800],
+                                    height: 1.5,
+                                  ),
+                                  children: const [
+                                    TextSpan(
+                                      text: 'Required Fields:\n',
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    TextSpan(text: '• Customer\'s Name\n'),
+                                    TextSpan(text: '• Address\n'),
+                                    TextSpan(text: '• Phone Number\n\n'),
+                                    TextSpan(
+                                      text: 'Optional Fields:\n',
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    TextSpan(text: '• Landmark'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Additional information or instructions can go here
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.blue[50],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: const [
+                              Icon(Icons.lightbulb_outline, color: Colors.blue),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Upload your file in CSV or Excel format. Make sure all required fields are properly filled.',
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Fixed bottom section with upload button
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    border: Border(
+                      top: BorderSide(color: Colors.grey[200]!),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.cloud_upload_outlined,
+                        size: 48,
+                        color: appColor,
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            FilePickerResult? result = await FilePicker.platform.pickFiles();
+                            if (result != null) {
+                              String fileName = result.files.single.name;
+                              Get.snackbar(
+                                'Success',
+                                'Selected file: $fileName',
+                                backgroundColor: Colors.green[100],
+                                colorText: Colors.green[800],
+                                snackPosition: SnackPosition.BOTTOM,
+                                margin: const EdgeInsets.all(16),
+                              );
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: appColor,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.folder_open, color: Colors.white),
+                              SizedBox(width: 12),
+                              Text(
+                                'Choose File to Import',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

@@ -221,14 +221,31 @@ implements AuthenticationApi {
   }
 
   @override
-  Future<String>downLoadTicketDatabyUserName({Map<String, dynamic>? dataBody, id})async{
+  Future<Uint8List> downloadTicketDataByUsername({Map<String, dynamic>? dataBody, String? id}) async {
+    try {
+      final response = await dioClient!.get("api/ticket/$id/pdf/", data: dataBody, skipAuth: false, options: Options(responseType: ResponseType.bytes, followRedirects: false,),);
+      if (response.data == null) {
+        throw Exception("Failed to download PDF: Empty response");
+      }
+      return response.data;
+    } catch (error) {
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
+  @override
+  Future<Uint8List> exportTicketDataByDate({Map<String, dynamic>? dataBody, parameter})async{
     try{
-      final response = await dioClient!.get("api/ticket/$id/pdf/",data: dataBody, skipAuth: false);
-      return response;
+      final response = await dioClient!.get(ApiEnd.exportTicketEnd, data: dataBody, skipAuth: false, queryParameters: parameter);
+      if (response.data == null){
+        throw Exception("Failed to download excel: Empty response");
+      }
+      return response.data;
     }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }
   }
+
   @override
   Future<LeaveResponseModel> getLeavesApiCall(
       {Map<String, dynamic>? dataBody}) async {
@@ -626,6 +643,16 @@ implements AuthenticationApi {
     try{
       final response = await dioClient!.get("${ApiEnd.tmsUsersEnd}", data: dataBody, skipAuth: false);
       return TMSResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
+  @override
+  Future<AttendanceUserResponseModel>getCalenderViewUserAttendanceApiCall({Map<String, dynamic>? dataBody, parameter})async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.userAttendanceCalendarApiEnd}", data: dataBody, skipAuth: false, queryParameters: parameter);
+      return AttendanceUserResponseModel.fromJson(response);
     }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }

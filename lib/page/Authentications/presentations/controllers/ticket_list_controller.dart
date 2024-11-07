@@ -320,11 +320,16 @@
 //     tickets.value = filteredTickets;
 //   }
 // }
+import 'dart:io';
+
+import 'package:external_path/external_path.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:tms_sathi/constans/const_local_keys.dart';
 import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
@@ -382,7 +387,8 @@ class TicketListController extends GetxController {
         ticketResult.assignAll(response.results);
         applyFilters(); // Apply initial filters
       }
-      List<String> ticketids = ticketResult.map((ids)=> ids.id.toString()).toList();
+      List<String> ticketids = ticketResult.map((ids) => ids.id.toString())
+          .toList();
       await storage.write(ticketId, ticketids);
     } catch (error) {
       toast('Error fetching ticket details: ${error.toString()}');
@@ -403,7 +409,8 @@ class TicketListController extends GetxController {
       filteredTickets = filteredTickets.where((ticket) {
         switch (selectedFilter.value) {
           case "Customer Name":
-            return ticket.customerDetails.customerName?.toLowerCase().contains(query) ??
+            return ticket.customerDetails.customerName?.toLowerCase().contains(
+                query) ??
                 false;
           case "Sub-Customer Name":
             return ticket.subCustomerDetails?.customerName?.toLowerCase()
@@ -523,13 +530,37 @@ class TicketListController extends GetxController {
     }
   }
 
-  void downloadTicketData(String? tickId){
+  Future<void> downloadTicketData(String? ticketId) async {
+    if (ticketId == null){
+      toast('Invalid Ticket Id');
+      return;
+    }
     isLoading.value = true;
     customLoader.show();
-    FocusManager.instance.primaryFocus?.unfocus();
-    Get.find<AuthenticationApiService>().downLoadTicketDatabyUserName(id: tickId).then((value){
-      toast("Ticket details downloaded successfully");
+    FocusManager.instance.primaryFocus!.context;
+    final hasPermission = await requestPermissionHandler();
+    if (!hasPermission) {
+      isLoading.value = false;
       customLoader.hide();
+      toast('Please grant storage permission from settings to download tickets');
+      return;
+    }
+    Get.find<AuthenticationApiService>().downloadTicketDataByUsername(id: ticketId).then((value)async{
+      Directory? directory;
+      if (Platform.isAndroid) {
+        directory = Directory('/storage/emulated/0/Download');
+      } else {
+        directory = await getApplicationDocumentsDirectory();
+      }
+
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
+      final fileName = 'ticket_${ticketId}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final file = File('${directory.path}/$fileName');
+      await file.writeAsBytes(value);
+      customLoader.hide();
+      toast("Ticket data downloaded to: ${file.path}");
       update();
     }).onError((error, stackError){
       isLoading.value = false;
@@ -537,4 +568,106 @@ class TicketListController extends GetxController {
       toast(error.toString());
     });
   }
+
+  Future<bool> requestPermissionHandler()async{
+    if(Platform.isAndroid){
+      final storageStatus = await Permission.storage.request();
+      if (storageStatus.isGranted) {
+        return true;
+      }
+      if (storageStatus.isPermanentlyDenied) {
+        await openAppSettings();
+        return false;
+      }
+
+      return false;
+    }
+    return true;
+  }
+
+
+// Future<String> getFilePath(String filename) async {
+  //   Directory appDocDir = await getApplicationDocumentsDirectory();
+  //   String appDocPath = appDocDir.path;
+  //   return join(appDocPath, filename);
+  // }
+
+//   void downloadTicketData(String? ticketId) async {
+//     if (ticketId == null) {
+//       toast("Invalid ticket ID");
+//       return;
+//     }
+//
+//     try {
+//       isLoading.value = true;
+//       customLoader.show();
+//
+//       // Check and request permissions for Android
+//       if (Platform.isAndroid) {
+//         Map<Permission, PermissionStatus> statuses = await [
+//           Permission.storage,
+//           Permission.manageExternalStorage,
+//         ].request();
+//
+//         if (statuses[Permission.storage] != PermissionStatus.granted ||
+//             statuses[Permission.manageExternalStorage] !=
+//                 PermissionStatus.granted) {
+//           throw Exception(
+//               "Storage permissions are required to download the ticket");
+//         }
+//       }
+//       final pdfData = await Get.find<AuthenticationApiService>()
+//           .downloadTicketDataByUsername(id: ticketId)
+//           .catchError((error) {
+//         throw Exception("Failed to download PDF: ${error.toString()}");
+//       });
+//
+//       // Get the download directory path based on platform
+//       String? downloadPath;
+//       if (Platform.isAndroid) {
+//         // Use Downloads directory for Android
+//         downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
+//           ExternalPath.DIRECTORY_DOWNLOADS,
+//         );
+//       } else {
+//         final directory = await getApplicationDocumentsDirectory();
+//         downloadPath = directory.path;
+//       }
+//
+//       if (downloadPath == null) {
+//         throw Exception("Could not access storage directory");
+//       }
+//
+//       // Create a directory for your app's downloads if it doesn't exist
+//       final appDir = Directory('$downloadPath/TMS_Tickets');
+//       if (!await appDir.exists()) {
+//         await appDir.create(recursive: true);
+//       }
+//
+//       // Create file name with timestamp
+//       final timestamp = DateTime
+//           .now()
+//           .millisecondsSinceEpoch;
+//       final fileName = 'ticket_$ticketId\_$timestamp.pdf';
+//       final filePath = '${appDir.path}/$fileName';
+//
+//       // Write the PDF data to a file with error handling
+//       try {
+//         final file = File(filePath);
+//         await file.writeAsBytes(pdfData as List<int>);
+//
+//         customLoader.hide();
+//         isLoading.value = false;
+//         toast("Ticket downloaded to Downloads/TMS_Tickets/$fileName");
+//         update();
+//       } catch (e) {
+//         throw Exception("Failed to save file: ${e.toString()}");
+//       }
+//     } catch (error) {
+//       isLoading.value = false;
+//       customLoader.hide();
+//       toast("Download failed: ${error.toString()}");
+//     }
+//   }
+// }
 }

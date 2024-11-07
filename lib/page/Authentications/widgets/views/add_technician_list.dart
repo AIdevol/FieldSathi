@@ -26,7 +26,7 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
                 onPressed: () => Get.back(),
               ),
               backgroundColor: appColor,
-              middle: Text('Add Agent', style: MontserratStyles.montserratBoldTextStyle(size: 15, color: Colors.black),),
+              middle: Text('Add Technician', style: MontserratStyles.montserratBoldTextStyle(size: 15, color: Colors.black),),
             ),
             child: _form(controller, context),
           );
@@ -44,6 +44,10 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
         padding: const EdgeInsets.all(18.0),
         child: ListView(
           children: [
+            _buildEmployeeId(controller),
+            vGap(20),
+            _buildDateOfJoining(controller,context),
+            vGap(20),
             _buildFirstName(controller),
             vGap(20),
             _buildLastName(controller),
@@ -52,11 +56,39 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
             vGap(20),
             _buildPhoneNumber(controller),
             vGap(20),
-            _buildDobField(controller,context),
-            vGap(40),
+
             _buildOptionButtons(controller),
           ],
         ),
+      ),
+    );
+  }
+  Widget _buildEmployeeId(AddTechnicianListController controller) {
+    return CustomTextField(
+      hintText: "Employee Id".tr,
+      controller: controller.employeeIdController,
+      textInputType: TextInputType.text,
+      focusNode: controller.firstFocusNode,
+      onFieldSubmitted: (String? value) {
+        FocusScope.of(Get.context!).requestFocus(controller.lastFocusNode);
+      },
+      labletext: "Employee Id".tr,
+      prefix: Icon(Icons.person, color: Colors.black),
+    );
+  }
+
+  Widget _buildDateOfJoining(AddTechnicianListController controller, BuildContext context) {
+    return CustomTextField(
+      hintText: "dd-mm-yyyy".tr,
+      controller: controller.dateJoiningController,
+      textInputType: TextInputType.datetime,
+      labletext: "Date of Joining".tr,
+      onTap: ()=> controller.selectDate(context),
+      suffix: IconButton(
+        onPressed: () {
+          controller.selectDate(context);
+        },
+        icon: Icon(Icons.calendar_month, color: Colors.black),
       ),
     );
   }
@@ -117,21 +149,7 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
     );
   }
 
-  Widget _buildDobField(AddTechnicianListController controller, BuildContext context) {
-    return CustomTextField(
-      hintText: "Date of Birth".tr,
-      controller: controller.dobController,
-      textInputType: TextInputType.datetime,
-      labletext: "Date of Birth".tr,
-      onTap: ()=> controller.selectDate(context),
-      suffix: IconButton(
-        onPressed: () {
-      controller.selectDate(context);
-        },
-        icon: Icon(Icons.calendar_month, color: Colors.black),
-      ),
-    );
-  }
+
 
   Widget _buildOptionButtons(AddTechnicianListController controller) {
     return Row(
@@ -167,7 +185,7 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
     return ButtonStyle(
       backgroundColor: MaterialStateProperty.all(appColor),
       foregroundColor: MaterialStateProperty.all(Colors.white),
-      padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 60, vertical: 15)),
+      padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 50, vertical: 15)),
       elevation: MaterialStateProperty.all(5),
       shape: MaterialStateProperty.all(
         RoundedRectangleBorder(
