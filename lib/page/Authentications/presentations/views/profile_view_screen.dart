@@ -386,13 +386,9 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
       labletext: "Country".tr,
       readOnly: true,
       prefix: const Icon(FeatherIcons.globe, color: Colors.black),
-      suffix: IconButton(
-        onPressed: () {
-          _openCountryPicker(context);
-        },
-        icon: const Icon(Icons.arrow_drop_down, color: Colors.black, size: 30),
-      ),
-      validator: (value) => value?.isEmpty ?? true ? "Country is required" : null,
+      suffix: const Icon(Icons.arrow_drop_down, color: Colors.black, size: 30),
+    validator: (value) => value?.isEmpty ?? true ? "Country is required" : null,
+      onTap: ()=>  _openCountryPicker(context),
     );
   }
 

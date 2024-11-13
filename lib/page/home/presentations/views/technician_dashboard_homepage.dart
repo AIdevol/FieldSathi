@@ -203,7 +203,7 @@ class TechnicianDashboardHomepage extends StatelessWidget {
               height: hieghtLength.height*0.99,
               // width: Get.width*0.08,
               // padding: EdgeInsets.all(16),
-              child: AmcStatusMonitorGraph(),
+              child: AmcStatusBarChart(),
             ),
           ),
         ],

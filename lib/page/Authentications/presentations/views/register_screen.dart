@@ -188,11 +188,11 @@ class RegisterScreen extends GetView<RegisterScreenController> {
             },
             labletext: "Country".tr,
             prefix: Icon(FeatherIcons.globe, color: Colors.black),
-            suffix: IconButton(onPressed:(){_openCountryPicker(context);},icon: const Icon(Icons.arrow_drop_down, color: Colors.black,size: 30,)),
+            suffix:const Icon(Icons.arrow_drop_down, color: Colors.black,size: 30,),
             validator: (value) {
               return value?.isEmptyField(messageTitle: "country");
             },
-            // readOnly: true,
+            onTap: ()=> _openCountryPicker(context),
           ),
           vGap(20),
           InkWell(

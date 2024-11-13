@@ -42,7 +42,8 @@ class CalendarController extends GetxController {
   void hitHolidayApiCall() {
     customLoader.show();
     Get.find<AuthenticationApiService>().holidaysCalenderApiCall().then((value) {
-      if (value is HolidaysCalendarResponseModel) {
+
+      if (value is HolidayResponseModel) {
         for (var result in value.results) {
           _addEventFromApi(result);
         }

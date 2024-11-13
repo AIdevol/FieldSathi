@@ -19,10 +19,8 @@ import '../../../../response_models/ticket_response_model.dart';
 class HomeScreenController extends GetxController{
   final RxString profileImageUrl = ''.obs;
   final RxBool isLoading = true.obs;
-  // UserResponseModel userData = UserResponseModel();
   List<FsrResponseModel> allFsr = <FsrResponseModel>[].obs;
   RxList<LeadGetResponseModel> leadListData = <LeadGetResponseModel>[].obs;
-  // RxList<AmcResponseModel> amcData = <AmcResponseModel>[].obs;
   RxList<AmcResult> amcResultData = <AmcResult>[].obs;
   RxList<TicketResponseModel> ticketData = <TicketResponseModel>[].obs;
   RxList<TicketResult>ticketResultData = <TicketResult>[].obs;
@@ -38,6 +36,7 @@ class HomeScreenController extends GetxController{
     fetchTicketsApiCall();
     hitGetAmcDetailsApiCall();
     hitServiceCategoriesApiCall();
+    checkFirstTimeUser();
   }
 
   @override
@@ -45,29 +44,34 @@ class HomeScreenController extends GetxController{
     super.onClose();
   }
 
-  void onReady(){
-    super.onReady();
-    showDialog(
-      context: Get.context!,
-      builder: (BuildContext context) {
-        return CustomDialogue(
-          onOkTap: () {
-            Get.back();
-          },
-          title: 'Welcome',
-          desc: 'Welcome to your universe',
-        );
-      },
-    );
+  void checkFirstTimeUser()async{
+    bool isFirstTime = storage.read(FIRST_TIME_KEY) ?? true;
+    // super.onReady();
+    if(isFirstTime != null ) {
+      WidgetsBinding.instance.addPostFrameCallback((_){
+      showDialog(
+        context: Get.context!,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return CustomDialogue(
+            onOkTap: () {
+              Get.back();
+            },
+            title: 'Welcome',
+            desc: 'Welcome to your universe',
+          );
+        },
+      );
+    });
+     await storage.write(FIRST_TIME_KEY, false);
+    }
   }
+  // WidgetsBinding.instance.addPostFrameCallback
 
   void hitGetuserDetailsApiCall(){
     isLoading.value = true;
     final userid = storage.read(userId);
-    print("userId++++: $userid");
-    // customLoader.show();
     FocusManager.instance.primaryFocus!.context;
-
     Get.find<AuthenticationApiService>().userDetailsApiCall(id: userid).then((value)async{
       var userData = value;
       customLoader.hide();
@@ -78,7 +82,6 @@ class HomeScreenController extends GetxController{
       toast('Details successfully fetched');
       update();
     }).onError((error, stackError){
-      customLoader.hide();
       toast(error.toString());
       isLoading.value = false;
     });
@@ -86,36 +89,27 @@ class HomeScreenController extends GetxController{
 
   void hitGetfsrDetailsApiCall()async{
     isLoading.value = true;
-    // customLoader.show();
     FocusManager.instance.primaryFocus!.context;
     Get.find<AuthenticationApiService>().getfsrDetailsApiCall().then((value)async{
-      // allFsr.assignAll(value);
       customLoader.hide();
-      if (allFsr is FsrResponseModel){
-        // var fsrid = allFsr.first.id.toString();
-        // print('aldjfklasf= ${fsrid}');
-        // await storage.write(FsrId, fsrid);
+      if (allFsr is FsrResponseModel) {
+        update();
       }
-      // toast('FSR Fetched Successfully');
-      update();
     }).onError((error, stackError){
       customLoader.hide();
       toast(error.toString());
       isLoading.value = false;
     });
   }
+
   
   void fetchedLeadListApiCall(){
     isLoading.value = true;
-    // customLoader.show();
     FocusManager.instance.primaryFocus!.context;
     Get.find<AuthenticationApiService>().getLeadListApiCall().then((value){
       leadListData.assignAll(value);
-      customLoader.hide();
-      // toast("Lead list fetched successfully");
       update();
     }).onError((error,stackError){
-      customLoader.hide();
       toast(error.toString());
       isLoading.value = false;
     });
@@ -123,7 +117,6 @@ class HomeScreenController extends GetxController{
 
   void hitGetAmcDetailsApiCall(){
     isLoading.value = true;
-    // customLoader.show();
     FocusManager.instance.primaryFocus!.context;
     // try{
     //   final amcValues=Get.find<AuthenticationApiService>().getAmcDetailsApiCall();
@@ -138,15 +131,11 @@ class HomeScreenController extends GetxController{
     // }
     Get.find<AuthenticationApiService>().getAmcDetailsApiCall().then((value){
       var amcData = value;
-      print('amc Data ${amcData}');
       amcResultData.assignAll(value.results);
       List<String>amcIds=amcResultData.map((amcValue)=>amcValue.id.toString()).toList();
       print("kya bhai amc ka Id bhi dekh liye: $amcIds");
-      customLoader.hide();
-      // toast("AMC successfully Fetched");
       update();
     }).onError((error, stackError){
-      customLoader.hide();
       toast(error.toString());
       isLoading.value = false;
     });

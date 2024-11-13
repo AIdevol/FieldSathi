@@ -1,243 +1,205 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../presentations/controllers/amc_status_monitor_graph_controller.dart';
 
-class AmcStatusMonitorGraph extends GetView<AmcStatusMonitorGraphController> {
-  const AmcStatusMonitorGraph({Key? key}) : super(key: key);
+class AmcStatusBarChart extends StatelessWidget {
+  final controller = Get.find<AmcStatusMonitorGraphController>();
+
+  AmcStatusBarChart({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => controller.isLoading.value
-        ? const Center(child: CircularProgressIndicator())
-        : AspectRatio(
-      aspectRatio: 1.6,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildLegend(),
-            const SizedBox(height: 16),
-            Expanded(child: _buildChart()),
-          ],
+    return Obx(() {
+      // if (controller.isLoading.value) {
+      //   return const Center(child: CircularProgressIndicator());
+      // }
+
+      return AspectRatio(
+        aspectRatio: 1.6,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildLegend(),
+              const SizedBox(height: 16),
+              Expanded(
+                flex: 3,
+                child: _buildChart(),
+              ),
+            ],
+          ),
         ),
-      ),
-    ));
+      );
+    });
   }
 
   Widget _buildLegend() {
+    const legends = [
+      {'color': Colors.blue, 'label': 'Upcoming'},
+      {'color': Colors.yellow, 'label': 'Renewal'},
+      {'color': Colors.purple, 'label': 'Completed'},
+      {'color': Colors.green, 'label': 'Total'}
+    ];
+
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: const [
-        _LegendItem(
-          color: Colors.blue,
-          label: 'Upcoming',
-        ),
-        SizedBox(width: 16),
-        _LegendItem(
-          color: Colors.yellow,
-          label: 'Renewal',
-        ),
-        SizedBox(width: 16),
-        _LegendItem(
-          color: Colors.purple,
-          label: 'Completed',
-        ),
-        SizedBox(width: 16),
-        _LegendItem(
-          color: Colors.green,
-          label: 'Total',
-        ),
-      ],
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: legends.map((legend) {
+        return _LegendItem(
+          color: legend['color'] as Color,
+          label: legend['label'] as String,
+        );
+      }).toList(),
     );
   }
 
   Widget _buildChart() {
-    // Using percentage values for Y-axis max
-    const yAxisMax = 100.0;
+    final List<double> values = [
+      controller.upcomingPercentage.value,
+      controller.renewalPercentage.value,
+      controller.completedPercentage.value,
+      controller.totalPercentage.value,
+    ];
+    final List<int> counts = [
+      controller.upcomingCount.value,
+      controller.renewalCount.value,
+      controller.completedCount.value,
+      controller.totalCount.value,
+    ];
 
-    return Obx(() => BarChart(
+    return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
-        maxY: yAxisMax,
-        barTouchData: _buildBarTouchData(),
-        titlesData: _buildTitlesData(),
-        gridData: _buildGridData(),
-        borderData: _buildBorderData(),
-        extraLinesData: _buildExtraLinesData(),
-        barGroups: [
-          _createBarData(
-            0,
-            controller.upcomingPercentage.value,
-            controller.upcomingCount.value,
-            Colors.blue,
+        maxY: 100,
+        barTouchData: BarTouchData(
+          enabled: true,
+          touchTooltipData: BarTouchTooltipData(
+            // tooltipBgColor: Colors.black54,
+            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              return BarTooltipItem(
+                'Count: ${counts[groupIndex]}\nPercentage: ${rod.toY.toStringAsFixed(1)}%',
+                const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              );
+            },
           ),
-          _createBarData(
-            1,
-            controller.renewalPercentage.value,
-            controller.renewalCount.value,
-            Colors.yellow,
-          ),
-          _createBarData(
-            2,
-            controller.completedPercentage.value,
-            controller.completedCount.value,
-            Colors.purple,
-          ),
-          _createBarData(
-            3,
-            controller.totalPercentage.value,
-            controller.totalCount.value,
-            Colors.green,
-          ),
-        ],
-      ),
-    ));
-  }
-
-  BarTouchData _buildBarTouchData() {
-    return BarTouchData(
-      enabled: true,
-      touchTooltipData: BarTouchTooltipData(
-        getTooltipItem: (group, groupIndex, rod, rodIndex) {
-          return BarTooltipItem(
-            'Count: ${rod.rodStackItems.isEmpty ? rod.toY.toInt() : rod.rodStackItems.first.toY.toInt()}\n'
-                'Percentage: ${rod.toY.toStringAsFixed(1)}%',
-            const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+        ),
+        titlesData: FlTitlesData(
+          show: true,
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                const titles = ['Upcoming', 'Renewal', 'Completed', 'Total'];
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    titles[value.toInt()],
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  FlTitlesData _buildTitlesData() {
-    return FlTitlesData(
-      show: true,
-      rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      bottomTitles: AxisTitles(
-        sideTitles: SideTitles(
-          showTitles: true,
-          getTitlesWidget: (value, meta) {
-            const categories = ['Upcoming', 'Renewal', 'Completed', 'Total'];
-            if (value.toInt() >= 0 && value.toInt() < categories.length) {
-              return Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  categories[value.toInt()],
+          ),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 45,
+              interval: 20,
+              getTitlesWidget: (value, meta) {
+                return Text(
+                  '${value.toInt()}%',
                   style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
-                ),
-              );
-            }
-            return const Text('');
-          },
+                );
+              },
+            ),
+          ),
         ),
-      ),
-      leftTitles: AxisTitles(
-        sideTitles: SideTitles(
-          showTitles: true,
-          reservedSize: 45,
-          interval: 20, // Show percentage intervals of 20
-          getTitlesWidget: (value, meta) {
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Text(
-                '${value.toInt()}%',
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          horizontalInterval: 20,
+          getDrawingHorizontalLine: (value) {
+            return FlLine(
+              color: Colors.grey.shade300,
+              strokeWidth: 1,
             );
           },
         ),
-      ),
-    );
-  }
-
-  FlGridData _buildGridData() {
-    return FlGridData(
-      show: true,
-      drawVerticalLine: false,
-      horizontalInterval: 20, // Grid lines every 20%
-      getDrawingHorizontalLine: (value) {
-        return FlLine(
-          color: Colors.grey.shade300,
-          strokeWidth: 1,
-        );
-      },
-    );
-  }
-
-  FlBorderData _buildBorderData() {
-    return FlBorderData(
-      show: true,
-      border: Border.all(color: Colors.grey.shade300),
-    );
-  }
-
-  ExtraLinesData _buildExtraLinesData() {
-    return ExtraLinesData(
-      horizontalLines: [
-        HorizontalLine(
-          y: controller.upcomingTarget,
-          color: Colors.blue,
-          strokeWidth: 2,
-          dashArray: [5, 5],
-          label: HorizontalLineLabel(
-            show: true,
-            labelResolver: (line) => 'Target: ${controller.upcomingTarget}%',
-            alignment: Alignment.topRight,
-            style: const TextStyle(
+        borderData: FlBorderData(
+          show: true,
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        extraLinesData: ExtraLinesData(
+          horizontalLines: [
+            HorizontalLine(
+              y: controller.upcomingTarget,
               color: Colors.blue,
-              fontWeight: FontWeight.bold,
+              strokeWidth: 2,
+              dashArray: [5, 5],
+              label: HorizontalLineLabel(
+                show: true,
+                labelResolver: (line) => 'Target: ${controller.upcomingTarget}%',
+                alignment: Alignment.topRight,
+                style: const TextStyle(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-          ),
-        ),
-        HorizontalLine(
-          y: controller.completedTarget,
-          color: Colors.purple,
-          strokeWidth: 2,
-          dashArray: [5, 5],
-          label: HorizontalLineLabel(
-            show: true,
-            labelResolver: (line) => 'Target: ${controller.completedTarget}%',
-            alignment: Alignment.topRight,
-            style: const TextStyle(
+            HorizontalLine(
+              y: controller.completedTarget,
               color: Colors.purple,
-              fontWeight: FontWeight.bold,
+              strokeWidth: 2,
+              dashArray: [5, 5],
+              label: HorizontalLineLabel(
+                show: true,
+                labelResolver: (line) => 'Target: ${controller.completedTarget}%',
+                alignment: Alignment.topRight,
+                style: const TextStyle(
+                  color: Colors.purple,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-      ],
-    );
-  }
-
-  BarChartGroupData _createBarData(int x, double percentage, int count, Color color) {
-    return BarChartGroupData(
-      x: x,
-      barRods: [
-        BarChartRodData(
-          toY: percentage,
-          color: color,
-          width: 40,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(4),
-            topRight: Radius.circular(4),
-          ),
-        ),
-      ],
-      showingTooltipIndicators: [0],
+        barGroups: values
+            .asMap()
+            .map((index, value) {
+          final colors = [Colors.blue, Colors.yellow, Colors.purple, Colors.green];
+          return MapEntry(
+            index,
+            BarChartGroupData(
+              x: index,
+              barRods: [
+                BarChartRodData(
+                  toY: value,
+                  color: colors[index],
+                  width: 36,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(6),
+                    topRight: Radius.circular(6),
+                  ),
+                ),
+              ],
+              showingTooltipIndicators: [0],
+            ),
+          );
+        })
+            .values
+            .toList(),
+      ),
     );
   }
 }

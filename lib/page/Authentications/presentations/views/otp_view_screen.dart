@@ -134,8 +134,8 @@ class OtpViewScreen extends GetView<OtpViewController>{
     ));
   }
   _bottonFieldForm(){
-    return InkWell(onTap: (){
-      controller.hitOtpVerifyAPiCall();
+    return InkWell(onTap: () async {
+      await controller.hitOtpVerifyAPiCall();
     },child: Container( height: Get.height*0.06,
       width: Get.width,
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(25), color: appColor),
@@ -145,28 +145,44 @@ class OtpViewScreen extends GetView<OtpViewController>{
       ),),);
 
   }
-  goToResendOtp() {
-    return Text.rich(
-      TextSpan(
-          text: "Don't receive code? ".tr,
-          style:
-          MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: Colors.black45),
-          children: [
-            TextSpan(
-              text: "Resend Code".tr,
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  // controller.hitresendOtpAPiCall();
-                },
-              style: MontserratStyles.montserratSemiBoldTextStyle(color: appColor),
+  Widget goToResendOtp() {
+    return Obx(() => Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "Don't receive code? ".tr,
+          style: MontserratStyles.montserratSemiBoldTextStyle(
+            size: 15,
+            color: Colors.black45,
+          ),
+        ),
+        controller.isResending.value
+            ? Container(
+          height: 15,
+          width: 15,
+          margin: const EdgeInsets.only(left: 8),
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(appColor),
+          ),
+        )
+            : GestureDetector(
+          onTap: () async {
+            if (!controller.isResending.value) {
+              controller.isResending.value = true;
+              await controller.hitresendOtpAPiCall();
+              controller.isResending.value = false;
+              controller.resendOtp();
+            }
+          },
+          child: Text(
+            "Resend Code".tr,
+            style: MontserratStyles.montserratSemiBoldTextStyle(
+              color: appColor,
             ),
-          ]),
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        color: Colors.black,
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-      ),
-    );
+          ),
+        ),
+      ],
+    ));
   }
   }

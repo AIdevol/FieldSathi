@@ -37,23 +37,17 @@ class AttendanceResponseModel {
 //======================================================================Tms Technician Role wise data fetched ==========================================
 
 class TechnicianAttendanceResponseModel {
-  final int? count;
-  final int? totalPages;
-  final List<TechnicianData?> results;
+  int? count;
+  int? totalPages;
+  List<TechnicianAttendanceResult>? results;
 
-  TechnicianAttendanceResponseModel({
-    required this.count,
-    required this.totalPages,
-    required this.results,
-  });
+  TechnicianAttendanceResponseModel({this.count, this.totalPages, this.results});
 
   factory TechnicianAttendanceResponseModel.fromJson(Map<String, dynamic> json) {
     return TechnicianAttendanceResponseModel(
       count: json['count'],
       totalPages: json['total_pages'],
-      results: (json['results'] as List)
-          .map((item) => TechnicianData.fromJson(item))
-          .toList(),
+      results: (json['results'] as List?)?.map((item) => TechnicianAttendanceResult.fromJson(item)).toList(),
     );
   }
 
@@ -61,106 +55,108 @@ class TechnicianAttendanceResponseModel {
     return {
       'count': count,
       'total_pages': totalPages,
-      'results': results.map((item) => item?.toJson()).toList(),
+      'results': results?.map((item) => item.toJson()).toList(),
     };
   }
 }
 
-class TechnicianData {
-  final int id;
-  final TodayAttendance? todayAttendance;
-  final List<String> brandNames;
-  final dynamic lastLogin;
-  final String firstName;
-  final String lastName;
-  final String email;
-  final String phoneNumber;
-  final String companyName;
-  final String employees;
-  final dynamic dob;
-  final String otp;
-  final bool otpVerified;
-  final bool isStaff;
-  final bool isSuperuser;
-  final bool isActive;
-  final dynamic profileImage;
-  final dynamic customerName;
-  final dynamic customerTag;
-  final dynamic modelNo;
-  final dynamic socialId;
-  final bool deactivate;
-  final String role;
-  final dynamic customerType;
-  final String? batteryStatus;
-  final bool gpsStatus;
-  final dynamic longitude;
-  final dynamic latitude;
-  final dynamic companyAddress;
-  final dynamic companyCity;
-  final dynamic companyState;
-  final dynamic companyPincode;
-  final dynamic companyCountry;
-  final dynamic companyRegion;
-  final dynamic companyLandlineNo;
-  final dynamic gstNo;
-  final dynamic cinNo;
-  final dynamic panNo;
-  final dynamic companyContactNo;
-  final dynamic companyWebsite;
-  final dynamic bankName;
-  final dynamic ifscSwift;
-  final dynamic accountNumber;
-  final dynamic branchAddress;
-  final dynamic upiId;
-  final dynamic paymentLink;
-  final dynamic fileUpload;
-  final dynamic primaryAddress;
-  final dynamic landmarkPaci;
-  final dynamic notes;
-  final dynamic state;
-  final dynamic country;
-  final dynamic city;
-  final dynamic zipcode;
-  final dynamic region;
-  final int allocatedSickLeave;
-  final int allocatedCasualLeave;
-  final String? dateJoined;
-  final int maxEmployeesAllowed;
-  final int employeesCreated;
-  final bool isLeaveAllocated;
-  final dynamic empId;
-  final int createdBy;
-  final int admin;
-  final dynamic customerId;
-  final dynamic subscription;
+class TechnicianAttendanceResult {
+  int? id;
+  TodayAttendance? todayAttendance;
+  List<dynamic>? brandNames;
+  String? lastLogin;
+  String? firstName;
+  String? lastName;
+  String? email;
+  String? phoneNumber;
+  String? companyName;
+  String? employees;
+  String? dob;
+  String? otp;
+  bool? otpVerified;
+  bool? isStaff;
+  bool? isSuperuser;
+  bool? isActive;
+  String? profileImage;
+  String? customerName;
+  String? customerTag;
+  String? modelNo;
+  String? socialId;
+  bool? deactivate;
+  String? role;
+  String? customerType;
+  String? batteryStatus;
+  bool? gpsStatus;
+  String? longitude;
+  String? latitude;
+  String? companyAddress;
+  String? companyCity;
+  String? companyState;
+  String? companyPincode;
+  String? companyCountry;
+  String? companyRegion;
+  String? companyLandlineNo;
+  String? gstNo;
+  String? cinNo;
+  String? panNo;
+  String? companyContactNo;
+  String? companyWebsite;
+  String? bankName;
+  String? ifscSwift;
+  String? accountNumber;
+  String? branchAddress;
+  String? upiId;
+  String? paymentLink;
+  String? fileUpload;
+  String? primaryAddress;
+  String? landmarkPaci;
+  String? notes;
+  String? state;
+  String? country;
+  String? city;
+  String? zipcode;
+  String? region;
+  int? allocatedSickLeave;
+  int? allocatedCasualLeave;
+  String? dateJoined;
+  int? maxEmployeesAllowed;
+  int? employeesCreated;
+  bool? isLeaveAllocated;
+  String? empId;
+  bool? isDisabled;
+  String? createdAt;
+  int? createdBy;
+  int? admin;
+  String? customerId;
+  String? subscription;
 
-  TechnicianData({
-    required this.id,
+  TechnicianAttendanceResult({
+    this.id,
     this.todayAttendance,
-    required this.brandNames,
+    this.brandNames,
     this.lastLogin,
-    required this.firstName,
-    required this.lastName,
-    required this.email,
-    required this.phoneNumber,
-    required this.companyName,
-    required this.employees,
+    this.firstName,
+    this.lastName,
+    this.email,
+    this.phoneNumber,
+    this.companyName,
+    this.employees,
     this.dob,
-    required this.otp,
-    required this.otpVerified,
-    required this.isStaff,
-    required this.isSuperuser,
-    required this.isActive,
+    this.otp,
+    this.otpVerified,
+    this.isStaff,
+    this.isSuperuser,
+    this.isActive,
     this.profileImage,
     this.customerName,
     this.customerTag,
     this.modelNo,
     this.socialId,
-    required this.deactivate,
-    required this.role,
+    this.deactivate,
+    this.role,
     this.customerType,
     this.batteryStatus,
-    required this.gpsStatus,
+    this.gpsStatus,
     this.longitude,
     this.latitude,
     this.companyAddress,
@@ -190,26 +186,28 @@ class TechnicianData {
     this.city,
     this.zipcode,
     this.region,
-    required this.allocatedSickLeave,
-    required this.allocatedCasualLeave,
+    this.allocatedSickLeave,
+    this.allocatedCasualLeave,
     this.dateJoined,
-    required this.maxEmployeesAllowed,
-    required this.employeesCreated,
-    required this.isLeaveAllocated,
+    this.maxEmployeesAllowed,
+    this.employeesCreated,
+    this.isLeaveAllocated,
     this.empId,
-    required this.createdBy,
-    required this.admin,
+    this.isDisabled,
+    this.createdAt,
+    this.createdBy,
+    this.admin,
     this.customerId,
     this.subscription,
   });
 
-  factory TechnicianData.fromJson(Map<String, dynamic> json) {
-    return TechnicianData(
+  factory TechnicianAttendanceResult.fromJson(Map<String, dynamic> json) {
+    return TechnicianAttendanceResult(
       id: json['id'],
       todayAttendance: json['today_attendance'] != null
           ? TodayAttendance.fromJson(json['today_attendance'])
           : null,
-      brandNames: List<String>.from(json['brand_names']),
+      brandNames: json['brand_names'],
       lastLogin: json['last_login'],
       firstName: json['first_name'],
       lastName: json['last_name'],
@@ -269,6 +267,8 @@ class TechnicianData {
       employeesCreated: json['employees_created'],
       isLeaveAllocated: json['is_leave_allocated'],
       empId: json['emp_id'],
+      isDisabled: json['is_disabled'],
+      createdAt: json['created_at'],
       createdBy: json['created_by'],
       admin: json['admin'],
       customerId: json['customer_id'],
@@ -340,6 +340,8 @@ class TechnicianData {
       'employees_created': employeesCreated,
       'is_leave_allocated': isLeaveAllocated,
       'emp_id': empId,
+      'is_disabled': isDisabled,
+      'created_at': createdAt,
       'created_by': createdBy,
       'admin': admin,
       'customer_id': customerId,
@@ -349,28 +351,21 @@ class TechnicianData {
 }
 
 class TodayAttendance {
-  final int id;
-  final int user;
-  final dynamic checkIn;
-  final dynamic checkOut;
-  final String status;
-  final String date;
+  int? id;
+  int? user;
+  String? punchIn;
+  String? punchOut;
+  String? status;
+  String? date;
 
-  TodayAttendance({
-    required this.id,
-    required this.user,
-    this.checkIn,
-    this.checkOut,
-    required this.status,
-    required this.date,
-  });
+  TodayAttendance({this.id, this.user, this.punchIn, this.punchOut, this.status, this.date});
 
   factory TodayAttendance.fromJson(Map<String, dynamic> json) {
     return TodayAttendance(
       id: json['id'],
       user: json['user'],
-      checkIn: json['check_in'],
-      checkOut: json['check_out'],
+      punchIn: json['punch_in'],
+      punchOut: json['punch_out'],
       status: json['status'],
       date: json['date'],
     );
@@ -380,13 +375,15 @@ class TodayAttendance {
     return {
       'id': id,
       'user': user,
-      'check_in': checkIn,
-      'check_out': checkOut,
+      'punch_in': punchIn,
+      'punch_out': punchOut,
       'status': status,
       'date': date,
     };
   }
 }
+
+
 //=========================================================================== userAttendance ================================================================================
 class AttendanceUserResponseModel {
   int? count;

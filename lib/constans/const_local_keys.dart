@@ -22,6 +22,8 @@ const String technicianId = 'technicianId';
 const String ticketId = 'ticketId';
 const String serviceRequestsId = 'serviceRequestsId';
 
+const String FIRST_TIME_KEY = 'is_first_time_launch';
+
 
 // RememberMeModal? getRememberMe() {
 //   String? email = storage.read(emailKey);

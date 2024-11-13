@@ -10,6 +10,7 @@ import 'package:tms_sathi/response_models/ticket_response_model.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
+import '../../../../constans/string_const.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../widgets/views/principal_customer_view.dart';
 import '../controllers/ticket_list_controller.dart';
@@ -53,7 +54,7 @@ class TicketListScreen extends GetView<TicketListController> {
                 Expanded(
                   child: Obx(() => controller.isLoading.value
                       ?  Center(child: Container())
-                      : _buildTicketTable(controller)),
+                      : _buildContent(controller)),
                 ),
               ],
             ),
@@ -216,6 +217,39 @@ class TicketListScreen extends GetView<TicketListController> {
     );
   }
 
+   Widget _buildContent(TicketListController controller) {
+     return Obx(() {
+       if (controller.ticketResult.isEmpty) {
+         return _buildEmptyState();
+       }
+
+       return _buildTicketTable(controller);
+     });
+   }
+
+   _buildEmptyState() {
+     return Center(
+       child: Column(
+         mainAxisAlignment: MainAxisAlignment.center,
+         children: [
+           Image.asset(
+             nullVisualImage,
+             width: 300,
+             height: 300,
+           ),
+           SizedBox(height: 20),
+           Text(
+             'No services found',
+             style: MontserratStyles.montserratSemiBoldTextStyle(
+               size: 18,
+               color: blackColor,
+             ),
+           ),
+         ],
+       ),
+     );
+   }
+
   Widget _buildTicketTable(TicketListController controller) {
     final resultData = controller.ticketResult.map((Ids)=> Ids.id);
     return Container(
@@ -325,6 +359,8 @@ class TicketListScreen extends GetView<TicketListController> {
       ),
     );
   }
+
+
 
   List<DataRow> _buildTableRows(TicketListController controller) {
     return controller.ticketResult.map((ticket) {

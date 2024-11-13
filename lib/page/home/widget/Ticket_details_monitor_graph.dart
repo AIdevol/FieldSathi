@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:get/get.dart';
+import 'package:tms_sathi/utilities/helper_widget.dart';
 
 import '../presentations/controllers/graph_view_controller.dart';
 
@@ -15,104 +16,52 @@ class GraphViewScreen extends GetView<GraphViewController> {
       builder: (controller) => Scaffold(
         body: Obx(() => controller.isLoading.value
             ? const Center(child: CircularProgressIndicator())
-            : Column(
-          children: [
-            // Pie Chart Section
-            Container(
-              height: 300,
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
-                children: [
-                  // Pie Chart
-                  Expanded(
-                    flex: 3,
-                    child: PieChart(
-                      PieChartData(
-                        pieTouchData: PieTouchData(
-                          touchCallback:
-                              (FlTouchEvent event, pieTouchResponse) {
-                            if (!event.isInterestedForInteractions ||
-                                pieTouchResponse == null ||
-                                pieTouchResponse.touchedSection == null) {
-                              controller.setTouchedIndex(-1);
-                              return;
-                            }
-                            controller.setTouchedIndex(pieTouchResponse
-                                .touchedSection!.touchedSectionIndex);
-                          },
-                        ),
-                        borderData: FlBorderData(show: false),
-                        sectionsSpace: 2,
-                        centerSpaceRadius: 40,
-                        sections: showingSections(controller),
+            : SingleChildScrollView(
+          child: Column(
+            children: [
+              // Pie Chart Section with fixed height
+              SizedBox(
+                height: 300,
+                child: Container(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  color: Colors.white,
+                  child: PieChart(
+                    PieChartData(
+                      pieTouchData: PieTouchData(
+                        touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                          if (!event.isInterestedForInteractions ||
+                              pieTouchResponse == null ||
+                              pieTouchResponse.touchedSection == null) {
+                            controller.setTouchedIndex(-1);
+                            return;
+                          }
+                          controller.setTouchedIndex(
+                              pieTouchResponse.touchedSection!.touchedSectionIndex);
+                        },
                       ),
+                      borderData: FlBorderData(show: false),
+                      sectionsSpace: 2,
+                      centerSpaceRadius: 40,
+                      sections: showingSections(controller),
                     ),
                   ),
-                  // Expanded(flex:2 ,child: _buildLegend()),
-                  // Legend
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildLegendItem(
-                          Colors.blue.shade400,
-                          'Completed',
-                          controller.completedTicketsCount.value,
-                          controller.getPercentage(
-                              controller.completedTicketsCount.value),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildLegendItem(
-                          Colors.amber.shade400,
-                          'Ongoing',
-                          controller.ongoingTicketsCount.value,
-                          controller.getPercentage(
-                              controller.ongoingTicketsCount.value),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildLegendItem(
-                          Colors.purple.shade400,
-                          'Inactive',
-                          controller.inactiveTicketsCount.value,
-                          controller.getPercentage(
-                              controller.inactiveTicketsCount.value),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildLegendItem(
-                          Colors.green.shade400,
-                          'On-Hold',
-                          controller.onHoldTicketsCount.value,
-                          controller.getPercentage(
-                              controller.onHoldTicketsCount.value),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildLegendItem(
-                          Colors.red.shade400,
-                          'Rejected',
-                          controller.rejectedTicketsCount.value,
-                          controller.getPercentage(
-                              controller.rejectedTicketsCount.value),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-            // Divider
-            // const Divider(height: 10),
-
-            // Grid View Section
-            Expanded(
-              child: SizedBox(
-                height: Get.height*0.05,
+              // Legend Section
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(vertical: 16.0),
+              //   child: _buildLegend(),
+              // ),
+              // Grid View Section with padding
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: GridView.count(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
                   crossAxisCount: 2,
                   mainAxisSpacing: 16.0,
                   crossAxisSpacing: 16.0,
-                  childAspectRatio: 1.5,
+                  childAspectRatio: 1.2,
                   children: [
                     _buildStatCard(
                       title: 'Completed',
@@ -170,12 +119,13 @@ class GraphViewScreen extends GetView<GraphViewController> {
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         )),
       ),
     );
   }
+
   Widget _buildLegend() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -245,7 +195,6 @@ class GraphViewScreen extends GetView<GraphViewController> {
     required IconData icon,
     required Color backgroundColor,
     required Color iconColor,
-    // double? height,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -269,48 +218,44 @@ class GraphViewScreen extends GetView<GraphViewController> {
           },
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Icon(
-                        icon,
-                        size: 32,
-                        color: iconColor,
-                      ),
-                      Text(
-                        '${percentage.toStringAsFixed(1)}%',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: iconColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  // const SizedBox(height: 8),
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 32,
                       color: iconColor,
                     ),
-                  ),
-                  Text(
-                    '$count tickets',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
+                    Text(
+                      '${percentage.toStringAsFixed(1)}%',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: iconColor,
+                      ),
                     ),
+                  ],
+                ),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: iconColor,
                   ),
-                ],
-              ),
+                ),
+                Text(
+                  '$count tickets',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -386,10 +331,8 @@ class _LegendItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-      // mainAxisSize: MainAxisSize.max,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 16,

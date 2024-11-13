@@ -80,6 +80,7 @@ class GraphViewController extends GetxController {
     onHoldTicketsCount.value = onHold;
 
     update(); // Trigger UI update
+
   }
 
   void fetchTicketsApiCall() async {

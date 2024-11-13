@@ -1,22 +1,22 @@
-class HolidaysCalendarResponseModel {
-  final int count;
-  final int totalPages;
-  final int currentPage;
-  final List<Result> results;
+class HolidayResponseModel {
+  int count;
+  int totalPages;
+  int currentPage;
+  List<Result> results;
 
-  HolidaysCalendarResponseModel({
+  HolidayResponseModel({
     required this.count,
     required this.totalPages,
     required this.currentPage,
     required this.results,
   });
 
-  factory HolidaysCalendarResponseModel.fromJson(Map<String, dynamic> json) {
-    return HolidaysCalendarResponseModel(
+  factory HolidayResponseModel.fromJson(Map<String, dynamic> json) {
+    return HolidayResponseModel(
       count: json['count'],
       totalPages: json['total_pages'],
       currentPage: json['current_page'],
-      results: List<Result>.from(json['results'].map((x) => Result.fromJson(x))),
+      results: List<Result>.from(json['results'].map((result) => Result.fromJson(result))),
     );
   }
 
@@ -25,28 +25,28 @@ class HolidaysCalendarResponseModel {
       'count': count,
       'total_pages': totalPages,
       'current_page': currentPage,
-      'results': results.map((x) => x.toJson()).toList(),
+      'results': results.map((result) => result.toJson()).toList(),
     };
   }
 }
 
 class Result {
-  final int? id;
-  final String? start;
-  final String? end;
-  final String? title;
-  final String? color;
-  final String? createdBy;
-  final String? admin;
+  int id;
+  String start;
+  String end;
+  String title;
+  String color;
+  int createdBy;
+  int admin;
 
-  Result( {
-    this.id,
-    this.start,
-    this.end,
-    this.title,
-    this.color,
-    this.createdBy,
-    this.admin,
+  Result({
+    required this.id,
+    required this.start,
+    required this.end,
+    required this.title,
+    required this.color,
+    required this.createdBy,
+    required this.admin,
   });
 
   factory Result.fromJson(Map<String, dynamic> json) {

@@ -100,12 +100,12 @@ implements AuthenticationApi {
   }
 
   @override
-  Future<ResendOtpApiCall> resendOtpApiCall(
+  Future<ResendOtpResponseModel> resendOtpApiCall(
       {Map<String, dynamic>? dataBody}) async {
     try {
       final response = await dioClient!.post(
           ApiEnd.resendOtpEnd, data: dataBody);
-      return ResendOtpApiCall.fromJson(response);
+      return ResendOtpResponseModel.fromJson(response);
     } catch (e) {
       return Future.error(NetworkExceptions.getDioException(e));
     }
@@ -168,12 +168,12 @@ implements AuthenticationApi {
 
 // =====================================================Page ApI's=======================================================================
   @override
-  Future<HolidaysCalendarResponseModel> holidaysCalenderApiCall(
+  Future<HolidayResponseModel> holidaysCalenderApiCall(
       {Map<String, dynamic>? dataBody}) async {
     try {
       final response = await dioClient!.get(
           "${ApiEnd.holidaysApiEnd}", data: dataBody, skipAuth: false);
-      return HolidaysCalendarResponseModel.fromJson(response);
+      return HolidayResponseModel.fromJson(response);
     } catch (e) {
       return Future.error(NetworkExceptions.getDioException(e));
     }
@@ -741,25 +741,33 @@ Future<TechnicianAttendanceResponseModel>getAttendanceApiCall({Map<String, dynam
   //=========================================================================== Service Requests Response Api Call ==================================================
 
   @override
-  Future<List<ServiceRequestsResponseModel>> getServiceRequestsApiCall({Map<String, dynamic>?dataBody, parameters}) async {
-    try {
-      final response = await dioClient!.get(ApiEnd.serviceRequestsEnd, data: dataBody,
-          skipAuth: false,
-          queryParameters: parameters);
-      if (response is List) {
-        return response.map((item) => ServiceRequestsResponseModel.fromJson(item))
-            .toList();
-      } else
-      if (response is Map<String, dynamic> && response.containsKey('data')) {
-        final List<dynamic>data = response['data'];
-        return data.map((item) => ServiceRequestsResponseModel.fromJson(item))
-            .toList();
-      }
-      return [];
-    } catch (error) {
+  Future<ServiceRequestResponseModel>getServiceRequestsApiCall({Map<String, dynamic>? dataBody, parameters})async{
+    try{
+      final response = await dioClient!.get(ApiEnd.serviceRequestsEnd, data: dataBody, skipAuth: false, queryParameters: parameters);
+      return ServiceRequestResponseModel.fromJson(response);
+    }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }
   }
+  // Future<List<ServiceRequestResponseModel>> getServiceRequestsApiCall({Map<String, dynamic>?dataBody, parameters}) async {
+  //   try {
+  //     final response = await dioClient!.get(ApiEnd.serviceRequestsEnd, data: dataBody,
+  //         skipAuth: false,
+  //         queryParameters: parameters);
+  //     if (response is List) {
+  //       return response.map((item) => ServiceRequestResponseModel.fromJson(item))
+  //           .toList();
+  //     } else
+  //     if (response is Map<String, dynamic> && response.containsKey('data')) {
+  //       final List<dynamic>data = response['data'];
+  //       return data.map((item) => ServiceRequestResponseModel.fromJson(item))
+  //           .toList();
+  //     }
+  //     return [];
+  //   } catch (error) {
+  //     return Future.error(NetworkExceptions.getDioException(error));
+  //   }
+  // }
 
   Future<ExportServiceResponse>getDownLoadExportServiceResponse()async{
     try{

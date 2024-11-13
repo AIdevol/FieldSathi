@@ -7,11 +7,10 @@ import '../../../../response_models/amc_response_model.dart';
 import '../../../../services/APIs/auth_services/auth_api_services.dart';
 
 class AmcStatusMonitorGraphController extends GetxController {
-  RxBool isLoading = true.obs;
+  RxBool isLoading = false.obs;
   final _touchedIndex = (-1).obs;
   int get touchedIndex => _touchedIndex.value;
   void setTouchedIndex(int index) => _touchedIndex.value = index;
-  // RxList<AmcResponseModel> amcData = <AmcResponseModel>[].obs;
   RxList<AmcResult> amcResultData = <AmcResult>[].obs;
 
 

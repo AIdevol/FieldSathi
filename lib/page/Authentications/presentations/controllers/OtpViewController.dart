@@ -7,6 +7,7 @@ import 'package:tms_sathi/page/Authentications/presentations/controllers/login_s
 import 'package:tms_sathi/page/Authentications/presentations/controllers/register_screen_controller.dart';
 import 'package:tms_sathi/response_models/otp_response_model.dart';
 import '../../../../constans/const_local_keys.dart';
+import '../../../../constans/role_based_keys.dart';
 import '../../../../main.dart';
 import '../../../../services/APIs/auth_services/auth_api_services.dart';
 
@@ -14,6 +15,7 @@ class OtpViewController extends GetxController {
   late TextEditingController otpviewController;
   final loginScreenController = Get.put(LoginScreenController());
   final registerScreenController = Get.put(RegisterScreenController());
+  final isResending = false.obs;
   late String email = '';
   final RxInt timeLeft = 30.obs;
   Timer? _timer;
@@ -28,7 +30,7 @@ class OtpViewController extends GetxController {
   }
 
 
-  void checkVerificationStatus() {
+  void checkVerificationStatus()async {
     String? token = storage.read(LOCALKEY_token);
     print("token data: $token");
     bool isLoggedIn = storage.read('isLoggedIn') ?? false;
@@ -36,6 +38,7 @@ class OtpViewController extends GetxController {
     if (token != null && token.isNotEmpty && isLoggedIn && isVerified) {
       Get.offAllNamed(AppRoutes.homeScreen);
     }
+    // await storage.write(, value)
   }
 
   void startTimer() {
@@ -67,7 +70,7 @@ class OtpViewController extends GetxController {
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
-  void hitOtpVerifyAPiCall() {
+  Future<void> hitOtpVerifyAPiCall()async {
     final emailData = storage.read(emailKey);
     customLoader.show();
     var resendValue = {
@@ -78,10 +81,11 @@ class OtpViewController extends GetxController {
     Get.find<AuthenticationApiService>().verifyOtpApiCall(dataBody: resendValue).then((value) async {
       customLoader.hide();
       logInData = value;
+      await storage.write(userRole, logInData.userDetails?.role??'');
       print("data body=${logInData.accessToken}");
       toast(logInData.message ?? '');
       await _saveUserData();
-      Get.offAllNamed(AppRoutes.homeScreen);
+      await Get.offAllNamed(AppRoutes.homeScreen);
       update();
     }).onError((error, stackError) {
       customLoader.hide();
@@ -117,16 +121,13 @@ class OtpViewController extends GetxController {
   }
 
 
-  void hitresendOtpAPiCall() {
-    // final email = Get.find<LoginScreenController>().emailcontroller.text;
+  Future<void> hitresendOtpAPiCall() async {
     final emailData = storage.read(emailKey);
-    customLoader.show();
     var resendValue = {
       "email_or_phone": emailData
     };
     Get.find<AuthenticationApiService>().resendOtpApiCall(dataBody: resendValue).then((value) async {
-      toast('OTP resent successfully');
-      customLoader.hide();
+      toast("your otp: ${value.otp!}");
       update();
     }).onError((error, stackError) {
       customLoader.hide();
