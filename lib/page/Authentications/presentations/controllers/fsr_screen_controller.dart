@@ -6,6 +6,11 @@ import 'package:tms_sathi/response_models/fsr_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 class FsrViewController extends GetxController {
+
+  final TextEditingController firstNameController = TextEditingController();
+  final List<TextEditingController> categoryNameControllers = [TextEditingController()];
+  final List<List<TextEditingController>> categoryCheckpointControllers = [[TextEditingController()]];
+  final FocusNode firstNameFocusNode = FocusNode();
   final TextEditingController searchController = TextEditingController();
   final TextEditingController checkPointStatusCheckingController = TextEditingController();
   final FocusNode checkPointStatusCheckingFocusNode = FocusNode();
@@ -29,20 +34,39 @@ class FsrViewController extends GetxController {
     hitGetFsrDetailsApiCall();
   }
 
-  // @override
-  // void dispose(){
-  //   for (var controller in checkPointStatusCheckingController){
-  //     c
-  //   }
-  //   super.dispose();
-  // }
   @override
   void onClose() {
+    firstNameController.dispose();
+    for (var controller in categoryNameControllers) {
+      controller.dispose();
+    }
+    for (var checkpointList in categoryCheckpointControllers) {
+      for (var controller in checkpointList) {
+        controller.dispose();
+      }
+    }
     searchController.removeListener(_onSearchChanged);
     searchController.dispose();
     checkPointStatusCheckingController.dispose();
     checkPointStatusCheckingFocusNode.dispose();
     super.onClose();
+  }
+  void addNewCategoryField() {
+    categoryNameControllers.add(TextEditingController());
+    categoryCheckpointControllers.add([TextEditingController()]);
+    update();
+  }
+
+  void removeCategoryField(int index) {
+    if (index < categoryNameControllers.length) {
+      categoryNameControllers[index].dispose();
+      for (var controller in categoryCheckpointControllers[index]) {
+        controller.dispose();
+      }
+      categoryNameControllers.removeAt(index);
+      categoryCheckpointControllers.removeAt(index);
+      update();
+    }
   }
 
   void _onSearchChanged() {
@@ -53,6 +77,7 @@ class FsrViewController extends GetxController {
     searchQuery.value = query;
     _filterFsr();
   }
+
 
   void _filterFsr() {
     if (searchQuery.isEmpty) {
@@ -147,4 +172,34 @@ class FsrViewController extends GetxController {
         .where((name) => name != null && name.isNotEmpty)
         .join(', ') ?? '';
   }
+
+
+  // Future<void> updateCheckpointStatuses(
+  //     String fsrId,
+  //     String categoryId,
+  //     Map<String, String> checkpointStatuses,
+  //     ) async {
+  //   try {
+  //     isLoading.value = true;
+  //     final response = await _fsrService.updateCheckpointStatuses(
+  //       fsrId: fsrId,
+  //       categoryId: categoryId,
+  //       checkpointStatuses: checkpointStatuses,
+  //     );
+  //
+  //     if (response != null && response.success == true) {
+  //       toast('Checkpoint statuses updated successfully');
+  //       await hitGetFsrDetailsApiCall(); // Refresh the list
+  //     } else {
+  //       toast('Failed to update checkpoint statuses');
+  //     }
+  //   } catch (e) {
+  //     print('Error updating checkpoint statuses: $e');
+  //     toast('Failed to update checkpoint statuses');
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
 }
+
+

@@ -29,6 +29,7 @@ abstract class AppRoutes {
   static const SuperAgentsScreen = '/SuperAgentsScreen';
   static const accountViewScreen = '/accountViewScreen';
   static const technicianListsScreen ='/technicianListsScreen';
+  static const salesListScreen = '/salesListScreen';
   static const addtechnicianListScreen = '/addtechnicianListScreen';
   static const notificationsScreen = '/notificationsScreen';
   static const ticketListCreationScreen = '/ticketListCreationScreen';

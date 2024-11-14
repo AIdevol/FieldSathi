@@ -38,6 +38,7 @@ dependencies:
   flutter_screenutil: ^5.9.3
   logger:
   get_storage:
+  excel:
   get: ^4.6.6
   fluttertoast: ^8.2.8
   country_code_picker: ^3.1.0

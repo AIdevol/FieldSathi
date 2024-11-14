@@ -3,3 +3,4 @@ const String adminRole = 'admin';
 const String superUserRole = 'superuser';
 const String agentRole = 'agent';
 const String technicianRole = 'technician';
+const String salesRole = 'sales';

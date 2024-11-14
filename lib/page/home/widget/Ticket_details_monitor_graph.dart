@@ -279,7 +279,7 @@ class GraphViewScreen extends GetView<GraphViewController> {
         ),
       ];
     }
-
+    // final Set<String> countTotal = controller.ticketModel.map((t)=> t.count.toString()).toSet();
     final sections = <PieChartSectionData>[];
     final data = [
       (Colors.blue.shade400, controller.completedTicketsCount.value, 'Completed'),

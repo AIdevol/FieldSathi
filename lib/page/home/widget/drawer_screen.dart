@@ -203,6 +203,14 @@ class _DrawerScreenState extends State<DrawerScreen> {
         'roles': ['admin', 'technician','superuser', 'agent'],
       },
       {
+        'icon': FeatherIcons.calendar,
+        'title': "Attendance",
+        'onTap': () async {
+          Get.toNamed(AppRoutes.attendanceScreen);
+        },
+        'roles': ['admin', 'technician','superuser', 'agent'],
+      },
+      {
         'icon': FeatherIcons.grid,
         'title': "Leaves",
         'onTap': () async {

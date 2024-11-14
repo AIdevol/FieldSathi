@@ -5,6 +5,7 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class PricingViewController extends GetxController {
+
   late Razorpay _razorpay;
   final selectedPlan = ''.obs;
   final amount = 0.obs;

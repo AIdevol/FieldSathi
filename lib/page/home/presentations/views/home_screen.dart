@@ -801,6 +801,8 @@ class HomeScreen extends GetView<HomeScreenController> {
         return _buildDashboardView(context);
       case technicianRole:
         return TechnicianDashboardHomepage();
+      case salesRole:
+        return TechnicianDashboardHomepage();
       default:
         return Center(
           child: Text("Unauthorized access or no role found"),
@@ -1082,9 +1084,9 @@ class HomeScreen extends GetView<HomeScreenController> {
           Get.back();
           await Get.toNamed(AppRoutes.technicianListsScreen);
         }),
-        _buildBottomSheetAction('Attendance', () {
+        _buildBottomSheetAction('Sales', () {
           Get.back();
-          Get.toNamed(AppRoutes.attendanceScreen);
+          Get.toNamed(AppRoutes.salesListScreen);
         }),
         _buildBottomSheetAction('Expenditure', () {
           Get.back();

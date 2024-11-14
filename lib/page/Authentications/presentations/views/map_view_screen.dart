@@ -15,6 +15,7 @@ class MapViewScreen extends GetView<MapViewScreenController> {
         child: GetBuilder<MapViewScreenController>(
           builder: (controller) => Scaffold(
             appBar: AppBar(
+              leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
               backgroundColor: appColor,
               title: Text('Map', style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 15)),
             ),

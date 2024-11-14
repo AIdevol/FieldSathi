@@ -33,10 +33,7 @@ class RegisterScreen extends GetView<RegisterScreenController> {
               appBar: AppBar(
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                leading: IconButton(
-                  icon: Icon(Icons.arrow_back, color: whiteColor),
-                  onPressed: () => Get.back(),
-                ),
+                leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
               ),
               body: _mainScreen(context),
             ),

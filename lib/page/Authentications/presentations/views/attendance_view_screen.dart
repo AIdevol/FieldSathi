@@ -15,22 +15,27 @@ class AttendanceScreen extends GetView<AttendanceScreenController>{
 
   @override
   Widget build(BuildContext context) {
-    return MyAnnotatedRegion(child: SafeArea(child: GetBuilder<AttendanceScreenController>(builder: (controller)=> Scaffold(
-      appBar: AppBar(
-        backgroundColor: appColor,
-        title: Text("Attendance", style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 15),),
-        actions: [TextButton(
-          onPressed: () {
-            Get.toNamed(AppRoutes.showViewAllDataAttendanceScreen);},
-          child: Text(
-            "View All",
-            style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black),
-            textAlign: TextAlign.center,
-          ),
-        ),],
+    return MyAnnotatedRegion(child:
+        GetBuilder<AttendanceScreenController>(
+            init: AttendanceScreenController(),
+            builder: (controller)=>Scaffold(
+        appBar: AppBar(
+          leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
+          backgroundColor: appColor,
+          title: Text("Attendance", style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 15),),
+          actions: [TextButton(
+            onPressed: () {
+              Get.toNamed(AppRoutes.showViewAllDataAttendanceScreen);},
+            child: Text(
+              "View All",
+              style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black),
+              textAlign: TextAlign.center,
+            ),
+          ),],
+        ),
+        body: _mainScreenWidget(controller),
       ),
-      body: _mainScreenWidget(controller),
-    ))));
+    ));
   }
 
   _mainScreenWidget(AttendanceScreenController controller){

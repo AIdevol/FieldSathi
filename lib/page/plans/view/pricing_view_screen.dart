@@ -475,7 +475,26 @@ class PricingViewScreen extends GetView<PricingViewController> {
     return MyAnnotatedRegion(
       child: GetBuilder<PricingViewController>(
         init: PricingViewController(),
-        builder: (controller) => CupertinoPageScaffold(
+        builder: (controller) =>
+        Scaffold(
+          resizeToAvoidBottomInset: true,
+          backgroundColor: Color(0xFFF5F7FA),
+        appBar: AppBar(
+          backgroundColor: appColor,
+          title: Text(
+            'Choose Your Plan',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87),
+          onPressed: () => Get.back(),
+        ),),
+        body:  _buildHorizontalLayout(controller, context),)
+        /*CupertinoPageScaffold(
           backgroundColor: Color(0xFFF5F7FA),
           navigationBar: CupertinoNavigationBar(
             backgroundColor: appColor,
@@ -493,8 +512,8 @@ class PricingViewScreen extends GetView<PricingViewController> {
               ),
             ),
           ),
-          child:  _buildHorizontalLayout(controller, context)/*AutoScrollCards(child: _buildHorizontalLayout(controller, context))*/,
-        ),
+          child:  _buildHorizontalLayout(controller, context)*//*AutoScrollCards(child: _buildHorizontalLayout(controller, context))*//*,
+        ),*/
       ),
     );
   }
@@ -603,103 +622,114 @@ class PricingViewScreen extends GetView<PricingViewController> {
           ),
 
           // Popular Badge
-          if (plan.popular)
-            Positioned(
-              top: -60,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                decoration: BoxDecoration(
-                  color: plan.color,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: plan.color.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  'MOST POPULAR',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
+
 
           // Header Pentagon
           Positioned(
             top: -50,
-            child: ClipPath(
-              clipper: ExtraWideTopPentagonalClipper(),
-              child: Container(
-                width: cardWidth * 0.9,
-                height: 160,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      plan.color,
-                      plan.color.withOpacity(0.8),
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: plan.color.withOpacity(0.3),
-                      spreadRadius: 0,
-                      blurRadius: 20,
-                      offset: Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      plan.name,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '₹',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '${plan.price}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '/mo',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16,
-                          ),
-                        ),
+            child: Stack(
+              children: [ClipPath(
+                clipper: ExtraWideTopPentagonalClipper(),
+                child: Container(
+                  width: cardWidth * 0.9,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        plan.color,
+                        plan.color.withOpacity(0.8),
                       ],
                     ),
-                  ],
+                    boxShadow: [
+                      BoxShadow(
+                        color: plan.color.withOpacity(0.3),
+                        spreadRadius: 0,
+                        blurRadius: 20,
+                        offset: Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        plan.name,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '₹',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '${plan.price}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '/mo',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
+
+                if (plan.popular)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    // right: 0,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.white,
+                        borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: plan.color.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: plan.color.withOpacity(0.3),
+                            spreadRadius: 2,
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        'MOST POPULAR',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),]
             ),
           ),
 

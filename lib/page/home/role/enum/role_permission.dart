@@ -35,6 +35,7 @@ class RoutePermission{
     AppRoutes.SuperAgentsScreen,
     AppRoutes.accountViewScreen,
     AppRoutes.technicianListsScreen,
+    AppRoutes.salesListScreen,
     AppRoutes.addtechnicianListScreen,
     AppRoutes.notificationsScreen,
     AppRoutes.ticketListCreationScreen,
@@ -99,7 +100,6 @@ class RoutePermission{
   ],
 
   UserRole.Technician: [
-    // Technician has access to basic and technical operations
     AppRoutes.splash,
     AppRoutes.homeScreen,
     AppRoutes.editProfile,
@@ -115,4 +115,21 @@ class RoutePermission{
     AppRoutes.notificationsScreen,
     AppRoutes.leaveUpdateScreen,
   ],
+
+    UserRole.Sales: [
+      AppRoutes.splash,
+      AppRoutes.homeScreen,
+      AppRoutes.editProfile,
+      AppRoutes.login,
+      AppRoutes.fsrScreen,
+      AppRoutes.attendanceScreen,
+      AppRoutes.otpScreen,
+      AppRoutes.attendanceScreen,
+      AppRoutes.ticketListScreen,
+      AppRoutes.ticketListCreationScreen,
+      AppRoutes.calendarScreen,
+      AppRoutes.leaveReportScreen,
+      AppRoutes.notificationsScreen,
+      AppRoutes.leaveUpdateScreen,
+    ],
 };}

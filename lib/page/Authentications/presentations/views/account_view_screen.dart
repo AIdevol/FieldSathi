@@ -36,7 +36,7 @@ final GlobalKey<FormState>_formKey = GlobalKey<FormState>();
       backgroundColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: whiteColor),
+        icon: const Icon(Icons.arrow_back_ios, color: whiteColor),
         onPressed: () => Get.back(),
       ),
     );

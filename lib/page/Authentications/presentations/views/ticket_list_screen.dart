@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/constans/const_local_keys.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
@@ -45,6 +46,7 @@ class TicketListScreen extends GetView<TicketListController> {
         init: TicketListController(),
         builder: (controller) => SafeArea(
           child: Scaffold(
+            backgroundColor: CupertinoColors.white,
             resizeToAvoidBottomInset: true,
             appBar: _buildAppBar(),
             body: Column(
@@ -66,6 +68,7 @@ class TicketListScreen extends GetView<TicketListController> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
+      leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
       backgroundColor: appColor,
       title: Text(
         'Ticket Details',
@@ -120,7 +123,7 @@ class TicketListScreen extends GetView<TicketListController> {
              context,
              'Export',
              Icons.file_upload_outlined,
-             onTap: () {},
+             onTap: () => _downLoadExportModelView(context, controller),
            ),
          ],
        ),
@@ -128,28 +131,6 @@ class TicketListScreen extends GetView<TicketListController> {
    }
 
 
-   Widget _buildActionButton(
-       BuildContext context,
-       String label,
-       IconData icon,
-       {required VoidCallback onTap}
-       ) {
-     return ElevatedButton.icon(
-       style: ElevatedButton.styleFrom(
-         backgroundColor: appColor,
-         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-         shape: RoundedRectangleBorder(
-           borderRadius: BorderRadius.circular(8),
-         ),
-       ),
-       onPressed: onTap,
-       icon: Icon(icon, size: 18),
-       label: Text(
-         label,
-         style: MontserratStyles.montserratSemiBoldTextStyle(size: 13),
-       ),
-     );
-   }
 
   Widget _buildFilterDropdown() {
     return Container(
@@ -230,18 +211,17 @@ class TicketListScreen extends GetView<TicketListController> {
    _buildEmptyState() {
      return Center(
        child: Column(
-         mainAxisAlignment: MainAxisAlignment.center,
+         // mainAxisAlignment: MainAxisAlignment.center,
          children: [
            Image.asset(
              nullVisualImage,
              width: 300,
              height: 300,
            ),
-           SizedBox(height: 20),
            Text(
              'No services found',
-             style: MontserratStyles.montserratSemiBoldTextStyle(
-               size: 18,
+             style: MontserratStyles.montserratNormalTextStyle(
+               // size: 18,
                color: blackColor,
              ),
            ),
@@ -1093,6 +1073,144 @@ ButtonStyle _buttonStyle() {
   );
 }
 
+
+void _downLoadExportModelView(BuildContext context, TicketListController controller) {
+  final startDateController = TextEditingController();
+  final endDateController = TextEditingController();
+  DateTime? startDate;
+  DateTime? endDate;
+
+  Future<DateTime?> _selectDate(BuildContext context, {DateTime? initialDate, DateTime? firstDate, DateTime? lastDate}) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate ?? DateTime.now(),
+      firstDate: firstDate ?? DateTime(2000),
+      lastDate: lastDate ?? DateTime.now(),
+    );
+    return picked;
+  }
+
+  void _handleStartDateSelection() async {
+    final picked = await _selectDate(
+      context,
+      initialDate: startDate ?? DateTime.now(),
+      lastDate: endDate ?? DateTime.now(),
+    );
+    if (picked != null) {
+      startDate = picked;
+      startDateController.text = DateFormat('dd-MM-yyyy').format(picked);
+    }
+  }
+
+  void _handleEndDateSelection() async {
+    final picked = await _selectDate(
+      context,
+      initialDate: endDate ?? DateTime.now(),
+      firstDate: startDate ?? DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      endDate = picked;
+      endDateController.text = DateFormat('dd-MM-yyyy').format(picked);
+    }
+  }
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: Get.height * 0.8,
+            maxWidth: Get.width * 0.8,
+          ),
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Download Tickets Report",
+                style: MontserratStyles.montserratBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              divider(color: Colors.grey),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(
+                    child: CustomTextField(
+                      controller: startDateController,
+                      labletext: 'Start Date',
+                      hintText: "dd-mm-yyyy",
+                      readOnly: true,
+                      onTap: _handleStartDateSelection,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      "To",
+                      style: MontserratStyles.montserratBoldTextStyle(
+                        size: 15,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: CustomTextField(
+                      controller: endDateController,
+                      labletext: 'End Date',
+                      hintText: "dd-mm-yyyy",
+                      readOnly: true,
+                      onTap: _handleEndDateSelection,
+                    ),
+                  ),
+                ],
+              ),
+              vGap(30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildActionButton(
+                    context,
+                    'Cancel',
+                    Icons.cancel,
+                    onTap: () {
+                      Get.back();
+                    },
+                  ),
+                  _buildActionButton(
+                    context,
+                    'Download Excel',
+                    Icons.download,
+                    onTap: () {
+                      if (startDate == null || endDate == null) {
+                        Get.snackbar(
+                          'Error',
+                          'Please select both start and end dates',
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                        return;
+                      }
+                      // Add your download logic here
+                      // You can access the selected dates using startDate and endDate
+                    },
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  });
+}
+
 void _showImportModelView(BuildContext context,TicketListController controller) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
     showDialog(
@@ -1290,4 +1408,27 @@ void _showImportModelView(BuildContext context,TicketListController controller) 
       },
     );
   });
+}
+
+Widget _buildActionButton(
+    BuildContext context,
+    String label,
+    IconData icon,
+    {required VoidCallback onTap}
+    ) {
+  return ElevatedButton.icon(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: appColor,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    ),
+    onPressed: onTap,
+    icon: Icon(icon, size: 18),
+    label: Text(
+      label,
+      style: MontserratStyles.montserratSemiBoldTextStyle(size: 13),
+    ),
+  );
 }

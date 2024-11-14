@@ -1,5 +1,5 @@
 class ApiEnd{
-  static const String baseUrl ='https://fieldsathi.com:92/'; /*'http://192.168.1.29:8000/'*/
+  static const String baseUrl =/*'https://fieldsathi.com:92/'*/ 'http://122.160.153.204:85/';
   static const String loginEnd = 'users/login/';
   static const String signUpEnd = 'users/signup/';
   static const String verifyotpEnd = 'users/verify_otp/';

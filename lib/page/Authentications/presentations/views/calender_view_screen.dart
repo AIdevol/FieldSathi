@@ -16,6 +16,7 @@ class CalendarView extends GetView<CalendarController> {
       init: CalendarController(),
       builder: (controller) => Scaffold(
         appBar: AppBar(
+          leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
           title: Text(
               'Calendar',
               style: MontserratStyles.montserratBoldTextStyle(

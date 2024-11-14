@@ -15,6 +15,7 @@ class GraphViewController extends GetxController {
   final _touchedIndex = (-1).obs;
   int get touchedIndex => _touchedIndex.value;
   void setTouchedIndex(int index) => _touchedIndex.value = index;
+  RxSet<TicketResponseModel> ticketModel = <TicketResponseModel>{}.obs;
   RxList<TicketResult> ticketResult = <TicketResult>[].obs;
   // var ticketData = TicketResponseModel();
 
@@ -87,6 +88,7 @@ class GraphViewController extends GetxController {
     isLoading.value = true;
     try {
       final tickets = await Get.find<AuthenticationApiService>().getticketDetailsApiCall();
+      ticketModel.add(tickets);
       ticketResult.assignAll(tickets.results);
       var ticketData = tickets;
       print('tickets : $ticketData');

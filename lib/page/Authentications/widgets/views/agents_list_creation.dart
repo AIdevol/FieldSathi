@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/AgentsViewScreenController.dart';
@@ -40,6 +41,10 @@ _form(AgentsListController controller, BuildContext context) {
     child: Padding(
       padding: const EdgeInsets.all(18.0),
       child: ListView(children: [
+        _buildEmpId(controller: controller, context: context),
+        vGap(20),
+        _buildJoiningDate(controller: controller, context: context),
+        vGap(20),
         _buildTaskName(controller: controller, context: context),
         vGap(20),
         _buildLastName(controller: controller,context: context),
@@ -54,6 +59,72 @@ _form(AgentsListController controller, BuildContext context) {
     ),
 
   );
+}
+
+_buildEmpId({required AgentsListController controller, required BuildContext context}){
+  return CustomTextField(
+    hintText: "Employee Id".tr,
+    controller: controller.employeeIdController,
+    textInputType: TextInputType.text,
+    focusNode: controller.employeeIdFocusNode,
+    onFieldSubmitted: (String? value) {
+      // FocusScope.of(Get.context!)
+      //     .requestFocus(controller.passwordFocusNode);
+    },
+    labletext: "Employee Id".tr,
+    prefix: Icon(Icons.person, color: Colors.black,),
+    // validator: (value) {
+    //   return value?.isEmptyField(messageTitle: "Email");
+    // },
+    inputFormatters:[
+      // LengthLimitingTextInputFormatter(10),
+    ],
+  );
+
+}
+_buildJoiningDate({required AgentsListController controller, required BuildContext context}) {
+  return GestureDetector(
+    onTap: () => _showDatePicker(context, controller),
+    child: CustomTextField(
+      hintText: "Select Joining Date".tr,
+      controller: controller.joiningDateController,
+      textInputType: TextInputType.text,
+      focusNode: controller.joiningDateFocusNode,
+      labletext: "Joining Date".tr,
+      prefix: Icon(Icons.calendar_today, color: Colors.black),
+      suffix: Icon(Icons.arrow_drop_down, color: Colors.black),
+      readOnly: true,
+    ),
+  );
+}
+
+void _showDatePicker(BuildContext context, AgentsListController controller) async {
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime(2000),
+    lastDate: DateTime.now(),
+    builder: (context, child) {
+      return Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.light(
+            primary: appColor,
+            onPrimary: Colors.white,
+            surface: Colors.white,
+            onSurface: Colors.black,
+          ),
+        ),
+        child: child!,
+      );
+    },
+  );
+
+  if (picked != null) {
+    final formattedDate = DateFormat('dd-MM-yyyy').format(picked);
+    controller.joiningDateController.text = formattedDate;
+    controller.selectedDate = picked; // Store the date object
+    controller.update();
+  }
 }
 
 _buildTaskName({required AgentsListController controller, required BuildContext context}){
@@ -82,7 +153,7 @@ _buildLastName({required AgentsListController controller,required BuildContext c
     hintText: "last Name".tr,
     controller: controller.lastNameController,
     textInputType: TextInputType.text,
-    focusNode: controller.emailFocusnode,
+    focusNode: controller.emailFocusNode,
     onFieldSubmitted: (String? value) {
       // FocusScope.of(Get.context!)
       //     .requestFocus(controller.passwordFocusNode);

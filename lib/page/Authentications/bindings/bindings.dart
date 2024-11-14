@@ -11,6 +11,7 @@ import 'package:tms_sathi/page/Authentications/presentations/controllers/fsr_scr
 import 'package:tms_sathi/page/Authentications/presentations/controllers/login_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/map_Screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/profile_screen_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/sales_view_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/service_request_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/services_Categories_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/technician_list_view_screen_controller.dart';
@@ -49,5 +50,6 @@ class AuthenticationBinding extends Bindings {
     Get.lazyPut<SuperViewScreenController>(()=> SuperViewScreenController());
     Get.lazyPut<AccountViewScreenController>(()=> AccountViewScreenController());
     Get.lazyPut<TechnicianListViewScreenController>(()=> TechnicianListViewScreenController());
+    Get.lazyPut<SalesViewScreenController>(()=> SalesViewScreenController());
   }
 }

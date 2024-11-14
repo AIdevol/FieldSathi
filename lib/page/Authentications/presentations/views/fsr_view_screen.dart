@@ -9,6 +9,7 @@ import 'package:tms_sathi/page/Authentications/widgets/controller/add_fsr_view_c
 import '../../../../constans/color_constants.dart';
 import '../../../../navigations/navigation.dart';
 import '../../../../response_models/fsr_response_model.dart';
+import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../../utilities/helper_widget.dart';
 import '../controllers/fsr_screen_controller.dart';
@@ -21,6 +22,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
         child: GetBuilder<FsrViewController>(
           builder: (controller) => Scaffold(
             appBar: AppBar(
+              leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
               backgroundColor: appColor,
               title: Text(
                 'FSR',
@@ -30,13 +32,16 @@ class FsrViewScreen extends GetView<FsrViewController> {
                 ),
               ),
               actions: [
+                IconButton(onPressed: (){
+                  controller.hitGetFsrDetailsApiCall();
+                }, icon: Icon(Icons.refresh_outlined)),
                 IconButton(
                   onPressed: () {
                     Get.toNamed(AppRoutes.addfsrScreen);
                     toast("Add your New FSR");
                   },
                   icon: const Icon(FeatherIcons.plus),
-                ).paddingOnly(left: 20.0)
+                ).paddingOnly(right: 10)
               ],
             ),
             body: Column(
@@ -86,7 +91,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
                     PopupMenuItem<String>(
                       value: 'Edit',
                       onTap: () {
-                        // Get.toNamed(AppRoutes.editProfile);
+                        _showEditModelView(controller, context);
                       },
                       child: const ListTile(
                         leading: Icon(Icons.edit_calendar_outlined, size: 20, color: Colors.black),
@@ -245,9 +250,9 @@ class FsrViewScreen extends GetView<FsrViewController> {
           Expanded(
             child: _buildSearchField(controller),
           ),
-          hGap(10),
-          _buildCheckpointStatusButton(),
-          hGap(10),
+          /// hGap(10),
+          /// _buildCheckpointStatusButton(),
+          /// hGap(10),
         ],
       ),
     );
@@ -286,279 +291,6 @@ class FsrViewScreen extends GetView<FsrViewController> {
     );
   }
 
-  Widget _buildCheckpointStatusButton() {
-    return ElevatedButton(
-      onPressed: () => _buildAlertDialog(Get.context!),
-      style: _buttonStyle(),
-      child: Text(
-        'CheckPoint Status',
-        style: MontserratStyles.montserratBoldTextStyle(
-          color: whiteColor,
-          size: 13,
-        ),
-      ),
-    );
-  }
-
-  // void _buildAlertDialog(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) => AlertDialog(
-  //       content: Column(
-  //         mainAxisSize: MainAxisSize.min,
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Text(
-  //             "Checkpoint Status",
-  //             style: MontserratStyles.montserratBoldTextStyle(
-  //               color: Colors.black,
-  //               size: 16,
-  //             ),
-  //           ),
-  //           vGap(10),
-  //           TextField(
-  //             controller: controller.checkPointStatusCheckingController,
-  //             focusNode: controller.checkPointStatusCheckingFocusNode,
-  //             decoration: InputDecoration(
-  //               hintText: 'Checkpoint status',
-  //               border: OutlineInputBorder(),
-  //             ),
-  //           ),
-  //           vGap(20),
-  //           Align(
-  //             alignment: Alignment.centerLeft,
-  //             child: ElevatedButton(
-  //               onPressed: () {
-  //                 controller.hitPostCheckingStatusApiCall();
-  //                 Navigator.of(context).pop();
-  //               },
-  //               style: _buttonStyle(),
-  //               child: Text(
-  //                 '+CheckPoint Status',
-  //                 style: MontserratStyles.montserratBoldTextStyle(
-  //                   color: whiteColor,
-  //                   size: 13,
-  //                 ),
-  //               ),
-  //             ),
-  //           ),
-  //           vGap(20),
-  //           Align(
-  //             alignment: Alignment.centerLeft,
-  //             child: Row(
-  //               mainAxisAlignment: MainAxisAlignment.start,
-  //               children: [
-  //                 ElevatedButton(
-  //                   onPressed: () {
-  //                     // controller.hitPostCheckingStatusApiCall();
-  //                     Navigator.of(context).pop();
-  //                   },
-  //                   style: _buttonStyle(),
-  //                   child: Text(
-  //                     'Cancel',
-  //                     style: MontserratStyles.montserratBoldTextStyle(
-  //                       color: whiteColor,
-  //                       size: 13,
-  //                     ),
-  //                   ),
-  //                 ),
-  //                 hGap(10),
-  //                 ElevatedButton(
-  //                   onPressed: () {
-  //                     controller.hitPostCheckingStatusApiCall();
-  //                     Navigator.of(context).pop();
-  //                   },
-  //                   style: _buttonStyle(),
-  //                   child: Text(
-  //                     'Submit',
-  //                     style: MontserratStyles.montserratBoldTextStyle(
-  //                       color: whiteColor,
-  //                       size: 13,
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-  void _buildAlertDialog(BuildContext context) {
-    // Keep track of text fields in the controller
-    final RxList<Map<String, dynamic>> checkpoints = <Map<String, dynamic>>[
-      {
-        'controller': TextEditingController(),
-        'focusNode': FocusNode(),
-      }
-    ].obs;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        content: Obx(() => Container(
-          width: double.maxFinite,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Checkpoint Status",
-                  style: MontserratStyles.montserratBoldTextStyle(
-                    color: Colors.black,
-                    size: 16,
-                  ),
-                ),
-                vGap(10),
-                // Generate text fields dynamically
-                ...checkpoints.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final checkpoint = entry.value;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: TextField(
-                      controller: checkpoint['controller'],
-                      focusNode: checkpoint['focusNode'],
-                      decoration: InputDecoration(
-                        hintText: 'Checkpoint status ${index + 1}',
-                        border: OutlineInputBorder(),
-                        suffixIcon: index != 0 ? IconButton(
-                          icon: Icon(Icons.remove_circle_outline, color: Colors.red),
-                          onPressed: () {
-                            // Dispose the controllers and focus nodes
-                            checkpoint['controller'].dispose();
-                            checkpoint['focusNode'].dispose();
-                            // Remove the field
-                            checkpoints.removeAt(index);
-                          },
-                        ) : null,
-                      ),
-                      onSubmitted: (_) {
-                        if (index == checkpoints.length - 1) {
-                          // Add new field when Enter is pressed on the last field
-                          checkpoints.add({
-                            'controller': TextEditingController(),
-                            'focusNode': FocusNode(),
-                          });
-                          // Focus the new field
-                          checkpoints.last['focusNode'].requestFocus();
-                        } else {
-                          // Focus next field
-                          checkpoints[index + 1]['focusNode'].requestFocus();
-                        }
-                      },
-                      textInputAction: index == checkpoints.length - 1
-                          ? TextInputAction.done
-                          : TextInputAction.next,
-                    ),
-                  );
-                }).toList(),
-                vGap(20),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      checkpoints.add({
-                        'controller': TextEditingController(),
-                        'focusNode': FocusNode(),
-                      });
-                      // Focus the new field after it's added
-                      Future.delayed(Duration(milliseconds: 100), () {
-                        checkpoints.last['focusNode'].requestFocus();
-                      });
-                    },
-                    style: _buttonStyle(),
-                    child: Text(
-                      '+ CheckPoint Status',
-                      style: MontserratStyles.montserratBoldTextStyle(
-                        color: whiteColor,
-                        size: 13,
-                      ),
-                    ),
-                  ),
-                ),
-                vGap(20),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          // Clean up all controllers and focus nodes
-                          for (var checkpoint in checkpoints) {
-                            checkpoint['controller'].dispose();
-                            checkpoint['focusNode'].dispose();
-                          }
-                          Navigator.of(context).pop();
-                        },
-                        style: _buttonStyle(),
-                        child: Text(
-                          'Cancel',
-                          style: MontserratStyles.montserratBoldTextStyle(
-                            color: whiteColor,
-                            size: 13,
-                          ),
-                        ),
-                      ),
-                      hGap(10),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Get all non-empty checkpoint values
-                          final List values = checkpoints
-                              .map((cp) => cp['controller'].text)
-                              .where((text) => text.isNotEmpty)
-                              .toList();
-
-                          // Clean up all controllers and focus nodes
-                          for (var checkpoint in checkpoints) {
-                            checkpoint['controller'].dispose();
-                            checkpoint['focusNode'].dispose();
-                          }
-
-                          // Process the values
-                          print('Checkpoint values: $values');
-                          controller.hitPostCheckingStatusApiCall();
-                          Navigator.of(context).pop();
-                        },
-                        style: _buttonStyle(),
-                        child: Text(
-                          'Submit',
-                          style: MontserratStyles.montserratBoldTextStyle(
-                            color: whiteColor,
-                            size: 13,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        )),
-      ),
-    );
-  }
-  ButtonStyle _buttonStyle() {
-    return ButtonStyle(
-      backgroundColor: MaterialStateProperty.all(appColor),
-      foregroundColor: MaterialStateProperty.all(Colors.white),
-      padding: MaterialStateProperty.all(
-        EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-      ),
-      elevation: MaterialStateProperty.all(3),
-      shape: MaterialStateProperty.all(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.3)),
-    );
-  }
-}
 
 Widget _fsrCategoriesData(Result entry) {
   return PopupMenuButton<String>(
@@ -580,6 +312,7 @@ Widget _fsrCategoriesData(Result entry) {
     itemBuilder: (BuildContext context) {
       return entry.categories?.map((category) {
         return PopupMenuItem<String>(
+          // onTap: () =>_buildCheckpointStatusButton(),
           value: category.name,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -590,10 +323,17 @@ Widget _fsrCategoriesData(Result entry) {
                   children: [
                     Row(
                       children: [
-                        const Icon(
-                          Icons.menu,
-                          size: 16,
-                          color: Colors.blue,
+                         IconButton(
+                          onPressed: (){
+                            Navigator.pop(context);
+                            _showCheckpointDialog(
+                            context,
+                            entry,
+                            category
+                            );},
+                          icon:Icon(Icons.menu,
+                            size: 16,
+                            color: Colors.blue,)
                         ),
                         const SizedBox(width: 8),
                         Expanded(
@@ -655,5 +395,328 @@ Widget _fsrCategoriesData(Result entry) {
       // Handle category selection if needed
       print('Selected category: $value');
     },
+  );
+}
+
+  Widget _buildCheckpointStatusButton(BuildContext context, Result fsr, Category category) {
+    return ElevatedButton(
+      onPressed: () => _showCheckpointDialog(context, fsr, category),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: appColor,
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: Text(
+        'Checkpoint Status',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+        ),
+      ),
+    );
+  }
+
+  void _showCheckpointDialog(
+      BuildContext context,
+      Result fsr,
+      Category category,
+      ) {
+    final checkpointControllers = category.checkpoints?.map(
+          (checkpoint) => TextEditingController(text: checkpoint.id.toString()??" "),
+    ).toList() ??
+        [];
+
+    if (checkpointControllers.isEmpty) {
+      checkpointControllers.add(TextEditingController());
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "FSR: ${fsr.fsrName ?? ''}",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Category: ${category.name ?? ''}",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+              content: Container(
+                width: double.maxFinite,
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.7,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ...List.generate(
+                        category.checkpoints?.length ?? 0,
+                            (index) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      category.checkpoints?[index].checkpointName ??
+                                          '',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    TextField(
+                                      controller: checkpointControllers[index],
+                                      decoration: InputDecoration(
+                                        hintText: 'Enter status',
+                                        border: OutlineInputBorder(),
+                                        contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 15,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    for (var controller in checkpointControllers) {
+                      controller.dispose();
+                    }
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final checkpointStatuses = <String, String>{};
+                    for (int i = 0;
+                    i < (category.checkpoints?.length ?? 0);
+                    i++) {
+                      checkpointStatuses[
+                      category.checkpoints?[i].id.toString()?? ''] =
+                          checkpointControllers[i].text;
+                    }
+
+                    // await Get.find<FsrViewController>().hitGetFsrDetailsApiCall(
+                    //   Result.id.toString() ?? '',
+                    //   category.id.toString() ?? '',
+                    //   checkpointStatuses,
+                    // );
+
+                    for (var controller in checkpointControllers) {
+                      controller.dispose();
+                    }
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: appColor,
+                  ),
+                  child: const Text(
+                    'Update Status',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+  ButtonStyle _buttonStyle() {
+    return ButtonStyle(
+      backgroundColor: MaterialStateProperty.all(appColor),
+      foregroundColor: MaterialStateProperty.all(Colors.white),
+      padding: MaterialStateProperty.all(
+        EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      ),
+      elevation: MaterialStateProperty.all(3),
+      shape: MaterialStateProperty.all(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.3)),
+    );
+  }
+
+
+void _showEditModelView(FsrViewController controller, BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent dismissal by tapping outside
+    builder: (context) => Dialog(
+      // Set maximum size constraints for better layout
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.9,
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+        ),
+        child: GetBuilder<FsrViewController>( // Add GetBuilder to update UI when controller state changes
+          builder: (controller) => Column(
+            mainAxisSize: MainAxisSize.min, // Make dialog size fit content
+            children: [
+              // Header with close button
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Edit FSR",
+                      style: MontserratStyles.montserratBoldTextStyle(
+                        size: 15,
+                        color: Colors.black,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(color: Colors.grey),
+
+              // Scrollable content
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomTextField(
+                          hintText: "Name".tr,
+                          controller: controller.firstNameController,
+                          textInputType: TextInputType.text,
+                          labletext: 'Name'.tr,
+                        ),
+                        vGap(20),
+
+                        // Categories list
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: controller.categoryNameControllers.length,
+                          separatorBuilder: (context, index) => vGap(10),
+                          itemBuilder: (context, index) {
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: CustomTextField(
+                                    hintText: 'Categories'.tr,
+                                    controller: controller.categoryNameControllers[index],
+                                    maxLines: 2,
+                                    textInputType: TextInputType.text,
+                                    labletext: 'Categories'.tr,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.remove_circle, color: Colors.red),
+                                  onPressed: () {
+                                    controller.removeCategoryField(index);
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        vGap(20),
+
+                        // Add Category button
+                        Center(
+                          child: SizedBox(
+                            width: 230,
+                            height: 50,
+                            child: CupertinoButton(
+                              color: appColor,
+                              onPressed: () => controller.addNewCategoryField(),
+                              padding: EdgeInsets.zero,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.add, size: 18),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    'Add Category',
+                                    style: MontserratStyles.montserratBoldTextStyle(
+                                      color: blackColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        vGap(20),
+
+                        // Submit button
+                        SizedBox(
+                          width: double.infinity,
+                          child: CupertinoButton(
+                            color: appColor,
+                            onPressed: () {
+                              // controller.hitPostFsrDetailsApiCall();
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              'Update FSR',
+                              style: MontserratStyles.montserratBoldTextStyle(
+                                color: blackColor,
+                                size: 15,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
   );
 }

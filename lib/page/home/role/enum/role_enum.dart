@@ -1,4 +1,4 @@
-enum UserRole { Admin, SuperUser, Agent, Technician,}
+enum UserRole { Admin, SuperUser, Agent, Technician,Sales}
 
 // enum Permission{
 //   viewDashboard,

@@ -16,6 +16,7 @@ import 'package:tms_sathi/page/Authentications/presentations/views/map_view_scre
 import 'package:tms_sathi/page/Authentications/presentations/views/otp_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/profile_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/register_screen.dart';
+import 'package:tms_sathi/page/Authentications/presentations/views/sales_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/service_request_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/services_View_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/super_view_screen.dart';
@@ -265,6 +266,14 @@ class AppPages {
       name: AppRoutes.technicianListsScreen,
       binding: AuthenticationBinding(),
       page: () => TechnicianListViewScreen(),
+        middlewares: [
+          RoutePermissionMiddleware()
+        ]
+    ),
+    GetPage(
+        name: AppRoutes.salesListScreen,
+        binding: AuthenticationBinding(),
+        page: () => SalesViewScreen(),
         middlewares: [
           RoutePermissionMiddleware()
         ]
