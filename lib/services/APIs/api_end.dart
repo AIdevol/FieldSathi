@@ -22,10 +22,12 @@ class ApiEnd{
   static const String importTicketDataEnd = 'api/import-tickets/';
   static const String amcEnd = 'api/amcs/';
   static const String leadEnd = 'api/leads/';
+  static const String lead_interaction = 'api/interactions/';
   static const String serviceEnd = 'api/services/';
   static const String serviceCategories = 'api/service-categories/';
   static const String serviceSubCategories = 'api/service-sub-categories/';
   static const String expensesEnd = 'api/expenses/';
+  static const String expenseType = 'api/expense-type/';
   static const String serviceRequestsEnd ='api/service-requests/';
   static const String exportServiceRequestEnd = 'api/export-service-requests/';
   static const String downloadSuperUserCSVEnd = 'api/download-superuser-csv/';

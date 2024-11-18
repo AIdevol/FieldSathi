@@ -274,8 +274,30 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
       onFieldSubmitted: (_) => FocusScope.of(Get.context!).requestFocus(nextFocusNode),
       labletext: hintText,
       prefix: Icon(icon, color: Colors.black),
-      validator: (value) => value?.isEmpty ?? true ? "$hintText is required" : null,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return "$hintText is required";
+          }
+          if (keyboardType == TextInputType.emailAddress ||
+              keyboardType == TextInputType.number) {
+            return null;
+          }
+          if (value.isNotEmpty && !value[0].toUpperCase().contains(RegExp(r'[A-Z]'))) {
+            return "$hintText should start with a capital letter";
+          }
+          return null;
+        },/*value?.isEmpty ?? true ? "$hintText is required" : null*/
+      onChanged: (value) {
+        if (value.isNotEmpty && !value[0].toUpperCase().contains(RegExp(r'[A-Z]'))) {
+          final capitalizedValue = value[0].toUpperCase() + value.substring(1);
+          controller.value = TextEditingValue(
+            text: capitalizedValue,
+            selection: TextSelection.collapsed(offset: capitalizedValue.length),
+          );
+        }
+      },
     );
+
   }
   
 

@@ -12,7 +12,7 @@ class TechnicianListViewScreenController extends GetxController {
   RxBool isLoading = true.obs;
   RxList<TechnicianResults> allTechnicians = <TechnicianResults>[].obs;
   RxList<TechnicianResults> filteredTechnicians = <TechnicianResults>[].obs;
-  RxBool isTableView = true.obs; // Set default to true since we're using DataTable
+  RxBool isTableView = true.obs;
 
   @override
   void onInit() {

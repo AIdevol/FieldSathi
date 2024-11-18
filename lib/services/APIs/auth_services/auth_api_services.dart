@@ -23,12 +23,14 @@ import 'package:tms_sathi/response_models/ticket_response_model.dart';
 import 'package:tms_sathi/response_models/user_response_model.dart';
 import 'package:tms_sathi/services/APIs/dio_client.dart';
 
+import '../../../response_models/add_sales_response_model.dart';
 import '../../../response_models/check_points_response_model.dart';
 import '../../../response_models/export_import_directory/expense_export_response_model.dart';
 import '../../../response_models/holidays_calender_response_model.dart';
 import '../../../response_models/leave_allocation_response_model.dart';
 import '../../../response_models/register_response_model.dart';
 import '../../../response_models/resend_otp_api_call.dart';
+import '../../../response_models/sales_response_model.dart';
 import '../../../response_models/service_requests_response_model.dart';
 import '../../../response_models/super_user_response_model.dart';
 import '../api_end.dart';
@@ -321,7 +323,28 @@ implements AuthenticationApi {
       return Future.error(NetworkExceptions.getDioException(e));
     }
   }
+  // ===================================================================================Sales Api call ===================================================================
+  @override
+  Future<SalesResponseModel>getSalesDetailsApiCall({Map<String, dynamic>? dataBody, parameters})async{
+    try{
+      final response = await dioClient!.get('${ApiEnd.tmsUsersEnd}', data: dataBody, queryParameters:parameters,skipAuth: false);
+      return SalesResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+  @override
+  Future<AddSalesResponseModel>postAddSalesDetailsApiCall({Map<String, dynamic>? dataBody, parameters})async{
+    try{
+      final response = await dioClient!.post('${ApiEnd.tmsUsersEnd}', data: dataBody, queryParameters:parameters,skipAuth: false);
+      return AddSalesResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
 
+
+  // ===================================================================================FSR Api Call ==============================================================================
   @override
   Future<FsrResponseModel>getfsrDetailsApiCall({Map<String, dynamic>? dataBody})async{
     try{

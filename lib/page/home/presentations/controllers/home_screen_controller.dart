@@ -187,8 +187,14 @@ class HomeScreenController extends GetxController{
   }
 
 
-  void _calculateTicketDetails(){
-
+  Future<void> refereshAllTicket()async{
+    hitGetuserDetailsApiCall();
+    hitGetfsrDetailsApiCall();
+    fetchedLeadListApiCall();
+    fetchTicketsApiCall();
+    hitGetAmcDetailsApiCall();
+    hitServiceCategoriesApiCall();
+    checkFirstTimeUser();
   }
   
 }

@@ -15,12 +15,12 @@ class GraphViewController extends GetxController {
   final _touchedIndex = (-1).obs;
   int get touchedIndex => _touchedIndex.value;
   void setTouchedIndex(int index) => _touchedIndex.value = index;
-  RxSet<TicketResponseModel> ticketModel = <TicketResponseModel>{}.obs;
+  // RxSet<TicketResponseModel> ticketModel = <TicketResponseModel>{}.obs;
   RxList<TicketResult> ticketResult = <TicketResult>[].obs;
   // var ticketData = TicketResponseModel();
 
   // Ticket counts
-  final RxInt totalTicketsCount = 0.obs;
+  final Rx totalTicketsCount = 0.obs;
   final RxInt completedTicketsCount = 0.obs;
   final RxInt ongoingTicketsCount = 0.obs;
   final RxInt rejectedTicketsCount = 0.obs;
@@ -37,7 +37,6 @@ class GraphViewController extends GetxController {
     if (totalTicketsCount.value == 0) return 0;
     return (count / totalTicketsCount.value) * 100;
   }
-
   void _calculateTicketDetails() {
     int total = 0;
     int completed = 0;
@@ -84,11 +83,14 @@ class GraphViewController extends GetxController {
 
   }
 
+  void getCountTicketData(TicketResponseModel ticketData){
+    totalTicketsCount.value = ticketData.results;
+  }
   void fetchTicketsApiCall() async {
     isLoading.value = true;
     try {
       final tickets = await Get.find<AuthenticationApiService>().getticketDetailsApiCall();
-      ticketModel.add(tickets);
+      // ticketModel.add(tickets);
       ticketResult.assignAll(tickets.results);
       var ticketData = tickets;
       print('tickets : $ticketData');

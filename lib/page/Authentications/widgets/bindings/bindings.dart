@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/add_amc_view_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/add_amc_view_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/add_fsr_view_controller.dart';
+import 'package:tms_sathi/page/Authentications/widgets/controller/add_sales_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/add_super_user_view_Controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/add_technician_list_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/calender_view_amc_controller.dart';
@@ -23,5 +24,8 @@ class WidgetBindings extends Bindings{
     Get.lazyPut<TicketListCreationController>(() => TicketListCreationController());
     Get.lazyPut<AddAmcViewController>(() => AddAmcViewController());
     Get.lazyPut<AddSuperUserViewController>(() => AddSuperUserViewController());
-    Get.lazyPut<ShowTechnicianDataController>(() => ShowTechnicianDataController());  }
+    Get.lazyPut<ShowTechnicianDataController>(() => ShowTechnicianDataController());
+    Get.lazyPut<AddSalesScreenController>(() => AddSalesScreenController());
+
+  }
 }

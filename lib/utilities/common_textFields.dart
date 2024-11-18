@@ -126,6 +126,7 @@ class CustomTextField extends StatelessWidget {
   Color? textColor;
   int? maxLength;
   String? labletext;
+  ValueChanged<String>? onChanged;
   var corRadious;
   CustomTextField(
       {Key? key,
@@ -148,7 +149,7 @@ class CustomTextField extends StatelessWidget {
         this.inputFormatters,
         this.textInputType,
         this.onFieldSubmitted,
-        this.maxLength, })
+        this.maxLength, this. onChanged, })
       : super(key: key);
 
   @override

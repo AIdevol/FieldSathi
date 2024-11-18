@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import '../../../response_models/add_sales_response_model.dart';
 import '../../../response_models/add_technician_response_model.dart';
 import '../../../response_models/agents_response_model.dart';
 import '../../../response_models/amc_response_model.dart';
@@ -17,6 +18,7 @@ import '../../../response_models/login_response_model.dart';
 import '../../../response_models/otp_response_model.dart';
 import '../../../response_models/register_response_model.dart';
 import '../../../response_models/resend_otp_api_call.dart';
+import '../../../response_models/sales_response_model.dart';
 import '../../../response_models/service_requests_response_model.dart';
 import '../../../response_models/services_response_model.dart';
 import '../../../response_models/sub_service_response_model.dart';
@@ -72,5 +74,7 @@ abstract class AuthenticationApi {
   // Future<List<ExpensesResponseModel>>getExpensesApiCall({Map<String, dynamic>?dataBody, parameters});
   Future<ServiceRequestResponseModel>getServiceRequestsApiCall({Map<String, dynamic>? dataBody, parameters});
   Future<TechnicianResponseModel>getTechnicianApiCall({Map<String, dynamic>? dataBody, parameters}) ;
+  Future<SalesResponseModel>getSalesDetailsApiCall({Map<String, dynamic>? dataBody, parameters});
+  Future<AddSalesResponseModel>postAddSalesDetailsApiCall({Map<String, dynamic>? dataBody, parameters});
   Future<AmcResponseModel>getAmcDetailsApiCall({Map<String, dynamic>?dataBody});
 }

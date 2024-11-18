@@ -19,6 +19,7 @@ abstract class AppRoutes {
   static const ticketListScreen = '/ticketListScreen';
   static const addfsrScreen = '/addfsrScreen';
   static const leaveReportScreen = '/leaveReportScreen';
+  static const forTechnicianAndSalesAttendace= '/forTechnicianAndSalesLeaves';
   static const createamcScreen = '/createamcScreen';
   static const calenderViewScreen = '/calenderViewScreen';
   static const customerListScreen = '/customerListScreen';
@@ -30,6 +31,7 @@ abstract class AppRoutes {
   static const accountViewScreen = '/accountViewScreen';
   static const technicianListsScreen ='/technicianListsScreen';
   static const salesListScreen = '/salesListScreen';
+  static const addSalesListScreen = '/addSalesListScreen';
   static const addtechnicianListScreen = '/addtechnicianListScreen';
   static const notificationsScreen = '/notificationsScreen';
   static const ticketListCreationScreen = '/ticketListCreationScreen';

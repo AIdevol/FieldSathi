@@ -6,9 +6,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/sales_view_screen_controller.dart';
+import 'package:tms_sathi/response_models/sales_response_model.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
 import '../../../../constans/color_constants.dart';
+import '../../../../constans/string_const.dart';
 import '../../../../navigations/navigation.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
@@ -17,11 +19,14 @@ class SalesViewScreen extends GetView<SalesViewScreenController>{
 
   @override
   Widget build(BuildContext context){
-    return MyAnnotatedRegion(child: GetBuilder<SalesViewScreenController>(builder: (controller)=>
+    return MyAnnotatedRegion(child: GetBuilder<SalesViewScreenController>(
+      init: SalesViewScreenController(),
+        builder: (controller)=>
     Scaffold(
       appBar: _buildAppBar(controller),
       body: SafeArea(child: Column(children: [
         _buildTopBar(context, controller),
+        Expanded(child: _buildDataTableView(controller, context))
       ],)),
     )));
   }
@@ -40,12 +45,12 @@ PreferredSizeWidget _buildAppBar(SalesViewScreenController controller) {
     ),
     actions: [
       IconButton(
-        onPressed: () {}/*=> controller.refreshList()*/,
+        onPressed: ()=> controller.hitRefreshGetSalesApiCall(),
         icon: Icon(FontAwesomeIcons.rotate),
         tooltip: 'Refresh',
       ),
       IconButton(
-        onPressed: ()=>Get.toNamed(AppRoutes.addtechnicianListScreen),
+        onPressed: ()=>Get.toNamed(AppRoutes.addSalesListScreen),
         icon: Icon(FontAwesomeIcons.plus),
         tooltip: 'Filter',
       ),
@@ -264,8 +269,6 @@ void _showImportModelView(BuildContext context,SalesViewScreenController control
                     ),
                   ),
                 ),
-
-                // Fixed bottom section with upload button
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
@@ -499,6 +502,434 @@ Widget _buildActionButton(
   );
 }
 
-Widget _buildDataTableView(SalesViewScreenController controller){
-  return Container();
+Widget _buildDataTableView(SalesViewScreenController controller, BuildContext context){
+  return SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: SingleChildScrollView(
+      child: DataTable(columns: [
+        _buildTableHeader('Id'),
+        _buildTableHeader('Name'),
+        _buildTableHeader('Email'),
+        _buildTableHeader('Contact'),
+        _buildTableHeader('Casual Leaves'),
+        _buildTableHeader('Sick Leaves'),
+        _buildTableHeader('Check In'),
+        _buildTableHeader('Check Out'),
+        _buildTableHeader('Status'),
+        _buildTableHeader('Battery(%)'),
+        _buildTableHeader('GPS'),
+        _buildTableHeader('Actions'),
+      ],
+          rows: controller.salesData.map((f){
+        return DataRow(cells: [
+        DataCell(_ticketBoxIcons(f.id.toString())),
+            DataCell(Text("${f.firstName} ${f.lastName}")),
+            DataCell(Text(f.email)),
+            DataCell(Text(f.phoneNumber)),
+            DataCell(Text(f.allocatedCasualLeave.toString())),
+            DataCell(Text(f.allocatedSickLeave.toString())),
+            DataCell(Text(_formatDateTime(
+            f.todayAttendance?['check_in'] ?? 'N/A'))),
+            DataCell(Text(_formatDateTime(
+            f.todayAttendance?['check_out'] ?? 'N/A'))),
+            DataCell(_buildAttendanceStatusBadge(
+            f.todayAttendance?['status'] ?? '')),
+            DataCell(Text(f.batteryStatus  ?? 'N/A')),
+            DataCell(Text(f.gpsStatus ? 'On' : 'Off')),
+            DataCell(_dropDownValueViews(controller,f.id.toString(),f, context))
+        ],
+            );
+      }
+       ).toList()),
+    ),
+  );
+}
+DataColumn _buildTableHeader(String title) {
+  return DataColumn(
+    label: Text(
+      title,
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ),
+  );
+}
+Widget _ticketBoxIcons(String ticketId) {
+  return Center(
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: normalBlue,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: Colors.blue.shade300,
+          width: 1,
+        ),
+      ),
+      child: Text(
+        '$ticketId',
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+        ),
+      ),
+    ),
+  );
+}
+String _formatDateTime(String dateTimeStr) {
+  try {
+    final dateTime = DateTime.parse(dateTimeStr);
+    return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
+  } catch (e) {
+    return dateTimeStr;
+  }
+}
+Widget _buildAttendanceStatusBadge(String status) {
+  Color color;
+  String displayText = status;
+
+  switch (status.toLowerCase()) {
+    case 'present':
+      color = Colors.green;
+      break;
+    case 'absent':
+      color = Colors.red;
+      break;
+    case 'late':
+      color = Colors.orange;
+      break;
+    case 'on_leave':
+      color = Colors.blue;
+      displayText = 'On Leave';
+      break;
+    default:
+      color = Colors.grey;
+  }
+
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: color.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Text(
+      displayText,
+      style: TextStyle(
+        color: color,
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  );
+}
+
+Widget _dropDownValueViews(SalesViewScreenController controller,
+    String agentId, SalesResutls salesData, BuildContext context) {
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: PopupMenuButton<String>(
+        icon: Icon(Icons.more_vert),
+        onSelected: (String result) {
+          switch (result) {
+            case 'Edit':
+              showDialogBoxForDataUpdating(controller, context, salesData,agentId);
+              break;
+            case 'Delete':
+            // controller.hitDeleteStatuApiValue(agentId);
+              break;
+            case 'Deactivate':
+            // controller.hitUpdateStatusValue(agentId);
+              break;
+          }
+        },
+        itemBuilder: (BuildContext context) =>
+        <PopupMenuEntry<String>>[
+          PopupMenuItem<String>(
+            value: 'Edit',
+            child: ListTile(
+              leading: Icon(Icons.edit_calendar_outlined, size: 20,
+                  color: Colors.black),
+              title: Text(
+                  'Edit', style: MontserratStyles.montserratBoldTextStyle(
+                color: blackColor,
+                size: 13,
+              )),
+            ),
+          ),
+          PopupMenuItem<String>(
+            value: 'Delete',
+            child: ListTile(
+              leading: Icon(Icons.delete, color: Colors.red, size: 20),
+              title: Text('Delete',
+                  style: MontserratStyles.montserratBoldTextStyle(
+                    color: blackColor,
+                    size: 13,
+                  )),
+            ),
+          ),
+          PopupMenuItem<String>(
+            value: 'Deactivate',
+            child: ListTile(
+              leading: Image.asset(wrongRoundedImage, color: Colors.black,
+                height: 25,
+                width: 25,),
+              title: Text('Deactivate',
+                  style: MontserratStyles.montserratBoldTextStyle(
+                    color: blackColor,
+                    size: 13,
+                  )),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Future<void> showDialogBoxForDataUpdating(
+    SalesViewScreenController controller,
+    BuildContext context,
+    SalesResutls salesData,
+    String agentId,
+    ) {
+  controller.initializeWithSalesData(salesData);
+
+  return showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => Dialog(
+      insetPadding: EdgeInsets.all(20),
+      child: _form(controller, context, salesData, agentId),
+    ),
+  ).then((_) {
+    controller.clearFormData();
+  });
+}
+
+// Update the _form widget
+Widget _form(
+    SalesViewScreenController controller,
+    BuildContext context,
+    SalesResutls salesData,
+    String agentId,
+    ) {
+  return SingleChildScrollView(
+    child: Padding(
+      padding: const EdgeInsets.all(18.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Edit User",
+                style: MontserratStyles.montserratBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.close),
+                onPressed: () => Get.back(),
+              ),
+            ],
+          ),
+          Divider(color: Colors.black),
+          vGap(20),
+          _buildEmployeeId(controller),
+          vGap(20),
+          _buildDateOfJoining(controller, context),
+          vGap(20),
+          _buildFirstName(controller),
+          vGap(20),
+          _buildLastName(controller),
+          vGap(20),
+          _buildEmail(controller),
+          vGap(20),
+          _buildPhoneNumber(controller),
+          vGap(20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                onPressed: () => Get.back(),
+                style: _buttonStyle(),
+                child: Text(
+                  'Cancel',
+                  style: MontserratStyles.montserratBoldTextStyle(
+                    color: Colors.white,
+                    size: 13,
+                  ),
+                ),
+              ),
+              hGap(20),
+              ElevatedButton(
+                onPressed: () => controller.updateSalesData(salesData, agentId),
+                style: _buttonStyle(),
+                child: Text(
+                  'Update',
+                  style: MontserratStyles.montserratBoldTextStyle(
+                    color: Colors.white,
+                    size: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildOptionButtons(SalesViewScreenController controller, SalesResutls salesData, String agentId) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      ElevatedButton(
+        onPressed: () => Get.back(),
+        child: Text(
+          'Cancel',
+          style: MontserratStyles.montserratBoldTextStyle(color: Colors.white, size: 13),
+        ),
+        style: _buttonStyle(),
+      ),
+      hGap(20),
+      ElevatedButton(
+        onPressed: () {
+          // Call the update API with the updated controller data and agentId
+          // controller.updateSalesData(salesData, agentId);
+        },
+        child: Text(
+          'Submit',
+          style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),
+        ),
+        style: _buttonStyle(),
+      ),
+    ],
+  );
+}
+
+
+Widget _buildEmployeeId(SalesViewScreenController controller) {
+  return CustomTextField(
+    hintText: "Employee Id".tr,
+    controller: controller.employeeIdController,
+    textInputType: TextInputType.text,
+    focusNode: controller.firstFocusNode,
+    onFieldSubmitted: (_) => _shiftFocus(controller.lastFocusNode),
+    labletext: "Employee Id".tr,
+    prefix: Icon(Icons.person, color: Colors.black),
+  );
+}
+
+Widget _buildDateOfJoining(SalesViewScreenController controller, BuildContext context) {
+  return CustomTextField(
+    hintText: "dd-mm-yyyy".tr,
+    controller: controller.dateJoiningController,
+    textInputType: TextInputType.datetime,
+    labletext: "Date of Joining".tr,
+    onTap: () => controller.selectDate(context),
+    suffix: IconButton(
+      onPressed: () => controller.selectDate(context),
+      icon: Icon(Icons.calendar_month, color: Colors.black),
+    ),
+  );
+}
+
+Widget _buildFirstName(SalesViewScreenController controller) {
+  return CustomTextField(
+    hintText: "First Name".tr,
+    controller: controller.firstNameController,
+    textInputType: TextInputType.text,
+    focusNode: controller.firstFocusNode,
+    onFieldSubmitted: (_) => _shiftFocus(controller.lastFocusNode),
+    labletext: "First Name".tr,
+    prefix: Icon(Icons.person, color: Colors.black),
+  );
+}
+
+Widget _buildLastName(SalesViewScreenController controller) {
+  return CustomTextField(
+    hintText: "Last Name".tr,
+    controller: controller.lastNameController,
+    textInputType: TextInputType.text,
+    focusNode: controller.lastFocusNode,
+    onFieldSubmitted: (_) => _shiftFocus(controller.emailFocusNode),
+    labletext: "Last Name".tr,
+    prefix: Icon(Icons.person, color: Colors.black),
+  );
+}
+
+Widget _buildEmail(SalesViewScreenController controller) {
+  return CustomTextField(
+    hintText: "Email".tr,
+    controller: controller.emailController,
+    textInputType: TextInputType.emailAddress,
+    focusNode: controller.emailFocusNode,
+    onFieldSubmitted: (_) => _shiftFocus(controller.phoneFocusNode),
+    labletext: "Email".tr,
+    prefix: Icon(Icons.mail, color: Colors.black),
+  );
+}
+
+Widget _buildPhoneNumber(SalesViewScreenController controller) {
+  return CustomTextField(
+    hintText: "Phone Number".tr,
+    controller: controller.phoneController,
+    textInputType: TextInputType.phone,
+    focusNode: controller.phoneFocusNode,
+    labletext: "Phone Number".tr,
+    prefix: Icon(Icons.phone_android_rounded, color: Colors.black),
+  );
+}
+
+/*Widget _buildOptionButtons(SalesViewScreenController controller) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      ElevatedButton(
+        onPressed: () => Get.back(),
+        child: Text(
+          'Cancel',
+          style: MontserratStyles.montserratBoldTextStyle(color: Colors.white, size: 13),
+        ),
+        style: _buttonStyle(),
+      ),
+      hGap(20),
+      ElevatedButton(
+        onPressed: () {
+          // Ensure API call or logic is implemented here.
+          // controller.hitAddTechnicianApiCall();
+        },
+        child: Text(
+          'Submit',
+          style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),
+        ),
+        style: _buttonStyle(),
+      ),
+    ],
+  );
+}*/
+
+// ButtonStyle _buttonStyle() {
+//   return ButtonStyle(
+//     backgroundColor: MaterialStateProperty.all(appColor),
+//     foregroundColor: MaterialStateProperty.all(Colors.white),
+//     padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
+//     elevation: MaterialStateProperty.all(3),
+//     shape: MaterialStateProperty.all(
+//       RoundedRectangleBorder(
+//         borderRadius: BorderRadius.circular(8),
+//       ),
+//     ),
+//   );
+// }
+
+void _shiftFocus(FocusNode? nextFocusNode) {
+  if (nextFocusNode != null) {
+    FocusScope.of(Get.context!).requestFocus(nextFocusNode);
+  }
 }

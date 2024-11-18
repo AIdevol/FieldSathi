@@ -184,12 +184,13 @@ class _DrawerScreenState extends State<DrawerScreen> {
 
   // Define menu items with their roles
   List<Map<String, dynamic>> getMenuItems() {
+    final currentRole = widget.userrole;
     return [
       {
         'icon': Icons.dashboard,
         'title': "Dashboard",
         'onTap': () => Get.back(),
-        'roles': ['admin', 'technician','superuser', 'agent'], // visible to all roles
+        'roles': ['admin', 'technician','superuser', 'agent','sales'], // visible to all roles
       },
       {
         'icon': Icons.calendar_month,
@@ -200,15 +201,19 @@ class _DrawerScreenState extends State<DrawerScreen> {
           Get.toNamed(AppRoutes.calendarScreen);
           customLoader.hide();
         },
-        'roles': ['admin', 'technician','superuser', 'agent'],
+        'roles': ['admin', 'technician','superuser', 'agent','sales'],
       },
       {
         'icon': FeatherIcons.calendar,
         'title': "Attendance",
         'onTap': () async {
-          Get.toNamed(AppRoutes.attendanceScreen);
+          if(currentRole == 'technician'||currentRole=='sales'){
+            Get.toNamed(AppRoutes.forTechnicianAndSalesAttendace);
+          }else{
+            Get.toNamed(AppRoutes.attendanceScreen);
+          }
         },
-        'roles': ['admin', 'technician','superuser', 'agent'],
+        'roles': ['admin', 'technician','superuser', 'agent', 'sales'],
       },
       {
         'icon': FeatherIcons.grid,
@@ -216,7 +221,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
         'onTap': () async {
           Get.toNamed(AppRoutes.leaveReportScreen);
         },
-        'roles': ['admin', 'technician','superuser', 'agent'],
+        'roles': ['admin', 'technician','superuser', 'agent','sales'],
       },
       {
         'icon': Icons.token,
@@ -227,7 +232,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
           Get.toNamed(AppRoutes.ticketListScreen);
           customLoader.hide();
         },
-        'roles': ['admin', 'technician','superuser', 'agent'],
+        'roles': ['admin', 'technician','superuser', 'agent','sales'],
       },
       {
         'icon': FeatherIcons.grid,
@@ -253,6 +258,22 @@ class _DrawerScreenState extends State<DrawerScreen> {
           Get.toNamed(AppRoutes.amcScreen);
         },
         'roles': ['admin','superuser', 'agent'],  // only visible to admin
+      },
+      {
+        'icon': Icons.price_change_rounded,
+        'title': "Expenditure",
+        'onTap': () async {
+          Get.toNamed(AppRoutes.expenditureScreen);
+        },
+        'roles': ['technician', 'sales'],
+      },
+      {
+        'icon': Icons.request_page_sharp,
+        'title': "Material Request",
+        'onTap': () async {
+          Get.toNamed(AppRoutes.serviceReqScreen);
+        },
+        'roles': ['technician', 'sales'],
       },
     ];
   }

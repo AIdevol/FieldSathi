@@ -55,7 +55,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
                     ).paddingSymmetric(horizontal: 20.0),
                   ],
                 ),
-                body: Column(
+                body: ListView(
                   children: [
                     _buildTopBar(context, controller),
                     vGap(10),
@@ -510,40 +510,42 @@ class AMCViewScreen extends GetView<AMCScreenController> {
 
   _dataTableViewScreen(amcIds) {
     return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Obx(() =>
-          DataTable(columns: [
-            DataColumn(label: Text('AMC ID/Name')),
-            DataColumn(label: Text('Date')),
-            DataColumn(label: Text('Name')),
-            DataColumn(label: Text('Customer Name')),
-            DataColumn(label: Text('Services')),
-            DataColumn(label: Text('Service Amount')),
-            DataColumn(label: Text('Service Occurrence')),
-            DataColumn(label: Text('Recieved Amount')),
-            DataColumn(label: Text('Remainder')),
-            DataColumn(label: Text('Status')),
-            DataColumn(label: Text(' ')),
-            DataColumn(label: Text(' ')),
-            DataColumn(label: Text(' ')),
-          ], rows: controller.amcResultData.map((amc) {
-            return DataRow(cells: [
-              DataCell(_ticketBoxIcons(amc.id.toString(), amc.productName.toString())/*Text(amc.id.toString())*/),
-              DataCell(Text(amc.customer.customerName.toString()?? 'N/A')),
-              DataCell(Text(amc.amcName ?? 'N/A')),
-              DataCell(Text(amc.customer.customerName ?? 'N/A')),
-              DataCell(Text('${amc.serviceCompleted ?? 'N/A'}'+'${'/'}'+'${amc.createdBy ?? 'N/A'}')),
-              DataCell(Text(amc.serviceAmount.toString())),
-              DataCell(Text(amc.selectServiceOccurence ?? 'N/A')),
-              DataCell(Text(amc.receivedAmount.toString())),
-              DataCell(Text(amc.remainder ?? 'N/A')),
-              DataCell(Text(amc.status ?? 'N/A')),
-              DataCell( _dropDownValueViews(controller,amc)
-                  /*IconButton(onPressed: () {_dropDownValueViews(controller);}, icon: Icon(Icons.more_vert))*/),
-              DataCell(_viewDetailsButton(controller, amc)),
-              DataCell(_addTicketViewButton(controller)),
-            ]);
-          }).toList())),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Obx(() =>
+            DataTable(columns: [
+              DataColumn(label: Text('AMC ID/Name')),
+              DataColumn(label: Text('Date')),
+              DataColumn(label: Text('Name')),
+              DataColumn(label: Text('Customer Name')),
+              DataColumn(label: Text('Services')),
+              DataColumn(label: Text('Service Amount')),
+              DataColumn(label: Text('Service Occurrence')),
+              DataColumn(label: Text('Recieved Amount')),
+              DataColumn(label: Text('Remainder')),
+              DataColumn(label: Text('Status')),
+              DataColumn(label: Text(' ')),
+              DataColumn(label: Text(' ')),
+              DataColumn(label: Text(' ')),
+            ], rows: controller.amcResultData.map((amc) {
+              return DataRow(cells: [
+                DataCell(_ticketBoxIcons(amc.id.toString(), amc.productName.toString())/*Text(amc.id.toString())*/),
+                DataCell(Text(amc.customer.customerName.toString()?? 'N/A')),
+                DataCell(Text(amc.amcName ?? 'N/A')),
+                DataCell(Text(amc.customer.customerName ?? 'N/A')),
+                DataCell(Text('${amc.serviceCompleted ?? 'N/A'}'+'${'/'}'+'${amc.createdBy ?? 'N/A'}')),
+                DataCell(Text(amc.serviceAmount.toString())),
+                DataCell(Text(amc.selectServiceOccurence ?? 'N/A')),
+                DataCell(Text(amc.receivedAmount.toString())),
+                DataCell(Text(amc.remainder ?? 'N/A')),
+                DataCell(Text(amc.status ?? 'N/A')),
+                DataCell( _dropDownValueViews(controller,amc)
+                    /*IconButton(onPressed: () {_dropDownValueViews(controller);}, icon: Icon(Icons.more_vert))*/),
+                DataCell(_viewDetailsButton(controller, amc)),
+                DataCell(_addTicketViewButton(controller)),
+              ]);
+            }).toList())),
+      ),
     );
   }
 

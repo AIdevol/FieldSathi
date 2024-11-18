@@ -7,6 +7,7 @@ import 'package:tms_sathi/page/Authentications/presentations/controllers/attenda
 import 'package:tms_sathi/page/Authentications/presentations/controllers/calender_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/customer_list_view_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/expenditure_screen_controller.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/forTechnicianAndSalesLeavesScreenController.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/fsr_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/login_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/map_Screen_controller.dart';
@@ -44,6 +45,7 @@ class AuthenticationBinding extends Bindings {
     Get.lazyPut<ProfileViewScreenController>(()=> ProfileViewScreenController());
     Get.lazyPut<TicketListController>(()=> TicketListController());
     Get.lazyPut<LeaveReportViewScreenController>(()=> LeaveReportViewScreenController());
+    Get.lazyPut<ForTechcnicianandsalesAttendanceScreeenController>(()=> ForTechcnicianandsalesAttendanceScreeenController());
     Get.lazyPut<CustomerListViewController>(()=> CustomerListViewController());
     Get.lazyPut<LeadListViewController>(()=> LeadListViewController());
     Get.lazyPut<ServiceCategoriesController>(()=> ServiceCategoriesController());

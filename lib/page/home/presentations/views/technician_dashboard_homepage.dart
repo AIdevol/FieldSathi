@@ -1,129 +1,193 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:tms_sathi/constans/role_based_keys.dart';
+import 'package:tms_sathi/constans/string_const.dart';
 
 import '../../../../constans/color_constants.dart';
-import '../../../../navigations/navigation.dart';
+import '../../../../main.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../../utilities/helper_widget.dart';
-import '../../widget/amc_status_monitor_graph.dart';
 import '../controllers/technician_dashboard_homepage_controller.dart';
 
-class TechnicianDashboardHomepage extends StatelessWidget {
-  TechnicianDashboardHomepage({super.key}) {
-    Get.put(TechnicianDashboardHomepageController());
-  }
-
-  final List<DashboardItem> dashboardItems = [
-    DashboardItem(title: 'Total Tasks', value: '156', icon: Icons.task_alt, color: Colors.blue),
-    DashboardItem(title: 'Pending', value: '43', icon: Icons.pending_actions, color: Colors.orange),
-    DashboardItem(title: 'Completed', value: '113', icon: Icons.check_circle, color: Colors.green),
-    DashboardItem(title: 'AMC Active', value: '28', icon: Icons.security, color: Colors.purple),
-    DashboardItem(title: 'Overdue', value: '5', icon: Icons.warning_amber, color: Colors.red),
-    DashboardItem(title: 'Performance', value: '94%', icon: Icons.trending_up, color: Colors.teal),
-  ];
+class TechnicianDashboardHomepage extends GetView<TechnicianDashboardHomepageController> {
+  const TechnicianDashboardHomepage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<TechnicianDashboardHomepageController>();
-
-    return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: () async {
-          // Implement refresh logic
-          await Future.delayed(Duration(seconds: 1));
-        },
-        child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          children: [
-            _header(),
-            vGap(20),
-            _mainDataGridView(context, controller),
-            vGap(20),
-            _graphSection(context),
-          ],
+    return MyAnnotatedRegion(
+      child: GetBuilder<TechnicianDashboardHomepageController>(
+        init: TechnicianDashboardHomepageController(),
+        builder: (controller) => Scaffold(
+          body: RefreshIndicator(
+            onRefresh: () async {
+              await controller.hitGetTechnicianApiCall();
+            },
+            child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              children: [
+                _header(controller),
+                vGap(20),
+                _mainDataGridView(context, controller),
+                vGap(20),
+                _techniciansList(controller),
+                vGap(20),
+                _ticketDistributionChart(context, controller),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _header() {
+  Widget _header(TechnicianDashboardHomepageController controller) {
+    final userrole = storage.read(userRole);
+    String getRoleHeader(String role) {
+      switch (role) {
+        case "technician":
+          return "Technician";
+        case "sales":
+          return "Sales";
+        default:
+          return "";
+      }
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          'Technician Dashboard',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        IconButton(
-          icon: Icon(Icons.notifications_none),
-          onPressed: () {
-            // Handle notifications
-          },
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${getRoleHeader(userrole)} Dashboard',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            Obx(() => Text(
+              '${controller.allTechnicians.length} Technicians Active',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            )),
+          ],
         ),
       ],
     );
   }
 
   Widget _mainDataGridView(BuildContext context, TechnicianDashboardHomepageController controller) {
-    return GridView.builder(
-      physics: NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16.0,
-        mainAxisSpacing: 16.0,
-        childAspectRatio: 1.5,
-      ),
-      itemCount: dashboardItems.length,
-      itemBuilder: (BuildContext context, int index) {
-        final item = dashboardItems[index];
-        return _buildGridItem(item);
-      },
-    );
+    return Obx(() {
+      final dashboardItems = controller.getDashboardItems();
+      return GridView.builder(
+        physics: NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16.0,
+          mainAxisSpacing: 16.0,
+          childAspectRatio: 1.5,
+        ),
+        itemCount: dashboardItems.length,
+        itemBuilder: (BuildContext context, int index) {
+          final item = dashboardItems[index];
+          return _buildGridItem(
+            title: item['title'],
+            value: item['value'],
+            icon: _getIconData(item['icon']),
+            color: _getColor(item['color']),
+          );
+        },
+      );
+    });
   }
 
-  Widget _buildGridItem(DashboardItem item) {
-    return Container(
-      decoration: BoxDecoration(
-        color: whiteColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+  IconData _getIconData(String iconName) {
+    switch (iconName) {
+      case 'task_alt':
+        return Icons.task_alt;
+      case 'check_circle':
+        return Icons.check_circle;
+      case 'pending_actions':
+        return Icons.pending_actions;
+      case 'security':
+        return Icons.security;
+      case 'warning_amber':
+        return Icons.warning_amber;
+      case 'trending_up':
+        return Icons.trending_up;
+      default:
+        return Icons.error;
+    }
+  }
+
+  Color _getColor(String colorName) {
+    switch (colorName) {
+      case 'Colors.blue':
+        return Colors.blue;
+      case 'Colors.green':
+        return Colors.green;
+      case 'Colors.orange':
+        return Colors.orange;
+      case 'Colors.purple':
+        return Colors.purple;
+      case 'Colors.red':
+        return Colors.red;
+      case 'Colors.teal':
+        return Colors.teal;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Widget _buildGridItem({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return SingleChildScrollView(
+      child: Container(
+        decoration: BoxDecoration(
+          color: whiteColor,
           borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            // Handle item tap
-          },
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: SingleChildScrollView(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 8,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              // Handle item tap
+            },
+            child: Padding(
+              padding: EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Icon(
-                    item.icon,
-                    color: item.color,
+                    icon,
+                    color: color,
                     size: 32,
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item.value,
+                        value,
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -132,7 +196,7 @@ class TechnicianDashboardHomepage extends StatelessWidget {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        item.title,
+                        title,
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.black54,
@@ -149,8 +213,7 @@ class TechnicianDashboardHomepage extends StatelessWidget {
     );
   }
 
-  Widget _graphSection(BuildContext context) {
-    final hieghtLength = MediaQuery.of(context).size * 1/2;
+  Widget _techniciansList(TechnicianDashboardHomepageController controller) {
     return Container(
       decoration: BoxDecoration(
         color: whiteColor,
@@ -169,59 +232,165 @@ class TechnicianDashboardHomepage extends StatelessWidget {
         children: [
           Padding(
             padding: EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'AMC Status Monitor',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+            child: Text(
+              'Active Users',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+          Obx(() => ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: controller.filteredTechnicians.length,
+            itemBuilder: (context, index) {
+              final technician = controller.filteredTechnicians[index];
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: appColor,
+                  backgroundImage: NetworkImage(technician.profileImage) ,
+                  // child: Text(
+                  //   technician.firstName[0].toUpperCase(),
+                  //   style: TextStyle(color: whiteColor),
+                  // ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Get.toNamed(AppRoutes.amcScreen);
-                  },
-                  icon: Icon(Icons.manage_accounts, size: 20),
-                  label: Text('Manage AMCs'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: appColor,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                title: Text('${technician.firstName} ${technician.lastName}'),
+                subtitle: Text(technician.email),
+                trailing: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: technician.isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    technician.isActive ? 'Active' : 'Inactive',
+                    style: TextStyle(
+                      color: technician.isActive ? Colors.green : Colors.red,
+                      fontSize: 12,
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          SingleChildScrollView(
-            child: Container(
-              height: hieghtLength.height*0.99,
-              // width: Get.width*0.08,
-              // padding: EdgeInsets.all(16),
-              child: AmcStatusBarChart(),
-            ),
-          ),
+              );
+            },
+          )),
         ],
       ),
     );
   }
-}
 
-class DashboardItem {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
+  Widget _ticketDistributionChart(BuildContext context, TechnicianDashboardHomepageController controller) {
+    return Obx(() {
+      final stats = controller.dashboardStats;
+      return Container(
+        height: 300,
+        decoration: BoxDecoration(
+          color: whiteColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 8,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Ticket Distribution',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: PieChart(
+                      PieChartData(
+                        sectionsSpace: 0,
+                        centerSpaceRadius: 40,
+                        sections: [
+                          PieChartSectionData(
+                            color: Colors.blue,
+                            value: stats.totalTickets.toDouble(),
+                            title: 'Total',
+                            radius: 50,
+                            titleStyle: TextStyle(color: whiteColor, fontSize: 12),
+                          ),
+                          PieChartSectionData(
+                            color: Colors.orange,
+                            value: stats.completedTickets.toDouble(),
+                            title: 'Completed',
+                            radius: 50,
+                            titleStyle: TextStyle(color: whiteColor, fontSize: 12),
+                          ),
+                          PieChartSectionData(
+                            color: Colors.green,
+                            value: stats.onHoldTickets.toDouble(),
+                            title: 'On-Hold',
+                            radius: 50,
+                            titleStyle: TextStyle(color: whiteColor, fontSize: 12),
+                          ),
+                          PieChartSectionData(
+                            color: Colors.red,
+                            value: stats.rejectedTickets.toDouble(),
+                            title: 'Rejected',
+                            radius: 50,
+                            titleStyle: TextStyle(color: whiteColor, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _legendItem('Total (${stats.totalTickets})', Colors.blue),
+                        SizedBox(height: 8),
+                        _legendItem('Completed (${stats.completedTickets})', Colors.orange),
+                        SizedBox(height: 8),
+                        _legendItem('On-Hold (${stats.onHoldTickets})', Colors.green),
+                        SizedBox(height: 8),
+                        _legendItem('Rejected (${stats.rejectedTickets})', Colors.red),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
 
-  DashboardItem({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-  });
+  Widget _legendItem(String label, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 16,
+          height: 16,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        SizedBox(width: 8),
+        Text(label),
+      ],
+    );
+  }
 }

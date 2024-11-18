@@ -8,6 +8,7 @@ import 'package:tms_sathi/page/Authentications/presentations/views/attendance_vi
 import 'package:tms_sathi/page/Authentications/presentations/views/calender_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/customer_list_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/expenditure_view_screen.dart';
+import 'package:tms_sathi/page/Authentications/presentations/views/forTechcnicianAndSalesLeavesScreeen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/fsr_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/lead_list_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/presentations/views/leave_report_view.dart';
@@ -25,6 +26,7 @@ import 'package:tms_sathi/page/Authentications/presentations/views/ticket_list_s
 import 'package:tms_sathi/page/Authentications/widgets/views/add_amc_calender_view.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/add_amc_view_screen.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/add_fsr_view.dart';
+import 'package:tms_sathi/page/Authentications/widgets/views/add_sales_screen.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/add_superUser_View.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/add_technician_list.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/lead_form_field.dart';
@@ -279,6 +281,14 @@ class AppPages {
         ]
     ),
     GetPage(
+        name: AppRoutes.addSalesListScreen,
+        binding: AuthenticationBinding(),
+        page: () => AddSalesScreen(),
+        middlewares: [
+          RoutePermissionMiddleware()
+        ]
+    ),
+    GetPage(
       name: AppRoutes.addtechnicianListScreen,
       binding: AuthenticationBinding(),
       page: () => AddTechnicianList(),
@@ -306,6 +316,14 @@ class AppPages {
       name: AppRoutes.leaveUpdateScreen,
       binding: AuthenticationBinding(),
       page: () => LeaveUpdateScreen(),
+        middlewares: [
+          RoutePermissionMiddleware()
+        ]
+    ),
+    GetPage(
+        name: AppRoutes.forTechnicianAndSalesAttendace,
+        binding: AuthenticationBinding(),
+        page: () => FortechcnicianandsalesAttendancescreeen(),
         middlewares: [
           RoutePermissionMiddleware()
         ]
