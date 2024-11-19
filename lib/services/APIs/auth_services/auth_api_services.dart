@@ -19,6 +19,7 @@ import 'package:tms_sathi/response_models/otp_response_model.dart';
 import 'package:tms_sathi/response_models/services_response_model.dart';
 import 'package:tms_sathi/response_models/sub_service_response_model.dart';
 import 'package:tms_sathi/response_models/technician_response_model.dart';
+import 'package:tms_sathi/response_models/ticket_history_response_model.dart';
 import 'package:tms_sathi/response_models/ticket_response_model.dart';
 import 'package:tms_sathi/response_models/user_response_model.dart';
 import 'package:tms_sathi/services/APIs/dio_client.dart';
@@ -182,6 +183,41 @@ implements AuthenticationApi {
   }
 
   @override
+  Future<PutHolidayResponseModel> postholidaysCalenderApiCall(
+      {Map<String, dynamic>? dataBody}) async {
+    try {
+      final response = await dioClient!.post(
+          "${ApiEnd.holidaysApiEnd}", data: dataBody, skipAuth: false);
+      return PutHolidayResponseModel.fromJson(response);
+    } catch (e) {
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+
+  @override
+  Future<PutHolidayResponseModel> putholidaysCalenderApiCall(
+      {Map<String, dynamic>? dataBody, required String id}) async {
+    try {
+      final response = await dioClient!.put(
+          "${ApiEnd.holidaysApiEnd}$id/", data: dataBody, skipAuth: false);
+      return PutHolidayResponseModel.fromJson(response);
+    } catch (e) {
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+
+  @override
+  Future<PutHolidayResponseModel> deleteholidaysCalenderApiCall(
+      {Map<String, dynamic>? dataBody, required String id}) async {
+    try {
+      final response = await dioClient!.delete(
+          "${ApiEnd.holidaysApiEnd}$id/", data: dataBody, skipAuth: false);
+      return PutHolidayResponseModel.fromJson(response);
+    } catch (e) {
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+  @override
   Future<TicketResponseModel>getticketDetailsApiCall({Map<String, dynamic>? dataBody})async{
     try{
       final response = await dioClient!.get('${ApiEnd.get_ticketEnd}', data: dataBody, skipAuth: false);
@@ -248,6 +284,23 @@ implements AuthenticationApi {
     }
   }
 
+  @override
+  Future<List<TicketHistoryResponseModel>>getTicketHistoryData({Map<String, dynamic>?dataBody,required String id })async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.get_ticketHistoryEnd}$id/", data: dataBody, skipAuth: false, );
+      if (response is List) {
+              return response.map((item) => TicketHistoryResponseModel.fromJson(item)).toList();
+            } else
+            if (response is Map<String, dynamic> && response.containsKey('data')) {
+              final List<dynamic> data = response['data'];
+              return data.map((item) => TicketHistoryResponseModel.fromJson(item)).toList();
+            }
+            return [];
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+  // ======================================================================================Leaves Api Call ==========================================================
   @override
   Future<LeaveResponseModel> getLeavesApiCall(
       {Map<String, dynamic>? dataBody}) async {
@@ -636,12 +689,19 @@ implements AuthenticationApi {
     }
 }
   @override
-  Future<ServiceCategoryResponseModel> postServiceCategoriesApiCall(
-      {Map<String, dynamic>? dataBody}) async {
+  Future<PostServiceCategoryResponseModel> postServiceCategoriesApiCall(
+      {required dioo.FormData dataBody}) async {
     try {
+      // String? fileName = imageFile?.path
+      //     .split('/')
+      //     .last;
+      // dioo.FormData formData = dioo.FormData.fromMap({
+      //   "profile_image": await dioo.MultipartFile.fromFile(
+      //     imageFile!.path, filename: fileName,),
+      // });
       final response = await dioClient!.post(
-          ApiEnd.serviceCategories, data: dataBody, skipAuth: false);
-      return ServiceCategoryResponseModel.fromJson(response);
+          ApiEnd.serviceCategories, data: dataBody, options: dioo.Options(contentType: 'multipart/form-data'),skipAuth: false);
+      return PostServiceCategoryResponseModel.fromJson(response);
     } catch (error) {
       return Future.error(NetworkExceptions.getDioException(error));
     }

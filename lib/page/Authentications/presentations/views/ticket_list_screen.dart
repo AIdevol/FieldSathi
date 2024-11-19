@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/constans/const_local_keys.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
+import 'package:tms_sathi/response_models/ticket_history_response_model.dart';
 import 'package:tms_sathi/response_models/ticket_response_model.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
@@ -37,7 +38,7 @@ class TicketListScreen extends GetView<TicketListController> {
     'Aging': 100,
     'Actions': 80,
   };
-  
+
 
   @override
   Widget build(BuildContext context) {
@@ -49,17 +50,19 @@ class TicketListScreen extends GetView<TicketListController> {
             backgroundColor: CupertinoColors.white,
             resizeToAvoidBottomInset: true,
             appBar: _buildAppBar(),
-            body: Column(
+            body: RefreshIndicator(child:  Column(
               children: [
                 _buildTopBar(context, controller),
                 _buildSearchBar(),
                 Expanded(
                   child: Obx(() => controller.isLoading.value
                       ?  Center(child: Container())
-                      : _buildContent(controller)),
+                      : _buildContent(context,controller)),
                 ),
               ],
-            ),
+            ), onRefresh: ()async{
+              await controller.hitRefreshAllTicketData();
+            })
           ),
         ),
       ),
@@ -198,13 +201,13 @@ class TicketListScreen extends GetView<TicketListController> {
     );
   }
 
-   Widget _buildContent(TicketListController controller) {
+   Widget _buildContent(BuildContext context, TicketListController controller) {
      return Obx(() {
        if (controller.ticketResult.isEmpty) {
          return _buildEmptyState();
        }
 
-       return _buildTicketTable(controller);
+       return _buildTicketTable(context, controller);
      });
    }
 
@@ -230,7 +233,7 @@ class TicketListScreen extends GetView<TicketListController> {
      );
    }
 
-  Widget _buildTicketTable(TicketListController controller) {
+  Widget _buildTicketTable(BuildContext context, TicketListController controller) {
     final resultData = controller.ticketResult.map((Ids)=> Ids.id);
     return Container(
       decoration: BoxDecoration(
@@ -265,7 +268,7 @@ class TicketListScreen extends GetView<TicketListController> {
               ),
               headingRowColor: MaterialStateProperty.all(Colors.grey.shade50),
               columns: _buildTableColumns(),
-              rows: _buildTableRows(controller),
+              rows: _buildTableRows(context, controller),
             ),
           ),
         ),
@@ -342,9 +345,10 @@ class TicketListScreen extends GetView<TicketListController> {
 
 
 
-  List<DataRow> _buildTableRows(TicketListController controller) {
+  List<DataRow> _buildTableRows(BuildContext context, TicketListController controller) {
     return controller.ticketResult.map((ticket) {
       return DataRow(
+        onSelectChanged:(_)=>_showDialogWidgetContext(context, controller, ticket.id!.toString(), ticket),
         cells: [
           DataCell(_ticketBoxIcons(ticket.id?.toString() ?? 'NA')),
           DataCell(_buildDataCell(ticket.taskName?.toString() ?? 'NA')),
@@ -390,7 +394,7 @@ class TicketListScreen extends GetView<TicketListController> {
             maxWidth: columnWidths['Ticket Date'],
           )),
           DataCell(_buildAgingCell(ticket.aging?.toString() ?? 'NA')),
-          DataCell(_buildActionCell(controller, ticket.id.toString())),
+          DataCell(_buildActionCell(controller, ticket.id.toString(), ticket),),
         ],
       );
     }).toList();
@@ -487,7 +491,7 @@ class TicketListScreen extends GetView<TicketListController> {
     );
   }
 
-   Widget _buildActionCell(TicketListController controller, String? tickId) {
+   Widget _buildActionCell(TicketListController controller, String? tickId, TicketResult ticket) {
      return Container(
        width: columnWidths['Actions'],
        child: PopupMenuButton<String>(
@@ -496,7 +500,7 @@ class TicketListScreen extends GetView<TicketListController> {
          shape: RoundedRectangleBorder(
            borderRadius: BorderRadius.circular(12),
          ),
-         itemBuilder: (BuildContext context) => _buildMenuItems(context, controller, tickId),
+         itemBuilder: (BuildContext context) => _buildMenuItems(context, controller, tickId, ticket),
          child: Container(
            padding: const EdgeInsets.all(8),
            decoration: BoxDecoration(
@@ -513,7 +517,7 @@ class TicketListScreen extends GetView<TicketListController> {
      );
    }
 
-   List<PopupMenuEntry<String>> _buildMenuItems(BuildContext context, TicketListController controller, String? tickId) {
+   List<PopupMenuEntry<String>> _buildMenuItems(BuildContext context, TicketListController controller, String? tickId, TicketResult ticket, ) {
      // Find the ticket by ID to get its status
      final ticket = controller.ticketResult.firstWhere(
            (ticket) => ticket.id.toString() == tickId,
@@ -529,11 +533,11 @@ class TicketListScreen extends GetView<TicketListController> {
      // Add either Reassign or Edit based on status
      if (status == 'completed') {
        menuItems.add(
-         _buildPopupEditMenuItem('Reassign', Icons.edit_outlined, Colors.blue.shade700, context, controller),
+         _buildPopupEditMenuItem('Reassign', Icons.edit_outlined, Colors.blue.shade700, context, controller, ticket),
        );
      } else {
        menuItems.add(
-         _buildPopupEditMenuItem('Edit', Icons.edit_outlined, Colors.blue.shade700, context, controller),
+         _buildPopupEditMenuItem('Edit', Icons.edit_outlined, Colors.blue.shade700, context, controller, ticket),
        );
      }
 
@@ -567,9 +571,9 @@ class TicketListScreen extends GetView<TicketListController> {
     );
   }
    PopupMenuItem<String> _buildPopupEditMenuItem(
-       String text, IconData icon, Color iconColor, BuildContext context, TicketListController controller) {
+       String text, IconData icon, Color iconColor, BuildContext context, TicketListController controller, TicketResult ticket) {
      return PopupMenuItem<String>(
-       onTap: ()=>_showInbuildDialogValue(context, controller),
+       onTap: ()=>_showInbuildDialogValue(context, controller,ticket),
        value: text,
        child: Row(
          mainAxisSize: MainAxisSize.min,
@@ -611,20 +615,20 @@ class TicketListScreen extends GetView<TicketListController> {
 }
 
 
-_showInbuildDialogValue(BuildContext context, TicketListController controller){
+_showInbuildDialogValue(BuildContext context, TicketListController controller, TicketResult ticket){
   Get.dialog(
     Dialog(
       child: Container(
         height: Get.height,
         width: Get.width,
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-        child: _form(context, controller),
+        child: _form(context, controller, ticket),
       ),
     )
   );
 }
 
-_form(BuildContext context, TicketListController controller) {
+_form(BuildContext context, TicketListController controller, TicketResult ticket) {
   return Padding(
     padding: const EdgeInsets.all(18.0),
     child: SingleChildScrollView(  // Changed from ListView to SingleChildScrollView
@@ -639,17 +643,17 @@ _form(BuildContext context, TicketListController controller) {
             ),
           ),
           Divider(height: 20),
-          _buildTaskName(context: context),
+          _buildTaskName(context,controller, ticket),
           vGap(20),
-          _addTechnician(context: context),
+          _addTechnician(context, controller, ticket),
           vGap(20),
-          _buildOptionbutton(context: context),
+          _buildOptionbutton(context, controller, ticket),
           vGap(20),
-          _buildtextContainer(context: context),
+          _buildtextContainer(context, controller, ticket),
           vGap(20),
-          _dobView(context: context, controller: controller),
+          _dobView(context, controller, ticket),
           vGap(20),
-          _buildGroupForm(context: context)  // Renamed and restructured
+          _buildGroupForm(context, controller, ticket)  // Renamed and restructured
         ],
       ),
     ),
@@ -693,12 +697,12 @@ extension TicketListScreenExtensions on TicketListScreen {
     }
   }
 }
-_buildTaskName({required BuildContext context}){
+_buildTaskName( BuildContext context,TicketListController controller, TicketResult? ticket){
+  controller.taskNameController.text = ticket?.taskName ?? "N/A";
   return CustomTextField(
     hintText: "Task Name".tr,
-    // controller: controller.emailcontroller,
+    controller:controller.taskNameController,
     textInputType: TextInputType.emailAddress,
-    // focusNode: controller.phoneFocusNode,
     onFieldSubmitted: (String? value) {
       // FocusScope.of(Get.context!)
       //     .requestFocus(controller.passwordFocusNode);
@@ -715,10 +719,12 @@ _buildTaskName({required BuildContext context}){
 
 }
 
-_addTechnician({required BuildContext context}){
+_addTechnician(BuildContext context,TicketListController controller, TicketResult? ticket){
+  controller.assignTo.text = ticket!.assignTo.toString();
+
   return CustomTextField(
     hintText: "Assign To".tr,
-    // controller: controller.emailcontroller,
+    controller: controller.assignTo,
     textInputType: TextInputType.emailAddress,
     // focusNode: controller.phoneFocusNode,
     onFieldSubmitted: (String? value) {
@@ -738,109 +744,115 @@ _addTechnician({required BuildContext context}){
 
 }
 
-Widget _buildOptionbutton({required BuildContext context}) {
+Widget _buildOptionbutton(BuildContext context,TicketListController controller, TicketResult? ticket) {
+  controller.rateController.text = ticket!.rate.toString();
   return GetBuilder<TicketListController>(
-    builder: (controller) => Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        // AMC Button
-        ElevatedButton(
-          onPressed: () => controller.toggleAmc(),
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(
-              controller.isAmcSelected ? appColor : Colors.white,
+    builder: (controller) => SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // AMC Button
+          ElevatedButton(
+            onPressed: () => controller.toggleAmc(),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(
+                controller.isAmcSelected ? appColor : Colors.white,
+              ),
+              foregroundColor: MaterialStateProperty.all(
+                controller.isAmcSelected ? Colors.white : Colors.black,
+              ),
+              padding: MaterialStateProperty.all(
+                const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              ),
+              elevation: MaterialStateProperty.all(5),
+              shape: MaterialStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(
+                    color: controller.isAmcSelected ? appColor : Colors.grey,
+                    width: 1,
+                  ),
+                ),
+              ),
+              shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
             ),
-            foregroundColor: MaterialStateProperty.all(
-              controller.isAmcSelected ? Colors.white : Colors.black,
+            child: Text(
+              'AMC',
+              style: MontserratStyles.montserratBoldTextStyle(
+                color: controller.isAmcSelected ? whiteColor : Colors.black,
+                size: 13,
+              ),
             ),
-            padding: MaterialStateProperty.all(
-              const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+          ),
+          const SizedBox(width: 10),
+          ElevatedButton(
+            onPressed: () => controller.toggleRate(),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(
+                controller.isRateSelected ? appColor : Colors.white,
+              ),
+              foregroundColor: MaterialStateProperty.all(
+                controller.isRateSelected ? Colors.white : Colors.black,
+              ),
+              padding: MaterialStateProperty.all(
+                const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              ),
+              elevation: MaterialStateProperty.all(5),
+              shape: MaterialStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(
+                    color: controller.isRateSelected ? appColor : Colors.grey,
+                    width: 1,
+                  ),
+                ),
+              ),
+              shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
             ),
-            elevation: MaterialStateProperty.all(5),
-            shape: MaterialStateProperty.all(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(
-                  color: controller.isAmcSelected ? appColor : Colors.grey,
+            child: Text(
+              'Rate',
+              style: MontserratStyles.montserratBoldTextStyle(
+                color: controller.isRateSelected ? whiteColor : Colors.black,
+                size: 13,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          if (controller.isRateSelected)
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: Get.height * 0.06,
+              width: Get.width * 0.30,
+              decoration: BoxDecoration(
+                color: whiteColor,
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(
                   width: 1,
+                  color: Colors.grey,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: TextField(
+                  controller: controller.rateController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Rate *',
+                  ),
                 ),
               ),
             ),
-            shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
-          ),
-          child: Text(
-            'AMC',
-            style: MontserratStyles.montserratBoldTextStyle(
-              color: controller.isAmcSelected ? whiteColor : Colors.black,
-              size: 13,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        ElevatedButton(
-          onPressed: () => controller.toggleRate(),
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(
-              controller.isRateSelected ? appColor : Colors.white,
-            ),
-            foregroundColor: MaterialStateProperty.all(
-              controller.isRateSelected ? Colors.white : Colors.black,
-            ),
-            padding: MaterialStateProperty.all(
-              const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-            ),
-            elevation: MaterialStateProperty.all(5),
-            shape: MaterialStateProperty.all(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(
-                  color: controller.isRateSelected ? appColor : Colors.grey,
-                  width: 1,
-                ),
-              ),
-            ),
-            shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
-          ),
-          child: Text(
-            'Rate',
-            style: MontserratStyles.montserratBoldTextStyle(
-              color: controller.isRateSelected ? whiteColor : Colors.black,
-              size: 13,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        if (controller.isRateSelected)
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: Get.height * 0.06,
-            width: Get.width * 0.30,
-            decoration: BoxDecoration(
-              color: whiteColor,
-              borderRadius: BorderRadius.circular(25),
-              border: Border.all(
-                width: 1,
-                color: Colors.grey,
-              ),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'Rate *',
-                ),
-              ),
-            ),
-          ),
-      ],
+        ],
+      ),
     ),
   );
 }
 
 
-_buildtextContainer({required BuildContext context}){
+_buildtextContainer(BuildContext context,TicketListController controller, TicketResult? ticket){
+  controller.purposeController.text = ticket!.purpose.toString();
   return  Container(
     height: Get.height * 0.16,
     decoration: BoxDecoration(
@@ -854,6 +866,7 @@ _buildtextContainer({required BuildContext context}){
     child: Padding(
       padding: EdgeInsets.symmetric(horizontal: 10),
       child: TextField(
+        controller: controller.purposeController,
         style: MontserratStyles.montserratBoldTextStyle(
             color: Colors.black,
             size: 13
@@ -868,8 +881,8 @@ _buildtextContainer({required BuildContext context}){
   );
 }
 
-Widget _dobView({required BuildContext context, required TicketListController controller}) {
-  // final controller = Get.put(TicketListController());
+Widget _dobView(BuildContext context,TicketListController controller, TicketResult? ticket) {
+  controller.dateController.text = ticket!.date.toString();
   return CustomTextField(
     hintText: "dd-month-yyyy".tr,
     controller: controller.dateController,
@@ -887,7 +900,8 @@ Widget _dobView({required BuildContext context, required TicketListController co
 }
 
 
-Widget _buildGroupForm({required BuildContext context}) {
+Widget _buildGroupForm(BuildContext context,TicketListController controller, TicketResult? ticket) {
+
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -898,7 +912,7 @@ Widget _buildGroupForm({required BuildContext context}) {
             size: 13
         ),
       ),
-      _buildListCustomerDetails(context: context),
+      _buildListCustomerDetails(context,controller, ticket),
       vGap(20),
       Text(
         'FSR Details',
@@ -907,7 +921,7 @@ Widget _buildGroupForm({required BuildContext context}) {
             size: 13
         ),
       ),
-      _buildFSRDetails(),
+      _buildFSRDetails(context, controller, ticket),
       vGap(20),
       Text(
         'Services Details',
@@ -916,7 +930,7 @@ Widget _buildGroupForm({required BuildContext context}) {
             size: 13
         ),
       ),
-      _buildServicesDetails(),
+      _buildServicesDetails(context,controller, ticket),
       vGap(20),
       Text(
         'Instructions',
@@ -925,15 +939,18 @@ Widget _buildGroupForm({required BuildContext context}) {
             size: 13
         ),
       ),
-      _buildInstructionsField(),
+      _buildInstructionsField(context,controller,ticket),
       vGap(20),
-      _buildButtonView(context: context)
+      _buildButtonView(context, controller, ticket)
     ],
   );
 }
 
-Widget _buildFSRDetails() {
+Widget _buildFSRDetails(BuildContext context,TicketListController controller, TicketResult? ticket) {
+  controller.fsrController.text = ticket!.fsrDetails.fsrName.toString();
+
   return CustomTextField(
+    controller: controller.fsrController,
     hintText: "FSR Details".tr,
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
@@ -944,8 +961,10 @@ Widget _buildFSRDetails() {
   );
 }
 
-Widget _buildServicesDetails() {
+Widget _buildServicesDetails(BuildContext context,TicketListController controller, TicketResult? ticket) {
+  controller.servicesDetailsController.text = ticket!.serviceDetails.toString();
   return CustomTextField(
+    controller: controller.servicesDetailsController,
     hintText: "Services Details".tr,
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
@@ -957,7 +976,9 @@ Widget _buildServicesDetails() {
 }
 
 // New widget for Instructions field
-Widget _buildInstructionsField() {
+Widget _buildInstructionsField(BuildContext context,TicketListController controller, TicketResult? ticket) {
+  controller.instructionController.text = ticket!.instructions.toString();
+
   return Container(
     height: Get.height * 0.16,
     decoration: BoxDecoration(
@@ -971,6 +992,7 @@ Widget _buildInstructionsField() {
     child: Padding(
       padding: EdgeInsets.symmetric(horizontal: 10),
       child: TextField(
+        controller: controller.instructionController,
         style: MontserratStyles.montserratBoldTextStyle(
             color: Colors.black,
             size: 13
@@ -985,20 +1007,26 @@ Widget _buildInstructionsField() {
   );
 }
 
-Widget _buildListCustomerDetails({required BuildContext context}) {
+Widget _buildListCustomerDetails(BuildContext context,TicketListController controller, TicketResult? ticket) {
+  controller.customerNameController.text = ticket!.customerDetails.customerName.toString();
+  controller.productNameController.text = ticket!.brand.toString();
+  controller.modelNoController.text = ticket!.model.toString();
+
   return Column(
     children: [
       vGap(20),
       CustomTextField(
+        controller: controller.customerNameController,
         hintText: "Customer Details".tr,
         textInputType: TextInputType.text,
         labletext: "customer name".tr,
         prefix: IconButton(
-          onPressed: () => _buildBottomsheet(context: context),
+          onPressed: () => _buildBottomsheet(context),
           icon: Icon(Icons.add, color: Colors.black),
         ),
       ),
       CustomTextField(
+        controller: controller.productNameController,
         hintText: "product name".tr,
         textInputType: TextInputType.text,
         labletext: "product name".tr,
@@ -1008,6 +1036,7 @@ Widget _buildListCustomerDetails({required BuildContext context}) {
         ),
       ),
       CustomTextField(
+        controller: controller.modelNoController,
         hintText: "model no".tr,
         textInputType: TextInputType.text,
         labletext: "model no".tr,
@@ -1019,13 +1048,14 @@ Widget _buildListCustomerDetails({required BuildContext context}) {
     ],
   );
 }
-_buildBottomsheet({required BuildContext context}){
+/// ShowPrincipalView
+_buildBottomsheet(BuildContext context){
   return showBottomSheet(context: context, builder: (BuildContext context){
     return PrincipalCustomerView();
   });
 }
 
-Widget _buildButtonView({required BuildContext context}) {
+Widget _buildButtonView(BuildContext context,TicketListController controller, TicketResult? ticket) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 16.0),
     child: Row(
@@ -1033,6 +1063,7 @@ Widget _buildButtonView({required BuildContext context}) {
       children: [
         ElevatedButton(
           onPressed: () => Get.back(),
+          style: _buttonStyle(),
           child: Text(
             'Cancel',
             style: MontserratStyles.montserratBoldTextStyle(
@@ -1040,11 +1071,11 @@ Widget _buildButtonView({required BuildContext context}) {
                 size: 13
             ),
           ),
-          style: _buttonStyle(),
         ),
         hGap(20),
         ElevatedButton(
           onPressed: () {},
+          style: _buttonStyle(),
           child: Text(
             "Add Ticket",
             style: MontserratStyles.montserratBoldTextStyle(
@@ -1052,7 +1083,6 @@ Widget _buildButtonView({required BuildContext context}) {
                 size: 13
             ),
           ),
-          style: _buttonStyle(),
         )
       ],
     ),
@@ -1432,3 +1462,309 @@ Widget _buildActionButton(
     ),
   );
 }
+
+_showDialogWidgetContext(BuildContext context, TicketListController controller, String ticketid, TicketResult ticket, ){
+   controller.hitGetTicketHistoryApiCall(ticketid);
+   final progressResult = controller.ticketHistoryData;
+  return showDialog(context: context, builder: (context){
+    return Dialog(
+      child: Container(
+        height: Get.height * 0.8,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.blueAccent,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "${ticket.taskName}",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      "${ticket.status}",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Created & Assigned Section
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Created At: ${ticket.createdAt}",
+                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                                Text("Created By: ${ticket.createdBy}"),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Assigned To: ${ticket.assignTo}",
+                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                                Text(
+                                  "Technician\nfthhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+                      // Ticket Details Section
+                      Text(
+                        "Ticket Details",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      Divider(),
+                      ...[
+                        "Customer Name: ${ticket.customerDetails.customerName}",
+                        "Subcustomer Name: ${ticket.subCustomerDetails.customerName} ",
+                        "FSR: ${ticket.fsrDetails.fsrName}",
+                        "Phone Number: ${ticket.customerDetails.phoneNumber}",
+                        "Service: ${ticket.serviceDetails}",
+                        "Address: ${ticket.ticketAddress}",
+                        "Purpose: ${ticket.purpose??"N/A"}",
+                        "Instructions: ${ticket.instructions??"N/A"}",
+                        "Brand: ${ticket.brand??"N/A"}",
+                        "Model: ${ticket.model}",
+                      ].map((detail) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text(detail),
+                      )),
+                      SizedBox(height: 16),
+                      // Progress History Section
+                      Text(
+                        "Progress History",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      Divider(),
+                      ...[
+                        "${progressResult[0]}",
+                        // "Rohitddfdx\nfthhhhhhhhhhhhhhhhhhhhhhhhhhh",
+                        // "Technician\nhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+                        // "17-11-2024 08:10 AM",
+                        // "Ticket updated by Rohitddfdx",
+                      ].map((history) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text(history),
+                      )),
+                      vGap(20),
+                      _buildActionButton(
+                        context,
+                        'Okay',
+                        Icons.cancel,
+                        onTap: () => Get.back(),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),);
+  });
+}
+// _showBottomForTicketHistory(BuildContext context, TicketListController controller, String ticketId) {
+//   return showBottomSheet(
+//     context:context,
+//     backgroundColor: Colors.transparent,
+//     builder: (context) {
+//       return Container(
+//         height: Get.height * 0.6, // Adjust height to match your content
+//         decoration: BoxDecoration(
+//           color: Colors.white,
+//           borderRadius: BorderRadius.only(
+//             topLeft: Radius.circular(16),
+//             topRight: Radius.circular(16),
+//           ),
+//         ),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             // Header
+//             Container(
+//               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+//               decoration: BoxDecoration(
+//                 color: Colors.blueAccent,
+//                 borderRadius: BorderRadius.only(
+//                   topLeft: Radius.circular(16),
+//                   topRight: Radius.circular(16),
+//                 ),
+//               ),
+//               child: Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   Text(
+//                     "fddg",
+//                     style: TextStyle(
+//                       color: Colors.white,
+//                       fontSize: 18,
+//                       fontWeight: FontWeight.bold,
+//                     ),
+//                   ),
+//                   Container(
+//                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+//                     decoration: BoxDecoration(
+//                       color: Colors.green,
+//                       borderRadius: BorderRadius.circular(12),
+//                     ),
+//                     child: Text(
+//                       "Accepted",
+//                       style: TextStyle(color: Colors.white),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             Expanded(
+//               child: Padding(
+//                 padding: const EdgeInsets.all(16),
+//                 child: SingleChildScrollView(
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       // Created & Assigned Section
+//                       Row(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Expanded(
+//                             child: Column(
+//                               crossAxisAlignment: CrossAxisAlignment.start,
+//                               children: [
+//                                 Text(
+//                                   "Created At: 28-10-2024 00:00",
+//                                   style: TextStyle(fontWeight: FontWeight.w600),
+//                                 ),
+//                                 Text("Created By: admintest@yopmail.com"),
+//                               ],
+//                             ),
+//                           ),
+//                           Expanded(
+//                             child: Column(
+//                               crossAxisAlignment: CrossAxisAlignment.start,
+//                               children: [
+//                                 Text(
+//                                   "Assigned To: Rohitddfdx",
+//                                   style: TextStyle(fontWeight: FontWeight.w600),
+//                                 ),
+//                                 Text(
+//                                   "Technician\nfthhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+//                                   maxLines: 2,
+//                                   overflow: TextOverflow.ellipsis,
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//                       SizedBox(height: 16),
+//                       // Ticket Details Section
+//                       Text(
+//                         "Ticket Details",
+//                         style: TextStyle(
+//                           fontSize: 16,
+//                           fontWeight: FontWeight.bold,
+//                           color: Colors.blue,
+//                         ),
+//                       ),
+//                       Divider(),
+//                       ...[
+//                         "Customer Name: NAINA KAUSHIK",
+//                         "Subcustomer Name: N/A",
+//                         "FSR: fsr",
+//                         "Phone Number: N/A",
+//                         "Service: N/A",
+//                         "Address: N/A",
+//                       ].map((detail) => Padding(
+//                         padding: const EdgeInsets.symmetric(vertical: 4),
+//                         child: Text(detail),
+//                       )),
+//                       SizedBox(height: 16),
+//                       // Progress History Section
+//                       Text(
+//                         "Progress History",
+//                         style: TextStyle(
+//                           fontSize: 16,
+//                           fontWeight: FontWeight.bold,
+//                           color: Colors.blue,
+//                         ),
+//                       ),
+//                       Divider(),
+//                       ...[
+//                         "from '14' to 'None'",
+//                         "Rohitddfdx\nfthhhhhhhhhhhhhhhhhhhhhhhhhhh",
+//                         "Technician\nhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+//                         "17-11-2024 08:10 AM",
+//                         "Ticket updated by Rohitddfdx",
+//                       ].map((history) => Padding(
+//                         padding: const EdgeInsets.symmetric(vertical: 4),
+//                         child: Text(history),
+//                       )),
+//                     ],
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       );
+//     },
+//   );
+// }
+

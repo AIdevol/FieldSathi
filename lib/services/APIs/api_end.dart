@@ -8,6 +8,7 @@ class ApiEnd{
   static const String userProfileImageEnd = 'users/user_profile/';
   static const String get_attendanceEnd = 'users/attendance/';
   static const String get_ticketEnd ='api/tickets/';
+  static const String get_ticketHistoryEnd = 'api/ticket_history_view/';
   static const String get_fsrEnd = 'api/tickets/';
   static const String leavesReportEnd = 'users/leaves/';
   static const String checkpointsCategoriesEnd = 'api/add-checkpoints/';

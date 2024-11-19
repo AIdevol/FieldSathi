@@ -73,3 +73,44 @@ class Result {
     };
   }
 }
+//======================================================================Put method=============================================
+class PutHolidayResponseModel {
+  int? id;
+  String? start;
+  String? end;
+  String? title;
+  String? color;
+  int? createdBy;
+  int? admin;
+
+  PutHolidayResponseModel(
+      {this.id,
+        this.start,
+        this.end,
+        this.title,
+        this.color,
+        this.createdBy,
+        this.admin});
+
+  PutHolidayResponseModel.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    start = json['start'];
+    end = json['end'];
+    title = json['title'];
+    color = json['color'];
+    createdBy = json['created_by'];
+    admin = json['admin'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['start'] = this.start;
+    data['end'] = this.end;
+    data['title'] = this.title;
+    data['color'] = this.color;
+    data['created_by'] = this.createdBy;
+    data['admin'] = this.admin;
+    return data;
+  }
+}

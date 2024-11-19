@@ -10,6 +10,7 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../constans/const_local_keys.dart';
+import '../../../../constans/role_based_keys.dart';
 import '../../../../main.dart';
 import '../../../../navigations/navigation.dart';
 import '../../../../services/APIs/auth_services/auth_api_services.dart';
@@ -48,12 +49,14 @@ class ProfileViewScreenController extends GetxController {
   Timer? _timer;
   File? selectedImage ;
   final ImagePicker _picker = ImagePicker();
+  bool isAdmin = false;
 
   @override
   void onInit() {
     initializeControllers();
     hituserDetailsApiCall();
     super.onInit();
+    _checkUserRole();
   }
 
   void initializeControllers() {
@@ -115,6 +118,13 @@ class ProfileViewScreenController extends GetxController {
     profileImageUrl.value = '';
     profileImage.value = null;
   }
+
+  Future<void> _checkUserRole() async {
+    final currentUser = await storage.read(userRole);
+    print('userrole = $currentUser');
+    isAdmin = currentUser.role == 'admin';
+    update();
+  }
 // Future<void> hitUserUpdateProfileImage()async {
 //     customLoader.show();
 //     FocusManager.instance.primaryFocus!.context;
@@ -152,7 +162,7 @@ class ProfileViewScreenController extends GetxController {
     var userUpdatedData = {
       "first_name": nameController.text,
       "email": emailController.text,
-      "company_name": companyNameController.text,
+      "companyName": companyNameController.text,
       "employees": employeesController.text,
       "primary_address": addressController.text,
       "country": countryController.text,

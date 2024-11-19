@@ -125,6 +125,7 @@ class CustomTextField extends StatelessWidget {
   Color? borderColor;
   Color? textColor;
   int? maxLength;
+  bool? enabled;
   String? labletext;
   ValueChanged<String>? onChanged;
   var corRadious;
@@ -149,7 +150,7 @@ class CustomTextField extends StatelessWidget {
         this.inputFormatters,
         this.textInputType,
         this.onFieldSubmitted,
-        this.maxLength, this. onChanged, })
+        this.maxLength, this. onChanged, this.enabled, })
       : super(key: key);
 
   @override

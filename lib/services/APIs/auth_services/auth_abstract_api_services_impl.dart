@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:dio/dio.dart' as dioo;
 
 import '../../../response_models/add_sales_response_model.dart';
 import '../../../response_models/add_technician_response_model.dart';
@@ -24,6 +25,7 @@ import '../../../response_models/services_response_model.dart';
 import '../../../response_models/sub_service_response_model.dart';
 import '../../../response_models/super_user_response_model.dart';
 import '../../../response_models/technician_response_model.dart';
+import '../../../response_models/ticket_history_response_model.dart';
 import '../../../response_models/ticket_response_model.dart';
 import '../../../response_models/user_response_model.dart';
 
@@ -39,8 +41,12 @@ abstract class AuthenticationApi {
   Future<UserResponseModel>updateUserDetailsApiCall({Map<String, dynamic>? dataBody, String? id});
   Future<UserResponseModel> userProfileImageUpdateApiCall(File imageFile);
   Future<HolidayResponseModel>holidaysCalenderApiCall({Map<String, dynamic>? dataBody});
+  Future<PutHolidayResponseModel> postholidaysCalenderApiCall({Map<String, dynamic>? dataBody});
+  Future<PutHolidayResponseModel> putholidaysCalenderApiCall({Map<String, dynamic>? dataBody, required String id});
+  Future<PutHolidayResponseModel> deleteholidaysCalenderApiCall({Map<String, dynamic>? dataBody, required String id});
   // Future<List<TicketResponseModel>>getticketDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<TicketResponseModel>getticketDetailsApiCall({Map<String, dynamic>? dataBody});
+  Future<List<TicketHistoryResponseModel>>getTicketHistoryData({Map<String, dynamic>?dataBody,required String id });
   Future<TicketResponseModel>postTicketDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<LeaveResponseModel>getLeavesApiCall({Map<String, dynamic>? dataBody});
   Future<LeaveResponseModel>putLeavesApiCall({Map<String, dynamic>? dataBody,id});
@@ -62,8 +68,7 @@ abstract class AuthenticationApi {
   Future<LeadPostResponseModel>postLeadListApiCall({Map<String, dynamic>?dataBody});
   Future<LeadPostResponseModel>delLeadListApiCall({Map<String, dynamic>?dataBody, String? id});
   Future<LeadPostResponseModel>putLeadListApiCall({Map<String, dynamic>?dataBody, String? id});
-  Future<ServiceCategoryResponseModel>getServiceCategoriesApiCall({Map<String, dynamic>? dataBody});
-  Future<ServiceCategoryResponseModel>postServiceCategoriesApiCall({Map<String, dynamic>? dataBody});
+  Future<ServiceCategoryResponseModel>getServiceCategoriesApiCall({Map<String, dynamic>? dataBody}); Future<PostServiceCategoryResponseModel> postServiceCategoriesApiCall({required dioo.FormData dataBody});
   Future<SubService>getSub_ServiceCategoriesApiCall({Map<String, dynamic>? dataBody});
   Future<TMSResponseModel>getuserDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<Uint8List> downloadTicketDataByUsername({Map<String, dynamic>? dataBody, String? id});

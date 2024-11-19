@@ -275,3 +275,40 @@ class ServiceCategory {
     );
   }
 }
+//====================================================================post Api Call ====================================
+class PostServiceCategoryResponseModel {
+  int? id;
+  String? serviceCategoryName;
+  String? serviceCatDescriptions;
+  String? serviceCatImage;
+  int? createdBy;
+  int? admin;
+
+  PostServiceCategoryResponseModel(
+      {this.id,
+        this.serviceCategoryName,
+        this.serviceCatDescriptions,
+        this.serviceCatImage,
+        this.createdBy,
+        this.admin});
+
+  PostServiceCategoryResponseModel.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    serviceCategoryName = json['service_category_name'];
+    serviceCatDescriptions = json['service_cat_descriptions'];
+    serviceCatImage = json['service_cat_image'];
+    createdBy = json['created_by'];
+    admin = json['admin'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['service_category_name'] = this.serviceCategoryName;
+    data['service_cat_descriptions'] = this.serviceCatDescriptions;
+    data['service_cat_image'] = this.serviceCatImage;
+    data['created_by'] = this.createdBy;
+    data['admin'] = this.admin;
+    return data;
+  }
+}

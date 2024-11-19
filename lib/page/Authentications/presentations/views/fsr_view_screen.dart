@@ -51,7 +51,10 @@ class FsrViewScreen extends GetView<FsrViewController> {
                   child: Obx(() =>
                   controller.isLoading.value
                       ? Center(child: Container())
-                      : _buildDataTable(controller),
+                      : Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: _buildDataTable(controller),
+                      ),
                   ),
                 ),
               ],

@@ -53,7 +53,7 @@ class RegisterScreenController extends GetxController{
     var loginReq = {
       "email_or_phone":emailController.text,
       "first_name": nameController.text,
-      "companyName": companyNameController.text,
+      "company_name": companyNameController.text,
       "employees":employeesController.text,
       "country":countryController.text
 

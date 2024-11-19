@@ -21,7 +21,10 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
             Scaffold(
               backgroundColor: CupertinoColors.white,
               appBar: _buildSearchAppBar(controller),
-              body: _mainScreen(controller, context),
+              body: RefreshIndicator(child: _mainScreen(controller, context),
+                  onRefresh: ()async{
+                   await controller.refreshDataIndicator();
+              })
             )));
   }
 
@@ -39,7 +42,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
             color: Colors.black,
           ),
           decoration: InputDecoration(
-            hintText: 'Search services...',
+            hintText: 'Search Service Categories...',
             hintStyle: MontserratStyles.montserratRegularTextStyle(
               size: 16,
               color: Colors.black54,
@@ -563,12 +566,11 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                       size: 16, color: Colors.grey),
                 ),
                 SizedBox(height: 8),
+                // Replace your existing image selection Row with this:
                 Row(
                   children: [
                     InkWell(
-                      onTap: () {
-                        // Add icon selection logic here
-                      },
+                      onTap: () => controller.showImagePickerDialog(),
                       child: Container(
                         width: 80,
                         height: 80,
@@ -576,19 +578,43 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Icon(
-                            FontAwesomeIcons.upload, size: 32, color: appColor),
+                        child: Obx(() => controller.selectedImage.value != null
+                            ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            controller.selectedImage.value!,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                            : Icon(FontAwesomeIcons.upload, size: 32, color: appColor),
+                        ),
                       ),
                     ),
                     SizedBox(width: 16),
-                    Text(
-                      "Upload Image",
-                      style: MontserratStyles.montserratRegularTextStyle(
-                          size: 16, color: Colors.grey),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Upload Image",
+                            style: MontserratStyles.montserratRegularTextStyle(
+                              size: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          if (controller.isImageSelected.value)
+                            TextButton(
+                              onPressed: () => controller.clearSelectedImage(),
+                              child: Text(
+                                "Clear Selection",
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-                SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -618,7 +644,6 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                             size: 16, color: Colors.white),
                       ),
                     ),
-
                   ],
                 ),
               ],
@@ -713,8 +738,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                       onChanged: (String? newValue) {
                         if (newValue != null) {
                           selectedType = newValue;
-                          // You might want to use setState here if this is a StatefulWidget
-                          // or use a state management solution like GetX to update the UI
+
                         }
                       },
                     ),
@@ -727,12 +751,11 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                       size: 16, color: Colors.grey),
                 ),
                 SizedBox(height: 8),
+                // Replace your existing image selection Row with this:
                 Row(
                   children: [
                     InkWell(
-                      onTap: () {
-                        // Add icon selection logic here
-                      },
+                      onTap: () => controller.showImagePickerDialog(),
                       child: Container(
                         width: 80,
                         height: 80,
@@ -740,19 +763,43 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Icon(
-                            FontAwesomeIcons.upload, size: 32, color: appColor),
+                        child: Obx(() => controller.selectedImage.value != null
+                            ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            controller.selectedImage.value!,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                            : Icon(FontAwesomeIcons.upload, size: 32, color: appColor),
+                        ),
                       ),
                     ),
                     SizedBox(width: 16),
-                    Text(
-                      "Upload Image",
-                      style: MontserratStyles.montserratRegularTextStyle(
-                          size: 16, color: Colors.grey),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Upload Image",
+                            style: MontserratStyles.montserratRegularTextStyle(
+                              size: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          if (controller.isImageSelected.value)
+                            TextButton(
+                              onPressed: () => controller.clearSelectedImage(),
+                              child: Text(
+                                "Clear Selection",
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-                SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [

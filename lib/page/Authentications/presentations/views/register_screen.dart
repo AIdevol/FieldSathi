@@ -19,7 +19,8 @@ import 'otp_view_screen.dart';
 
 class RegisterScreen extends GetView<RegisterScreenController> {
   final formGlobalKey = GlobalKey<FormState>();
-  final RegisterScreenController controller = Get.put(RegisterScreenController());
+  final RegisterScreenController controller = Get.put(
+      RegisterScreenController());
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,9 @@ class RegisterScreen extends GetView<RegisterScreenController> {
               appBar: AppBar(
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
+                leading: IconButton(onPressed: () => Get.back(),
+                    icon: Icon(
+                        Icons.arrow_back_ios, size: 22, color: Colors.black87)),
               ),
               body: _mainScreen(context),
             ),
@@ -57,7 +60,10 @@ class RegisterScreen extends GetView<RegisterScreenController> {
         Positioned(
           left: 0,
           right: 0,
-          top: MediaQuery.of(context).size.height * 0.30,
+          top: MediaQuery
+              .of(context)
+              .size
+              .height * 0.30,
           bottom: 0,
           child: SingleChildScrollView(
             child: Container(
@@ -135,7 +141,8 @@ class RegisterScreen extends GetView<RegisterScreenController> {
             textInputType: TextInputType.emailAddress,
             focusNode: controller.emailFocusNode,
             onFieldSubmitted: (String? value) {
-              FocusScope.of(context).requestFocus(controller.companyNameFocusNode);
+              FocusScope.of(context).requestFocus(
+                  controller.companyNameFocusNode);
             },
             labletext: "Email".tr,
             prefix: Icon(FeatherIcons.mail, color: Colors.black),
@@ -150,7 +157,8 @@ class RegisterScreen extends GetView<RegisterScreenController> {
             textInputType: TextInputType.text,
             focusNode: controller.companyNameFocusNode,
             onFieldSubmitted: (String? value) {
-              FocusScope.of(context).requestFocus(controller.employeesFocusNode);
+              FocusScope.of(context).requestFocus(
+                  controller.employeesFocusNode);
             },
             labletext: "Company Name".tr,
             prefix: Icon(FeatherIcons.briefcase, color: Colors.black),
@@ -185,11 +193,12 @@ class RegisterScreen extends GetView<RegisterScreenController> {
             },
             labletext: "Country".tr,
             prefix: Icon(FeatherIcons.globe, color: Colors.black),
-            suffix:const Icon(Icons.arrow_drop_down, color: Colors.black,size: 30,),
+            suffix: const Icon(
+              Icons.arrow_drop_down, color: Colors.black, size: 30,),
             validator: (value) {
               return value?.isEmptyField(messageTitle: "country");
             },
-            onTap: ()=> _openCountryPicker(context),
+            onTap: () => _openCountryPicker(context),
           ),
           vGap(20),
           InkWell(
@@ -230,15 +239,20 @@ class RegisterScreen extends GetView<RegisterScreenController> {
     return Text.rich(
       TextSpan(
           text: "Already have an account? ".tr,
-          style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: Colors.black45),
+          style: MontserratStyles.montserratSemiBoldTextStyle(
+              size: 15,
+              color: Colors.black45
+          ),
           children: [
             TextSpan(
               text: "Login".tr,
-              recognizer: new TapGestureRecognizer()
+              recognizer: TapGestureRecognizer()
                 ..onTap = () {
                   Get.offAllNamed(AppRoutes.login);
                 },
-              style: MontserratStyles.montserratSemiBoldTextStyle(color: appColor),
+              style: MontserratStyles.montserratSemiBoldTextStyle(
+                  color: appColor
+              ),
             ),
           ]
       ),
@@ -250,25 +264,38 @@ class RegisterScreen extends GetView<RegisterScreenController> {
       ),
     );
   }
+
   void _openCountryPicker(BuildContext context) {
+    // Set initial country code for India
+    const String defaultCountry = 'IN';
+
     showModalBottomSheet(
       backgroundColor: CupertinoColors.white,
       context: context,
-      builder: (context) => CountryCodePicker(
-        onChanged: (countryCode) {
-          // Set the selected country in the controller
-          controller.countryController.text = countryCode.name ?? '';
-          Navigator.of(context).pop(); // Close the modal after selection
-        },
-        initialSelection: controller.countryController.text,
-        showCountryOnly: true,
-        favorite: ['+1','US','+91', 'IN', ],
-        showOnlyCountryWhenClosed: true,
-        alignLeft: true,
-      ),
+      builder: (context) =>
+          CountryCodePicker(
+            onChanged: (countryCode) {
+              controller.countryController.text = countryCode.name ?? '';
+              controller.selectedCountry = countryCode;
+              controller.update();
+              Navigator.pop(context);
+            },
+            initialSelection: defaultCountry,
+            showCountryOnly: true,
+            favorite: const ['+91', 'IN', '+1', 'US'],
+            // Moved India to first position
+            showOnlyCountryWhenClosed: true,
+            alignLeft: true,
+            showFlag: true,
+            showFlagDialog: true,
+          ),
     );
   }
+
   Container _showCountryPicker({required BuildContext context}) {
+    // Set initial country code for India
+    const String defaultCountry = 'IN';
+
     return Container(
       child: CountryCodePicker(
         onChanged: (CountryCode countryCode) {
@@ -277,8 +304,8 @@ class RegisterScreen extends GetView<RegisterScreenController> {
           controller.update();
           Navigator.pop(context);
         },
-        initialSelection: 'IN',
-        favorite: ['+1', 'US', '+91', 'IN'],
+        initialSelection: defaultCountry,
+        favorite: const ['+91', 'IN', '+1', 'US'],
         showCountryOnly: true,
         showOnlyCountryWhenClosed: true,
         alignLeft: false,
@@ -289,7 +316,9 @@ class RegisterScreen extends GetView<RegisterScreenController> {
             leading: Container(
               width: 30,
               height: 20,
-              child: countryCode != null ? Text(countryCode.flagUri ?? '') : SizedBox(),
+              child: countryCode != null
+                  ? Text(countryCode.code ?? '')
+                  : const SizedBox(),
             ),
             title: Text(countryCode?.name ?? ''),
             trailing: Text(countryCode?.dialCode ?? ''),
@@ -297,58 +326,5 @@ class RegisterScreen extends GetView<RegisterScreenController> {
         },
       ),
     );
-    // showModalBottomSheet(
-    //   context: context,
-    //   isScrollControlled: true,
-    //   shape: RoundedRectangleBorder(
-    //     borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-    //   ),
-    //   builder: (BuildContext context) {
-    //     return Container(
-    //       height: MediaQuery.of(context).size.height * 0.7,
-    //       child: Column(
-    //         children: [
-    //           Padding(
-    //             padding: const EdgeInsets.all(16.0),
-    //             child: Text(
-    //               'Select Country',
-    //               style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 18),
-    //             ),
-    //           ),
-    //           Expanded(
-    //             child: CountryCodePicker(
-    //               onChanged: (CountryCode countryCode) {
-    //                 controller.countryController.text = countryCode.name ?? '';
-    //                 controller.selectedCountry = countryCode;
-    //                 controller.update();
-    //                 Navigator.pop(context);
-    //               },
-    //               initialSelection: 'IN',
-    //               favorite: ['+1', 'US', '+91', 'IN'],
-    //               showCountryOnly: true,
-    //               showOnlyCountryWhenClosed: true,
-    //               alignLeft: false,
-    //               showFlag: true,
-    //               showFlagDialog: true,
-    //               builder: (CountryCode? countryCode) {
-    //                 return ListTile(
-    //                   leading: Container(
-    //                     width: 30,
-    //                     height: 20,
-    //                     child: countryCode != null ? Text(countryCode.flagUri ?? '') : SizedBox(),
-    //                   ),
-    //                   title: Text(countryCode?.name ?? ''),
-    //                   trailing: Text(countryCode?.dialCode ?? ''),
-    //                 );
-    //               },
-    //             ),
-    //           ),
-    //         ],
-    //       ),
-    //     );
-    //   },
-    // );
   }
-
-
 }

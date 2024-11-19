@@ -6,9 +6,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tms_sathi/constans/role_based_keys.dart';
+import 'package:tms_sathi/page/home/presentations/controllers/home_screen_controller.dart';
 
 import '../../../../constans/color_constants.dart';
 import '../../../../constans/string_const.dart';
+import '../../../../main.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../../utilities/helper_widget.dart';
@@ -40,7 +43,10 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
 
       backgroundColor: Colors.transparent,
       elevation: 0,
-      leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
+      leading: IconButton(onPressed: (){
+       // Get.find<HomeScreenController>().fetchTicketsApiCall();
+        Get.back();
+      }, icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
     );
   }
 
@@ -108,6 +114,18 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
           ),
           const SizedBox(height: 20),
           _buildImagePickerWidget(),
+          // FutureBuilder<Widget>(
+          //   future: _buildForm(context),
+          //   builder: (context, snapshot) {
+          //     if (snapshot.connectionState == ConnectionState.waiting) {
+          //       return const Center(child: CircularProgressIndicator());
+          //     }
+          //     if (snapshot.hasError) {
+          //       return Center(child: Text('Error: ${snapshot.error}'));
+          //     }
+          //     return snapshot.data ?? Container();
+          //   },
+          // )
           _buildForm(context),
         ],
       ),
@@ -186,6 +204,8 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
   }
 
   Widget _buildForm(BuildContext context) {
+    // final currentUser =  storage.read(userRole);
+    // final isAdmin = currentUser.role == 'admin';
     return Form(
       key: _formKey,
       child: Column(
@@ -201,21 +221,26 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
           ),
           vGap(16),
           _buildTextField(
-            onIconPressed: (){},
+            onIconPressed: controller.isAdmin ? (){} : null,
             hintText: "Email".tr,
             controller: controller.emailController,
-            focusNode: controller.emailFocusNode,
-            nextFocusNode: controller.phoneFocusNode,
+            focusNode: controller.isAdmin ? controller.emailFocusNode : null,
+            nextFocusNode: controller.isAdmin ? controller.phoneFocusNode : null,
             icon: FeatherIcons.mail,
             keyboardType: TextInputType.emailAddress,
+            readOnly: !controller.isAdmin,
+            enabled: controller.isAdmin,
           ),
           vGap(16),
           _buildPhoneTextField(
-            onIconPressed: (){},
+            onIconPressed:  controller.isAdmin? (){}: null,
             hintText: "Phone Number".tr,
             Controller: controller.phoneController,
-            focusNode: controller.phoneFocusNode,
-            nextFocusNode: controller.companyNameFocusNode,
+            focusNode: controller.isAdmin? controller.phoneFocusNode: null,
+            nextFocusNode: controller.isAdmin? controller.companyNameFocusNode: null,
+            keyboardType: TextInputType.phone,
+            readOnly: !controller.isAdmin,
+            enabled: controller.isAdmin,
             // icon: FeatherIcons.phone,
           ),
           vGap(16),
@@ -259,11 +284,13 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
   Widget _buildTextField({
     required String hintText,
     required TextEditingController controller,
-    required FocusNode focusNode,
-    required FocusNode nextFocusNode,
-    required VoidCallback onIconPressed,
+    required FocusNode? focusNode,  // Make focusNode optional
+    FocusNode? nextFocusNode,      // Make nextFocusNode optional
+    VoidCallback? onIconPressed,    // Make onIconPressed optional
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
+    bool readOnly = false,          // Add readOnly parameter
+    bool enabled = true,            // Add enabled parameter
   }) {
     return CustomTextField(
       hintText: hintText,
@@ -271,24 +298,41 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
       textInputType: keyboardType,
       textCapitalization: TextCapitalization.words,
       focusNode: focusNode,
-      onFieldSubmitted: (_) => FocusScope.of(Get.context!).requestFocus(nextFocusNode),
+      readOnly: readOnly,           // Add readOnly property
+      enabled: enabled,             // Add enabled property
+      onFieldSubmitted: nextFocusNode != null
+          ? (_) => FocusScope.of(Get.context!).requestFocus(nextFocusNode)
+          : null,
       labletext: hintText,
-      prefix: Icon(icon, color: Colors.black),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return "$hintText is required";
-          }
-          if (keyboardType == TextInputType.emailAddress ||
-              keyboardType == TextInputType.number) {
-            return null;
-          }
-          if (value.isNotEmpty && !value[0].toUpperCase().contains(RegExp(r'[A-Z]'))) {
-            return "$hintText should start with a capital letter";
+      prefix: Icon(icon, color: enabled ? Colors.black : Colors.grey),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "$hintText is required";
+        }
+
+        // For email fields, add email validation
+        if (keyboardType == TextInputType.emailAddress) {
+          final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+          if (!emailRegExp.hasMatch(value)) {
+            return "Please enter a valid email address";
           }
           return null;
-        },/*value?.isEmpty ?? true ? "$hintText is required" : null*/
-      onChanged: (value) {
+        }
+
+        // For other fields, keep the capital letter validation
+        if (keyboardType == TextInputType.number) {
+          return null;
+        }
         if (value.isNotEmpty && !value[0].toUpperCase().contains(RegExp(r'[A-Z]'))) {
+          return "$hintText should start with a capital letter";
+        }
+        return null;
+      },
+      onChanged: (value) {
+        // Only apply capitalization for non-email fields
+        if (keyboardType != TextInputType.emailAddress &&
+            value.isNotEmpty &&
+            !value[0].toUpperCase().contains(RegExp(r'[A-Z]'))) {
           final capitalizedValue = value[0].toUpperCase() + value.substring(1);
           controller.value = TextEditingValue(
             text: capitalizedValue,
@@ -297,16 +341,17 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
         }
       },
     );
-
   }
-  
 
   Widget _buildPhoneTextField({
     required String hintText,
     required TextEditingController Controller,
-    required FocusNode focusNode,
-    required FocusNode nextFocusNode,
-    required VoidCallback onIconPressed,
+    TextInputType keyboardType = TextInputType.text,
+  FocusNode? focusNode,
+    FocusNode ?nextFocusNode,
+     VoidCallback? onIconPressed,
+    bool readOnly = false,          // Add readOnly parameter
+    bool enabled = true,
   }) {
     return CustomTextField(
       hintText: hintText,

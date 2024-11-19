@@ -24,9 +24,13 @@ class SuperViewScreen extends GetView<SuperViewScreenController>{
         backgroundColor: appColor,
         leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
         actions: [
+          IconButton(onPressed: ()async{
+            await controller.refreshSupperData();
+          }, icon: Icon(Icons.refresh)),
           IconButton(onPressed: (){
             Get.toNamed(AppRoutes.addSuperuserViewScreen);
-          }, icon: Icon(FeatherIcons.plus))],
+          }, icon: Icon(FeatherIcons.plus)),
+        ],
       ),
       body: Column(
         children: [

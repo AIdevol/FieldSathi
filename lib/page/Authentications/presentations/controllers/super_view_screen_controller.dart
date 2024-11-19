@@ -43,4 +43,8 @@ class SuperViewScreenController extends GetxController{
       toast(error.toString());
     });
   }
+
+  Future<void> refreshSupperData()async{
+    hitsuperUserApiCall();
+  }
 }

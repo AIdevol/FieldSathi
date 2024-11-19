@@ -21,6 +21,7 @@ const String attendanceId = 'attendanceId';
 const String technicianId = 'technicianId';
 const String ticketId = 'ticketId';
 const String serviceRequestsId = 'serviceRequestsId';
+const String  calendarId = 'calenderId';
 
 const String FIRST_TIME_KEY = 'is_first_time_launch';
 
