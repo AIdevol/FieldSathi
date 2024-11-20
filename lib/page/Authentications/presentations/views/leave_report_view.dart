@@ -1,418 +1,22 @@
-// import 'package:flutter/material.dart';
-// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-// import 'package:get/get.dart';
-// import 'package:pluto_grid/pluto_grid.dart';
-// import 'package:tms_sathi/constans/color_constants.dart';
-// import 'package:tms_sathi/navigations/navigation.dart';
-// import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
-// import 'package:tms_sathi/page/Authentications/presentations/controllers/LeaveReportViewScreenController.dart';
-// import 'package:tms_sathi/response_models/leaves_response_model.dart';
-// import 'package:intl/intl.dart';
-//
-// import '../../../home/widget/leave_update_screen.dart';
-//
-// class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
-//   late final PlutoGridStateManager stateManager;
-//
-//   final List<PlutoColumn> columns = [
-//     PlutoColumn(
-//       title: 'Sr. No.',
-//       field: 'srNo',
-//       type: PlutoColumnType.number(),
-//       width: 70,
-//       frozen: PlutoColumnFrozen.start,
-//     ),
-//     PlutoColumn(
-//       title: 'Name',
-//       field: 'name',
-//       type: PlutoColumnType.text(),
-//       width: 150,
-//     ),
-//     PlutoColumn(
-//       title: 'Phone',
-//       field: 'phone',
-//       type: PlutoColumnType.text(),
-//       width: 120,
-//     ),
-//     PlutoColumn(
-//       title: 'Role',
-//       field: 'role',
-//       type: PlutoColumnType.text(),
-//       width: 100,
-//     ),
-//     PlutoColumn(
-//       title: 'From Date',
-//       field: 'fromDate',
-//       type: PlutoColumnType.date(),
-//       width: 110,
-//     ),
-//     PlutoColumn(
-//       title: 'To Date',
-//       field: 'toDate',
-//       type: PlutoColumnType.date(),
-//       width: 110,
-//     ),
-//     PlutoColumn(
-//       title: 'Days',
-//       field: 'days',
-//       type: PlutoColumnType.number(),
-//       width: 70,
-//     ),
-//     PlutoColumn(
-//       title: 'Reason',
-//       field: 'reason',
-//       type: PlutoColumnType.text(),
-//       width: 200,
-//     ),
-//     PlutoColumn(
-//       title: 'Status',
-//       field: 'status',
-//       type: PlutoColumnType.text(),
-//       width: 100,
-//     ),
-//     PlutoColumn(
-//       title: 'Leave Type',
-//       field: 'leaveType',
-//       type: PlutoColumnType.text(),
-//       width: 120,
-//     ),
-//     PlutoColumn(
-//       title: 'Actions',
-//       field: 'actions',
-//       type: PlutoColumnType.text(),
-//       width: 100,
-//       renderer: (rendererContext) {
-//         return ElevatedButton(onPressed: (){}, child: Text('Update Status', style: MontserratStyles.montserratSemiBoldTextStyle(size: 13, color: Colors.black),));
-//         /*IconButton(
-//           icon: Icon(Icons.info),
-//           onPressed: () {}*//*=> controller.showLeaveDetails(
-//             controller.filteredLeaves[rendererContext.rowIdx],
-//           ),*//*
-//         );*/
-//       },
-//     ),
-//   ];
-//
-//   List<PlutoRow> getRows(List<Results> leaves) {
-//     return leaves.asMap().entries.map((entry) {
-//       final index = entry.key;
-//       final leave = entry.value;
-//       return PlutoRow(cells: {
-//         'srNo': PlutoCell(value: index + 1),
-//         'name': PlutoCell(value: '${leave.userId?.firstName ?? ''} ${leave.userId?.lastName ?? ''}'),
-//         'phone': PlutoCell(value: leave.userId?.phoneNumber ?? ''),
-//         'role': PlutoCell(value: leave.userId?.role ?? ''),
-//         'fromDate': PlutoCell(value: DateTime.parse(leave.startDate ?? '')),
-//         'toDate': PlutoCell(value: DateTime.parse(leave.endDate ?? '')),
-//         'days': PlutoCell(value: controller.calculateDays(
-//           DateTime.parse(leave.startDate ?? ''),
-//           DateTime.parse(leave.endDate ?? ''),
-//         )),
-//         'reason': PlutoCell(value: leave.reason ?? ''),
-//         'status': PlutoCell(value: leave.status ?? ''),
-//         'leaveType': PlutoCell(value: leave.leaveType ?? ''),
-//         'actions': PlutoCell(value: ''),
-//       });
-//     }).toList();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         backgroundColor: appColor,
-//         title: Text('Leaves',
-//             style: MontserratStyles.montserratBoldTextStyle(
-//                 size: 18,
-//                 color: Colors.black
-//             )
-//         ),
-//         actions: [
-//           IconButton(
-//             icon: Icon(Icons.refresh),
-//             onPressed: controller.hitLeavesApiCall,
-//           ),
-//           IconButton(
-//             icon: Icon(Icons.add, size: 30),
-//             onPressed: () => Get.toNamed(AppRoutes.leaveUpdateScreen),
-//           ),
-//         ],
-//       ),
-//       body: Column(
-//         children: [
-//           _buildTopBar(),
-//           _buildSearchBar(),
-//           Expanded(
-//             child: Obx(() => controller.isLoading.value
-//                 ? Center(child: CircularProgressIndicator())
-//                 : _buildPlutoGrid()),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   Widget _buildTopBar() {
-//     return Container(
-//       padding: EdgeInsets.all(8.0),
-//       child: Row(
-//         children: [
-//           Expanded(child: _buildFilterDropdown()),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   Widget _buildFilterDropdown() {
-//     return Obx(() => DropdownButton(
-//       value: controller.selectedFilter.value,
-//       items: controller.filterTypes.map((String value) {
-//         return DropdownMenuItem(
-//           value: value,
-//           child: Text(value),
-//         );
-//       }).toList(),
-//       onChanged: (String? value) {
-//         controller.updateSelectedFilter(value);
-//         _updateGridFilter();
-//       },
-//     ));
-//   }
-//
-//   Widget _buildSearchBar() {
-//     return Padding(
-//       padding: const EdgeInsets.all(8.0),
-//       child: TextField(
-//         onChanged: (value) {
-//           controller.updateSearchQuery(value);
-//           _updateGridFilter();
-//         },
-//         decoration: const InputDecoration(
-//           labelText: 'Search',
-//           prefixIcon: Icon(Icons.search),
-//           border: OutlineInputBorder(),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   void _updateGridFilter() {
-//     if (stateManager != null) {
-//       stateManager.setFilter((row) {
-//         final searchQuery = controller.searchQuery.value.toLowerCase();
-//         final filter = controller.selectedFilter.value;
-//
-//         bool matchesSearch = true;
-//         if (searchQuery.isNotEmpty) {
-//           matchesSearch = row.cells.values.any((cell) =>
-//               cell.value.toString().toLowerCase().contains(searchQuery)
-//           );
-//         }
-//
-//         bool matchesFilter = true;
-//         if (filter != 'All') {
-//           matchesFilter = row.cells['status']!.value.toString() == filter;
-//         }
-//
-//         return matchesSearch && matchesFilter;
-//       });
-//     }
-//   }
-//
-//   Widget _buildPlutoGrid() {
-//     return PlutoGrid(
-//       columns: columns,
-//       rows: getRows(controller.filteredLeaves),
-//       onLoaded: (PlutoGridOnLoadedEvent event) {
-//         stateManager = event.stateManager;
-//       },
-//       configuration: PlutoGridConfiguration(
-//         columnSize: PlutoGridColumnSizeConfig(
-//           autoSizeMode: PlutoAutoSizeMode.scale,
-//         ),
-//         style: PlutoGridStyleConfig(
-//           gridBorderColor: Colors.grey.shade300,
-//           gridBackgroundColor: Colors.white,
-//           rowHeight: 70,
-//           // columnHeight: 70,
-//           columnTextStyle: MontserratStyles.montserratBoldTextStyle(
-//             size: 13,
-//             color: Colors.black,
-//           ),
-//           cellTextStyle: MontserratStyles.montserratSemiBoldTextStyle(
-//             size: 12,
-//             color: Colors.black,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:pluto_grid/pluto_grid.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/utilities/common_textFields.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/LeaveReportViewScreenController.dart';
 import 'package:tms_sathi/response_models/leaves_response_model.dart';
-import 'package:intl/intl.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
-import '../../../home/widget/leave_update_screen.dart';
-
 class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
-  late final PlutoGridStateManager stateManager;
-
-  final List<PlutoColumn> columns = [
-    PlutoColumn(
-      title: 'No.',
-      field: 'srNo',
-      type: PlutoColumnType.number(),
-      width: 80,
-      frozen: PlutoColumnFrozen.start,
-      titleTextAlign: PlutoColumnTextAlign.center,
-      textAlign: PlutoColumnTextAlign.center,
-    ),
-    PlutoColumn(
-      title: 'Name',
-      field: 'name',
-      type: PlutoColumnType.text(),
-      width: 180,
-      titleTextAlign: PlutoColumnTextAlign.center,
-      textAlign: PlutoColumnTextAlign.center,
-    ),
-    PlutoColumn(
-      title: 'Phone',
-      field: 'phone',
-      type: PlutoColumnType.text(),
-      width: 150,
-      titleTextAlign: PlutoColumnTextAlign.center,
-      textAlign: PlutoColumnTextAlign.center,
-    ),
-    PlutoColumn(
-      title: 'Role',
-      field: 'role',
-      type: PlutoColumnType.text(),
-      width: 120,
-      titleTextAlign: PlutoColumnTextAlign.center,
-      textAlign: PlutoColumnTextAlign.center,
-    ),
-    PlutoColumn(
-      title: 'From Date',
-      field: 'fromDate',
-      type: PlutoColumnType.date(),
-      width: 130,
-      titleTextAlign: PlutoColumnTextAlign.center,
-      textAlign: PlutoColumnTextAlign.center,
-    ),
-    PlutoColumn(
-      title: 'To Date',
-      field: 'toDate',
-      type: PlutoColumnType.date(),
-      width: 130,
-      titleTextAlign: PlutoColumnTextAlign.center,
-      textAlign: PlutoColumnTextAlign.center,
-    ),
-    PlutoColumn(
-      title: 'Days',
-      field: 'days',
-      type: PlutoColumnType.number(),
-      width: 80,
-      titleTextAlign: PlutoColumnTextAlign.center,
-      textAlign: PlutoColumnTextAlign.center,
-    ),
-    PlutoColumn(
-      title: 'Reason',
-      field: 'reason',
-      type: PlutoColumnType.text(),
-      width: 250,
-      titleTextAlign: PlutoColumnTextAlign.center,
-      textAlign: PlutoColumnTextAlign.center,
-    ),
-    PlutoColumn(
-      title: 'Leave',
-      field: 'leaveType',
-      type: PlutoColumnType.text(),
-      width: 140,
-      titleTextAlign: PlutoColumnTextAlign.center,
-      textAlign: PlutoColumnTextAlign.center,
-    ),
-    PlutoColumn(
-      title: 'Status',
-      field: 'status',
-      type: PlutoColumnType.text(),
-      width: 120,
-      titleTextAlign: PlutoColumnTextAlign.center,
-      textAlign: PlutoColumnTextAlign.center,
-    ),
-
-    // PlutoColumn(
-    //   title: 'Actions',
-    //   field: 'actions',
-    //   type: PlutoColumnType.text(),
-    //   width: 150,
-    //   titleTextAlign: PlutoColumnTextAlign.center,
-    //   textAlign: PlutoColumnTextAlign.center,
-    //   renderer: (rendererContext) {
-    //     return Center(
-    //       child: Padding(
-    //         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-    //         child: ElevatedButton(
-    //           onPressed: () {
-    //             _openDropDownFieldforStatusSubmitions();
-    //           },
-    //           style: ElevatedButton.styleFrom(
-    //             backgroundColor: appColor,
-    //             minimumSize: Size(130, 40),
-    //             shape: RoundedRectangleBorder(
-    //               borderRadius: BorderRadius.circular(8),
-    //             ),
-    //           ),
-    //           child: Text(
-    //             'Update Status',
-    //             style: MontserratStyles.montserratSemiBoldTextStyle(
-    //               size: 12,
-    //               color: Colors.black,
-    //             ),
-    //           ),
-    //         ),
-    //       ),
-    //     );
-    //   },
-    // ),
-  ];
-
-  List<PlutoRow> getRows(List<Results> leaves) {
-    return leaves.asMap().entries.map((entry) {
-      final index = entry.key;
-      final leave = entry.value;
-      return PlutoRow(cells: {
-        'srNo': PlutoCell(value: index + 1),
-        'name': PlutoCell(value: '${leave.userId?.firstName ?? ''} ${leave.userId?.lastName ?? ''}'),
-        'phone': PlutoCell(value: leave.userId?.phoneNumber ?? ''),
-        'role': PlutoCell(value: leave.userId?.role ?? ''),
-        'fromDate': PlutoCell(value: DateTime.parse(leave.startDate ?? '')),
-        'toDate': PlutoCell(value: DateTime.parse(leave.endDate ?? '')),
-        'days': PlutoCell(value: controller.calculateDays(
-          DateTime.parse(leave.startDate ?? ''),
-          DateTime.parse(leave.endDate ?? ''),
-        )),
-        'reason': PlutoCell(value: leave.reason ?? ''),
-        'leaveType': PlutoCell(value: leave.leaveType ?? ''),
-        'status': PlutoCell(value: leave.status ?? ''),
-        // 'actions': PlutoCell(value: ''),
-      });
-    }).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
+        leading: IconButton(
+            onPressed: () => Get.back(),
+            icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)
+        ),
         backgroundColor: appColor,
         title: Text(
           'Leaves',
@@ -439,8 +43,8 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
           Expanded(
             child: Obx(
                   () => controller.isLoading.value
-                  ? Center(child: Container())
-                  : _buildPlutoGrid(),
+                  ? Center(child: CircularProgressIndicator())
+                  : _buildDataTable(),
             ),
           ),
         ],
@@ -450,7 +54,7 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
 
   Widget _buildTopBar() {
     return Container(
-      padding: EdgeInsets.all(8.0),
+      padding: EdgeInsets.all(16),
       child: Row(
         children: [
           Expanded(child: _buildFilterDropdown()),
@@ -461,33 +65,36 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
 
   Widget _buildFilterDropdown() {
     return Obx(
-          () => DropdownButton<String>(
+          () => Container(
+        padding: EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: DropdownButton<String>(
           value: controller.selectedFilter.value,
           items: controller.filterTypes.map((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(
-              value,
-              style: MontserratStyles.montserratSemiBoldTextStyle(
-                size: 14,
-                color: Colors.black,
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value,
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 14,
+                  color: Colors.black,
+                ),
               ),
-            ),
-          );
-        }).toList(),
-        onChanged: (String? value) {
-          controller.updateSelectedFilter(value);
-          _updateGridFilter();
-        },
-        style: MontserratStyles.montserratRegularTextStyle(
-          size: 14,
-          color: Colors.black,
-        ),
-        icon: Icon(Icons.arrow_drop_down, color: Colors.black),
-        isExpanded: true,
-        underline: Container(
-          height: 1,
-          color: Colors.grey.shade400,
+            );
+          }).toList(),
+          onChanged: (String? value) {
+            controller.updateSelectedFilter(value);
+          },
+          style: MontserratStyles.montserratRegularTextStyle(
+            size: 14,
+            color: Colors.black,
+          ),
+          icon: Icon(Icons.arrow_drop_down, color: Colors.black),
+          isExpanded: true,
+          underline: Container(),
         ),
       ),
     );
@@ -495,11 +102,10 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
       child: TextField(
         onChanged: (value) {
           controller.updateSearchQuery(value);
-          _updateGridFilter();
         },
         style: MontserratStyles.montserratSemiBoldTextStyle(
           size: 14,
@@ -518,7 +124,7 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.black,)
+            borderSide: BorderSide(color: Colors.black),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
@@ -529,126 +135,192 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
     );
   }
 
-  void _updateGridFilter() {
-    if (stateManager != null) {
-      stateManager.setFilter((row) {
-        final searchQuery = controller.searchQuery.value.toLowerCase();
-        final filter = controller.selectedFilter.value;
-
-        bool matchesSearch = true;
-        if (searchQuery.isNotEmpty) {
-          matchesSearch = row.cells.values.any((cell) =>
-              cell.value.toString().toLowerCase().contains(searchQuery));
-        }
-
-        bool matchesFilter = true;
-        if (filter != 'All') {
-          matchesFilter = row.cells['status']!.value.toString() == filter;
-        }
-
-        return matchesSearch && matchesFilter;
-      });
-    }
-  }
-
-  Widget _buildPlutoGrid() {
-    return PlutoGrid(
-      columns: columns,
-      rows: getRows(controller.filteredLeaves),
-      onLoaded: (PlutoGridOnLoadedEvent event) {
-        stateManager = event.stateManager;
-      },
-      configuration: PlutoGridConfiguration(
-        columnSize: PlutoGridColumnSizeConfig(
-          autoSizeMode: PlutoAutoSizeMode.none,
-        ),
-        style: PlutoGridStyleConfig(
-          gridBorderColor: Colors.grey.shade300,
-          gridBackgroundColor: Colors.white,
-          rowHeight: 60,
-          columnHeight: 50,
-          columnTextStyle: MontserratStyles.montserratBoldTextStyle(
-            size: 13,
-            color: Colors.black,
-          ),
-          cellTextStyle: MontserratStyles.montserratSemiBoldTextStyle(
-            size: 12,
-            color: Colors.black,
-          ),
-          defaultCellPadding: EdgeInsets.symmetric(horizontal: 10),
-          gridBorderRadius: BorderRadius.circular(8),
-        ),
-        columnFilter: PlutoGridColumnFilterConfig(
-          filters: const [
-            ...FilterHelper.defaultFilters,
-          ],
-          resolveDefaultColumnFilter: (column, resolver) {
-            if (column.field == 'srNo') {
-              return resolver<PlutoFilterTypeContains>() as PlutoFilterType;
-            } else if (column.field == 'fromDate' || column.field == 'toDate') {
-              return resolver<PlutoFilterTypeGreaterThan>() as PlutoFilterType;
-            }
-            return resolver<PlutoFilterTypeContains>() as PlutoFilterType;
-          },
+  Widget _buildDataTable() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(16),
+          child: Obx(() {
+            final filteredData = controller.filteredLeaves;
+            return DataTable(
+              headingRowColor: MaterialStateColor.resolveWith((states) => appColor.withOpacity(0.1)),
+              dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
+              columnSpacing: 20,
+              horizontalMargin: 12,
+              headingRowHeight: 50,
+              dataRowHeight: 60,
+              headingTextStyle: MontserratStyles.montserratBoldTextStyle(
+                size: 13,
+                color: Colors.black,
+              ),
+              dataTextStyle: MontserratStyles.montserratSemiBoldTextStyle(
+                size: 12,
+                color: Colors.black,
+              ),
+              columns: [
+                DataColumn(label: Text('No.')),
+                DataColumn(label: Text('Name')),
+                DataColumn(label: Text('Phone')),
+                DataColumn(label: Text('Role')),
+                DataColumn(label: Text('From Date')),
+                DataColumn(label: Text('To Date')),
+                DataColumn(label: Text('Days')),
+                DataColumn(label: Text('Reason')),
+                DataColumn(label: Text('Leave Type')),
+                DataColumn(label: Text('Status')),
+                DataColumn(label: Text('Actions')),
+              ],
+              rows: List<DataRow>.generate(
+                filteredData.length,
+                    (index) {
+                  final leave = filteredData[index];
+                  return DataRow(
+                    cells: [
+                      DataCell(Text('${index + 1}')),
+                      DataCell(Text('${leave.userId?.firstName ?? ''} ${leave.userId?.lastName ?? ''}')),
+                      DataCell(Text(leave.userId?.phoneNumber ?? '')),
+                      DataCell(Text(leave.userId?.role ?? '')),
+                      DataCell(Text(_formatDate(leave.startDate))),
+                      DataCell(Text(_formatDate(leave.endDate))),
+                      DataCell(Text(controller.calculateDays(
+                        DateTime.parse(leave.startDate ?? ''),
+                        DateTime.parse(leave.endDate ?? ''),
+                      ).toString())),
+                      DataCell(Text(leave.reason ?? '')),
+                      DataCell(Text(leave.leaveType ?? '')),
+                      DataCell(_buildStatusCell(leave.status ?? '')),
+                      DataCell(_buildActionButton(leave)),
+                    ],
+                  );
+                },
+              ),
+            );
+          }),
         ),
       ),
     );
   }
 
+  Widget _buildStatusCell(String status) {
+    Color statusColor;
+    switch (status.toLowerCase()) {
+      case 'approved':
+        statusColor = Colors.green;
+        break;
+      case 'rejected':
+        statusColor = Colors.red;
+        break;
+      case 'pending':
+        statusColor = Colors.orange;
+        break;
+      default:
+        statusColor = Colors.grey;
+    }
 
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: statusColor),
+      ),
+      child: Text(
+        status,
+        style: MontserratStyles.montserratSemiBoldTextStyle(
+          size: 12,
+          color: statusColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(Results leave) {
+    return ElevatedButton(
+      onPressed: () => _openDropDownFieldforStatusSubmitions(),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: appColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      ),
+      child: Text(
+        'View Details',
+        style: MontserratStyles.montserratBoldTextStyle(
+          size: 12,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null) return '';
+    final date = DateTime.parse(dateStr);
+    return '${date.day}/${date.month}/${date.year}';
+  }
 }
 
-_openDropDownFieldforStatusSubmitions(){
-  final controller  = Get.put(LeaveReportViewScreenController());
-  return Get.dialog(
+void _openDropDownFieldforStatusSubmitions() {
+  final controller = Get.put(LeaveReportViewScreenController());
+  Get.dialog(
     Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
       child: Container(
-        height: Get.height * 0.3,
-        padding: EdgeInsets.all(16),
+        width: 400,
+        padding: EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Update Status", style: MontserratStyles.montserratBoldTextStyle(size: 20, color: Colors.black),),
-            vGap(30),
+            Text(
+              "Update Status",
+              style: MontserratStyles.montserratBoldTextStyle(
+                size: 20,
+                color: Colors.black,
+              ),
+            ),
+            SizedBox(height: 24),
             CustomTextField(
               controller: TextEditingController(
-                  text: controller.defaultSelectedStatus.value
+                text: controller.defaultSelectedStatus.value,
               ),
               hintText: 'Select Status',
               labletext: 'Select Status',
               suffix: Padding(
-                padding: const EdgeInsets.only(left: 8.0,right: 8.0),
-                child: Obx(()=>DropdownButton<String>(
-                  value: controller.defaultSelectedStatus.value,
-                  items: controller.selectedStatus.map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        value,
-                        style: MontserratStyles.montserratSemiBoldTextStyle(
-                          size: 14,
-                          color: Colors.black,
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Obx(
+                      () => DropdownButton<String>(
+                    value: controller.defaultSelectedStatus.value,
+                    items: controller.selectedStatus.map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(
+                          value,
+                          style: MontserratStyles.montserratSemiBoldTextStyle(
+                            size: 14,
+                            color: Colors.black,
+                          ),
                         ),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (String? value) {
-                    controller.updateSelectedStatus(value);
-                    // _updateGridFilter();
-                  },
-                  style: MontserratStyles.montserratRegularTextStyle(
-                    size: 14,
-                    color: Colors.black,
+                      );
+                    }).toList(),
+                    onChanged: (String? value) {
+                      controller.updateSelectedStatus(value);
+                    },
+                    style: MontserratStyles.montserratRegularTextStyle(
+                      size: 14,
+                      color: Colors.black,
+                    ),
+                    icon: Icon(Icons.arrow_drop_down, color: Colors.black),
+                    isExpanded: true,
+                    underline: Container(),
                   ),
-                  icon: Icon(Icons.arrow_drop_down, color: Colors.black),
-                  isExpanded: true,
-                  ),),)
+                ),
               ),
-            vGap(20),
+            ),
+            SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
                 controller.hitUpdateStatusPutAPiCall();
@@ -661,12 +333,14 @@ _openDropDownFieldforStatusSubmitions(){
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: Text("Submit",style: MontserratStyles.montserratSemiBoldTextStyle(size: 15),),
+              child: Text(
+                "Submit",
+                style: MontserratStyles.montserratSemiBoldTextStyle(size: 15),
+              ),
             ),
-        ]
-            ),
+          ],
         ),
       ),
-    );
-
+    ),
+  );
 }

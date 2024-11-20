@@ -8,9 +8,9 @@ import 'package:intl/intl.dart';
 import 'package:tms_sathi/constans/const_local_keys.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/super_view_screen_controller.dart';
-
 import '../../../../constans/color_constants.dart';
 import '../../../../constans/string_const.dart';
+import '../../../../response_models/super_user_response_model.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../../utilities/helper_widget.dart';
@@ -181,7 +181,7 @@ Widget _mainData(SuperViewScreenController controller){
           DataCell(Text(superData.email)),
           DataCell(Text(superData.phoneNumber)),
           DataCell(_buildStatusIndicator(superData.isActive)),
-          DataCell(_dropDownValueViews(controller, SuperUserId))
+          DataCell(_dropDownValueViews(controller, SuperUserId, superData))
         ],
         );
     }).toList()
@@ -257,7 +257,7 @@ Widget _buildStatusIndicator(bool isActive) {
     ),
   );
 }
-Widget _dropDownValueViews(SuperViewScreenController controller, String agentId) {
+Widget _dropDownValueViews(SuperViewScreenController controller, String agentId, Result superData) {
   return Center(
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -266,7 +266,7 @@ Widget _dropDownValueViews(SuperViewScreenController controller, String agentId)
         onSelected: (String result) {
           switch (result) {
             case 'Edit':
-              // _editWidgetOfAgentsDialogValue(controller, Get.context!, agentId, agentData);
+              _editWidgetOfAgentsDialogValue(controller, Get.context!, agentId, superData);
               break;
             case 'Delete':
             // controller.hitUpdateStatusValue(agentId);
@@ -279,6 +279,9 @@ Widget _dropDownValueViews(SuperViewScreenController controller, String agentId)
         itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
           PopupMenuItem<String>(
             value: 'Edit',
+            // onTap: (){
+            //   _editWidgetOfAgentsDialogValue(controller, context, agentId, agentData)
+            // },
             child: ListTile(
               leading: Icon(Icons.edit_calendar_outlined, size: 20, color: Colors.black),
               title: Text('Edit', style: MontserratStyles.montserratBoldTextStyle(
@@ -312,24 +315,187 @@ Widget _dropDownValueViews(SuperViewScreenController controller, String agentId)
     ),
   );
 }
-// void _editWidgetOfAgentsDialogValue(SuperViewScreenController controller, BuildContext context, String agentId, Result agentData) {
-//   controller.firstNameController.text = agentData.firstName ?? '';
-//   controller.lastNameController.text = agentData.lastName ?? '';
-//   controller.emailController.text = agentData.email ?? '';
-//   controller.phoneController.text = agentData.phoneNumber ?? '';
-//
-//   Get.dialog(
-//       Dialog(
-//         insetAnimationDuration: Duration(milliseconds: 3),
-//         child: Container(
-//           height: Get.height,
-//           width: Get.width,
-//           decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-//           child: _form(controller, context, agentId),
-//         ),
-//       )
-//   );
-// }
+void _editWidgetOfAgentsDialogValue(SuperViewScreenController controller, BuildContext context, String agentId, Result agentData) {
+  controller.firstNameController.text = agentData.firstName ?? '';
+  controller.lastNameController.text = agentData.lastName ?? '';
+  controller.emailController.text = agentData.email ?? '';
+  controller.phoneController.text = agentData.phoneNumber ?? '';
+  controller.joiningDateController.text = agentData.dateJoined??"";
+
+  Get.dialog(
+      Dialog(
+        insetAnimationDuration: Duration(milliseconds: 3),
+        child: Container(
+          height: Get.height,
+          width: Get.width,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+          child: _form(controller, context, agentId, agentData),
+        ),
+      )
+  );
+}
+
+Widget _form(SuperViewScreenController controller, BuildContext context, String agentId, Result agentData){
+  return Padding(
+    padding: const EdgeInsets.all(18.0),
+    child: ListView(
+      // controller: ,
+        children: [
+          vGap(20),
+          Text('Edit Manager',style: MontserratStyles.montserratBoldTextStyle(size: 15, color: Colors.black),),
+          Divider(color: Colors.black,),
+          vGap(20),
+          _employeIdField(controller, context, agentId, agentData),
+          vGap(20),
+          _joiningDateField(controller, context),
+          vGap(20),
+          _firstNameField(controller, context),
+          vGap(20),
+          _lastNameField(controller, context),
+          vGap(20),
+          _emailField(controller, context),
+          vGap(20),
+          _phoneNumberField(controller, context),
+          vGap(40),
+          _buildOptionButtons(controller, context),
+          vGap(20),
+        ]
+    ),
+  );
+}
+
+_employeIdField(SuperViewScreenController controller, BuildContext context, String agentId, Result agentData){
+  return CustomTextField(
+    controller: controller.employeeIdController,
+    hintText: 'Employee Id',
+    labletext: 'Employee Id',
+    prefix: Icon(Icons.perm_identity),
+    validator: (value){
+      if (value == null || value.isEmpty) {
+        return 'Please select a Employee Id';
+      };
+      return null;
+    },
+  );
+}
+
+_joiningDateField(SuperViewScreenController controller, BuildContext context) {
+  return CustomTextField(
+    controller: controller.joiningDateController,
+    hintText: 'Joining date',
+    labletext: 'Joining date',
+    validator: (value) {
+      if (value == null || value.isEmpty) {
+        return 'Please select a joining date';
+      }
+      return null;
+    },
+    suffix: IconButton(
+      onPressed: () async {
+        final DateTime? picked = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+        );
+        if (picked != null) {
+          String formattedDate="${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
+          // String formattedDate = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";  /*YYYY-MM-D*/
+          controller.joiningDateController.text = formattedDate;
+        }
+
+      },
+      icon: Icon(Icons.calendar_month_outlined),
+    ),
+  );
+}
+
+
+_firstNameField(SuperViewScreenController controller, BuildContext context){
+  return CustomTextField(
+    controller: controller.firstNameController,
+    hintText: 'First Name',
+    labletext: 'First Name',
+    // prefix: Icon(Icons.),
+  );
+}
+
+_lastNameField(SuperViewScreenController controller, BuildContext context){
+  return CustomTextField(
+    controller: controller.lastNameController,
+    hintText: 'Last Name',
+    labletext: 'Last Name',
+    // prefix: Icon(Icons.)
+
+  );
+}
+
+_emailField(SuperViewScreenController controller, BuildContext context){
+  return CustomTextField(
+    controller: controller.emailController,
+    hintText: 'Email',
+    labletext: 'Email',
+    prefix: Icon(Icons.email
+    ),
+  );
+}
+
+_phoneNumberField(SuperViewScreenController controller, BuildContext context){
+  return CustomTextField(
+    controller: controller.phoneController,
+    hintText: 'Phone Number',
+    labletext: 'Phone Number',
+    textInputType: TextInputType.phone,
+    prefix: Icon(Icons.phone
+    ),
+  );
+}
+
+_buildOptionButtons(SuperViewScreenController controller, BuildContext context) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      ElevatedButton(
+        onPressed: () {
+          // Implement cancel functionality
+          Get.back();
+        },
+        child: Text(
+          'Cancel',
+          style: MontserratStyles.montserratBoldTextStyle(color: Colors.white, size: 13),
+        ),
+        style: _buttonStyle(),
+      ),
+      hGap(20),
+      ElevatedButton(
+        onPressed: () {
+          // controller.hitPostAddSupperApiCallApiCall();
+        },
+        child: Text(
+          'Submit',
+          style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),
+        ),
+        style: _buttonStyle(),
+      )
+    ],
+  );
+}
+
+ButtonStyle _buttonStyle() {
+  return ButtonStyle(
+    backgroundColor: MaterialStateProperty.all(appColor),
+    foregroundColor: MaterialStateProperty.all(Colors.white),
+    padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
+    elevation: MaterialStateProperty.all(5),
+    shape: MaterialStateProperty.all(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+    shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
+  );
+}
+
 void _showImportModelView(BuildContext context,
     SuperViewScreenController controller) {
   WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -29,12 +29,7 @@ class AttendanceMonitorDashboard extends StatelessWidget {
               const SizedBox(height: 20),
               _buildAttendanceChart(),
               const SizedBox(height: 20),
-              _buildAttendanceBoxes(
-                controller.presentCount.value,
-                controller.absentCount.value,
-                controller.idleCount.value,
-                controller.totalCount.value,
-              ),
+              _buildAttendanceBoxes(),
             ],
           ),
         ),
@@ -66,7 +61,7 @@ class AttendanceMonitorDashboard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Total Employees: ${controller.totalCount.value}',
+            'Total Employees: ${controller.totalCount}',
             style: const TextStyle(
               fontSize: 16,
               color: Colors.white70,
@@ -81,24 +76,25 @@ class AttendanceMonitorDashboard extends StatelessWidget {
 
   Widget _buildProgressIndicators() {
     return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildCircularProgress(
             'Present',
-            controller.presentCount.value.toDouble(),
+            controller.presentPercentage.value,
             Colors.green,
           ),
           hGap(10),
           _buildCircularProgress(
             'Absent',
-            controller.absentCount.value.toDouble(),
+            controller.absentPercentage.value,
             Colors.red,
           ),
           hGap(10),
           _buildCircularProgress(
             'Idle',
-            controller.idleCount.value.toDouble(),
+            controller.idlePercentage.value,
             Colors.orange,
           ),
         ],
@@ -164,16 +160,9 @@ class AttendanceMonitorDashboard extends StatelessWidget {
           maxY: controller.totalCount.value.toDouble(),
           lineBarsData: [
             LineChartBarData(
-              spots: [
-                const FlSpot(0, 0),
-                FlSpot(1, controller.presentCount.value.toDouble()),
-                FlSpot(2, (controller.presentCount.value + controller.absentCount.value).toDouble()),
-                FlSpot(3, controller.totalCount.value.toDouble()),
-              ],
+              spots: controller.getGraphSpots(),
               isCurved: true,
-              gradient: LinearGradient(
-                colors: [primaryColor, accentColor],
-              ),
+              gradient: controller.getGraphGradient(),
               barWidth: 4,
               isStrokeCapRound: true,
               dotData: FlDotData(
@@ -205,7 +194,7 @@ class AttendanceMonitorDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildAttendanceBoxes(int present, int absent, int idle, int total) {
+  Widget _buildAttendanceBoxes() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: GridView.count(
@@ -218,25 +207,25 @@ class AttendanceMonitorDashboard extends StatelessWidget {
         children: [
           _buildAttendanceBox(
             'Present',
-            present,
+            controller.presentCount.value,
             Colors.green,
             Image.asset(verifiedPerson, color: textColor, height: 25, width: 25, scale: 2),
           ),
           _buildAttendanceBox(
             'Absent',
-            absent,
+            controller.absentCount.value,
             Colors.red,
             Image.asset(wrongPerson, color: textColor, height: 25, width: 25, scale: 2),
           ),
           _buildAttendanceBox(
             'Idle     ',
-            idle,
+            controller.idleCount.value,
             Colors.amber,
             Image.asset(idleImage, color: textColor, height: 30, width: 30, scale: 2),
           ),
           _buildAttendanceBox(
             'Total  ',
-            total,
+            controller.totalCount.value,
             primaryColor,
             Icon(Icons.group, size: 25),
           ),

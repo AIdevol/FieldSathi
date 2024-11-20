@@ -13,6 +13,13 @@ class SuperViewScreenController extends GetxController{
 
   RxBool isLoading = false.obs;
 
+  final employeeIdController = TextEditingController();
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
+  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
+  final joiningDateController = TextEditingController();
+
 
   @override
   void onInit(){
@@ -22,6 +29,12 @@ class SuperViewScreenController extends GetxController{
 
   @override
   void onClose(){
+    emailController.dispose();
+    phoneController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    employeeIdController.dispose();
+    joiningDateController.dispose();
     super.onClose();
   }
 

@@ -68,7 +68,7 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
       hintText: "Employee Id".tr,
       controller: controller.employeeIdController,
       textInputType: TextInputType.text,
-      focusNode: controller.firstFocusNode,
+      focusNode: controller.employeeIdFocusNode,
       onFieldSubmitted: (String? value) {
         FocusScope.of(Get.context!).requestFocus(controller.lastFocusNode);
       },

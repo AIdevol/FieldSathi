@@ -14,6 +14,13 @@ class TechnicianListViewScreenController extends GetxController {
   RxList<TechnicianResults> filteredTechnicians = <TechnicianResults>[].obs;
   RxBool isTableView = true.obs;
 
+  final employeeIdController = TextEditingController();
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
+  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
+  final joiningDateController = TextEditingController();
+
   @override
   void onInit() {
     super.onInit();
@@ -24,6 +31,12 @@ class TechnicianListViewScreenController extends GetxController {
 
   @override
   void onClose() {
+    emailController.dispose();
+    phoneController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    employeeIdController.dispose();
+    joiningDateController.dispose();
     searchController.dispose();
     super.onClose();
   }

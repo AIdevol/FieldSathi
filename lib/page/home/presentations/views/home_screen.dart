@@ -11,6 +11,7 @@ import 'package:tms_sathi/utilities/helper_widget.dart';
 
 import '../../../../constans/string_const.dart';
 import '../../../../main.dart';
+import '../../../../utilities/aniammted.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../Authentications/presentations/controllers/profile_screen_controller.dart';
 import '../../widget/Ticket_details_monitor_graph.dart';
@@ -223,11 +224,25 @@ class HomeScreen extends GetView<HomeScreenController> {
   }
 
   PreferredSizeWidget _buildAppBar(HomeScreenController controller) {
-    return AppBar(
+    return AnimatedAppBar(
+    title: 'FieldSathi',
+      actions: [
+      IconButton(
+        onPressed: () async {
+          await Get.toNamed(AppRoutes.notificationsScreen);
+        },
+        icon: Icon(Icons.notifications_sharp, size: 25),
+      ),
+      _buildProfileMenu(controller),
+      SizedBox(width: 10),
+    ],
+
+    );
+    /*AppBar(
       backgroundColor: appColor,
-      elevation: 0,
+      elevation: 4,
       title: Text(
-        "TMS_Sathi",
+        "FieldSathi",
         style: MontserratStyles.montserratBoldTextStyle(
           color: blackColor,
           size: 15,
@@ -247,7 +262,7 @@ class HomeScreen extends GetView<HomeScreenController> {
         _buildProfileMenu(controller),
         SizedBox(width: 10),
       ],
-    );
+    );*/
   }
 
   Widget _buildProfileMenu(HomeScreenController controller) {

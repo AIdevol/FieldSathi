@@ -188,13 +188,15 @@ class HomeScreenController extends GetxController{
 
 
   Future<void> refereshAllTicket()async{
+    customLoader.show();
     hitGetuserDetailsApiCall();
     hitGetfsrDetailsApiCall();
     fetchedLeadListApiCall();
     fetchTicketsApiCall();
     hitGetAmcDetailsApiCall();
     hitServiceCategoriesApiCall();
-    checkFirstTimeUser();
+    customLoader.hide();
+    // checkFirstTimeUser();
   }
   
 }

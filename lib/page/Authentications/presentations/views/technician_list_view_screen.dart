@@ -28,7 +28,10 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
               children: [
                 _buildTopBar(context,controller),
                 Expanded(
-                  child: _buildDataTableView(controller))
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: _buildDataTableView(controller, context),
+                  ))
               ],
             ),
           ),
@@ -159,7 +162,7 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
     );
   }
 
-  Widget _buildDataTableView(TechnicianListViewScreenController controller) {
+  Widget _buildDataTableView(TechnicianListViewScreenController controller,BuildContext context) {
     if (controller.isLoading.value) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -174,6 +177,7 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
         child: DataTable(
           columns: [
             _buildTableHeader('Id'),
+            _buildTableHeader('Image'),
             _buildTableHeader('Name'),
             _buildTableHeader('Email'),
             _buildTableHeader('Contact'),
@@ -189,7 +193,8 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
           rows: controller.filteredTechnicians.map((technician) {
             return DataRow(
               cells: [
-                DataCell(_ticketBoxIcons(technician.id.toString())),
+                DataCell(_ticketBoxIcons(technician.id.toString(), technician)),
+                DataCell(_technicianImage(technician.id.toString(), technician)),
                 DataCell(Text("${technician.firstName} ${technician.lastName}")),
                 DataCell(Text(technician.email)),
                 DataCell(Text(technician.phoneNumber)),
@@ -203,7 +208,7 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
                     technician.todayAttendance?['status'] ?? '')),
                 DataCell(Text(technician.batteryStatus  ?? 'N/A')),
                 DataCell(Text(technician.gpsStatus ? 'On' : 'Off')),
-                DataCell(_dropDownValueViews(controller,technician.id.toString(),technician )
+                DataCell(_dropDownValueViews(controller,context, technician.id.toString(),technician )
                   /*Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -286,7 +291,7 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
       return dateTimeStr;
     }
   }
-Widget _dropDownValueViews(TechnicianListViewScreenController controller,
+Widget _dropDownValueViews(TechnicianListViewScreenController controller, BuildContext context,
     String agentId, TechnicianResults agentData) {
   return Center(
     child: Padding(
@@ -296,6 +301,7 @@ Widget _dropDownValueViews(TechnicianListViewScreenController controller,
         onSelected: (String result) {
           switch (result) {
             case 'Edit':
+              _editWidgetOfAgentsDialogValue(controller, context, agentId, agentData);
               // _editWidgetOfAgentsDialogValue(
               //     controller, Get.context!, agentId, agentData);
               break;
@@ -350,7 +356,7 @@ Widget _dropDownValueViews(TechnicianListViewScreenController controller,
     ),
   );
 }
-Widget _ticketBoxIcons(String ticketId) {
+Widget _ticketBoxIcons(String ticketId, TechnicianResults technician) {
   return Center(
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -363,7 +369,7 @@ Widget _ticketBoxIcons(String ticketId) {
         ),
       ),
       child: Text(
-        '$ticketId',
+        '${technician.empId}',
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w600,
@@ -373,7 +379,22 @@ Widget _ticketBoxIcons(String ticketId) {
     ),
   );
 }
-
+Widget _technicianImage(String ticketId, TechnicianResults technician) {
+  return Center(
+    child: Container(
+      // padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      decoration: BoxDecoration(
+        color: normalBlue,
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(
+          color: Colors.blue.shade300,
+          width: 1,
+        ),
+      ),
+      child: CircleAvatar(radius: 25,backgroundImage: technician.profileImage != null?NetworkImage(technician.profileImage): AssetImage(userImageIcon),)
+    ),
+  );
+}
 void _showImportModelView(BuildContext context,TechnicianListViewScreenController controller) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
     showDialog(
@@ -726,558 +747,186 @@ Widget _buildActionButton(
     ),
   );
 }
-// class TechnicianListViewScreen extends GetView<TechnicianListViewScreenController> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MyAnnotatedRegion(
-//       child: GetBuilder<TechnicianListViewScreenController>(
-//         builder: (controller) => Scaffold(
-//           appBar: _buildAppBar(controller),
-//           body: SafeArea(
-//             child: Column(
-//               children: [
-//                 _buildTopBar(controller),
-//                 // _buildStatistics(controller),
-//                 // _buildViewToggle(controller),
-//                 Expanded(
-//                   child: controller.isTableView.value
-//                       ? _buildDataTableView(controller)
-//                       : _buildListView(controller),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   PreferredSizeWidget _buildAppBar(TechnicianListViewScreenController controller) {
-//     return AppBar(
-//       backgroundColor: appColor,
-//       elevation: 0,
-//       title: Text(
-//         "Technician",
-//         style: MontserratStyles.montserratBoldTextStyle(
-//           size: 15,
-//           color: Colors.black,
-//         ),
-//       ),
-//       actions: [
-//         IconButton(
-//           onPressed: () => controller.refreshList(),
-//           icon: Icon(FontAwesomeIcons.rotate),
-//           tooltip: 'Refresh',
-//         ),
-//         IconButton(
-//           onPressed: (){} /*controller.showFilterOptions()*/,
-//           icon: Icon(FontAwesomeIcons.plus),
-//           tooltip: 'Filter',
-//         ),
-//       ],
-//     );
-//   }
-//
-//   Widget _buildTopBar(TechnicianListViewScreenController controller) {
-//     return Container(
-//       height: Get.height * 0.07,
-//       width: Get.width,
-//       decoration: BoxDecoration(
-//         color: whiteColor,
-//         boxShadow: [
-//           BoxShadow(
-//             color: Colors.grey.withOpacity(0.5),
-//             spreadRadius: 1,
-//             blurRadius: 5,
-//             offset: Offset(0, 5),
-//           ),
-//         ],
-//       ),
-//       child: Row(
-//         mainAxisAlignment: MainAxisAlignment.end,
-//         children: [
-//           Expanded(child: _buildSearchField()),
-//           hGap(10),
-//           ElevatedButton(
-//             onPressed: () {} /*_showImportModelView*/,
-//             style: _buttonStyle(),
-//             child: Text(
-//               'Import',
-//               style: MontserratStyles.montserratBoldTextStyle(
-//                 color: whiteColor,
-//                 size: 13,
-//               ),
-//             ),
-//           ),
-//           hGap(10),
-//           ElevatedButton(
-//             onPressed: () {
-//               // controller.exportData(); // Implement this method in your controller
-//             },
-//             child: Text(
-//               'Export',
-//               style: MontserratStyles.montserratBoldTextStyle(
-//                 color: whiteColor,
-//                 size: 13,
-//               ),
-//             ),
-//             style: _buttonStyle(),
-//           ),
-//           hGap(10),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   ButtonStyle _buttonStyle() {
-//     return ElevatedButton.styleFrom(
-//       backgroundColor: appColor,
-//       foregroundColor: Colors.white,
-//       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-//       elevation: 5,
-//       shape: RoundedRectangleBorder(
-//         borderRadius: BorderRadius.circular(10),
-//       ),
-//       shadowColor: Colors.black.withOpacity(0.5),
-//     );
-//   }
-//   Widget _buildSearchField() {
-//     return Container(
-//       height: Get.height * 0.05,
-//       margin: EdgeInsets.symmetric(horizontal: 10),
-//       decoration: BoxDecoration(
-//         color: whiteColor,
-//         borderRadius: BorderRadius.circular(25),
-//         border: Border.all(
-//           width: 1,
-//           color: Colors.grey,
-//         ),
-//       ),
-//       child: TextField(
-//         decoration: InputDecoration(
-//           hintText: "Search",
-//           hintStyle: MontserratStyles.montserratSemiBoldTextStyle(
-//             color: Colors.grey,
-//           ),
-//           prefixIcon: Icon(FeatherIcons.search, color: Colors.grey),
-//           border: InputBorder.none,
-//           contentPadding: EdgeInsets.symmetric(vertical: 10),
-//         ),
-//         style: MontserratStyles.montserratSemiBoldTextStyle(
-//           color: Colors.black,
-//         ),
-//         onChanged: (value) {
-//           // controller.updateSearch(value); // Implement this method in your controller
-//         },
-//       ),
-//     );
-//   }
-//   // Widget _buildStatistics(TechnicianListViewScreenController controller) {
-//   //   return Container(
-//   //     padding: EdgeInsets.all(16),
-//   //     child: Row(
-//   //       children: [
-//   //         _statisticCard(
-//   //           'Total',
-//   //           controller.filteredTechnicians.length.toString(),
-//   //           FontAwesomeIcons.userGear,
-//   //           Colors.blue,
-//   //         ),
-//   //         SizedBox(width: 16),
-//   //         _statisticCard(
-//   //           'Active',
-//   //           controller.activeTechnicians.toString(),
-//   //           FontAwesomeIcons.userCheck,
-//   //           Colors.green,
-//   //         ),
-//   //         SizedBox(width: 16),
-//   //         _statisticCard(
-//   //           'On Leave',
-//   //           controller.techniciansOnLeave.toString(),
-//   //           FontAwesomeIcons.userClock,
-//   //           Colors.orange,
-//   //         ),
-//   //       ],
-//   //     ),
-//   //   );
-//   // }
-//
-//   // Widget _buildViewToggle(TechnicianListViewScreenController controller) {
-//   //   return Container(
-//   //     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-//   //     child: Row(
-//   //       mainAxisAlignment: MainAxisAlignment.end,
-//   //       children: [
-//   //         ToggleButtons(
-//   //           onPressed: (int index) {
-//   //             controller.toggleView(index == 1);
-//   //           },
-//   //           isSelected: [!controller.isTableView.value, controller.isTableView.value],
-//   //           borderRadius: BorderRadius.circular(8),
-//   //           selectedColor: whiteColor,
-//   //           fillColor: appColor,
-//   //           color: Colors.grey,
-//   //           constraints: BoxConstraints(minHeight: 36, minWidth: 64),
-//   //           children: [
-//   //             Icon(Icons.view_list),
-//   //             Icon(Icons.grid_on),
-//   //           ],
-//   //         ),
-//   //       ],
-//   //     ),
-//   //   );
-//   // }
-//   Widget _buildListView(TechnicianListViewScreenController controller) {
-//     return RefreshIndicator(
-//       onRefresh: () async => controller.refreshList(),
-//       child: ListView.separated(
-//         padding: EdgeInsets.all(16),
-//         itemCount: controller.allTechnicians.length,
-//         separatorBuilder: (context, index) => SizedBox(height: 12),
-//         itemBuilder: (context, index) {
-//           final technician = controller.allTechnicians[index];
-//           return _buildTechnicianCard(technician, controller);
-//         },
-//       ),
-//     );
-//   }
-//
-//   Widget _buildDataTableView(TechnicianListViewScreenController controller) {
-//     if (controller.allTechnicians.isEmpty) {
-//       return Center(
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             Icon(Icons.person_off, size: 64, color: Colors.grey),
-//             SizedBox(height: 16),
-//             Text(
-//               'No technicians found',
-//               style: MontserratStyles.montserratMediumTextStyle(
-//                 size: 16,
-//                 color: Colors.grey,
-//               ),
-//             ),
-//           ],
-//         ),
-//       );
-//     }
-//
-//     return RefreshIndicator(
-//       onRefresh: () async => controller.refreshList(),
-//       child: SingleChildScrollView(
-//         padding: EdgeInsets.all(16),
-//         child: Card(
-//           elevation: 4,
-//           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.stretch,
-//             children: [
-//               Container(
-//                 padding: EdgeInsets.all(16),
-//                 decoration: BoxDecoration(
-//                   color: appColor.withOpacity(0.1),
-//                   borderRadius: BorderRadius.only(
-//                     topLeft: Radius.circular(12),
-//                     topRight: Radius.circular(12),
-//                   ),
-//                 ),
-//                 child: Text(
-//                   'Technician List',
-//                   style: MontserratStyles.montserratBoldTextStyle(
-//                     size: 18,
-//                     color: appColor,
-//                   ),
-//                 ),
-//               ),
-//               SingleChildScrollView(
-//                 scrollDirection: Axis.horizontal,
-//                 child: DataTable(
-//                   headingRowColor: MaterialStateProperty.resolveWith<Color>(
-//                         (Set<MaterialState> states) => Colors.grey.shade50,
-//                   ),
-//                   columnSpacing: 20,
-//                   headingRowHeight: 50,
-//                   dataRowHeight: 60,
-//                   horizontalMargin: 20,
-//                   columns: [
-//                     _buildTableHeader('Name'),
-//                     _buildTableHeader('Email'),
-//                     _buildTableHeader('Contact'),
-//                     _buildTableHeader('Status'),
-//                     _buildTableHeader('Check In'),
-//                     _buildTableHeader('Check Out'),
-//                     _buildTableHeader('Battery'),
-//                     _buildTableHeader('GPS'),
-//                     _buildTableHeader('Actions'),
-//                   ],
-//                   rows: controller.allTechnicians.map((technician) {
-//                     return DataRow(
-//                       cells: [
-//                         DataCell(_buildNameCell(technician)),
-//                         DataCell(Text(technician.email ?? '-')),
-//                         DataCell(Text(technician.phoneNumber ?? '-')),
-//                         DataCell(_buildAttendanceStatusBadge(technician.todayAttendance?.status ?? '')),
-//                         DataCell(Text(_formatDateTime(technician.todayAttendance?.checkIn) ?? '-')),
-//                         DataCell(Text(_formatDateTime(technician.todayAttendance?.checkOut) ?? '-')),
-//                         DataCell(_buildBatteryIndicator(technician.batteryStatus ?? '0%')),
-//                         DataCell(_buildGpsStatus(technician.gpsStatus ?? false)),
-//                         DataCell(
-//                           Row(
-//                             mainAxisSize: MainAxisSize.min,
-//                             children: [
-//                               IconButton(
-//                                 icon: Icon(Icons.edit, size: 20),
-//                                 onPressed: () {},
-//                                 color: Colors.blue,
-//                               ),
-//                               IconButton(
-//                                 icon: Icon(Icons.delete, size: 20),
-//                                 onPressed: (){} /*controller.deleteTechnician(technician)*/,
-//                                 color: Colors.red,
-//                               ),
-//                             ],
-//                           ),
-//                         ),
-//                       ],
-//                     );
-//                   }).toList(),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-//   DataColumn _buildTableHeader(String title) {
-//     return DataColumn(
-//       label: Text(
-//         title,
-//         style: MontserratStyles.montserratBoldTextStyle(
-//           size: 14,
-//           color: Colors.black87,
-//         ),
-//       ),
-//     );
-//   }
-//   Widget _buildNameCell(dynamic technician) {
-//     return Row(
-//       mainAxisSize: MainAxisSize.min,
-//       children: [
-//         CircleAvatar(
-//           radius: 16,
-//           backgroundColor: appColor.withOpacity(0.1),
-//           child: Text(
-//             (technician.firstName?[0] ?? '').toUpperCase(),
-//             style: TextStyle(color: appColor),
-//           ),
-//         ),
-//         SizedBox(width: 8),
-//         Text(
-//           '${technician.firstName ?? ''} ${technician.lastName ?? ''}'.trim(),
-//           style: MontserratStyles.montserratSemiBoldTextStyle(size: 14),
-//         ),
-//       ],
-//     );
-//   }
-// // Helper method to format date time
-//   String _formatDateTime(String dateTimeStr) {
-//     try {
-//       final dateTime = DateTime.parse(dateTimeStr);
-//       return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
-//     } catch (e) {
-//       return dateTimeStr;
-//     }
-//   }
-//
-// // Updated status badge specifically for attendance status
-//   Widget _buildAttendanceStatusBadge(String status) {
-//     Color color;
-//     String displayText = status;
-//
-//     switch (status.toLowerCase()) {
-//       case 'present':
-//         color = Colors.green;
-//         break;
-//       case 'absent':
-//         color = Colors.red;
-//         break;
-//       case 'late':
-//         color = Colors.orange;
-//         break;
-//       case 'on_leave':
-//         color = Colors.blue;
-//         displayText = 'On Leave';
-//         break;
-//       default:
-//         color = Colors.grey;
-//     }
-//
-//     return Container(
-//       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-//       decoration: BoxDecoration(
-//         color: color.withOpacity(0.1),
-//         borderRadius: BorderRadius.circular(12),
-//       ),
-//       child: Text(
-//         displayText,
-//         style: TextStyle(
-//           color: color,
-//           fontSize: 12,
-//           fontWeight: FontWeight.bold,
-//         ),
-//       ),
-//     );
-//   }
-//
-// // Updated battery indicator with proper icon selection
-//   Widget _buildBatteryIndicator(String batteryStatus) {
-//     Color color;
-//     IconData icon;
-//
-//     try {
-//       final batteryLevel = int.tryParse(batteryStatus.replaceAll('%', '')) ?? 0;
-//
-//       if (batteryLevel <= 20) {
-//         color = Colors.red;
-//         icon = Icons.battery_alert;
-//       } else if (batteryLevel <= 50) {
-//         color = Colors.orange;
-//         icon = Icons.battery_4_bar;
-//       } else {
-//         color = Colors.green;
-//         icon = Icons.battery_full;
-//       }
-//     } catch (e) {
-//       color = Colors.grey;
-//       icon = Icons.battery_unknown;
-//     }
-//
-//     return Row(
-//       mainAxisSize: MainAxisSize.min,
-//       children: [
-//         Icon(icon, color: color, size: 16),
-//         Text(' $batteryStatus', style: TextStyle(color: color)),
-//       ],
-//     );
-//   }
-//
-//   Widget _buildGpsStatus(bool? isActive) {
-//     Color color = isActive == true ? Colors.green : Colors.red;
-//     IconData icon = isActive == true ? Icons.gps_fixed : Icons.gps_off;
-//
-//     return Icon(icon, color: color, size: 16);
-//   }
-//
-//   Widget _buildTechnicianCard(dynamic technician, TechnicianListViewScreenController controller) {
-//     return Card(
-//       elevation: 2,
-//       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-//       child: InkWell(
-//         onTap: () {}/*controller.showTechnicianDetails(technician)*/,
-//         borderRadius: BorderRadius.circular(12),
-//         child: Padding(
-//           padding: EdgeInsets.all(16),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               Row(
-//                 children: [
-//                   CircleAvatar(
-//                     backgroundColor: appColor.withOpacity(0.1),
-//                     child: Text(
-//                       technician.name[0].toUpperCase(),
-//                       style: TextStyle(color: appColor),
-//                     ),
-//                   ),
-//                   SizedBox(width: 12),
-//                   Expanded(
-//                     child: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: [
-//                         Text(
-//                           technician.name,
-//                           style: MontserratStyles.montserratBoldTextStyle(
-//                             size: 16,
-//                             color: Colors.black87,
-//                           ),
-//                         ),
-//                         Text(
-//                           technician.specialization ?? 'No specialization',
-//                           style: MontserratStyles.montserratRegularTextStyle(
-//                             size: 14,
-//                             color: Colors.grey,
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                   _buildBatteryIndicator(technician.batteryStatus),
-//                   SizedBox(width: 8),
-//                   _buildGpsStatus(technician.gpsStatus),
-//                   PopupMenuButton(
-//                     icon: Icon(Icons.more_vert),
-//                     onSelected: (value){} /*_handleTechnicianAction(value, technician, controller)*/,
-//                     itemBuilder: (context) => [
-//                       PopupMenuItem(
-//                         value: 'edit',
-//                         child: Row(
-//                           children: [
-//                             Icon(Icons.edit, size: 20),
-//                             SizedBox(width: 8),
-//                             Text('Edit'),
-//                           ],
-//                         ),
-//                       ),
-//                       PopupMenuItem(
-//                         value: 'delete',
-//                         child: Row(
-//                           children: [
-//                             Icon(Icons.delete, size: 20, color: Colors.red),
-//                             SizedBox(width: 8),
-//                             Text('Delete', style: TextStyle(color: Colors.red)),
-//                           ],
-//                         ),
-//                       ),
-//                       PopupMenuItem<String>(
-//                         value: 'Deactivate',
-//                         child: ListTile(
-//                           leading: Image.asset(wrongRoundedImage, color: Colors.black,
-//                             height: 25,
-//                             width: 25,),
-//                           title: Text('Deactivate',
-//                               style: MontserratStyles.montserratBoldTextStyle(
-//                                 color: blackColor,
-//                                 size: 13,
-//                               )),
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ],
-//               ),
-//               SizedBox(height: 12),
-//               Row(
-//                 children: [
-//                   Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-//                   SizedBox(width: 4),
-//                   Text(
-//                     '${technician.checkInTime ?? 'No check-in'} - ${technician.checkOutTime ?? 'No check-out'}',
-//                     style: MontserratStyles.montserratRegularTextStyle(
-//                       size: 12,
-//                       color: Colors.grey,
-//                     ),
-//                   ),
-//                   Spacer(),
-//                   // _buildStatusBadge(technician.status),
-//                 ],
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   // Widget _statisticCard(String title, String value, Icon
-// }
+
+void _editWidgetOfAgentsDialogValue(TechnicianListViewScreenController controller, BuildContext context, String agentId, TechnicianResults agentData) {
+  controller.firstNameController.text = agentData.firstName ?? '';
+  controller.lastNameController.text = agentData.lastName ?? '';
+  controller.emailController.text = agentData.email ?? '';
+  controller.phoneController.text = agentData.phoneNumber ?? '';
+  controller.joiningDateController.text = agentData.dateJoined??"";
+  controller.employeeIdController.text = agentData.empId??"";
+
+  Get.dialog(
+      Dialog(
+        insetAnimationDuration: Duration(milliseconds: 3),
+        child: Container(
+          height: Get.height,
+          width: Get.width,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+          child: _form(controller, context, agentId, agentData),
+        ),
+      )
+  );
+}
+
+
+Widget _form(TechnicianListViewScreenController controller, BuildContext context, String agentId, TechnicianResults agentData){
+  return Padding(
+    padding: const EdgeInsets.all(18.0),
+    child: ListView(
+      // controller: ,
+        children: [
+          vGap(20),
+          Text('Edit Technician',style: MontserratStyles.montserratBoldTextStyle(size: 15, color: Colors.black),),
+          Divider(color: Colors.black,),
+          vGap(20),
+          _employeIdField(controller, context,),
+          vGap(20),
+          _joiningDateField(controller, context),
+          vGap(20),
+          _firstNameField(controller, context),
+          vGap(20),
+          _lastNameField(controller, context),
+          vGap(20),
+          _emailField(controller, context),
+          vGap(20),
+          _phoneNumberField(controller, context),
+          vGap(40),
+          _buildOptionButtons(controller, context),
+          vGap(20),
+        ]
+    ),
+  );
+}
+
+_employeIdField(TechnicianListViewScreenController controller, BuildContext context){
+  return CustomTextField(
+    controller: controller.employeeIdController,
+    hintText: 'Employee Id',
+    labletext: 'Employee Id',
+    prefix: Icon(Icons.perm_identity),
+    validator: (value){
+      if (value == null || value.isEmpty) {
+        return 'Please select a Employee Id';
+      };
+      return null;
+    },
+  );
+}
+
+_joiningDateField(TechnicianListViewScreenController controller, BuildContext context) {
+  return CustomTextField(
+    controller: controller.joiningDateController,
+    hintText: 'Joining date',
+    labletext: 'Joining date',
+    validator: (value) {
+      if (value == null || value.isEmpty) {
+        return 'Please select a joining date';
+      }
+      return null;
+    },
+    suffix: IconButton(
+      onPressed: () async {
+        final DateTime? picked = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+        );
+        if (picked != null) {
+          String formattedDate="${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
+          // String formattedDate = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";  /*YYYY-MM-D*/
+          controller.joiningDateController.text = formattedDate;
+        }
+
+      },
+      icon: Icon(Icons.calendar_month_outlined),
+    ),
+  );
+}
+
+
+_firstNameField(TechnicianListViewScreenController controller, BuildContext context){
+  return CustomTextField(
+    controller: controller.firstNameController,
+    hintText: 'First Name',
+    labletext: 'First Name',
+    // prefix: Icon(Icons.),
+  );
+}
+
+_lastNameField(TechnicianListViewScreenController controller, BuildContext context){
+  return CustomTextField(
+    controller: controller.lastNameController,
+    hintText: 'Last Name',
+    labletext: 'Last Name',
+    // prefix: Icon(Icons.)
+
+  );
+}
+
+_emailField(TechnicianListViewScreenController controller, BuildContext context){
+  return CustomTextField(
+    controller: controller.emailController,
+    hintText: 'Email',
+    labletext: 'Email',
+    prefix: Icon(Icons.email
+    ),
+  );
+}
+
+_phoneNumberField(TechnicianListViewScreenController controller, BuildContext context){
+  return CustomTextField(
+    controller: controller.phoneController,
+    hintText: 'Phone Number',
+    labletext: 'Phone Number',
+    textInputType: TextInputType.phone,
+    prefix: Icon(Icons.phone
+    ),
+  );
+}
+
+_buildOptionButtons(TechnicianListViewScreenController controller, BuildContext context) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      ElevatedButton(
+        onPressed: () {
+          // Implement cancel functionality
+          Get.back();
+        },
+        child: Text(
+          'Cancel',
+          style: MontserratStyles.montserratBoldTextStyle(color: Colors.white, size: 13),
+        ),
+        style: _buttonStyle(),
+      ),
+      hGap(20),
+      ElevatedButton(
+        onPressed: () {
+          // controller.hitPostAddSupperApiCallApiCall();
+        },
+        child: Text(
+          'Submit',
+          style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),
+        ),
+        style: _buttonStyle(),
+      )
+    ],
+  );
+}
+
+ButtonStyle _buttonStyle() {
+  return ButtonStyle(
+    backgroundColor: MaterialStateProperty.all(appColor),
+    foregroundColor: MaterialStateProperty.all(Colors.white),
+    padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
+    elevation: MaterialStateProperty.all(5),
+    shape: MaterialStateProperty.all(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+    shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
+  );
+}
