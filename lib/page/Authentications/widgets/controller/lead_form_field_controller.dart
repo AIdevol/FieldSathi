@@ -75,31 +75,31 @@ class LeadFormFieldController extends GetxController{
     super.onClose();
   }
 
-  void hitPostLeadlistApiCall(){
-    isLoading.value = true;
-    customLoader.show();
-    FocusManager.instance.primaryFocus!.context;
-    Map<String ,dynamic> leadData = {
-      "companyName":companyController.text,
-      "firstName":firstNameController.text,
-      "lastName":lastNameController.text,
-      "email": emailController.text,
-      "mobile":phoneController.text,
-      "address":addressController.text,
-      "country":countryController.text,
-      "state":stateController.text,
-      "city": cityController.text,
-      "source": sourceController,
-      "notes": additionalNotesController.text,
-      "status": 'In-Discussion',
-    };
-    Get.find<AuthenticationApiService>().postLeadListApiCall(dataBody: leadData).then((value){
-      customLoader.hide();
-      toast('Successfully added Lead list');
-      update();
-    }).onError((error, stackError){
-      customLoader.hide();
-      toast(error.toString());
-    });
-  }
+  // void hitPostLeadlistApiCall(){
+  //   isLoading.value = true;
+  //   customLoader.show();
+  //   FocusManager.instance.primaryFocus!.context;
+  //   Map<String ,dynamic> leadData = {
+  //     "companyName":companyController.text,
+  //     "firstName":firstNameController.text,
+  //     "lastName":lastNameController.text,
+  //     "email": emailController.text,
+  //     "mobile":phoneController.text,
+  //     "address":addressController.text,
+  //     "country":countryController.text,
+  //     "state":stateController.text,
+  //     "city": cityController.text,
+  //     "source": sourceController,
+  //     "notes": additionalNotesController.text,
+  //     "status": 'In-Discussion',
+  //   };
+  //   Get.find<AuthenticationApiService>().postLeadListApiCall(dataBody: leadData).then((value){
+  //     customLoader.hide();
+  //     toast('Successfully added Lead list');
+  //     update();
+  //   }).onError((error, stackError){
+  //     customLoader.hide();
+  //     toast(error.toString());
+  //   });
+  // }
 }

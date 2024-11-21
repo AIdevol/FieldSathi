@@ -1,26 +1,19 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
-
-import '../../../../constans/const_local_keys.dart';
-import '../../../../main.dart';
 import '../../../../response_models/ticket_response_model.dart';
 import '../../../../services/APIs/auth_services/auth_api_services.dart';
-
-import 'package:get/get.dart';
-import 'package:flutter/material.dart';
 
 class GraphViewController extends GetxController {
   RxBool isLoading = true.obs;
   final _touchedIndex = (-1).obs;
   int get touchedIndex => _touchedIndex.value;
   void setTouchedIndex(int index) => _touchedIndex.value = index;
-  // RxSet<TicketResponseModel> ticketModel = <TicketResponseModel>{}.obs;
-  RxList<TicketResult> ticketResult = <TicketResult>[].obs;
-  // var ticketData = TicketResponseModel();
+
+  // Store the ticket response model
+  Rx<TicketResponseModel?> ticketData = Rx<TicketResponseModel?>(null);
 
   // Ticket counts
-  final Rx totalTicketsCount = 0.obs;
+  final RxInt totalTicketsCount = 0.obs;
   final RxInt completedTicketsCount = 0.obs;
   final RxInt ongoingTicketsCount = 0.obs;
   final RxInt rejectedTicketsCount = 0.obs;
@@ -37,67 +30,76 @@ class GraphViewController extends GetxController {
     if (totalTicketsCount.value == 0) return 0;
     return (count / totalTicketsCount.value) * 100;
   }
+
   void _calculateTicketDetails() {
-    int total = 0;
-    int completed = 0;
-    int ongoing = 0;
-    int rejected = 0;
-    int inactive = 0;
-    int onHold = 0;
+    if (ticketData.value == null) return;
 
-    for (var ticket in ticketResult) {
-      total++;
-    String status  = ticket.status.toString();
-      print("kya bhai kya kr rhe ho ye sb: $status");
+    // First, calculate the individual status counts
+    completedTicketsCount.value = ticketData.value!.results
+        .where((ticket) => ticket.status.toLowerCase() == 'completed')
+        .length;
 
-      switch (status) {
-        case 'Completed':
-          completed++;
-          break;
-        case 'Ongoing':
-        case 'in progress':
-          ongoing++;
-          break;
-        case 'Rejected':
-          rejected++;
-          break;
-        case 'Inactive':
-          inactive++;
-          break;
-        case 'On hold':
-        case 'Onhold':
-          onHold++;
-          break;
-      }
-    }
+    ongoingTicketsCount.value = ticketData.value!.results
+        .where((ticket) =>
+    ticket.status.toLowerCase() == 'ongoing' ||
+        ticket.status.toLowerCase() == 'in progress')
+        .length;
 
-    // Update observable values
-    totalTicketsCount.value = total;
-    completedTicketsCount.value = completed;
-    ongoingTicketsCount.value = ongoing;
-    rejectedTicketsCount.value = rejected;
-    inactiveTicketsCount.value = inactive;
-    onHoldTicketsCount.value = onHold;
+    rejectedTicketsCount.value = ticketData.value!.results
+        .where((ticket) => ticket.status.toLowerCase() == 'rejected')
+        .length;
+
+    inactiveTicketsCount.value = ticketData.value!.results
+        .where((ticket) => ticket.status.toLowerCase() == 'inactive')
+        .length;
+
+    onHoldTicketsCount.value = ticketData.value!.results
+        .where((ticket) =>
+    ticket.status.toLowerCase() == 'on hold' ||
+        ticket.status.toLowerCase() == 'onhold')
+        .length;
+
+    // Set total from the API response
+    totalTicketsCount.value = ticketData.value!.count;
+
+    // Debug logging to verify calculations
+    print('API Total Count: ${totalTicketsCount.value}');
+    print('Completed: ${completedTicketsCount.value}');
+    print('Ongoing: ${ongoingTicketsCount.value}');
+    print('Rejected: ${rejectedTicketsCount.value}');
+    print('Inactive: ${inactiveTicketsCount.value}');
+    print('On Hold: ${onHoldTicketsCount.value}');
+    print('Sum of statuses: ${
+        completedTicketsCount.value +
+            ongoingTicketsCount.value +
+            rejectedTicketsCount.value +
+            inactiveTicketsCount.value +
+            onHoldTicketsCount.value
+    }');
 
     update(); // Trigger UI update
-
   }
 
-  void getCountTicketData(TicketResponseModel ticketData){
-    totalTicketsCount.value = ticketData.results;
-  }
   void fetchTicketsApiCall() async {
     isLoading.value = true;
     try {
-      final tickets = await Get.find<AuthenticationApiService>().getticketDetailsApiCall();
-      // ticketModel.add(tickets);
-      ticketResult.assignAll(tickets.results);
-      var ticketData = tickets;
-      print('tickets : $ticketData');
-      print("What happened to your data");
+      final response = await Get.find<AuthenticationApiService>().getticketDetailsApiCall();
+      ticketData.value = response;
+
+      if (ticketData.value != null) {
+        print('Received ${ticketData.value!.results.length} tickets');
+        print('Total count from API: ${ticketData.value!.count}');
+
+        // Log all statuses to debug
+        ticketData.value!.results.forEach((ticket) {
+          print('Ticket ID: ${ticket.id}, Status: ${ticket.status}');
+        });
+      }
+
       _calculateTicketDetails();
+
     } catch (error) {
-      toast(error.toString());
+      toast('Error fetching ticket details: ${error.toString()}');
     } finally {
       isLoading.value = false;
     }

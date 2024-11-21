@@ -67,6 +67,38 @@ class PrincipalCstomerViewController extends GetxController{
       selectedRegionFocusNode = FocusNode();
       super.onInit();
     }
+
+    void onClose(){
+      companyNameController.dispose();
+      customerNameController.dispose();
+      phoneController.dispose();
+      emailController.dispose();
+      customerNameController.dispose();
+      modelNoController.dispose();
+      productTypeController.dispose();
+      addressNameController.dispose();
+      landMarkController.dispose();
+      cityController.dispose();
+      stateController.dispose();
+      zipController.dispose();
+      countryController.dispose();
+      selectedRegionController.dispose();
+
+      customerFocusNode.dispose();
+      phoneFocusNode.dispose();
+      emailFocusNode.dispose();
+      customerFocusNode.dispose();
+      modelNoFocusNode.dispose();
+      productTypeFocusNode.dispose();
+      addressNamedFocusNode.dispose();
+      landMarkFocusNode.dispose();
+      cityFocusNode.dispose();
+      stateFocusNode.dispose();
+      zipFocusNode.dispose();
+      countryFocusNode.dispose();
+      selectedRegionFocusNode.dispose();
+      super.onClose();
+    }
   List<String> regionValues = [
     // 'Select Region'
     "North",

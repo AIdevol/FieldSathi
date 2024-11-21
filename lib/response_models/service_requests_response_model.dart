@@ -2,7 +2,7 @@ class ServiceRequestResponseModel {
   final int count;
   final int totalPages;
   final int currentPage;
-  final List<Result> results;
+  final List<ServiceRequest> results;
 
   ServiceRequestResponseModel({
     required this.count,
@@ -13,34 +13,30 @@ class ServiceRequestResponseModel {
 
   factory ServiceRequestResponseModel.fromJson(Map<String, dynamic> json) {
     return ServiceRequestResponseModel(
-      count: json['count'],
-      totalPages: json['total_pages'],
-      currentPage: json['current_page'],
-      results: List<Result>.from(json['results'].map((x) => Result.fromJson(x))),
+      count: json['count'] ?? 0,
+      totalPages: json['total_pages'] ?? 0,
+      currentPage: json['current_page'] ?? 0,
+      results: (json['results'] as List<dynamic>?)
+          ?.map((x) => ServiceRequest.fromJson(x))
+          .toList() ??
+          [],
     );
   }
-
-  Map<String, dynamic> toJson() => {
-    'count': count,
-    'total_pages': totalPages,
-    'current_page': currentPage,
-    'results': List<dynamic>.from(results.map((x) => x.toJson())),
-  };
 }
 
-class Result {
+class ServiceRequest {
   final int id;
   final Ticket ticket;
-  final List<dynamic> materialRequired;
+  final List<MaterialRequired> materialRequired;
   final String status;
-  final dynamic approvedRemark;
-  final dynamic dispatchedRemark;
-  final dynamic hubAddress;
-  final dynamic courierContactNumber;
-  final dynamic docktNo;
-  final dynamic whereToDispatched;
+  final String? approvedRemark;
+  final String? dispatchedRemark;
+  final String? hubAddress;
+  final String? courierContactNumber;
+  final String? docktNo;
+  final String? whereToDispatched;
 
-  Result({
+  ServiceRequest({
     required this.id,
     required this.ticket,
     required this.materialRequired,
@@ -53,12 +49,15 @@ class Result {
     this.whereToDispatched,
   });
 
-  factory Result.fromJson(Map<String, dynamic> json) {
-    return Result(
-      id: json['id'],
-      ticket: Ticket.fromJson(json['ticket']),
-      materialRequired: List<dynamic>.from(json['material_required']),
-      status: json['status'],
+  factory ServiceRequest.fromJson(Map<String, dynamic> json) {
+    return ServiceRequest(
+      id: json['id'] ?? 0,
+      ticket: Ticket.fromJson(json['ticket'] ?? {}),
+      materialRequired: (json['material_required'] as List<dynamic>?)
+          ?.map((x) => MaterialRequired.fromJson(x))
+          .toList() ??
+          [],
+      status: json['status'] ?? '',
       approvedRemark: json['approved_remark'],
       dispatchedRemark: json['dispatched_remark'],
       hubAddress: json['hub_address'],
@@ -67,19 +66,16 @@ class Result {
       whereToDispatched: json['where_to_dispatched'],
     );
   }
+}
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'ticket': ticket.toJson(),
-    'material_required': materialRequired,
-    'status': status,
-    'approved_remark': approvedRemark,
-    'dispatched_remark': dispatchedRemark,
-    'hub_address': hubAddress,
-    'courier_contact_number': courierContactNumber,
-    'dockt_no': docktNo,
-    'where_to_dispatched': whereToDispatched,
-  };
+class MaterialRequired {
+  final String name;
+
+  MaterialRequired({required this.name});
+
+  factory MaterialRequired.fromJson(Map<String, dynamic> json) {
+    return MaterialRequired(name: json['name'] ?? '');
+  }
 }
 
 class Ticket {
@@ -87,10 +83,10 @@ class Ticket {
   final String taskName;
   final String date;
   final String time;
-  final bool isRate;
-  final bool isAmc;
-  final AssignTo assignTo;
-  final CustomerDetails customerDetails;
+  final bool israte;
+  final bool isamc;
+  final User assignTo;
+  final User customerDetails;
   final List<dynamic> technicalNotes;
   final List<dynamic> devices;
   final String totalTime;
@@ -102,29 +98,29 @@ class Ticket {
   final dynamic rate;
   final String instructions;
   final String status;
-  final dynamic rejectedNote;
-  final dynamic onholdNote;
+  final String? rejectedNote;
+  final String? onholdNote;
   final String beforeNote;
   final String afterNote;
-  final String beforeTaskImages1;
-  final String beforeTaskImages2;
-  final String beforeTaskImages3;
-  final String afterTaskImages1;
+  final String? beforeTaskImages1;
+  final String? beforeTaskImages2;
+  final String? beforeTaskImages3;
+  final String? afterTaskImages1;
   final String? afterTaskImages2;
-  final dynamic afterTaskImages3;
-  final dynamic custName;
-  final dynamic custNumber;
+  final String? afterTaskImages3;
+  final String custName;
+  final String custNumber;
   final String custRating;
   final String technicalNote;
-  final String workMode;
-  final String custSignature;
-  final dynamic technicianSignature;
-  final dynamic technicianName;
-  final dynamic technicianNumber;
-  final dynamic brand;
-  final dynamic model;
+  final String workmode;
+  final String? custSignature;
+  final String? technicianSignature;
+  final String technicianName;
+  final String technicianNumber;
+  final String brand;
+  final String? model;
   final String purpose;
-  final dynamic acceptedNote;
+  final String? acceptedNote;
   final TicketAddress ticketAddress;
   final String createdAt;
   final FsrDetails fsrDetails;
@@ -137,8 +133,8 @@ class Ticket {
     required this.taskName,
     required this.date,
     required this.time,
-    required this.isRate,
-    required this.isAmc,
+    required this.israte,
+    required this.isamc,
     required this.assignTo,
     required this.customerDetails,
     required this.technicalNotes,
@@ -156,22 +152,22 @@ class Ticket {
     this.onholdNote,
     required this.beforeNote,
     required this.afterNote,
-    required this.beforeTaskImages1,
-    required this.beforeTaskImages2,
-    required this.beforeTaskImages3,
-    required this.afterTaskImages1,
+    this.beforeTaskImages1,
+    this.beforeTaskImages2,
+    this.beforeTaskImages3,
+    this.afterTaskImages1,
     this.afterTaskImages2,
     this.afterTaskImages3,
-    this.custName,
-    this.custNumber,
+    required this.custName,
+    required this.custNumber,
     required this.custRating,
     required this.technicalNote,
-    required this.workMode,
-    required this.custSignature,
+    required this.workmode,
+    this.custSignature,
     this.technicianSignature,
-    this.technicianName,
-    this.technicianNumber,
-    this.brand,
+    required this.technicianName,
+    required this.technicianNumber,
+    required this.brand,
     this.model,
     required this.purpose,
     this.acceptedNote,
@@ -185,295 +181,300 @@ class Ticket {
 
   factory Ticket.fromJson(Map<String, dynamic> json) {
     return Ticket(
-      id: json['id'],
-      taskName: json['taskName'],
-      date: json['date'],
-      time: json['time'],
-      isRate: json['israte'],
-      isAmc: json['isamc'],
-      assignTo: AssignTo.fromJson(json['assignTo']),
-      customerDetails: CustomerDetails.fromJson(json['customerDetails']),
-      technicalNotes: List<dynamic>.from(json['technical_notes']),
-      devices: List<dynamic>.from(json['devices']),
-      totalTime: json['total_time'],
-      startDateTime: json['start_date_time'],
-      endDateTime: json['end_date_time'],
-      ticketCheckpoints: List<dynamic>.from(json['ticket_checkpoints']),
-      admin: json['admin'],
-      createdBy: json['created_by'],
+      id: json['id'] ?? 0,
+      taskName: json['taskName'] ?? '',
+      date: json['date'] ?? '',
+      time: json['time'] ?? '',
+      israte: json['israte'] ?? false,
+      isamc: json['isamc'] ?? false,
+      assignTo: User.fromJson(json['assignTo'] ?? {}),
+      customerDetails: User.fromJson(json['customerDetails'] ?? {}),
+      technicalNotes: json['technical_notes'] ?? [],
+      devices: json['devices'] ?? [],
+      totalTime: json['total_time'] ?? '',
+      startDateTime: json['start_date_time'] ?? '',
+      endDateTime: json['end_date_time'] ?? '',
+      ticketCheckpoints: json['ticket_checkpoints'] ?? [],
+      admin: json['admin'] ?? 0,
+      createdBy: json['created_by'] ?? '',
       rate: json['rate'],
-      instructions: json['instructions'],
-      status: json['status'],
+      instructions: json['instructions'] ?? '',
+      status: json['status'] ?? '',
       rejectedNote: json['rejected_note'],
       onholdNote: json['onhold_note'],
-      beforeNote: json['before_note'],
-      afterNote: json['after_note'],
+      beforeNote: json['before_note'] ?? '',
+      afterNote: json['after_note'] ?? '',
       beforeTaskImages1: json['before_task_images_1'],
       beforeTaskImages2: json['before_task_images_2'],
       beforeTaskImages3: json['before_task_images_3'],
       afterTaskImages1: json['after_task_images_1'],
       afterTaskImages2: json['after_task_images_2'],
       afterTaskImages3: json['after_task_images_3'],
-      custName: json['cust_name'],
-      custNumber: json['cust_number'],
-      custRating: json['cust_rating'],
-      technicalNote: json['technical_note'],
-      workMode: json['workmode'],
+      custName: json['cust_name'] ?? '',
+      custNumber: json['cust_number'] ?? '',
+      custRating: json['cust_rating'] ?? '',
+      technicalNote: json['technical_note'] ?? '',
+      workmode: json['workmode'] ?? '',
       custSignature: json['cust_signature'],
       technicianSignature: json['technician_signature'],
-      technicianName: json['technician_name'],
-      technicianNumber: json['technician_number'],
-      brand: json['brand'],
+      technicianName: json['technician_name'] ?? '',
+      technicianNumber: json['technician_number'] ?? '',
+      brand: json['brand'] ?? '',
       model: json['model'],
-      purpose: json['purpose'],
+      purpose: json['purpose'] ?? '',
       acceptedNote: json['acceptedNote'],
-      ticketAddress: TicketAddress.fromJson(json['ticket_address']),
-      createdAt: json['created_at'],
-      fsrDetails: FsrDetails.fromJson(json['fsrDetails']),
+      ticketAddress: TicketAddress.fromJson(json['ticket_address'] ?? {}),
+      createdAt: json['created_at'] ?? '',
+      fsrDetails: FsrDetails.fromJson(json['fsrDetails'] ?? {}),
       serviceDetails: json['serviceDetails'],
-      subCustomerDetails: SubCustomerDetails.fromJson(json['subCustomerDetails']),
-      checkpoints: List<dynamic>.from(json['checkpoints']),
+      subCustomerDetails: SubCustomerDetails.fromJson(json['subCustomerDetails'] ?? {}),
+      checkpoints: json['checkpoints'] ?? [],
     );
   }
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'taskName': taskName,
-    'date': date,
-    'time': time,
-    'israte': isRate,
-    'isamc': isAmc,
-    'assignTo': assignTo.toJson(),
-    'customerDetails': customerDetails.toJson(),
-    'technical_notes': technicalNotes,
-    'devices': devices,
-    'total_time': totalTime,
-    'start_date_time': startDateTime,
-    'end_date_time': endDateTime,
-    'ticket_checkpoints': ticketCheckpoints,
-    'admin': admin,
-    'created_by': createdBy,
-    'rate': rate,
-    'instructions': instructions,
-    'status': status,
-    'rejected_note': rejectedNote,
-    'onhold_note': onholdNote,
-    'before_note': beforeNote,
-    'after_note': afterNote,
-    'before_task_images_1': beforeTaskImages1,
-    'before_task_images_2': beforeTaskImages2,
-    'before_task_images_3': beforeTaskImages3,
-    'after_task_images_1': afterTaskImages1,
-    'after_task_images_2': afterTaskImages2,
-    'after_task_images_3': afterTaskImages3,
-    'cust_name': custName,
-    'cust_number': custNumber,
-    'cust_rating': custRating,
-    'technical_note': technicalNote,
-    'workmode': workMode,
-    'cust_signature': custSignature,
-    'technician_signature': technicianSignature,
-    'technician_name': technicianName,
-    'technician_number': technicianNumber,
-    'brand': brand,
-    'model': model,
-    'purpose': purpose,
-    'acceptedNote': acceptedNote,
-    'ticket_address': ticketAddress.toJson(),
-    'created_at': createdAt,
-    'fsrDetails': fsrDetails.toJson(),
-    'serviceDetails': serviceDetails,
-    'subCustomerDetails': subCustomerDetails.toJson(),
-    'checkpoints': checkpoints,
-  };
 }
 
-class AssignTo {
-  final int id;
-  final TodayAttendance todayAttendance;
-  final String firstName;
-  final String lastName;
+class User {
+  final int? id;
+  final dynamic todayAttendance;
+  final List<String> brandNames;
+  final dynamic lastLogin;
+  final String? firstName;
+  final String? lastName;
   final String email;
   final String phoneNumber;
+  final String companyName;
+  final String employees;
+  final dynamic dob;
+  final String otp;
+  final bool otpVerified;
+  final bool isStaff;
+  final bool isSuperuser;
+  final bool isActive;
+  final dynamic profileImage;
+  final String? customerName;
+  final String? customerTag;
+  final String? modelNo;
+  final String? socialId;
+  final bool deactivate;
   final String role;
-  final String batteryStatus;
+  final String? customerType;
+  final String? batteryStatus;
   final bool gpsStatus;
-  final String longitude;
-  final String latitude;
-  final int allocatedSickLeave;
-  final int allocatedCasualLeave;
-  final bool isLeaveAllocated;
-  final String empId;
-  final bool isDisabled;
-
-  AssignTo({
-    required this.id,
-    required this.todayAttendance,
-    required this.firstName,
-    required this.lastName,
-    required this.email,
-    required this.phoneNumber,
-    required this.role,
-    required this.batteryStatus,
-    required this.gpsStatus,
-    required this.longitude,
-    required this.latitude,
-    required this.allocatedSickLeave,
-    required this.allocatedCasualLeave,
-    required this.isLeaveAllocated,
-    required this.empId,
-    required this.isDisabled,
-  });
-
-  factory AssignTo.fromJson(Map<String, dynamic> json) {
-    return AssignTo(
-      id: json['id'],
-      todayAttendance: TodayAttendance.fromJson(json['today_attendance']),
-      firstName: json['first_name'],
-      lastName: json['last_name'],
-      email: json['email'],
-      phoneNumber: json['phone_number'],
-      role: json['role'],
-      batteryStatus: json['battery_status'],
-      gpsStatus: json['gps_status'],
-      longitude: json['longitude'],
-      latitude: json['latitude'],
-      allocatedSickLeave: json['allocated_sick_leave'],
-      allocatedCasualLeave: json['allocated_casual_leave'],
-      isLeaveAllocated: json['is_leave_allocated'],
-      empId: json['emp_id'],
-      isDisabled: json['is_disabled'],
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'today_attendance': todayAttendance.toJson(),
-    'first_name': firstName,
-    'last_name': lastName,
-    'email': email,
-    'phone_number': phoneNumber,
-    'role': role,
-    'battery_status': batteryStatus,
-    'gps_status': gpsStatus,
-    'longitude': longitude,
-    'latitude': latitude,
-    'allocated_sick_leave': allocatedSickLeave,
-    'allocated_casual_leave': allocatedCasualLeave,
-    'is_leave_allocated': isLeaveAllocated,
-    'emp_id': empId,
-    'is_disabled': isDisabled,
-  };
-}
-
-class TodayAttendance {
-  final int id;
-  final int user;
-  final String status;
-  final String date;
-
-  TodayAttendance({
-    required this.id,
-    required this.user,
-    required this.status,
-    required this.date,
-  });
-
-  factory TodayAttendance.fromJson(Map<String, dynamic> json) {
-    return TodayAttendance(
-      id: json['id'],
-      user: json['user'],
-      status: json['status'],
-      date: json['date'],
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'user': user,
-    'status': status,
-    'date': date,
-  };
-}
-
-class CustomerDetails {
-  final int id;
-  final TodayAttendance todayAttendance;
-  final String? email;
-  final String? phoneNumber;
-  final String? companyName;
-  final String customerName;
+  final String? longitude;
+  final String? latitude;
+  final String? companyAddress;
+  final String? companyCity;
+  final String? companyState;
+  final String? companyPincode;
+  final String? companyCountry;
+  final String? companyRegion;
+  final String? companyLandlineNo;
+  final String? gstNo;
+  final String? cinNo;
+  final String? panNo;
+  final String? companyContactNo;
+  final String? companyWebsite;
+  final String? bankName;
+  final String? ifscSwift;
+  final String? accountNumber;
+  final String? branchAddress;
+  final String? upiId;
+  final String? paymentLink;
+  final dynamic fileUpload;
+  final String primaryAddress;
+  final String landmarkPaci;
+  final String? notes;
   final String state;
   final String country;
   final String city;
-  final bool isActive;
+  final String zipcode;
+  final String region;
+  final int allocatedSickLeave;
+  final int allocatedCasualLeave;
+  final String? dateJoined;
+  final int maxEmployeesAllowed;
+  final int employeesCreated;
+  final bool isLeaveAllocated;
+  final String? empId;
+  final bool isDisabled;
+  final String createdAt;
+  final int createdBy;
+  final int admin;
+  final dynamic customerId;
+  final dynamic subscription;
 
-  CustomerDetails({
-    required this.id,
-    required this.todayAttendance,
-    this.email,
-    this.phoneNumber,
-    this.companyName,
-    required this.customerName,
+  User({
+    this.id,
+    this.todayAttendance,
+    required this.brandNames,
+    this.lastLogin,
+    this.firstName,
+    this.lastName,
+    required this.email,
+    required this.phoneNumber,
+    required this.companyName,
+    required this.employees,
+    this.dob,
+    required this.otp,
+    required this.otpVerified,
+    required this.isStaff,
+    required this.isSuperuser,
+    required this.isActive,
+    this.profileImage,
+    this.customerName,
+    this.customerTag,
+    this.modelNo,
+    this.socialId,
+    required this.deactivate,
+    required this.role,
+    this.customerType,
+    this.batteryStatus,
+    required this.gpsStatus,
+    this.longitude,
+    this.latitude,
+    this.companyAddress,
+    this.companyCity,
+    this.companyState,
+    this.companyPincode,
+    this.companyCountry,
+    this.companyRegion,
+    this.companyLandlineNo,
+    this.gstNo,
+    this.cinNo,
+    this.panNo,
+    this.companyContactNo,
+    this.companyWebsite,
+    this.bankName,
+    this.ifscSwift,
+    this.accountNumber,
+    this.branchAddress,
+    this.upiId,
+    this.paymentLink,
+    this.fileUpload,
+    required this.primaryAddress,
+    required this.landmarkPaci,
+    this.notes,
     required this.state,
     required this.country,
     required this.city,
-    required this.isActive,
+    required this.zipcode,
+    required this.region,
+    required this.allocatedSickLeave,
+    required this.allocatedCasualLeave,
+    this.dateJoined,
+    required this.maxEmployeesAllowed,
+    required this.employeesCreated,
+    required this.isLeaveAllocated,
+    this.empId,
+    required this.isDisabled,
+    required this.createdAt,
+    required this.createdBy,
+    required this.admin,
+    this.customerId,
+    this.subscription,
   });
 
-  factory CustomerDetails.fromJson(Map<String, dynamic> json) {
-    return CustomerDetails(
-      id: json['id'],
-      todayAttendance: TodayAttendance.fromJson(json['today_attendance']),
-      email: json['email'],
-      phoneNumber: json['phone_number'],
-      companyName: json['company_name'],
-      customerName: json['customer_name'],
-      state: json['state'],
-      country: json['country'],
-      city: json['city'],
-      isActive: json['is_active'],
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+        id: json['id'],
+        todayAttendance: json['today_attendance'],
+        brandNames: List<String>.from(json['brand_names'] ?? []),
+    lastLogin: json['last_login'],
+    firstName: json['first_name'],
+    lastName: json['last_name'],
+    email: json['email'] ?? '',
+    phoneNumber: json['phone_number'] ?? '',
+    companyName: json['company_name'] ?? '',
+    employees: json['employees'] ?? '',
+    dob: json['dob'],
+    otp: json['otp'] ?? '',
+    otpVerified: json['otp_verified'] ?? false,
+    isStaff: json['is_staff'] ?? false,
+    isSuperuser: json['is_superuser'] ?? false,
+    isActive: json['is_active'] ?? false,
+    profileImage: json['profile_image'],
+    customerName: json['customer_name'],
+    customerTag: json['customer_tag'],
+    modelNo: json['model_no'],
+    socialId: json['social_id'],
+    deactivate: json['deactivate'] ?? false,
+    role: json['role'] ?? '',
+    customerType: json['customer_type'],
+    batteryStatus: json['battery_status'],
+    gpsStatus: json['gps_status'] ?? false,
+    longitude: json['longitude'],
+    latitude: json['latitude'],
+    companyAddress: json['companyAddress'],
+    companyCity: json['companyCity'],
+    companyState: json['companyState'],
+    companyPincode: json['companyPincode'],
+    companyCountry: json['companyCountry'],
+    companyRegion: json['companyRegion'],
+    companyLandlineNo: json['companyLandlineNo'],
+    gstNo: json['gstNo'],
+    cinNo: json['cinNo'],
+    panNo: json['panNo'],
+    companyContactNo: json['companyContactNo'],
+    companyWebsite: json['companyWebsite'],
+    bankName: json['bankName'],
+    ifscSwift: json['ifscSwift'],
+    accountNumber: json['accountNumber'],
+    branchAddress: json['branchAddress'],
+    upiId: json['upiId'],
+    paymentLink: json['paymentLink'],
+    fileUpload: json['fileUpload'],
+    primaryAddress: json['primary_address'] ?? '',
+    landmarkPaci: json['landmark_paci'] ?? '',
+    notes: json['notes'],
+    state: json['state'] ?? '',
+    country: json['country'] ?? '',
+    city: json['city'] ?? '',
+    zipcode: json['zipcode'] ?? '',
+    region: json['region'] ?? '',
+    allocatedSickLeave: json['allocated_sick_leave'] ?? 0,
+      allocatedCasualLeave: json['allocated_casual_leave'] ?? 0,
+      dateJoined: json['date_joined'],
+      maxEmployeesAllowed: json['max_employees_allowed'] ?? 0,
+      employeesCreated: json['employees_created'] ?? 0,
+      isLeaveAllocated: json['is_leave_allocated'] ?? false,
+      empId: json['emp_id'],
+      isDisabled: json['is_disabled'] ?? false,
+      createdAt: json['created_at'] ?? '',
+      createdBy: json['created_by'] ?? 0,
+      admin: json['admin'] ?? 0,
+      customerId: json['customer_id'],
+      subscription: json['subscription'],
     );
   }
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'today_attendance': todayAttendance.toJson(),
-    'email': email,
-    'phone_number': phoneNumber,
-    'company_name': companyName,
-    'customer_name': customerName,
-    'state': state,
-    'country': country,
-    'city': city,
-    'is_active': isActive,
-  };
 }
 
 class TicketAddress {
   final String city;
   final String state;
+  final String region;
   final String country;
+  final String zipcode;
+  final String primaryAddress;
 
   TicketAddress({
     required this.city,
     required this.state,
+    required this.region,
     required this.country,
+    required this.zipcode,
+    required this.primaryAddress,
   });
 
   factory TicketAddress.fromJson(Map<String, dynamic> json) {
     return TicketAddress(
-      city: json['city'],
-      state: json['state'],
-      country: json['country'],
+      city: json['city'] ?? '',
+      state: json['state'] ?? '',
+      region: json['region'] ?? '',
+      country: json['country'] ?? '',
+      zipcode: json['zipcode'] ?? '',
+      primaryAddress: json['primary_address'] ?? '',
     );
   }
-
-  Map<String, dynamic> toJson() => {
-    'city': city,
-    'state': state,
-    'country': country,
-  };
 }
 
 class FsrDetails {
@@ -487,47 +488,211 @@ class FsrDetails {
 
   factory FsrDetails.fromJson(Map<String, dynamic> json) {
     return FsrDetails(
-      fsrName: json['fsrName'],
-      categories: List<dynamic>.from(json['categories']),
+      fsrName: json['fsrName'] ?? '',
+      categories: json['categories'] ?? [],
     );
   }
-
-  Map<String, dynamic> toJson() => {
-    'fsrName': fsrName,
-    'categories': categories,
-  };
 }
 
 class SubCustomerDetails {
-  final String? firstName;
-  final String? lastName;
-  final String? email;
-  final String? phoneNumber;
+  final String password;
+  final dynamic lastLogin;
+  final String firstName;
+  final String lastName;
+  final String email;
+  final String phoneNumber;
+  final String companyName;
+  final String employees;
+  final dynamic dob;
+  final String otp;
+  final bool otpVerified;
+  final bool isStaff;
+  final bool isSuperuser;
   final bool isActive;
+  final dynamic profileImage;
+  final String customerName;
+  final String customerTag;
+  final String modelNo;
+  final String socialId;
+  final dynamic deactivate;
+  final dynamic role;
+  final String customerType;
+  final String batteryStatus;
+  final dynamic gpsStatus;
+  final String longitude;
+  final String latitude;
+  final String companyAddress;
+  final String companyCity;
+  final String companyState;
+  final String companyPincode;
+  final String companyCountry;
+  final String companyRegion;
+  final String companyLandlineNo;
+  final String gstNo;
+  final String cinNo;
+  final String panNo;
+  final String companyContactNo;
+  final String companyWebsite;
+  final String bankName;
+  final String ifscSwift;
+  final String accountNumber;
+  final String branchAddress;
+  final String upiId;
+  final String paymentLink;
+  final dynamic fileUpload;
+  final String primaryAddress;
+  final String landmarkPaci;
+  final String notes;
+  final String state;
+  final String country;
+  final String city;
+  final String zipcode;
+  final String region;
+  final dynamic allocatedSickLeave;
+  final dynamic allocatedCasualLeave;
+  final dynamic dateJoined;
+  final dynamic maxEmployeesAllowed;
+  final dynamic employeesCreated;
+  final bool isLeaveAllocated;
+  final String empId;
+  final bool isDisabled;
+  final dynamic createdBy;
+  final dynamic customerId;
+  final dynamic subscription;
 
   SubCustomerDetails({
-    this.firstName,
-    this.lastName,
-    this.email,
-    this.phoneNumber,
+    required this.password,
+    this.lastLogin,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.phoneNumber,
+    required this.companyName,
+    required this.employees,
+    this.dob,
+    required this.otp,
+    required this.otpVerified,
+    required this.isStaff,
+    required this.isSuperuser,
     required this.isActive,
+    this.profileImage,
+    required this.customerName,
+    required this.customerTag,
+    required this.modelNo,
+    required this.socialId,
+    this.deactivate,
+    this.role,
+    required this.customerType,
+    required this.batteryStatus,
+    this.gpsStatus,
+    required this.longitude,
+    required this.latitude,
+    required this.companyAddress,
+    required this.companyCity,
+    required this.companyState,
+    required this.companyPincode,
+    required this.companyCountry,
+    required this.companyRegion,
+    required this.companyLandlineNo,
+    required this.gstNo,
+    required this.cinNo,
+    required this.panNo,
+    required this.companyContactNo,
+    required this.companyWebsite,
+    required this.bankName,
+    required this.ifscSwift,
+    required this.accountNumber,
+    required this.branchAddress,
+    required this.upiId,
+    required this.paymentLink,
+    this.fileUpload,
+    required this.primaryAddress,
+    required this.landmarkPaci,
+    required this.notes,
+    required this.state,
+    required this.country,
+    required this.city,
+    required this.zipcode,
+    required this.region,
+    this.allocatedSickLeave,
+    this.allocatedCasualLeave,
+    this.dateJoined,
+    this.maxEmployeesAllowed,
+    this.employeesCreated,
+    required this.isLeaveAllocated,
+    required this.empId,
+    required this.isDisabled,
+    this.createdBy,
+    this.customerId,
+    this.subscription,
   });
 
   factory SubCustomerDetails.fromJson(Map<String, dynamic> json) {
     return SubCustomerDetails(
-      firstName: json['first_name'],
-      lastName: json['last_name'],
-      email: json['email'],
-      phoneNumber: json['phone_number'],
-      isActive: json['is_active'],
+      password: json['password'] ?? '',
+      lastLogin: json['last_login'],
+      firstName: json['first_name'] ?? '',
+      lastName: json['last_name'] ?? '',
+      email: json['email'] ?? '',
+      phoneNumber: json['phone_number'] ?? '',
+      companyName: json['company_name'] ?? '',
+      employees: json['employees'] ?? '',
+      dob: json['dob'],
+      otp: json['otp'] ?? '',
+      otpVerified: json['otp_verified'] ?? false,
+      isStaff: json['is_staff'] ?? false,
+      isSuperuser: json['is_superuser'] ?? false,
+      isActive: json['is_active'] ?? false,
+      profileImage: json['profile_image'],
+      customerName: json['customer_name'] ?? '',
+      customerTag: json['customer_tag'] ?? '',
+      modelNo: json['model_no'] ?? '',
+      socialId: json['social_id'] ?? '',
+      deactivate: json['deactivate'],
+      role: json['role'],
+      customerType: json['customer_type'] ?? '',
+      batteryStatus: json['battery_status'] ?? '',
+      gpsStatus: json['gps_status'],
+      longitude: json['longitude'] ?? '',
+      latitude: json['latitude'] ?? '',
+      companyAddress: json['companyAddress'] ?? '',
+      companyCity: json['companyCity'] ?? '',
+      companyState: json['companyState'] ?? '',
+      companyPincode: json['companyPincode'] ?? '',
+      companyCountry: json['companyCountry'] ?? '',
+      companyRegion: json['companyRegion'] ?? '',
+      companyLandlineNo: json['companyLandlineNo'] ?? '',
+      gstNo: json['gstNo'] ?? '',
+      cinNo: json['cinNo'] ?? '',
+      panNo: json['panNo'] ?? '',
+      companyContactNo: json['companyContactNo'] ?? '',
+      companyWebsite: json['companyWebsite'] ?? '',
+      bankName: json['bankName'] ?? '',
+      ifscSwift: json['ifscSwift'] ?? '',
+      accountNumber: json['accountNumber'] ?? '',
+      branchAddress: json['branchAddress'] ?? '',
+      upiId: json['upiId'] ?? '',
+      paymentLink: json['paymentLink'] ?? '',
+      fileUpload: json['fileUpload'],
+      primaryAddress: json['primary_address'] ?? '',
+      landmarkPaci: json['landmark_paci'] ?? '',
+      notes: json['notes'] ?? '',
+      state: json['state'] ?? '',
+      country: json['country'] ?? '',
+      city: json['city'] ?? '',
+      zipcode: json['zipcode'] ?? '',
+      region: json['region'] ?? '',
+      allocatedSickLeave: json['allocated_sick_leave'],
+      allocatedCasualLeave: json['allocated_casual_leave'],
+      dateJoined: json['date_joined'],
+      maxEmployeesAllowed: json['max_employees_allowed'],
+      employeesCreated: json['employees_created'],
+      isLeaveAllocated: json['is_leave_allocated'] ?? false,
+      empId: json['emp_id'] ?? '',
+      isDisabled: json['is_disabled'] ?? false,
+      createdBy: json['created_by'],
+      customerId: json['customer_id'],
+      subscription: json['subscription'],
     );
   }
-
-  Map<String, dynamic> toJson() => {
-    'first_name': firstName,
-    'last_name': lastName,
-    'email': email,
-    'phone_number': phoneNumber,
-    'is_active': isActive,
-  };
 }

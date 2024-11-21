@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/customer_list_view_controller.dart';
 import 'package:tms_sathi/response_models/customer_list_response_model.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../constans/color_constants.dart';
 import '../../../../constans/string_const.dart';
@@ -41,7 +42,7 @@ class CustomerListViewScreen extends GetView<CustomerListViewController>{
               body: ListView(children: [
                   _buildTopBar(context, controller),
                 vGap(25),
-                _dataTableViewScreen(controller),
+                _dataTableViewScreen(controller, context),
               ],),
           ),
         ),
@@ -139,49 +140,75 @@ Widget _buildSearchField(CustomerListViewController controller) {
   );
 }
 
-Widget _dataTableViewScreen(CustomerListViewController controller){
+Widget _dataTableViewScreen(CustomerListViewController controller, BuildContext context) {
   return SingleChildScrollView(
     scrollDirection: Axis.horizontal,
-    child: Obx(()=> DataTable(
-        columns: [
-          DataColumn(label: Text('ID',)),
-          DataColumn(label: Text('Profile',)),
-          DataColumn(label: Text('Customer Name',)),
-          DataColumn(label: Text('Company Name',)),
-          DataColumn(label: Text('Email',)),
-          DataColumn(label: Text('Mobile No.',)),
-          DataColumn(label: Text('Address',)),
-          DataColumn(label: Text('Region',)),
-          DataColumn(label: Text('Model No.',)),
-          DataColumn(label: Text('Status',)),
-          DataColumn(label: Text('',)),
-          DataColumn(label: Text('',))
-        ], rows: controller.customerListData.map((customerData){
-          return DataRow(cells: [
-            DataCell(Text(customerData.id.toString())),
-            DataCell(CircleAvatar(
-              backgroundImage: customerData.profileImage != null
-                  ? NetworkImage(customerData.profileImage!)
-                  : AssetImage(userImageIcon) as ImageProvider,
-            )),
-      DataCell(Text(customerData.customerName.toString())),
-      DataCell(Text(customerData.companyName.toString())),
-      DataCell(Text(customerData.email.toString())),
-      DataCell(Text(customerData.phoneNumber.toString())),
-      DataCell(Text(customerData!.primaryAddress.toString()??"None")),
-      DataCell(Text(customerData!.region.toString()??"N/A")),
-      DataCell(Text(customerData.modelNo.toString())),
-      DataCell(_buildStatusIndicator(customerData.isActive)),
-      DataCell(IconButton(onPressed: (){},icon: Image.asset(whatsappIcon),)),
-      DataCell(IconButton(onPressed: (){
-        // _editWidgetOfAgentsDialogValue(controller,customerData.id.toString() as BuildContext,customdata);
-      },icon: Icon(Icons.more_vert),)),
-      ]);
-    }).toList(),
-  ),
-  )
+    child: Obx(() => DataTable(
+      columnSpacing: 20, // Add consistent spacing between columns
+      columns: [
+        DataColumn(label: Text('ID')),
+        DataColumn(label: Text('Profile')),
+        DataColumn(label: Text('Customer Name')),
+        DataColumn(label: Text('Company Name')),
+        DataColumn(label: Text('Email')),
+        DataColumn(label: Text('Mobile No.')),
+        DataColumn(label: Text('Address')),
+        DataColumn(label: Text('Region')),
+        DataColumn(label: Text('Model No.')),
+        DataColumn(label: Text('Status')),
+        DataColumn(label: Container(width: 50, child: Text('Action'))), // Fixed width for action column
+        DataColumn(label: Container(width: 50, child: Text(''))), // Fixed width for more options
+      ],
+      rows: controller.customerListData.map((customerData) {
+        return DataRow(cells: [
+          DataCell(_ticketBoxIcons(customerData.id.toString())),
+          DataCell(CircleAvatar(
+            radius: 15,
+            backgroundImage: customerData.profileImage != null
+                ? NetworkImage(customerData.profileImage!)
+                : AssetImage(userImageIcon) as ImageProvider,
+          )),
+          DataCell(Text(customerData.customerName.toString())),
+          DataCell(Text(customerData.companyName.toString())),
+          DataCell(Text(customerData.email.toString())),
+          DataCell(Text(customerData.phoneNumber.toString())),
+          DataCell(Text(customerData.primaryAddress?.toString() ?? "None")),
+          DataCell(Text(customerData.region?.toString() ?? "N/A")),
+          DataCell(Text(customerData.modelNo.toString())),
+          DataCell(_buildStatusIndicator(customerData.isActive)),
+          DataCell(Container(
+            width: 50,
+            alignment: Alignment.center,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints(),
+              onPressed: () async{
+                final Uri url = Uri.parse('https://wa.me/91${customerData.phoneNumber}');
+                if (!await launchUrl(url)) {
+                throw Exception('Could not launch $url');
+                }
+              },
+              icon: Image.asset(whatsappIcon, width: 24, height: 24),
+            ),
+          )),
+          DataCell(Container(
+            width: 50,
+            alignment: Alignment.center,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints(),
+              onPressed: () {
+                _editWidgetOfAgentsDialogValue(controller, context, customerData.id.toString(), customerData);
+              },
+              icon: Icon(Icons.more_vert, size: 24),
+            ),
+          )),
+        ]);
+      }).toList(),
+    )),
   );
 }
+
 Widget _buildStatusIndicator(bool isActive) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -215,11 +242,30 @@ Widget _buildStatusIndicator(bool isActive) {
     ),
   );
 }
+Widget _ticketBoxIcons(String? ticketId) {
+  return Center(
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: normalBlue,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: Colors.blue.shade300,
+          width: 1,
+        ),
+      ),
+      child: Text(
+        ticketId?.isNotEmpty == true ? ticketId! : 'NA',
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+        ),
+      ),
+    ),
+  );
+}
 void _editWidgetOfAgentsDialogValue(CustomerListViewController controller, BuildContext context, String agentId,CustomerData customdata) {
-  // controller.firstNameController.text = agentData.firstName ?? '';
-  // controller.lastNameController.text = agentData.lastName ?? '';
-  // controller.emailController.text = agentData.email ?? '';
-  // controller.phoneController.text = agentData.phoneNumber ?? '';
 
   Get.dialog(
       Dialog(
@@ -228,130 +274,499 @@ void _editWidgetOfAgentsDialogValue(CustomerListViewController controller, Build
           height: Get.height,
           width: Get.width,
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-          child: _form(controller, context, agentId),
+          child: _form(controller, context, agentId,customdata),
         ),
       )
   );
 }
-
-Widget _form(CustomerListViewController controller, BuildContext context, String agentId) {
+Widget _form(CustomerListViewController controller, BuildContext context, String? agentId, CustomerData customData) {
+  WidgetsBinding.instance.addPostFrameCallback((_){
+    controller.customerNameController.text = customData.customerName ?? '';
+  controller.phoneController.text = customData.phoneNumber ?? '';
+  controller.emailController.text = customData.email ?? '';
+    controller.companyNameController.text = customData.companyName ?? '';
+    controller.modelNoController.text = customData.modelNo ?? '';
+    // controller.productTypeController.text = customData. ?? '';
+    controller.addressNameController.text = customData.primaryAddress ?? '';
+    controller.landMarkController.text = customData.landmarkPaci ?? '';
+    controller.cityController.text = customData.city ?? '';
+    controller.stateController.text = customData.state ?? '';
+    controller.zipController.text = customData.zipcode ?? '';
+    controller.countryController.text = customData.country ?? '';
+    controller.selectedRegionController.text = customData.region ?? '';
+  });
   return Container(
     height: Get.height,
     width: Get.width,
     color: whiteColor,
+    // decoration: BoxDecoration(
+    //   borderRadius: BorderRadius.circular(20)
+    // ),
     child: Padding(
       padding: const EdgeInsets.all(18.0),
       child: ListView(
         children: [
-          vGap(40),
-          _buildTopBarView(controller: controller, context: context),
-          Divider(height: 1, color: Colors.black),
-          vGap(40),
-          _buildTaskName(context: context, controller: controller),
           vGap(20),
-          _buildLastName(context: context, controller: controller),
+          _buildCustomerName(controller,context),
           vGap(20),
-          _addTechnician(context: context, controller: controller),
+          _buildMobileNoTextContainer(controller,context),
           vGap(20),
-          _phoneNumber(context: context, controller: controller),
-          vGap(40),
-          _buildOptionbutton(context: context, controller: controller, agentId: agentId),
+          _buildEmailIdContainer(controller,context),
+          vGap(20),
+          _buildCompanyName(controller,context),
+          vGap(20),
+          _buildModeNoContainer(controller,context),
+          vGap(20),
+          ProductTypeBuilder(),
+          vGap(20),
+          Container(
+            alignment: Alignment.center,
+            height: Get.height*0.03,
+            width: Get.width*4,
+            color: Colors.grey,
+            child: Text("Address", style: MontserratStyles.montserratBoldTextStyle(size: 15, color: Colors.black),),
+          ),
+          vGap(20),
+          _buildAddressName(controller,context),
+          vGap(20),
+          _buildLandMarkName(controller,context),
+          vGap(20),
+          _buildCityName(controller,context),
+          vGap(20),
+          _buildStateName(controller,context),
+          vGap(20),
+          _buildzipcode(controller,context),
+          vGap(20),
+          _countryView(controller,context),
+          vGap(20),
+          _buildSelectedRegion(controller,context),
+          vGap(20),
+          _buildOptionbutton(controller,context)
         ],
       ),
     ),
   );
 }
 
-Widget _buildTopBarView({required CustomerListViewController controller, required BuildContext context}) {
-  return Center(child: Text('Edit Agent', style: MontserratStyles.montserratBoldTextStyle(size: 25, color: blackColor)));
-}
 
-Widget _buildTaskName({required CustomerListViewController controller, required BuildContext context}) {
+Widget _buildCustomerName(CustomerListViewController controller, BuildContext context) {
   return CustomTextField(
-    hintText: "First Name".tr,
-    // controller: controller.firstNameController,
+    hintText: "Customer Name".tr,
+    controller: controller.customerNameController,
     textInputType: TextInputType.text,
-    // focusNode: controller.lastNameFocusNode,
-    labletext: "First Name".tr,
+    onFieldSubmitted: (String? value) {},
+    labletext: "Customer Name".tr,
     prefix: Icon(Icons.person, color: Colors.black),
   );
 }
 
-Widget _buildLastName({required CustomerListViewController controller, required BuildContext context}) {
+Widget _buildMobileNoTextContainer(CustomerListViewController controller, BuildContext context) {
   return CustomTextField(
-    hintText: "Last Name".tr,
-    // controller: controller.lastNameController,
-    textInputType: TextInputType.text,
-    // focusNode: controller.emailFocusnode,
-    labletext: "Last Name".tr,
-    prefix: Icon(Icons.person, color: Colors.black),
-  );
-}
-
-Widget _addTechnician({required CustomerListViewController controller, required BuildContext context}) {
-  return CustomTextField(
-    hintText: "Email".tr,
-    // controller: controller.emailController,
-    textInputType: TextInputType.emailAddress,
-    // focusNode: controller.phoneFocusNode,
-    labletext: "Email".tr,
-    prefix: Icon(Icons.mail, color: Colors.black),
-  );
-}
-
-Widget _phoneNumber({required CustomerListViewController controller, required BuildContext context}) {
-  return CustomTextField(
-    hintText: "Phone Number".tr,
-    // controller: controller.phoneController,
+    hintText: "Mobile No".tr,
+    controller: controller.phoneController,
     textInputType: TextInputType.phone,
-    // focusNode: controller.firstNameFocusNode,
-    labletext: "Phone Number".tr,
+    onFieldSubmitted: (String? value) {},
+    labletext: "Mobile No".tr,
     prefix: Icon(Icons.phone_android_rounded, color: Colors.black),
   );
 }
 
-Widget _buildOptionbutton({required CustomerListViewController controller, required BuildContext context, required String agentId}) {
-  return Row(
+Widget _buildEmailIdContainer(CustomerListViewController controller, BuildContext context) {
+  return CustomTextField(
+    hintText: "Email Id".tr,
+    controller: controller.emailController,
+    textInputType: TextInputType.emailAddress,
+    onFieldSubmitted: (String? value) {},
+    labletext: "Email Id".tr,
+    prefix: Icon(Icons.email, color: Colors.black),
+  );
+}
+
+Widget _buildCompanyName(CustomerListViewController controller, BuildContext context) {
+  return CustomTextField(
+    hintText: "Company Name".tr,
+    controller: controller.companyNameController,
+    textInputType: TextInputType.text,
+    onFieldSubmitted: (String? value) {},
+    labletext: "Company Name".tr,
+    prefix: Icon(Icons.add_business, color: Colors.black),
+  );
+}
+
+Widget _buildModeNoContainer(CustomerListViewController controller, BuildContext context) {
+  return CustomTextField(
+    hintText: "Model No".tr,
+    controller: controller.modelNoController,
+    textInputType: TextInputType.text,
+    onFieldSubmitted: (String? value) {},
+    labletext: "Model No".tr,
+    prefix: Icon(Icons.work_rounded, color: Colors.black),
+  );
+}
+
+Widget _buildAddressName(CustomerListViewController controller, BuildContext context) {
+  return CustomTextField(
+    hintText: "Address Name".tr,
+    controller: controller.addressNameController,
+    textInputType: TextInputType.text,
+    onFieldSubmitted: (String? value) {},
+    labletext: "Address Name".tr,
+  );
+}
+
+Widget _buildLandMarkName(CustomerListViewController controller, BuildContext context) {
+  return CustomTextField(
+    hintText: "LandMark".tr,
+    controller: controller.landMarkController,
+    textInputType: TextInputType.text,
+    onFieldSubmitted: (String? value) {},
+    labletext: "LandMark".tr,
+  );
+}
+
+Widget _buildCityName(CustomerListViewController controller, BuildContext context) {
+  return CustomTextField(
+    hintText: "City".tr,
+    controller: controller.cityController,
+    textInputType: TextInputType.text,
+    onFieldSubmitted: (String? value) {},
+    labletext: "City".tr,
+  );
+}
+
+Widget _buildStateName(CustomerListViewController controller, BuildContext context) {
+  return CustomTextField(
+    hintText: "State".tr,
+    controller: controller.stateController,
+    textInputType: TextInputType.text,
+    onFieldSubmitted: (String? value) {},
+    labletext: "State".tr,
+  );
+}
+
+Widget _buildzipcode(CustomerListViewController controller, BuildContext context) {
+  return CustomTextField(
+    hintText: "Zip code".tr,
+    controller: controller.zipController,
+    textInputType: TextInputType.text,
+    onFieldSubmitted: (String? value) {},
+    labletext: "Zip code".tr,
+  );
+}
+
+Widget _countryView(CustomerListViewController controller, BuildContext context) {
+  return CustomTextField(
+    hintText: "Country ".tr,
+    controller: controller.countryController,
+    textInputType: TextInputType.text,
+    onFieldSubmitted: (String? value) {},
+    labletext: "Country".tr,
+  );
+}
+
+Widget _buildSelectedRegion(CustomerListViewController controller, BuildContext context) {
+  // final controller = Get.put(PrincipalCstomerViewController());
+  return CustomTextField(
+    // hintText: "Selected Region ".tr,
+    textInputType: TextInputType.text,
+    onFieldSubmitted: (String? value) {},
+    labletext: "Selected Region".tr,
+    controller: TextEditingController(text: controller.defaultValue),
+    readOnly: true,
+    suffix: IconButton(
+      onPressed: () {
+        _showRegionSelection(controller, context);
+      },
+      icon: Icon(Icons.keyboard_arrow_down, color: Colors.black),
+    ),
+  );
+}
+
+void _showRegionSelection(CustomerListViewController controller, BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        // title: Text("Select Region"),
+        content: Container(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: controller.regionValues.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(controller.regionValues[index]),
+                onTap: () {
+                  controller.updateRegion(controller.regionValues[index]);
+                  Navigator.of(context).pop();
+                },
+              );
+            },
+          ),
+        ),
+      );
+    },
+  );
+}
+
+_buildOptionbutton(CustomerListViewController controller, BuildContext context){
+  return  Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         ElevatedButton(
-          onPressed: () {
-            Get.back();
-          },
-          child: Text('Cancel', style: MontserratStyles.montserratBoldTextStyle(color: Colors.white, size: 13)),
+          onPressed: () => Get.back(),
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(appColor),
-            foregroundColor: MaterialStateProperty.all(Colors.white),
-            padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
-            elevation: MaterialStateProperty.all(5),
-            shape: MaterialStateProperty.all(
+            backgroundColor: WidgetStateProperty.all(appColor),
+            foregroundColor: WidgetStateProperty.all(Colors.white),
+            padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
+            elevation: WidgetStateProperty.all(5),
+            shape: WidgetStateProperty.all(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
+            shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.5)), // Shadow color
           ),
+          child: Text('Cancel',style: MontserratStyles.montserratBoldTextStyle(color: Colors.white, size: 13),),
         ),
         hGap(20),
         ElevatedButton(
-          onPressed: () {},/* controller.hitPutAgentsDetailsApiCall(agentId),*/
-          child: Text('Update', style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13)),
+          onPressed: (){
+            // controller.hitPostCustomerApiCall();
+            Get.back();},
+          child: Text('Add',style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),),
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(appColor),
-            foregroundColor: MaterialStateProperty.all(Colors.white),
-            padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
-            elevation: MaterialStateProperty.all(5),
-            shape: MaterialStateProperty.all(
+            backgroundColor: WidgetStateProperty.all(appColor),
+            foregroundColor: WidgetStateProperty.all(Colors.white),
+            padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
+            elevation: WidgetStateProperty.all(5),
+            shape: WidgetStateProperty.all(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
+            shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.5)), // Shadow color
           ),
         )
       ]
   );
 }
+
+class ProductTypeBuilder extends StatefulWidget {
+  @override
+  _ProductTypeBuilderState createState() => _ProductTypeBuilderState();
+}
+
+class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
+  List<Widget> _productTypeFields = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _productTypeFields.add(_buildProductTypeField(isFirst: true));
+  }
+
+  Widget _buildProductTypeField({required bool isFirst}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: CustomTextField(
+              hintText: "Product Type".tr,
+              textInputType: TextInputType.text,
+              onFieldSubmitted: (String? value) {},
+              labletext: "Product Type".tr,
+              prefix: Icon(Icons.production_quantity_limits, color: Colors.black),
+            ),
+          ),
+          hGap(20),
+          Column(
+            children: [
+              _buildAddButton(),
+              vGap(10),
+              if (!isFirst) _buildDeleteButton(),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeleteButton() {
+    return Container(
+      width: 40,
+      height: 40,
+      child: FloatingActionButton(
+        child: Icon(Icons.delete, color: Colors.white),
+        backgroundColor: Colors.red,
+        onPressed: () {
+          setState(() {
+            if (_productTypeFields.length > 1) {
+              _productTypeFields.removeLast();
+            }
+          });
+        },
+        mini: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddButton() {
+    return Container(
+      width: 40,
+      height: 40,
+      child: FloatingActionButton(
+        child: Icon(Icons.add, color: Colors.white),
+        backgroundColor: Colors.blue,
+        onPressed: () {
+          setState(() {
+            _productTypeFields.add(_buildProductTypeField(isFirst: false));
+          });
+        },
+        mini: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: _productTypeFields,
+    );
+  }
+}
+// Widget _form(CustomerListViewController controller, BuildContext context, String agentId,CustomerData customdata) {
+//   WidgetsBinding.instance.addPostFrameCallback((_){
+//     controller.firstNameController.text = customdata.firstName ?? '';
+//   controller.lastNameController.text = customdata.lastName ?? '';
+//   controller.emailController.text = customdata.email ?? '';
+//   controller.phoneController.text = customdata.phoneNumber ?? '';
+//   });
+//
+//   return Container(
+//     height: Get.height,
+//     width: Get.width,
+//     color: whiteColor,
+//     child: Padding(
+//       padding: const EdgeInsets.all(18.0),
+//       child: ListView(
+//         children: [
+//           vGap(40),
+//           _buildTopBarView(controller: controller, context: context),
+//           Divider(height: 1, color: Colors.black),
+//           vGap(40),
+//           _buildTaskName(context: context, controller: controller),
+//           vGap(20),
+//           _buildLastName(context: context, controller: controller),
+//           vGap(20),
+//           _addTechnician(context: context, controller: controller),
+//           vGap(20),
+//           _phoneNumber(context: context, controller: controller),
+//           vGap(40),
+//           _buildOptionbutton(context: context, controller: controller, agentId: agentId),
+//         ],
+//       ),
+//     ),
+//   );
+// }
+//
+// Widget _buildTopBarView({required CustomerListViewController controller, required BuildContext context}) {
+//   return Center(child: Text('Edit Agent', style: MontserratStyles.montserratBoldTextStyle(size: 25, color: blackColor)));
+// }
+//
+// Widget _buildTaskName({required CustomerListViewController controller, required BuildContext context}) {
+//   return CustomTextField(
+//     hintText: "First Name".tr,
+//     controller: controller.firstNameController,
+//     textInputType: TextInputType.text,
+//     // focusNode: controller.lastNameFocusNode,
+//     labletext: "First Name".tr,
+//     prefix: Icon(Icons.person, color: Colors.black),
+//   );
+// }
+//
+// Widget _buildLastName({required CustomerListViewController controller, required BuildContext context}) {
+//   return CustomTextField(
+//     hintText: "Last Name".tr,
+//     controller: controller.lastNameController,
+//     textInputType: TextInputType.text,
+//     // focusNode: controller.emailFocusnode,
+//     labletext: "Last Name".tr,
+//     prefix: Icon(Icons.person, color: Colors.black),
+//   );
+// }
+//
+// Widget _addTechnician({required CustomerListViewController controller, required BuildContext context}) {
+//   return CustomTextField(
+//     hintText: "Email".tr,
+//     controller: controller.emailController,
+//     textInputType: TextInputType.emailAddress,
+//     // focusNode: controller.phoneFocusNode,
+//     labletext: "Email".tr,
+//     prefix: Icon(Icons.mail, color: Colors.black),
+//   );
+// }
+//
+// Widget _phoneNumber({required CustomerListViewController controller, required BuildContext context}) {
+//   return CustomTextField(
+//     hintText: "Phone Number".tr,
+//     controller: controller.phoneController,
+//     textInputType: TextInputType.phone,
+//     // focusNode: controller.firstNameFocusNode,
+//     labletext: "Phone Number".tr,
+//     prefix: Icon(Icons.phone_android_rounded, color: Colors.black),
+//   );
+// }
+//
+// Widget _buildOptionbutton({required CustomerListViewController controller, required BuildContext context, required String agentId}) {
+//   return Row(
+//       mainAxisAlignment: MainAxisAlignment.end,
+//       children: [
+//         ElevatedButton(
+//           onPressed: () {
+//             Get.back();
+//           },
+//           child: Text('Cancel', style: MontserratStyles.montserratBoldTextStyle(color: Colors.white, size: 13)),
+//           style: ButtonStyle(
+//             backgroundColor: MaterialStateProperty.all(appColor),
+//             foregroundColor: MaterialStateProperty.all(Colors.white),
+//             padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
+//             elevation: MaterialStateProperty.all(5),
+//             shape: MaterialStateProperty.all(
+//               RoundedRectangleBorder(
+//                 borderRadius: BorderRadius.circular(10),
+//               ),
+//             ),
+//             shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
+//           ),
+//         ),
+//         hGap(20),
+//         ElevatedButton(
+//           onPressed: () {},/* controller.hitPutAgentsDetailsApiCall(agentId),*/
+//           child: Text('Update', style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13)),
+//           style: ButtonStyle(
+//             backgroundColor: MaterialStateProperty.all(appColor),
+//             foregroundColor: MaterialStateProperty.all(Colors.white),
+//             padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
+//             elevation: MaterialStateProperty.all(5),
+//             shape: MaterialStateProperty.all(
+//               RoundedRectangleBorder(
+//                 borderRadius: BorderRadius.circular(10),
+//               ),
+//             ),
+//             shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
+//           ),
+//         )
+//       ]
+//   );
+// }
 
 String _formatDate(dynamic date) {
   if (date == null) return 'N/A';

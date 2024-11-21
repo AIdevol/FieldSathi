@@ -13,6 +13,7 @@ import 'package:tms_sathi/response_models/customer_list_response_model.dart';
 import 'package:tms_sathi/response_models/expenses_response_model.dart';
 import 'package:tms_sathi/response_models/fsr_response_model.dart';
 import 'package:tms_sathi/response_models/lead_response_model.dart';
+import 'package:tms_sathi/response_models/lead_satus_response_model.dart';
 import 'package:tms_sathi/response_models/leaves_response_model.dart';
 import 'package:tms_sathi/response_models/login_response_model.dart';
 import 'package:tms_sathi/response_models/otp_response_model.dart';
@@ -602,60 +603,77 @@ implements AuthenticationApi {
 
 // ============================================================================Lead End Api Call===============================================================
   @override
-  Future<List<LeadGetResponseModel>> getLeadListApiCall(
-      {Map<String, dynamic>?dataBody, parameters}) async {
-    try {
-      final response = await dioClient!.get(
-          "${ApiEnd.leadEnd}", queryParameters: parameters, skipAuth: false);
-      if (response is List) {
-        return response.map((item) => LeadGetResponseModel.fromJson(item))
-            .toList();
-      } else
-      if (response is Map<String, dynamic> && response.containsKey('data')) {
-        final List<dynamic>data = response['data'];
-        return data.map((item) => LeadGetResponseModel.fromJson(item)).toList();
-      }
-      return [];
-    } catch (error) {
+  Future<LeadGetResponseModel> getLeadListApiCall({Map<String, dynamic>?dataBody, parameters})async{
+    try{
+      final response = await dioClient!.get( "${ApiEnd.leadEnd}", queryParameters: parameters, skipAuth: false);
+      return LeadGetResponseModel.fromJson(response);
+    }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }
   }
-
   @override
-  Future<LeadPostResponseModel> postLeadListApiCall(
-      {Map<String, dynamic>?dataBody}) async {
-    try {
-      final response = await dioClient!.post(
-          ApiEnd.leadEnd, data: dataBody, skipAuth: false);
-      return LeadPostResponseModel.fromJson(response);
-    } catch (error) {
+  Future<LeadStatusResponseModel> getLeadStatusApiCall({Map<String, dynamic>?dataBody})async{
+    try{
+      final response = await dioClient!.get( "${ApiEnd.statusLeadsCountsEnd}" ,skipAuth: false);
+      return LeadStatusResponseModel.fromJson(response);
+    }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }
   }
+//   Future<List<LeadGetResponseModel>> getLeadListApiCall(
+//       {Map<String, dynamic>?dataBody, parameters}) async {
+//     try {
+//       final response = await dioClient!.get(
+//           "${ApiEnd.leadEnd}", queryParameters: parameters, skipAuth: false);
+//       if (response is List) {
+//         return response.map((item) => LeadGetResponseModel.fromJson(item))
+//             .toList();
+//       } else
+//       if (response is Map<String, dynamic> && response.containsKey('data')) {
+//         final List<dynamic>data = response['data'];
+//         return data.map((item) => LeadGetResponseModel.fromJson(item)).toList();
+//       }
+//       return [];
+//     } catch (error) {
+//       return Future.error(NetworkExceptions.getDioException(error));
+//     }
+//   }
 
-  @override
-  Future<LeadPostResponseModel> delLeadListApiCall(
-      {Map<String, dynamic>?dataBody, String? id}) async {
-    try {
-      final response = await dioClient!.delete(
-          "${ApiEnd.leadEnd}$id/", data: dataBody, skipAuth: false);
-      return LeadPostResponseModel.fromJson(response);
-    } catch (error) {
-      return Future.error(NetworkExceptions.getDioException(error));
-    }
-  }
+  // @override
+  // Future<LeadPostResponseModel> postLeadListApiCall(
+  //     {Map<String, dynamic>?dataBody}) async {
+  //   try {
+  //     final response = await dioClient!.post(
+  //         ApiEnd.leadEnd, data: dataBody, skipAuth: false);
+  //     return LeadPostResponseModel.fromJson(response);
+  //   } catch (error) {
+  //     return Future.error(NetworkExceptions.getDioException(error));
+  //   }
+  // }
+  //
+  // @override
+  // Future<LeadPostResponseModel> delLeadListApiCall(
+  //     {Map<String, dynamic>?dataBody, String? id}) async {
+  //   try {
+  //     final response = await dioClient!.delete(
+  //         "${ApiEnd.leadEnd}$id/", data: dataBody, skipAuth: false);
+  //     return LeadPostResponseModel.fromJson(response);
+  //   } catch (error) {
+  //     return Future.error(NetworkExceptions.getDioException(error));
+  //   }
+  // }
 
-  @override
-  Future<LeadPostResponseModel> putLeadListApiCall(
-      {Map<String, dynamic>?dataBody, String? id}) async {
-    try {
-      final response = await dioClient!.delete(
-          "${ApiEnd.leadEnd}$id/", data: dataBody, skipAuth: false);
-      return LeadPostResponseModel.fromJson(response);
-    } catch (error) {
-      return Future.error(NetworkExceptions.getDioException(error));
-    }
-  }
+  // @override
+  // Future<LeadPostResponseModel> putLeadListApiCall(
+  //     {Map<String, dynamic>?dataBody, String? id}) async {
+  //   try {
+  //     final response = await dioClient!.delete(
+  //         "${ApiEnd.leadEnd}$id/", data: dataBody, skipAuth: false);
+  //     return LeadPostResponseModel.fromJson(response);
+  //   } catch (error) {
+  //     return Future.error(NetworkExceptions.getDioException(error));
+  //   }
+  // }
 
 // ==================================================================================Service Categories api Call===============================================================
   /*@override

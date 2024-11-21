@@ -20,7 +20,7 @@ class HomeScreenController extends GetxController{
   final RxString profileImageUrl = ''.obs;
   final RxBool isLoading = true.obs;
   List<FsrResponseModel> allFsr = <FsrResponseModel>[].obs;
-  RxList<LeadGetResponseModel> leadListData = <LeadGetResponseModel>[].obs;
+  RxList<LeadResult> leadListData = <LeadResult>[].obs;
   RxList<AmcResult> amcResultData = <AmcResult>[].obs;
   RxList<TicketResponseModel> ticketData = <TicketResponseModel>[].obs;
   RxList<TicketResult>ticketResultData = <TicketResult>[].obs;
@@ -107,7 +107,7 @@ class HomeScreenController extends GetxController{
     isLoading.value = true;
     FocusManager.instance.primaryFocus!.context;
     Get.find<AuthenticationApiService>().getLeadListApiCall().then((value){
-      leadListData.assignAll(value);
+      leadListData.assignAll(value.results!);
       update();
     }).onError((error,stackError){
       toast(error.toString());

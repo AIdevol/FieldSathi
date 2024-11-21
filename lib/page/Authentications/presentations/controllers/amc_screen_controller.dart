@@ -8,6 +8,8 @@ import 'package:tms_sathi/response_models/amc_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 class AMCScreenController extends GetxController {
+  int? selectedNumberOfService;
+
   late TextEditingController amcNameController;
   late TextEditingController activationTimeController;
   late TextEditingController datesController;
@@ -46,7 +48,9 @@ class AMCScreenController extends GetxController {
   RxList<AmcResult> amcResultData = <AmcResult>[].obs;
   RxList<AmcResult> filteredAmcData = <AmcResult>[].obs;
 
-
+  void initializeNumberOfService() {
+    selectedNumberOfService = 1;
+  }
   // Counters for different AMC states
   RxInt totalAmcCount = 0.obs;
   RxInt upcomingCount = 0.obs;

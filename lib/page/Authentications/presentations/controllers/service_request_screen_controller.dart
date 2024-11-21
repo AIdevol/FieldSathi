@@ -23,28 +23,40 @@
       final approvedController = TextEditingController();
 
       RxList<String> selecteValue = [
-        "--Please Select Status--"
+
+        "All",
+        "Pending",
+        "In Progress",
         "Submitted",
         "Approved",
-        "Dispatched"
+        "Dispatched",
+        "Delivered",
+        "Cancelled"
       ].obs;
 
-      RxList<String> selectedValue = [
+      RxList<String> statusOptions = [
+        "All",
+        "Pending",
+        "In Progress",
         "Submitted",
         "Approved",
-        "Dispatched"
+        "Dispatched",
+        "Delivered",
+        "Cancelled"
       ].obs;
 
       RxString selectStatusValue = " ".obs;
-      RxString dropDownValue = "--Please Select Status--".obs;
+      RxString dropDownValue = "All".obs;
 
       final isSearching = false.obs;
       final RxString searchText = ''.obs;
-      final RxList<Result> servicesRequestsData = <Result>[].obs;
+      final RxList<ServiceRequest> servicesRequestsData = <ServiceRequest>[].obs;
       final RxSet<ServiceRequestResponseModel> ServiceRequestsDetails = <ServiceRequestResponseModel>{}.obs;
       final RxBool isLoading = true.obs;
       RxList<ExportServiceResponse> exportData = <ExportServiceResponse>[].obs;
-      final RxList<Result> filteredRequests = <Result>[].obs;
+      final RxList<ServiceRequest> filteredRequests = <ServiceRequest>[].obs;
+
+      final approvalRemarkController = TextEditingController();
 
 
       @override
@@ -78,7 +90,7 @@
       }
 
       void _applyFilters() {
-        List<Result> results = servicesRequestsData;
+        List<ServiceRequest> results = servicesRequestsData;
 
         if (searchText.value.isNotEmpty) {
           final query = searchText.value.toLowerCase();

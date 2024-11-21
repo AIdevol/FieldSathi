@@ -56,4 +56,7 @@ class ApiEnd{
 /*============================================================= History Apis ==============================================================*/
   // static const String downLoadTicketData = 'api/'
   static const String ticketHistoryViewEnd = 'api/ticket_history_view/';
+
+  /*=============================================================Status Counts Lead ==========================================================================*/
+  static const String statusLeadsCountsEnd= 'api/leads/status_counts/';
 }

@@ -28,54 +28,52 @@ class AMCViewScreen extends GetView<AMCScreenController> {
   Widget build(BuildContext context) {
     return MyAnnotatedRegion(
         child: GetBuilder<AMCScreenController>(builder: (controller) =>
-            SafeArea(
-              child: Scaffold(
-                appBar: AppBar(
-                  leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
-                  backgroundColor: appColor,
-                  title: Text(
-                    'AMC',
-                    style: MontserratStyles.montserratBoldTextStyle(
-                      color: blackColor,
-                      size: 15,
-                    ),
+            Scaffold(
+              appBar: AppBar(
+                leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
+                backgroundColor: appColor,
+                title: Text(
+                  'AMC',
+                  style: MontserratStyles.montserratBoldTextStyle(
+                    color: blackColor,
+                    size: 15,
                   ),
-                  actions: [
-                    IconButton(
-                      onPressed: () {
-                        Get.toNamed(AppRoutes.addAmcCallenderScreen);
-                      },
-                      icon: Icon(Icons.calendar_month),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        Get.toNamed(AppRoutes.createamcScreen);
-                      },
-                      icon: Icon(FeatherIcons.plus),
-                    ).paddingSymmetric(horizontal: 20.0),
-                  ],
                 ),
-                body: ListView(
-                  children: [
-                    _buildTopBar(context, controller),
-                    vGap(10),
-                    _mainData(),
-                    vGap(10),
-                    _dataTableViewScreen(amcIds),
-                  ],
-                )
-               /* controller.isLoading.value
-                    ? Center(child: CircularProgressIndicator(),)
-                    : Column(
-                  children: [
-                    _buildTopBar(),
-                    vGap(10),
-                    _mainData(),
-                    vGap(10),
-                    _dataTableViewScreen(),
-                  ],
-                ),*/
+                actions: [
+                  IconButton(
+                    onPressed: () {
+                      Get.toNamed(AppRoutes.addAmcCallenderScreen);
+                    },
+                    icon: Icon(Icons.calendar_month),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Get.toNamed(AppRoutes.createamcScreen);
+                    },
+                    icon: Icon(FeatherIcons.plus),
+                  ).paddingSymmetric(horizontal: 20.0),
+                ],
               ),
+              body: ListView(
+                children: [
+                  _buildTopBar(context, controller),
+                  vGap(10),
+                  _mainData(),
+                  vGap(10),
+                  _dataTableViewScreen(amcIds),
+                ],
+              )
+             /* controller.isLoading.value
+                  ? Center(child: CircularProgressIndicator(),)
+                  : Column(
+                children: [
+                  _buildTopBar(),
+                  vGap(10),
+                  _mainData(),
+                  vGap(10),
+                  _dataTableViewScreen(),
+                ],
+              ),*/
             ),)
     );
   }
@@ -658,19 +656,22 @@ Widget _ticketBoxIcons(String ticketId,String text) {
 }
 
 _amcDetailsEditWidget(BuildContext context, AMCScreenController controller, AmcResult amcData){
-  controller.amcNameController.text = amcData.amcName ?? '';
-  controller.activationTimeController.text = amcData.activationTime ?? '';
-  controller.datesController.text = amcData.activationDate ?? '';
-  controller.noOfServiceController.text = amcData.noOfService?.toString() ?? '';
-  controller.reminderController.text = amcData.remainder ?? '';
-  controller.serviceOccurrenceController.text = amcData.selectServiceOccurence ?? '';
-  controller.productNameController.text = amcData.productName ?? '';
-  controller.productBrandController.text = amcData.productBrand ?? '';
-  controller.serialModelNoController.text = amcData.serialModelNo ?? '';
-  controller.serviceAmountController.text = amcData.serviceAmount?.toString() ?? '';
-  controller.recievedAmountController.text = amcData.receivedAmount?.toString() ?? '';
-  controller.customerNameController.text = amcData.customer.customerName ?? '';
-  controller.notesController.text = amcData.note ?? '';
+  WidgetsBinding.instance.addPostFrameCallback((_){
+    controller.amcNameController.text = amcData.amcName ?? '';
+    controller.activationTimeController.text = amcData.activationTime ?? '';
+    controller.datesController.text = amcData.activationDate ?? '';
+    controller.noOfServiceController.text = amcData.noOfService?.toString() ?? '';
+    controller.reminderController.text = amcData.remainder ?? '';
+    controller.serviceOccurrenceController.text = amcData.selectServiceOccurence ?? '';
+    controller.productNameController.text = amcData.productName ?? '';
+    controller.productBrandController.text = amcData.productBrand ?? '';
+    controller.serialModelNoController.text = amcData.serialModelNo ?? '';
+    controller.serviceAmountController.text = amcData.serviceAmount?.toString() ?? '';
+    controller.recievedAmountController.text = amcData.receivedAmount?.toString() ?? '';
+    controller.customerNameController.text = amcData.customer.customerName ?? '';
+    controller.notesController.text = amcData.note ?? '';
+  });
+
    Get.dialog(
       Dialog(
         insetAnimationDuration: Duration(milliseconds: 3),
@@ -695,40 +696,41 @@ _form(BuildContext context, AMCScreenController controller, String amcId){
           _updateTextName(context),
           Divider(color: Colors.black,thickness: 2,),
           vGap(20),
-          _buildAMCName(context: context),
+          _buildAMCName(context, controller),
           vGap(20),
-          _addTimeRange(context: context),
+          _addTimeRange(context, controller),
           vGap(20),
-          _dobView(context: context),
+          _dobView(context, controller),
           vGap(20),
-          _buildNOofchoiceField(context:context),
+          buildNumberOfChoiceField(context, controller),
           vGap(20),
-          _buildselectedView(context: context),
+          _buildselectedView(context, controller),
           vGap(20),
-          _buildServiceOccurances(context: context),
+          _buildServiceOccurances(context, controller),
           vGap(20),
-          _buildProductBrand(context: context),
+          _buildProductBrand(context, controller),
           vGap(20),
-          _buildProductName(context: context),
+          _buildProductName(context, controller),
           vGap(20),
-          _buildSerialNoModel(context: context),
+          _buildSerialNoModel(context, controller),
           vGap(20),
-          _buildServiceAccount(context: context),
+          _buildServiceAccount(context, controller),
           vGap(20),
-          _buildRecoievedAccount(context: context),
+          _buildRecoievedAccount(context, controller),
           vGap(20),
-          _buildCustomerName(context: context),
+          _buildCustomerName(context, controller),
           vGap(20),
-          _buildtextContainer(context: context),
+          _buildtextContainer(context, controller),
           vGap(20),
-          _buildOptionbutton(context: context)
+          _buildOptionbutton(context, controller)
         ],
         ),
       ),
      );
 }
-Widget _buildAMCName({required BuildContext context}) {
+Widget _buildAMCName(BuildContext context,AMCScreenController controller) {
   return CustomTextField(
+    controller: controller.amcNameController,
     hintText: "AMC Name".tr,
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
@@ -736,8 +738,9 @@ Widget _buildAMCName({required BuildContext context}) {
     prefix: Icon(Icons.add_task, color: Colors.black),
   );
 }
-Widget _buildCustomerName({required BuildContext context}) {
+Widget _buildCustomerName(BuildContext context,AMCScreenController controller) {
   return CustomTextField(
+    controller: controller.customerNameController,
     hintText: "Customer Name".tr,
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
@@ -745,8 +748,9 @@ Widget _buildCustomerName({required BuildContext context}) {
     prefix: Icon(Icons.add_task, color: Colors.black),
   );
 }
-Widget _buildProductBrand({required BuildContext context}) {
+Widget _buildProductBrand(BuildContext context,AMCScreenController controller) {
   return CustomTextField(
+    controller: controller.productBrandController,
     hintText: "Product Brand".tr,
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
@@ -754,8 +758,9 @@ Widget _buildProductBrand({required BuildContext context}) {
     // suffix: IconButton(onPressed: (){}, icon: Icon(Icons.arrow_drop_up_outlined, color: Colors.black)),
   );
 }
-Widget _buildProductName({required BuildContext context}) {
+Widget _buildProductName(BuildContext context,AMCScreenController controller) {
   return CustomTextField(
+    controller: controller.productNameController,
     hintText: "Product Name".tr,
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
@@ -763,8 +768,9 @@ Widget _buildProductName({required BuildContext context}) {
     prefix: Icon(Icons.add_task, color: Colors.black),
   );
 }
-Widget _buildServiceAccount({required BuildContext context}) {
+Widget _buildServiceAccount(BuildContext context,AMCScreenController controller) {
   return CustomTextField(
+    controller: controller.serviceAmountController,
     hintText: "Service Amount".tr,
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
@@ -781,8 +787,9 @@ Widget _buildServiceAccount({required BuildContext context}) {
     ),
   );
 }
-Widget _buildRecoievedAccount({required BuildContext context}) {
+Widget _buildRecoievedAccount(BuildContext context,AMCScreenController controller) {
   return CustomTextField(
+    controller: controller.recievedAmountController,
     hintText: "Received Amount".tr,
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
@@ -797,8 +804,9 @@ Widget _buildRecoievedAccount({required BuildContext context}) {
     ),
   );
 }
-Widget _buildSerialNoModel({required BuildContext context}) {
+Widget _buildSerialNoModel(BuildContext context,AMCScreenController controller) {
   return CustomTextField(
+    controller: controller.serialModelNoController,
     hintText: "Serial Model No".tr,
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
@@ -806,8 +814,9 @@ Widget _buildSerialNoModel({required BuildContext context}) {
     prefix: Icon(Icons.add_task, color: Colors.black),
   );
 }
-Widget _addTimeRange({required BuildContext context}) {
+Widget _addTimeRange(BuildContext context,AMCScreenController controller) {
   return CustomTextField(
+    controller: controller.activationTimeController,
     hintText: "Activation Time".tr,
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
@@ -820,7 +829,7 @@ Widget _addTimeRange({required BuildContext context}) {
   );
 }
 
-Widget _buildOptionbutton({required BuildContext context}) {
+Widget _buildOptionbutton(BuildContext context,AMCScreenController controller) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.end,
     children: [
@@ -851,7 +860,7 @@ Widget _buildButton(String text,{required onPressed}) {
     ),
   );
 }
-Widget _dobView({required BuildContext context}) {
+Widget _dobView(BuildContext context,AMCScreenController controller) {
   final controller = Get.find<AMCScreenController>();
   return CustomTextField(
     hintText: "dd-month-yyyy".tr,
@@ -867,20 +876,40 @@ Widget _dobView({required BuildContext context}) {
   );
 }
 
-Widget _buildNOofchoiceField({required BuildContext context}) {
-  return CustomTextField(
-    hintText: 'No. of Service'.tr,
-    labletext: 'No. of Service'.tr,
-    textInputType: TextInputType.text,
-    onFieldSubmitted: (String? value) {},
-    prefix: IconButton(
-      onPressed: () {},
-      icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30),
+Widget buildNumberOfChoiceField(BuildContext context, AMCScreenController controller) {
+  return DropdownButtonFormField<int>(
+    value: controller.selectedNumberOfService,
+    decoration: InputDecoration(
+      hintText: 'No. of Service'.tr,
+      labelText: 'No. of Service'.tr,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(30)
+      ),
     ),
+    items: List.generate(12, (index) => index + 1)
+        .map((number) => DropdownMenuItem(
+      value: number,
+      child: Text(number.toString()),
+    ))
+        .toList(),
+    onChanged: (value) {
+      if (value != null) {
+        controller.selectedNumberOfService = value;
+        controller.noOfServiceController.text = value.toString();
+      }
+    },
+    validator: (value) {
+      if (value == null) {
+        return 'Please select number of services'.tr;
+      }
+      return null;
+    },
   );
 }
-Widget _buildselectedView({required BuildContext context}) {
+
+Widget _buildselectedView(BuildContext context,AMCScreenController controller) {
   return CustomTextField(
+    controller: controller.reminderController,
     hintText: 'Reminder'.tr,
     labletext: 'Reminder'.tr,
     textInputType: TextInputType.text,
@@ -891,8 +920,9 @@ Widget _buildselectedView({required BuildContext context}) {
     ),
   );
 }
-Widget _buildServiceOccurances({required BuildContext context}) {
+Widget _buildServiceOccurances(BuildContext context,AMCScreenController controller) {
   return CustomTextField(
+    controller: controller.serviceOccurrenceController,
     hintText: 'Service Occurrence'.tr,
     labletext: 'Service Occurrence'.tr,
     textInputType: TextInputType.text,
@@ -904,7 +934,7 @@ Widget _buildServiceOccurances({required BuildContext context}) {
   );
 }
 
-Widget _buildtextContainer({required BuildContext context}) {
+Widget _buildtextContainer(BuildContext context,AMCScreenController controller) {
   return Container(
     height: Get.height * 0.16,
     width: Get.width * 0.40,
@@ -916,6 +946,7 @@ Widget _buildtextContainer({required BuildContext context}) {
     child: Padding(
       padding: EdgeInsets.symmetric(horizontal: 10),
       child: TextField(
+        controller: controller.notesController,
         style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13),
         decoration: InputDecoration(
           border: InputBorder.none,

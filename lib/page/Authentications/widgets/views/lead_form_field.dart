@@ -210,7 +210,7 @@ Widget _customButtonViewWidget({required LeadFormFieldController controller,requ
     children: [
       _buildButton('Cancel',onPressed: ()=>Get.back(), controller: controller),
       hGap(10),
-      _buildButton('Add', onPressed: ()=>controller.hitPostLeadlistApiCall(), controller:  controller),
+      _buildButton('Add', onPressed: (){}/*controller.hitPostLeadlistApiCall()*/, controller:  controller),
       hGap(10),
       // _buildRateTextField(),
     ],
