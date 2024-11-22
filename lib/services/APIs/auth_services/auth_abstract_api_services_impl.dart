@@ -22,6 +22,7 @@ import '../../../response_models/register_response_model.dart';
 import '../../../response_models/resend_otp_api_call.dart';
 import '../../../response_models/sales_response_model.dart';
 import '../../../response_models/service_requests_response_model.dart';
+import '../../../response_models/services_all_response_model.dart';
 import '../../../response_models/services_response_model.dart';
 import '../../../response_models/sub_service_response_model.dart';
 import '../../../response_models/super_user_response_model.dart';
@@ -83,4 +84,5 @@ abstract class AuthenticationApi {
   Future<SalesResponseModel>getSalesDetailsApiCall({Map<String, dynamic>? dataBody, parameters});
   Future<AddSalesResponseModel>postAddSalesDetailsApiCall({Map<String, dynamic>? dataBody, parameters});
   Future<AmcResponseModel>getAmcDetailsApiCall({Map<String, dynamic>?dataBody});
+  Future<ServicesResponseModel> getAllservicesPricesAndDetails({Map<String, dynamic>?dataBody});
 }

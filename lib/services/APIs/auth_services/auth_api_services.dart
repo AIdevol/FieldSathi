@@ -17,6 +17,7 @@ import 'package:tms_sathi/response_models/lead_satus_response_model.dart';
 import 'package:tms_sathi/response_models/leaves_response_model.dart';
 import 'package:tms_sathi/response_models/login_response_model.dart';
 import 'package:tms_sathi/response_models/otp_response_model.dart';
+import 'package:tms_sathi/response_models/services_all_response_model.dart';
 import 'package:tms_sathi/response_models/services_response_model.dart';
 import 'package:tms_sathi/response_models/sub_service_response_model.dart';
 import 'package:tms_sathi/response_models/technician_response_model.dart';
@@ -913,6 +914,15 @@ Future<TechnicianAttendanceResponseModel>getAttendanceApiCall({Map<String, dynam
     }
  }
 //   =============================
+@override
+Future<ServicesResponseModel> getAllservicesPricesAndDetails({Map<String, dynamic>?dataBody})async{
+    try{
+      final response = await dioClient!.get(ApiEnd.serviceEnd, data: dataBody, skipAuth: false);
+      return ServicesResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+}
 }
 
 

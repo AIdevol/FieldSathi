@@ -84,6 +84,7 @@ class CustomerListViewController extends GetxController{
       selectedRegionFocusNode = FocusNode();
       super.onInit();
       hitGetCustomerListApiCall();
+
     }
 
     @override

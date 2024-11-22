@@ -348,9 +348,17 @@ class TicketListScreen extends GetView<TicketListController> {
   List<DataRow> _buildTableRows(BuildContext context, TicketListController controller) {
     return controller.ticketResult.map((ticket) {
       return DataRow(
-        onSelectChanged:(_)=>_showDialogWidgetContext(context, controller, ticket.id!.toString(), ticket),
+        onSelectChanged:(_) {
+          try {
+            showDialogWidgetContext(
+                context, controller, ticket.id.toString(), ticket);
+          } catch (e, stack) {
+            debugPrint('Error showing dialog: $e');
+            debugPrint(stack.toString());
+          };
+        },
         cells: [
-          DataCell(_ticketBoxIcons(ticket.id?.toString() ?? 'NA')),
+          DataCell(_ticketBoxIcons(ticket.id.toString() ?? 'NA')),
           DataCell(_buildDataCell(ticket.taskName?.toString() ?? 'NA')),
           DataCell(_buildDataCell(
             ticket.customerDetails.customerName ?? 'NA',
@@ -1463,7 +1471,7 @@ Widget _buildActionButton(
   );
 }
 
-_showDialogWidgetContext(BuildContext context, TicketListController controller, String ticketid, TicketResult ticket, ){
+Future showDialogWidgetContext(BuildContext context, TicketListController controller, String ticketid, TicketResult ticket, ){
    controller.hitGetTicketHistoryApiCall(ticketid);
    final progressResult = controller.ticketHistoryData;
   return showDialog(context: context, builder: (context){
