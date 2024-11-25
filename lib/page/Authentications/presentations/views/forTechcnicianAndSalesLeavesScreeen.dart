@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
-
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../controllers/forTechnicianAndSalesLeavesScreenController.dart';
 
@@ -16,11 +14,14 @@ class FortechcnicianandsalesAttendancescreeen extends GetView<ForTechcnicianands
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: appColor, // Replace with your appColor
-        title:  Text("Attendance",style: MontserratStyles.montserratBoldTextStyle(
-          size: 15,
-          color: Colors.black,
-        ),),
+        backgroundColor: appColor,
+        title: Text(
+          "Attendance",
+          style: MontserratStyles.montserratBoldTextStyle(
+            size: 15,
+            color: Colors.black,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -28,7 +29,6 @@ class FortechcnicianandsalesAttendancescreeen extends GetView<ForTechcnicianands
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Welcome Section
               Container(
                 padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
@@ -38,10 +38,7 @@ class FortechcnicianandsalesAttendancescreeen extends GetView<ForTechcnicianands
                 child: Center(
                   child: Text(
                     "Welcome, User!",
-                    style: MontserratStyles.montserratBoldTextStyle(
-                      size: 15,
-                      // color: Colors.black,
-                    ),
+                    style: MontserratStyles.montserratBoldTextStyle(size: 15),
                   ),
                 ),
               ),
@@ -62,20 +59,26 @@ class FortechcnicianandsalesAttendancescreeen extends GetView<ForTechcnicianands
                             groupValue: controller.isPunchInSelected.value,
                             onChanged: (value) => controller.togglePunchInOut(true),
                           ),
-                           Text("Punch In",style: MontserratStyles.montserratBoldTextStyle(
-                            size: 15,
-                            color: Colors.black,
-                          ),),
+                          Text(
+                            "Punch In",
+                            style: MontserratStyles.montserratBoldTextStyle(
+                              size: 15,
+                              color: Colors.black,
+                            ),
+                          ),
                           const SizedBox(width: 20),
                           Radio<bool>(
                             value: false,
                             groupValue: controller.isPunchInSelected.value,
                             onChanged: (value) => controller.togglePunchInOut(false),
                           ),
-                           Text("Punch Out",style: MontserratStyles.montserratBoldTextStyle(
-                             size: 15,
-                             color: Colors.black,
-                           ),),
+                          Text(
+                            "Punch Out",
+                            style: MontserratStyles.montserratBoldTextStyle(
+                              size: 15,
+                              color: Colors.black,
+                            ),
+                          ),
                         ],
                       )),
                       Obx(() => ElevatedButton(
@@ -83,10 +86,7 @@ class FortechcnicianandsalesAttendancescreeen extends GetView<ForTechcnicianands
                         style: _buttonStyle(),
                         child: Text(
                           controller.isPunchInSelected.value ? "PUNCH IN" : "PUNCH OUT",
-                          style: MontserratStyles.montserratBoldTextStyle(
-                            size: 12,
-                            // color: Colors.black,
-                          ),
+                          style: MontserratStyles.montserratBoldTextStyle(size: 12),
                         ),
                       )),
                     ],
@@ -102,42 +102,106 @@ class FortechcnicianandsalesAttendancescreeen extends GetView<ForTechcnicianands
                   color: Colors.lightBlueAccent,
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                child:  Center(
+                child: Center(
                   child: Text(
                     "Punch-In/Punch-Out History",
-                    style: MontserratStyles.montserratBoldTextStyle(
-                      size: 15,
-                      // color: Colors.black,
-                    ),
+                    style: MontserratStyles.montserratBoldTextStyle(size: 15),
                   ),
                 ),
               ),
               const SizedBox(height: 10.0),
 
-              // Calendar
-             TableCalendar(
-                focusedDay: DateTime.now(),
-                firstDay: DateTime.utc(2020, 1, 1),
-                lastDay: DateTime.utc(2030, 12, 31),
-                calendarFormat: CalendarFormat.month,
-                selectedDayPredicate: (day) =>
-                    controller.selectedDates.contains(day),
-                onDaySelected: (selectedDay, focusedDay) {
-                  if (!controller.selectedDates.contains(selectedDay)) {
-                    controller.selectedDates.add(selectedDay);
-                  }
-                },
-                calendarStyle: const CalendarStyle(
-                  todayDecoration: BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
+              // Updated Calendar with attendance data
+        TableCalendar(
+          focusedDay: DateTime.now(),
+          firstDay: DateTime.utc(2020, 1, 1),
+          lastDay: DateTime.utc(2030, 12, 31),
+          calendarFormat: CalendarFormat.month,
+          selectedDayPredicate: (day) {
+            // Check if the day exists in attendance data
+            return controller.attendanceData.any((attendance) {
+              if (attendance.date != null) {
+                final attendanceDate = DateTime.parse(attendance.date!);
+                return isSameDay(attendanceDate, day);
+              }
+              return false;
+            });
+          },
+          onDaySelected: (selectedDay, focusedDay) {
+            final attendance = controller.attendanceData.firstWhereOrNull(
+                    (attendance) => attendance.date != null &&
+                    isSameDay(DateTime.parse(attendance.date!), selectedDay)
+            );
+
+            if (attendance != null) {
+              print("adfadfadfadf: ${attendance.punchIn}");
+              Get.dialog(
+                AlertDialog(
+                  title: Text('Attendance Details',style: MontserratStyles.montserratBoldTextStyle(size: 20, color: Colors.black),),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Date: ${attendance.date}', style: MontserratStyles.montserratBoldTextStyle(size: 15, color: Colors.black),),
+                      Text('Status: ${attendance.status ?? "N/A"}',style: MontserratStyles.montserratBoldTextStyle(size: 12, color: Colors.grey),),
+                      Text('Check In: ${attendance.punchIn ?? "N/A"}',style: MontserratStyles.montserratBoldTextStyle(size: 12, color: Colors.grey),),
+                      Text('Check Out: ${attendance.punchOut ?? "N/A"}',style: MontserratStyles.montserratBoldTextStyle(size: 12, color: Colors.grey),),
+                    ],
                   ),
-                  selectedDecoration: BoxDecoration(
-                    color: Colors.redAccent,
-                    shape: BoxShape.circle,
-                  ),
+                  actions: [
+                    ElevatedButton(
+                      onPressed: () => Get.back(),
+                      child: Text('Close'),
+                      style: _buttonStyle(),
+                    ),
+                  ],
                 ),
-              ),
+              );
+            }
+          },
+          calendarStyle: CalendarStyle(
+            todayDecoration: BoxDecoration(
+              color: Colors.blue,
+              shape: BoxShape.circle,
+            ),
+            selectedDecoration: BoxDecoration(
+              color: Colors.green,
+              shape: BoxShape.circle,
+            ),
+            markerDecoration: BoxDecoration(
+              color: Colors.redAccent,
+              shape: BoxShape.circle,
+            ),
+          ),
+          calendarBuilders: CalendarBuilders(
+            markerBuilder: (context, date, events) {
+              // Find attendance for this date
+              final attendance = controller.attendanceData.firstWhereOrNull(
+                      (attendance) => attendance.date != null &&
+                      isSameDay(DateTime.parse(attendance.date!), date)
+              );
+
+              if (attendance != null) {
+                return Positioned(
+                  bottom: 1,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: attendance.status == 'completed'
+                          ? Colors.green
+                          : attendance.status == 'active'
+                          ? Colors.orange
+                          : Colors.red,
+                    ),
+                  ),
+                );
+              }
+              return null;
+            },
+          ),
+        ),
               const SizedBox(height: 20.0),
 
               // Export Button
@@ -146,12 +210,14 @@ class FortechcnicianandsalesAttendancescreeen extends GetView<ForTechcnicianands
                 style: _buttonStyle(),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                  Icon(FontAwesomeIcons.download, size: 25,),
-                   Text("EXPORT ATTENDANCE",style: MontserratStyles.montserratBoldTextStyle(
-                     size: 15,
-                     // color: Colors.black,
-                   ),)]),
+                  children: [
+                    Icon(FontAwesomeIcons.download, size: 25),
+                    Text(
+                      "EXPORT ATTENDANCE",
+                      style: MontserratStyles.montserratBoldTextStyle(size: 15),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

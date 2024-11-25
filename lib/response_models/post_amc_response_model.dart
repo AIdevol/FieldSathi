@@ -1,30 +1,4 @@
-class AmcResponseModel {
-  final int count;
-  final int totalPages;
-  final int currentPage;
-  final List<AmcResult> results;
-
-  AmcResponseModel({
-    required this.count,
-    required this.totalPages,
-    required this.currentPage,
-    required this.results,
-  });
-
-  factory AmcResponseModel.fromJson(Map<String, dynamic> json) {
-    return AmcResponseModel(
-      count: json['count'] ?? 0,
-      totalPages: json['total_pages'] ?? 0,
-      currentPage: json['current_page'] ?? 0,
-      results: (json['results'] as List<dynamic>?)
-          ?.map((e) => AmcResult.fromJson(e))
-          .toList() ??
-          [],
-    );
-  }
-}
-
-class AmcResult {
+class PostAmcResponseModel {
   final int id;
   final double remainingAmount;
   final int serviceCompleted;
@@ -49,7 +23,7 @@ class AmcResult {
   final int createdBy;
   final int admin;
 
-  AmcResult({
+  PostAmcResponseModel({
     required this.id,
     required this.remainingAmount,
     required this.serviceCompleted,
@@ -75,10 +49,10 @@ class AmcResult {
     required this.admin,
   });
 
-  factory AmcResult.fromJson(Map<String, dynamic> json) {
-    return AmcResult(
+  factory PostAmcResponseModel.fromJson(Map<String, dynamic> json) {
+    return PostAmcResponseModel(
       id: json['id'] ?? 0,
-      remainingAmount: (json['remainingAmount'] ?? 0.0).toDouble(),
+      remainingAmount: json['remainingAmount']?.toDouble() ?? 0.0,
       serviceCompleted: json['serviceCompleted'] ?? 0,
       amcName: json['amcName'] ?? '',
       activationTime: json['activationTime'] ?? '',
@@ -102,19 +76,47 @@ class AmcResult {
       admin: json['admin'] ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'remainingAmount': remainingAmount,
+      'serviceCompleted': serviceCompleted,
+      'amcName': amcName,
+      'activationTime': activationTime,
+      'activationDate': activationDate,
+      'remainder': remainder,
+      'productBrand': productBrand,
+      'productName': productName,
+      'serialModelNo': serialModelNo,
+      'underWarranty': underWarranty,
+      'serviceAmount': serviceAmount,
+      'receivedAmount': receivedAmount,
+      'status': status,
+      'select_service_occurence': selectServiceOccurence,
+      'no_of_service': noOfService,
+      'note': note,
+      'expiry': expiry,
+      'created_at': createdAt,
+      'service': service.toJson(),
+      'customer': customer.toJson(),
+      'created_by': createdBy,
+      'admin': admin,
+    };
+  }
 }
 
 class Service {
   final String serviceName;
-  final dynamic servicePrice;
+  final double? servicePrice;
   final String serviceContactNumber;
   final String serviceDescription;
-  final dynamic serviceImage1;
-  final dynamic serviceImage2;
-  final dynamic serviceImage3;
-  final dynamic serviceSubCategory;
-  final dynamic createdBy;
-  final dynamic admin;
+  final String? serviceImage1;
+  final String? serviceImage2;
+  final String? serviceImage3;
+  final String? serviceSubCategory;
+  final int? createdBy;
+  final int? admin;
 
   Service({
     required this.serviceName,
@@ -132,7 +134,7 @@ class Service {
   factory Service.fromJson(Map<String, dynamic> json) {
     return Service(
       serviceName: json['service_name'] ?? '',
-      servicePrice: json['service_price'],
+      servicePrice: json['service_price']?.toDouble(),
       serviceContactNumber: json['service_contact_number'] ?? '',
       serviceDescription: json['service_description'] ?? '',
       serviceImage1: json['service_image1'],
@@ -143,59 +145,114 @@ class Service {
       admin: json['admin'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'service_name': serviceName,
+      'service_price': servicePrice,
+      'service_contact_number': serviceContactNumber,
+      'service_description': serviceDescription,
+      'service_image1': serviceImage1,
+      'service_image2': serviceImage2,
+      'service_image3': serviceImage3,
+      'service_sub_category': serviceSubCategory,
+      'created_by': createdBy,
+      'admin': admin,
+    };
+  }
+}
+
+class TodayAttendance {
+  final int id;
+  final int user;
+  final String? punchIn;
+  final String? punchOut;
+  final String status;
+  final String date;
+
+  TodayAttendance({
+    required this.id,
+    required this.user,
+    this.punchIn,
+    this.punchOut,
+    required this.status,
+    required this.date,
+  });
+
+  factory TodayAttendance.fromJson(Map<String, dynamic> json) {
+    return TodayAttendance(
+      id: json['id'] ?? 0,
+      user: json['user'] ?? 0,
+      punchIn: json['punch_in'],
+      punchOut: json['punch_out'],
+      status: json['status'] ?? '',
+      date: json['date'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user': user,
+      'punch_in': punchIn,
+      'punch_out': punchOut,
+      'status': status,
+      'date': date,
+    };
+  }
 }
 
 class Customer {
   final int id;
   final TodayAttendance todayAttendance;
   final List<String> brandNames;
-  final dynamic lastLogin;
-  final dynamic firstName;
-  final dynamic lastName;
+  final String? lastName;
+  final String? firstName;
+  final String? lastLogin;
   final String email;
   final String phoneNumber;
   final String companyName;
   final String employees;
-  final dynamic dob;
+  final String? dob;
   final String otp;
   final bool otpVerified;
   final bool isStaff;
   final bool isSuperuser;
   final bool isActive;
-  final dynamic profileImage;
+  final String? profileImage;
   final String customerName;
-  final dynamic customerTag;
+  final String? customerTag;
   final String modelNo;
-  final dynamic socialId;
+  final String? socialId;
   final bool deactivate;
   final String role;
   final String customerType;
-  final dynamic batteryStatus;
+  final String? batteryStatus;
   final bool gpsStatus;
-  final dynamic longitude;
-  final dynamic latitude;
-  final dynamic companyAddress;
-  final dynamic companyCity;
-  final dynamic companyState;
-  final dynamic companyPincode;
-  final dynamic companyCountry;
-  final dynamic companyRegion;
-  final dynamic companyLandlineNo;
-  final dynamic gstNo;
-  final dynamic cinNo;
-  final dynamic panNo;
-  final dynamic companyContactNo;
-  final dynamic companyWebsite;
-  final dynamic bankName;
-  final dynamic ifscSwift;
-  final dynamic accountNumber;
-  final dynamic branchAddress;
-  final dynamic upiId;
-  final dynamic paymentLink;
-  final dynamic fileUpload;
+  final double? longitude;
+  final double? latitude;
+  final String? companyAddress;
+  final String? companyCity;
+  final String? companyState;
+  final String? companyPincode;
+  final String? companyCountry;
+  final String? companyRegion;
+  final String? companyLandlineNo;
+  final String? gstNo;
+  final String? cinNo;
+  final String? panNo;
+  final String? companyContactNo;
+  final String? companyWebsite;
+  final String? bankName;
+  final String? ifscSwift;
+  final String? accountNumber;
+  final String? branchAddress;
+  final String? upiId;
+  final String? paymentLink;
+  final String? fileUpload;
   final String primaryAddress;
   final String landmarkPaci;
-  final dynamic notes;
+  final String? notes;
   final String state;
   final String country;
   final String city;
@@ -203,25 +260,25 @@ class Customer {
   final String region;
   final int allocatedSickLeave;
   final int allocatedCasualLeave;
-  final dynamic dateJoined;
+  final String? dateJoined;
   final int maxEmployeesAllowed;
   final int employeesCreated;
   final bool isLeaveAllocated;
-  final dynamic empId;
+  final String? empId;
   final bool isDisabled;
   final String createdAt;
   final int createdBy;
   final int admin;
-  final dynamic customerId;
-  final dynamic subscription;
+  final String? customerId;
+  final String? subscription;
 
   Customer({
     required this.id,
     required this.todayAttendance,
     required this.brandNames,
-    this.lastLogin,
-    this.firstName,
     this.lastName,
+    this.firstName,
+    this.lastLogin,
     required this.email,
     required this.phoneNumber,
     required this.companyName,
@@ -291,9 +348,9 @@ class Customer {
       id: json['id'] ?? 0,
       todayAttendance: TodayAttendance.fromJson(json['today_attendance'] ?? {}),
       brandNames: List<String>.from(json['brand_names'] ?? []),
-      lastLogin: json['last_login'],
-      firstName: json['first_name'],
       lastName: json['last_name'],
+      firstName: json['first_name'],
+      lastLogin: json['last_login'],
       email: json['email'] ?? '',
       phoneNumber: json['phone_number'] ?? '',
       companyName: json['company_name'] ?? '',
@@ -314,8 +371,8 @@ class Customer {
       customerType: json['customer_type'] ?? '',
       batteryStatus: json['battery_status'],
       gpsStatus: json['gps_status'] ?? false,
-      longitude: json['longitude'],
-      latitude: json['latitude'],
+      longitude: json['longitude']?.toDouble(),
+      latitude: json['latitude']?.toDouble(),
       companyAddress: json['companyAddress'],
       companyCity: json['companyCity'],
       companyState: json['companyState'],
@@ -358,35 +415,77 @@ class Customer {
       subscription: json['subscription'],
     );
   }
-}
 
-class TodayAttendance {
-  final int id;
-  final int user;
-  final dynamic punchIn;
-  final dynamic punchOut;
-  final String status;
-  final String date;
-
-  TodayAttendance({
-    required this.id,
-    required this.user,
-    this.punchIn,
-    this.punchOut,
-    required this.status,
-    required this.date,
-  });
-
-  factory TodayAttendance.fromJson(Map<String, dynamic> json) {
-    return TodayAttendance(
-      id: json['id'] ?? 0,
-      user: json['user'] ?? 0,
-      punchIn: json['punch_in'],
-      punchOut: json['punch_out'],
-      status: json['status'] ?? '',
-      date: json['date'] ?? '',
-    );
+  Map<String, dynamic> toJson() {
+    return {
+    'id': id,
+    'today_attendance': todayAttendance.toJson(),
+    'brand_names': brandNames,
+    'last_name': lastName,
+    'first_name': firstName,
+    'last_login': lastLogin,
+    'email': email,
+    'phone_number': phoneNumber,
+    'company_name': companyName,
+    'employees': employees,
+    'dob': dob,
+    'otp': otp,
+    'otp_verified': otpVerified,
+    'is_staff': isStaff,
+      'is_superuser': isSuperuser,
+      'is_active': isActive,
+      'profile_image': profileImage,
+      'customer_name': customerName,
+      'customer_tag': customerTag,
+      'model_no': modelNo,
+      'social_id': socialId,
+      'deactivate': deactivate,
+      'role': role,
+      'customer_type': customerType,
+      'battery_status': batteryStatus,
+      'gps_status': gpsStatus,
+      'longitude': longitude,
+      'latitude': latitude,
+      'companyAddress': companyAddress,
+      'companyCity': companyCity,
+      'companyState': companyState,
+      'companyPincode': companyPincode,
+      'companyCountry': companyCountry,
+      'companyRegion': companyRegion,
+      'companyLandlineNo': companyLandlineNo,
+      'gstNo': gstNo,
+      'cinNo': cinNo,
+      'panNo': panNo,
+      'companyContactNo': companyContactNo,
+      'companyWebsite': companyWebsite,
+      'bankName': bankName,
+      'ifscSwift': ifscSwift,
+      'accountNumber': accountNumber,
+      'branchAddress': branchAddress,
+      'upiId': upiId,
+      'paymentLink': paymentLink,
+      'fileUpload': fileUpload,
+      'primary_address': primaryAddress,
+      'landmark_paci': landmarkPaci,
+      'notes': notes,
+      'state': state,
+      'country': country,
+      'city': city,
+      'zipcode': zipcode,
+      'region': region,
+      'allocated_sick_leave': allocatedSickLeave,
+      'allocated_casual_leave': allocatedCasualLeave,
+      'date_joined': dateJoined,
+      'max_employees_allowed': maxEmployeesAllowed,
+      'employees_created': employeesCreated,
+      'is_leave_allocated': isLeaveAllocated,
+      'emp_id': empId,
+      'is_disabled': isDisabled,
+      'created_at': createdAt,
+      'created_by': createdBy,
+      'admin': admin,
+      'customer_id': customerId,
+      'subscription': subscription,
+    };
   }
 }
-//========================================================================================================================
-

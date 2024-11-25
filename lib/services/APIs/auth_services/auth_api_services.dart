@@ -17,6 +17,7 @@ import 'package:tms_sathi/response_models/lead_satus_response_model.dart';
 import 'package:tms_sathi/response_models/leaves_response_model.dart';
 import 'package:tms_sathi/response_models/login_response_model.dart';
 import 'package:tms_sathi/response_models/otp_response_model.dart';
+import 'package:tms_sathi/response_models/post_amc_response_model.dart';
 import 'package:tms_sathi/response_models/services_all_response_model.dart';
 import 'package:tms_sathi/response_models/services_response_model.dart';
 import 'package:tms_sathi/response_models/sub_service_response_model.dart';
@@ -528,6 +529,17 @@ implements AuthenticationApi {
   }
 
   @override
+  Future<PostAmcResponseModel>postAmcDetailsApiCall({Map<String, dynamic>?dataBody})async {
+    try {
+      final response = await dioClient!.post(
+          '${ApiEnd.amcEnd}', data: dataBody, skipAuth: false);
+      return PostAmcResponseModel.fromJson(response);
+    } catch (error) {
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
+    @override
   Future<SuperUsersResponseModel> getAgentDetailsApiCall(
       {Map<String, dynamic>? dataBody, parameters}) async {
     try {
@@ -808,6 +820,46 @@ Future<TechnicianAttendanceResponseModel>getAttendanceApiCall({Map<String, dynam
     return Future.error(NetworkExceptions.getDioException(error));
   }
 }
+
+  @override
+  Future<PunchInOutResponseModel>postPunchInApiCall({Map<String, dynamic>? dataBody , dynamic parameters})async{
+    try{
+      final response = await dioClient!.post(ApiEnd.punchInApiEnd, data: dataBody, skipAuth: false, queryParameters: parameters );
+      return PunchInOutResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+  @override
+  Future<PunchInOutResponseModel>postPunchOutApiCall({Map<String, dynamic>? dataBody , dynamic parameters})async{
+    try{
+      final response = await dioClient!.post(ApiEnd.punchOutApiEnd, data: dataBody, skipAuth: false, queryParameters: parameters );
+      return PunchInOutResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
+  @override
+  Future<List<AttendanceResponseModel>>getAttendanceHistoryApiCall({Map<String, dynamic>?dataBody, parameters})async{
+    try {
+          final response = await dioClient!.get("users/attendance/", data: dataBody,
+              skipAuth: false,
+              queryParameters: parameters);
+          if (response is List) {
+            return response.map((item) => AttendanceResponseModel.fromJson(item))
+                .toList();
+          } else
+          if (response is Map<String, dynamic> && response.containsKey('data')) {
+            final List<dynamic>data = response['data'];
+            return data.map((item) => AttendanceResponseModel.fromJson(item))
+                .toList();
+          }
+          return [];
+        } catch (error) {
+          return Future.error(NetworkExceptions.getDioException(error));
+        }
+  }
 // ============================================================================Get Expenses Api Call=================================================
   @override
   Future<ExpensesResponseModel>getExpensesApiCall({Map<String, dynamic>? dataBody, parameters})async{

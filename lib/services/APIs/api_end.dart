@@ -1,5 +1,5 @@
 class ApiEnd{
-  static const String baseUrl ='https://fieldsathi.com:92/' /*'http://122.160.153.204:85/'*/;
+  static const String baseUrl =/*'https://fieldsathi.com:92/'*/ 'http://122.160.153.204:85/';
   static const String loginEnd = 'users/login/';
   static const String signUpEnd = 'users/signup/';
   static const String verifyotpEnd = 'users/verify_otp/';
@@ -16,9 +16,7 @@ class ApiEnd{
   static const String fsrApiEnd = 'api/fsrs/';
   static const String checkingPointStatusApiEnd = 'api/checkpointstatus/';
   static const String leaveEditPeriodEnd = 'users/leave-allocations/';
-  static const String punchinApiEnd = 'users/attendance/punch_in/';
   static const String userAttendanceCalendarApiEnd = 'users/attendance/';
-// /*http://192.168.1.13:8000/*/
 /*=======================================*/
   static const String importTicketDataEnd = 'api/import-tickets/';
   static const String amcEnd = 'api/amcs/';
@@ -38,9 +36,7 @@ class ApiEnd{
   static const String downloadTicketCSVEnd = 'api/download-tickets-csv/';
   static const String donwmnloadtechnicianListEnd = 'api/download-technician-csv/';
   static const String downlaodCustomerListEnd = 'api/download-customer-csv/';
-/*
-  ==============================================================================================================================
-*/
+/*==============================================================================================================================*/
 
   static const String importCustomerEnd = 'api/import-customers/';
   static const String importSuperUserEnd = 'api/import-superusers/';
@@ -49,14 +45,14 @@ class ApiEnd{
   static const String importLeadEnd = 'api/import-leads/';
   static const String importAMCsEnd = 'api/import-amcs/';
   static const String importTicketsEnd = 'api/import-tickets/';
-  ///
   static const String exportTicketEnd = 'api/export-tickets/';
 
 
 /*============================================================= History Apis ==============================================================*/
-  // static const String downLoadTicketData = 'api/'
   static const String ticketHistoryViewEnd = 'api/ticket_history_view/';
 
   /*=============================================================Status Counts Lead ==========================================================================*/
   static const String statusLeadsCountsEnd= 'api/leads/status_counts/';
+  static const String punchInApiEnd = 'users/attendance/punch_in/';
+  static const String punchOutApiEnd = 'users/attendance/punch_out/';
 }

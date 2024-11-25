@@ -280,7 +280,7 @@ class HomeScreen extends GetView<HomeScreenController> {
         _buildPopupMenuItem('Profile', Icons.person, () {
           Get.toNamed(AppRoutes.editProfile);
         }),
-        if(userrole == 'admin'|| userrole == 'superuser'|| userrole == 'agent')
+        if(userrole == 'admin'|| userrole == 'superuser')
           _buildPopupMenuItem('Account', Icons.account_balance, () {
           Get.toNamed(AppRoutes.accountViewScreen);
         }),

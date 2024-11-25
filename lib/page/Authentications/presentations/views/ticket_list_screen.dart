@@ -348,14 +348,9 @@ class TicketListScreen extends GetView<TicketListController> {
   List<DataRow> _buildTableRows(BuildContext context, TicketListController controller) {
     return controller.ticketResult.map((ticket) {
       return DataRow(
-        onSelectChanged:(_) {
-          try {
-            showDialogWidgetContext(
-                context, controller, ticket.id.toString(), ticket);
-          } catch (e, stack) {
-            debugPrint('Error showing dialog: $e');
-            debugPrint(stack.toString());
-          };
+        onSelectChanged:(selected) {
+          if(selected != null){ showDialogWidgetContext(
+          context, controller, ticket.id.toString(), ticket);}
         },
         cells: [
           DataCell(_ticketBoxIcons(ticket.id.toString() ?? 'NA')),
@@ -1471,7 +1466,7 @@ Widget _buildActionButton(
   );
 }
 
-Future showDialogWidgetContext(BuildContext context, TicketListController controller, String ticketid, TicketResult ticket, ){
+Future<void> showDialogWidgetContext(BuildContext context, TicketListController controller, String ticketid, TicketResult ticket, ){
    controller.hitGetTicketHistoryApiCall(ticketid);
    final progressResult = controller.ticketHistoryData;
   return showDialog(context: context, builder: (context){
@@ -1602,7 +1597,7 @@ Future showDialogWidgetContext(BuildContext context, TicketListController contro
                       ),
                       Divider(),
                       ...[
-                        "${progressResult[0]}",
+                        "${progressResult.map((ticket){return ticket.actionMessage;})}",
                         // "Rohitddfdx\nfthhhhhhhhhhhhhhhhhhhhhhhhhhh",
                         // "Technician\nhhhhhhhhhhhhhhhhhhhhhhhhhhh",
                         // "17-11-2024 08:10 AM",
@@ -1628,151 +1623,5 @@ Future showDialogWidgetContext(BuildContext context, TicketListController contro
       ),);
   });
 }
-// _showBottomForTicketHistory(BuildContext context, TicketListController controller, String ticketId) {
-//   return showBottomSheet(
-//     context:context,
-//     backgroundColor: Colors.transparent,
-//     builder: (context) {
-//       return Container(
-//         height: Get.height * 0.6, // Adjust height to match your content
-//         decoration: BoxDecoration(
-//           color: Colors.white,
-//           borderRadius: BorderRadius.only(
-//             topLeft: Radius.circular(16),
-//             topRight: Radius.circular(16),
-//           ),
-//         ),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             // Header
-//             Container(
-//               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-//               decoration: BoxDecoration(
-//                 color: Colors.blueAccent,
-//                 borderRadius: BorderRadius.only(
-//                   topLeft: Radius.circular(16),
-//                   topRight: Radius.circular(16),
-//                 ),
-//               ),
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   Text(
-//                     "fddg",
-//                     style: TextStyle(
-//                       color: Colors.white,
-//                       fontSize: 18,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                   Container(
-//                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-//                     decoration: BoxDecoration(
-//                       color: Colors.green,
-//                       borderRadius: BorderRadius.circular(12),
-//                     ),
-//                     child: Text(
-//                       "Accepted",
-//                       style: TextStyle(color: Colors.white),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             Expanded(
-//               child: Padding(
-//                 padding: const EdgeInsets.all(16),
-//                 child: SingleChildScrollView(
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       // Created & Assigned Section
-//                       Row(
-//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                         children: [
-//                           Expanded(
-//                             child: Column(
-//                               crossAxisAlignment: CrossAxisAlignment.start,
-//                               children: [
-//                                 Text(
-//                                   "Created At: 28-10-2024 00:00",
-//                                   style: TextStyle(fontWeight: FontWeight.w600),
-//                                 ),
-//                                 Text("Created By: admintest@yopmail.com"),
-//                               ],
-//                             ),
-//                           ),
-//                           Expanded(
-//                             child: Column(
-//                               crossAxisAlignment: CrossAxisAlignment.start,
-//                               children: [
-//                                 Text(
-//                                   "Assigned To: Rohitddfdx",
-//                                   style: TextStyle(fontWeight: FontWeight.w600),
-//                                 ),
-//                                 Text(
-//                                   "Technician\nfthhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
-//                                   maxLines: 2,
-//                                   overflow: TextOverflow.ellipsis,
-//                                 ),
-//                               ],
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                       SizedBox(height: 16),
-//                       // Ticket Details Section
-//                       Text(
-//                         "Ticket Details",
-//                         style: TextStyle(
-//                           fontSize: 16,
-//                           fontWeight: FontWeight.bold,
-//                           color: Colors.blue,
-//                         ),
-//                       ),
-//                       Divider(),
-//                       ...[
-//                         "Customer Name: NAINA KAUSHIK",
-//                         "Subcustomer Name: N/A",
-//                         "FSR: fsr",
-//                         "Phone Number: N/A",
-//                         "Service: N/A",
-//                         "Address: N/A",
-//                       ].map((detail) => Padding(
-//                         padding: const EdgeInsets.symmetric(vertical: 4),
-//                         child: Text(detail),
-//                       )),
-//                       SizedBox(height: 16),
-//                       // Progress History Section
-//                       Text(
-//                         "Progress History",
-//                         style: TextStyle(
-//                           fontSize: 16,
-//                           fontWeight: FontWeight.bold,
-//                           color: Colors.blue,
-//                         ),
-//                       ),
-//                       Divider(),
-//                       ...[
-//                         "from '14' to 'None'",
-//                         "Rohitddfdx\nfthhhhhhhhhhhhhhhhhhhhhhhhhhh",
-//                         "Technician\nhhhhhhhhhhhhhhhhhhhhhhhhhhh",
-//                         "17-11-2024 08:10 AM",
-//                         "Ticket updated by Rohitddfdx",
-//                       ].map((history) => Padding(
-//                         padding: const EdgeInsets.symmetric(vertical: 4),
-//                         child: Text(history),
-//                       )),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       );
-//     },
-//   );
-// }
+
 

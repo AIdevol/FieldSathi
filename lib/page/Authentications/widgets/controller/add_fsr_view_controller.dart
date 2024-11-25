@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/main.dart';
+import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 class AddFSRViewController extends GetxController {
@@ -79,6 +80,7 @@ class AddFSRViewController extends GetxController {
     Get.find<AuthenticationApiService>().postfsrDetailsApiCall(dataBody: postData).then((value) {
       customLoader.hide();
       toast('FSR details updated successfully');
+      Get.offAllNamed(AppRoutes.fsrScreen);
       update();
     }).onError((error, stackError) {
       customLoader.hide();

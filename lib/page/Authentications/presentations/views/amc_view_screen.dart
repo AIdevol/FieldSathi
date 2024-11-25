@@ -58,7 +58,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
                 children: [
                   _buildTopBar(context, controller),
                   vGap(10),
-                  _mainData(),
+                  _mainData(controller),
                   vGap(10),
                   _dataTableViewScreen(amcIds),
                 ],
@@ -78,7 +78,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
     );
   }
 
-  Widget _mainData() {
+  Widget _mainData(AMCScreenController controller) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(

@@ -1,24 +1,24 @@
 class AttendanceResponseModel {
   int? id;
   int? user;
-  Null? checkIn;
-  Null? checkOut;
+  String? punchIn;
+  String? punchOut;
   String? status;
   String? date;
 
   AttendanceResponseModel(
       {this.id,
         this.user,
-        this.checkIn,
-        this.checkOut,
+        this.punchIn,
+        this.punchOut,
         this.status,
         this.date});
 
   AttendanceResponseModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     user = json['user'];
-    checkIn = json['check_in'];
-    checkOut = json['check_out'];
+    punchIn = json['punch_in'];
+    punchOut = json['punch_out'];
     status = json['status'];
     date = json['date'];
   }
@@ -27,8 +27,8 @@ class AttendanceResponseModel {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['user'] = this.user;
-    data['check_in'] = this.checkIn;
-    data['check_out'] = this.checkOut;
+    data['punch_in'] = this.punchIn;
+    data['punch_out'] = this.punchOut;
     data['status'] = this.status;
     data['date'] = this.date;
     return data;
@@ -449,6 +449,43 @@ class UserAttendanceResults {
     data['user'] = this.user;
     data['punch_in'] = this.punchIn;
     data['punch_out'] = this.punchOut;
+    data['status'] = this.status;
+    data['date'] = this.date;
+    return data;
+  }
+}
+//===========================================================================================================================
+class PunchInOutResponseModel {
+  int? id;
+  int? user;
+  String? checkIn;
+  String? checkOut;
+  String? status;
+  String? date;
+
+  PunchInOutResponseModel(
+      {this.id,
+        this.user,
+        this.checkIn,
+        this.checkOut,
+        this.status,
+        this.date});
+
+  PunchInOutResponseModel.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    user = json['user'];
+    checkIn = json['check_in'];
+    checkOut = json['check_out'];
+    status = json['status'];
+    date = json['date'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['user'] = this.user;
+    data['check_in'] = this.checkIn;
+    data['check_out'] = this.checkOut;
     data['status'] = this.status;
     data['date'] = this.date;
     return data;

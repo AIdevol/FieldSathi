@@ -18,6 +18,7 @@ import '../../../response_models/leave_allocation_response_model.dart';
 import '../../../response_models/leaves_response_model.dart';
 import '../../../response_models/login_response_model.dart';
 import '../../../response_models/otp_response_model.dart';
+import '../../../response_models/post_amc_response_model.dart';
 import '../../../response_models/register_response_model.dart';
 import '../../../response_models/resend_otp_api_call.dart';
 import '../../../response_models/sales_response_model.dart';
@@ -77,6 +78,8 @@ abstract class AuthenticationApi {
   Future<Uint8List> exportTicketDataByDate({Map<String, dynamic>? dataBody, parameter});
   // Future<List<TMSResponseModel>>getuserDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<TechnicianAttendanceResponseModel>getAttendanceApiCall({Map<String, dynamic>? dataBody , dynamic parameters});
+  Future<PunchInOutResponseModel>postPunchInApiCall({Map<String, dynamic>? dataBody , dynamic parameters});
+  Future<PunchInOutResponseModel>postPunchOutApiCall({Map<String, dynamic>? dataBody , dynamic parameters});
   Future<ExpensesResponseModel>getExpensesApiCall({Map<String, dynamic>? dataBody, parameters});
   // Future<List<ExpensesResponseModel>>getExpensesApiCall({Map<String, dynamic>?dataBody, parameters});
   Future<ServiceRequestResponseModel>getServiceRequestsApiCall({Map<String, dynamic>? dataBody, parameters});
@@ -84,5 +87,7 @@ abstract class AuthenticationApi {
   Future<SalesResponseModel>getSalesDetailsApiCall({Map<String, dynamic>? dataBody, parameters});
   Future<AddSalesResponseModel>postAddSalesDetailsApiCall({Map<String, dynamic>? dataBody, parameters});
   Future<AmcResponseModel>getAmcDetailsApiCall({Map<String, dynamic>?dataBody});
+  Future<PostAmcResponseModel>postAmcDetailsApiCall({Map<String, dynamic>?dataBody});
   Future<ServicesResponseModel> getAllservicesPricesAndDetails({Map<String, dynamic>?dataBody});
+  Future<List<AttendanceResponseModel>>getAttendanceHistoryApiCall({Map<String, dynamic>?dataBody, parameters});
 }

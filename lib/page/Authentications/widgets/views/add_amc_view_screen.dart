@@ -9,6 +9,7 @@ import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 import 'package:tms_sathi/utilities/common_textFields.dart';
 
+import '../../../../response_models/customer_list_response_model.dart';
 import '../controller/add_amc_view_controller.dart';
 
 class CreateAMCViewScreen extends GetView<AddAmcViewController> {
@@ -77,7 +78,7 @@ class CreateAMCViewScreen extends GetView<AddAmcViewController> {
         vGap(20),
         _buildRecoievedAccount(context: context, controller: controller),
         vGap(20),
-        _buildCustomerName(context: context, controller: controller),
+        dropValueToShowCustomerName(context: context, controller: controller),
         vGap(20),
         _buildtextContainer(context: context, controller: controller),
         vGap(20),
@@ -97,34 +98,78 @@ class CreateAMCViewScreen extends GetView<AddAmcViewController> {
       prefix: Icon(Icons.add_task, color: Colors.black),
     );
   }
-  Widget _buildCustomerName({required BuildContext context,required AddAmcViewController controller }) {
-    return CustomTextField(
-      controller: controller.customerNameController,
-      hintText: "Customer Name".tr,
-      textInputType: TextInputType.text,
-      onFieldSubmitted: (String? value) {},
-      labletext: "Customer Name".tr,
-      prefix: Icon(Icons.add_task, color: Colors.black),
-    );
+  // Widget _buildCustomerName({required BuildContext context,required AddAmcViewController controller }) {
+  //   return CustomTextField(
+  //     controller: controller.customerNameController,
+  //     hintText: "Customer Name".tr,
+  //     textInputType: TextInputType.text,
+  //     onFieldSubmitted: (String? value) {},
+  //     labletext: "Customer Name".tr,
+  //     prefix: Icon(Icons.add_task, color: Colors.black),
+  //   );
+  // }
+
+  Widget dropValueToShowCustomerName(
+      {required BuildContext context, required AddAmcViewController controller}) {
+    return Obx(() => DropdownButtonHideUnderline(
+      child: DropdownMenu<CustomerData>(
+        // leadingIcon: IconButton(
+        //     onPressed: () {
+        //       // _editWidgetOfPrincipalDialogValue(context, controller);
+        //     },
+        //     icon: Icon(Icons.add)
+        // ),
+        inputDecorationTheme: InputDecorationTheme(
+          focusColor: appColor,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide(color: Colors.grey, width: 1),
+          ),
+        ),
+        width: MediaQuery.of(context).size.width - 40,
+        initialSelection: null,
+        requestFocusOnTap: true,
+        label: Text('Customer Name'.tr,style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color:Colors.grey),),
+        onSelected: (CustomerData? customerData) {
+          if (customerData != null) {
+            controller.customerNameController.text =
+            "${customerData.firstName ?? ''} ${customerData.lastName ?? ''}";
+            controller.selectedCustomerId.value = customerData.id ?? 0;
+          }
+        },
+        dropdownMenuEntries: controller.customerdefineData
+            .map<DropdownMenuEntry<CustomerData>>(
+                (CustomerData customer) {
+              return DropdownMenuEntry<CustomerData>(
+                value: customer,
+                label: "${customer.customerName ?? ''}" ?? 'Unknown Customer',
+              );
+            }).toList(),
+      ),
+    ));
   }
+
+
   Widget _buildProductBrand({required BuildContext context,required AddAmcViewController controller }) {
     return CustomTextField(
       controller: controller.productBrandController,
       hintText: "Product Brand".tr,
       textInputType: TextInputType.text,
+      maxLines: 2,
       onFieldSubmitted: (String? value) {},
       labletext: "Product Brand".tr,
-      suffix: IconButton(onPressed: (){}, icon: Icon(Icons.arrow_drop_down_outlined, color: Colors.black)),
+      // suffix: IconButton(onPressed: (){}, icon: Icon(Icons.arrow_drop_down_outlined, color: Colors.black)),
     );
   }
   Widget _buildProductName({required BuildContext context,required AddAmcViewController controller }) {
     return CustomTextField(
       controller: controller.productNameController,
       hintText: "Product Name".tr,
+      maxLines: 2,
       textInputType: TextInputType.text,
       onFieldSubmitted: (String? value) {},
       labletext: "Product Name".tr,
-      prefix: Icon(Icons.add_task, color: Colors.black),
+      // prefix: Icon(Icons.add_task, color: Colors.black),
     );
   }
   Widget _buildServiceAccount({required BuildContext context, required AddAmcViewController controller}) {
@@ -141,11 +186,11 @@ class CreateAMCViewScreen extends GetView<AddAmcViewController> {
           children: [
             GestureDetector(
               onTap: () => controller.incrementServiceAmount(),
-              child: Icon(Icons.arrow_drop_up_outlined, color: Colors.black),
+              child: Icon(Icons.arrow_drop_up_outlined, color: Colors.black,size: 25,),
             ),
             GestureDetector(
               onTap: () => controller.decrementServiceAmount(),
-              child: Icon(Icons.arrow_drop_down_outlined, color: Colors.black),
+              child: Icon(Icons.arrow_drop_down_outlined, color: Colors.black,size: 25,),
             ),
           ],
         ),
@@ -166,11 +211,11 @@ class CreateAMCViewScreen extends GetView<AddAmcViewController> {
           children: [
             GestureDetector(
               onTap: () => controller.incrementReceivedAmount(),
-              child: Icon(Icons.arrow_drop_up_outlined, color: Colors.black),
+              child: Icon(Icons.arrow_drop_up_outlined, color: Colors.black,size: 25,),
             ),
             GestureDetector(
               onTap: () => controller.decrementReceivedAmount(),
-              child: Icon(Icons.arrow_drop_down_outlined, color: Colors.black),
+              child: Icon(Icons.arrow_drop_down_outlined, color: Colors.black,size: 25),
             ),
           ],
         ),
@@ -181,14 +226,16 @@ class CreateAMCViewScreen extends GetView<AddAmcViewController> {
     return CustomTextField(
       controller: controller.serialModelNoController,
       hintText: "Serial Model No".tr,
+      maxLines: 2,
       textInputType: TextInputType.text,
       onFieldSubmitted: (String? value) {},
       labletext: "Serial Model No".tr,
-      prefix: Icon(Icons.add_task, color: Colors.black),
+      // prefix: Icon(Icons.add_task, color: Colors.black),
     );
   }
   Widget _addTimeRange({required BuildContext context,required AddAmcViewController controller }) {
     return CustomTextField(
+      onTap: ()=>controller.showTimePickerDropdown(context),
       hintText: "Activation Time".tr,
       controller: controller.activationTimeController,
       textInputType: TextInputType.text,
@@ -209,7 +256,7 @@ class CreateAMCViewScreen extends GetView<AddAmcViewController> {
       children: [
         _buildButton('Cancel',onPressed: ()=>Get.back()),
         hGap(10),
-        _buildButton('Add', onPressed: (){}),
+        _buildButton('Add', onPressed: ()=>controller.hitPostCreationAmcView()),
         hGap(10),
         // _buildRateTextField(),
       ],
@@ -237,6 +284,7 @@ class CreateAMCViewScreen extends GetView<AddAmcViewController> {
 Widget _dobView({required BuildContext context, required AddAmcViewController controller}) {
   // final controller = Get.find<>();
   return CustomTextField(
+    onTap: ()=>controller.selectDate(context),
     hintText: "dd-month-yyyy".tr,
     controller: controller.datesController,
     textInputType: TextInputType.datetime,
@@ -253,7 +301,9 @@ Widget _dobView({required BuildContext context, required AddAmcViewController co
 
 Widget _buildNOofchoiceField({required BuildContext context,required AddAmcViewController controller }) {
   return CustomTextField(
+    onTap: ()=>controller.noOfServicesDropdown(context),
     controller: controller.noOfServiceController,
+    readOnly: true,
     hintText: 'No. of Service'.tr,
     labletext: 'No. of Service'.tr,
     textInputType: TextInputType.text,
@@ -266,26 +316,30 @@ Widget _buildNOofchoiceField({required BuildContext context,required AddAmcViewC
 }
   Widget _buildselectedView({required BuildContext context,required AddAmcViewController controller }) {
     return CustomTextField(
+      onTap: ()=> controller.reminderSelection(context),
       controller: controller.reminderController,
+      readOnly: true,
       hintText: 'Reminder'.tr,
       labletext: 'Reminder'.tr,
       textInputType: TextInputType.text,
       onFieldSubmitted: (String? value) {},
       prefix: IconButton(
-        onPressed: () {},
+        onPressed: ()=>controller.reminderSelection(context),
         icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30),
       ),
     );
   }
   Widget _buildServiceOccurances({required BuildContext context,required AddAmcViewController controller}) {
     return CustomTextField(
+      onTap: ()=> controller.servicesOccurances(context),
       controller: controller.serviceOccurrenceController,
+      readOnly: true,
       hintText: 'Service Occurence'.tr,
       labletext: 'Service Occurence'.tr,
       textInputType: TextInputType.text,
       onFieldSubmitted: (String? value) {},
       prefix: IconButton(
-        onPressed: () {},
+        onPressed: () =>controller.servicesOccurances(context),
         icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30),
       ),
     );
