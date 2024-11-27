@@ -78,9 +78,15 @@ class ShowTechnicianDataController extends GetxController {
     isLoading.value = true;
     customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
-
-    Get.find<AuthenticationApiService>().getuserDetailsApiCall().then((value) async {
-      attendanceResultsData.assignAll(value.results);
+    var rolesParameters = {
+      "role": ["technician", "agent", "superuser", "sales"],
+      // "page":1,
+      // "status":"",
+      // "search":"",
+      "page_size":"all"
+    };
+    Get.find<AuthenticationApiService>().getuserDetailsApiCall(parameter: rolesParameters).then((value) async {
+      attendanceResultsData.assignAll(value.results!);
 
       customLoader.hide();
       toast('Team members data fetched successfully');

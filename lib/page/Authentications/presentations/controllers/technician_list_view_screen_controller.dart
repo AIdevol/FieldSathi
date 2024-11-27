@@ -10,9 +10,13 @@ import '../../../../services/APIs/auth_services/auth_api_services.dart';
 class TechnicianListViewScreenController extends GetxController {
   final searchController = TextEditingController();
   RxBool isLoading = true.obs;
-  RxList<TechnicianResults> allTechnicians = <TechnicianResults>[].obs;
-  RxList<TechnicianResults> filteredTechnicians = <TechnicianResults>[].obs;
+  RxList<TechnicianData> allTechnicians = <TechnicianData>[].obs;
+  RxList<TechnicianData> filteredTechnicians = <TechnicianData>[].obs;
   RxBool isTableView = true.obs;
+  RxList<TechnicianData> paginatedTechnicians = <TechnicianData>[].obs;
+  RxInt currentPage = 1.obs;
+  RxInt totalPages = 0.obs;
+  final int itemsPerPage = 10;
 
   final employeeIdController = TextEditingController();
   final firstNameController = TextEditingController();
@@ -25,7 +29,6 @@ class TechnicianListViewScreenController extends GetxController {
   void onInit() {
     super.onInit();
     hitGetTechnicianApiCall();
-    // Listen to search controller changes
     searchController.addListener(_onSearchChanged);
   }
 
@@ -41,6 +44,64 @@ class TechnicianListViewScreenController extends GetxController {
     super.onClose();
   }
 
+  void calculateTotalPages() {
+    totalPages.value = (filteredTechnicians.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+  }
+
+  void updatePaginatedTechnicians() {
+    List<TechnicianData> sourceList = filteredTechnicians.isEmpty
+        ? allTechnicians
+        : filteredTechnicians;
+    totalPages.value = (sourceList.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+
+    int startIndex = (currentPage.value - 1) * itemsPerPage;
+    int endIndex = startIndex + itemsPerPage;
+    endIndex = endIndex > sourceList.length ? sourceList.length : endIndex;
+    paginatedTechnicians.value = sourceList.sublist(
+        startIndex,
+        endIndex
+    );
+
+    update();
+  }
+
+
+  void nextPage() {
+    if (currentPage.value < totalPages.value) {
+      currentPage.value++;
+      updatePaginatedTechnicians();
+    }
+  }
+
+  void previousPage() {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+      updatePaginatedTechnicians();
+    }
+  }
+
+  void goToFirstPage() {
+    currentPage.value = 1;
+    updatePaginatedTechnicians();
+  }
+
+  void goToLastPage() {
+    currentPage.value = totalPages.value;
+    updatePaginatedTechnicians();
+  }
+
   void _onSearchChanged() {
     final query = searchController.text.toLowerCase();
     if (query.isEmpty) {
@@ -52,6 +113,11 @@ class TechnicianListViewScreenController extends GetxController {
           technician.email.toLowerCase().contains(query) ||
           technician.phoneNumber.toLowerCase().contains(query)));
     }
+
+    // Update total pages and current page for filtered results
+    totalPages.value = (filteredTechnicians.length / itemsPerPage).ceil();
+    currentPage.value = 1;
+    updatePaginatedTechnicians();
     update();
   }
 
@@ -61,7 +127,12 @@ class TechnicianListViewScreenController extends GetxController {
       customLoader.show();
       FocusManager.instance.primaryFocus?.unfocus();
 
-      final roleWiseData = {'role': 'technician'};
+      final roleWiseData = {
+        'role': 'technician',
+        "page": currentPage.value,
+        "page_size": itemsPerPage
+
+      };
 
       final response = await Get.find<AuthenticationApiService>()
           .getTechnicianApiCall(parameters: roleWiseData);
@@ -69,8 +140,10 @@ class TechnicianListViewScreenController extends GetxController {
       // Update both lists
       allTechnicians.assignAll(response.results);
       filteredTechnicians.assignAll(response.results); // Initialize filtered list
-
+      paginatedTechnicians.assignAll(response.results);
       // Store technician IDs
+      calculateTotalPages();
+      updatePaginatedTechnicians();
       final technicianIds = response.results.map((e) => e.id.toString()).toList();
       await storage.write(attendanceId, technicianIds.join(','));
 
@@ -109,7 +182,7 @@ class TechnicianListViewScreenController extends GetxController {
   }
 
   // Add method to handle technician editing
-  void editTechnician(TechnicianResults technician) {
+  void editTechnician(TechnicianData technician) {
     // Navigate to edit screen or show edit dialog
     // Get.toNamed('/edit-technician', arguments: technician);
   }

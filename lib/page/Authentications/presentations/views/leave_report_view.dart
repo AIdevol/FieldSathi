@@ -235,7 +235,7 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
     );
   }
 
-  Widget _buildActionButton(Results leave) {
+  Widget _buildActionButton(LeaveResult leave) {
     return ElevatedButton(
       onPressed: () => _openDropDownFieldforStatusSubmitions(),
       style: ElevatedButton.styleFrom(

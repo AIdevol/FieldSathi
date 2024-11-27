@@ -463,7 +463,7 @@ class TicketListCreation extends GetView<TicketListCreationController> {
 
 Widget dropValuetoshowtechnicianName(BuildContext context, TicketListCreationController controller) {
   return Obx(() => DropdownButtonHideUnderline(
-    child: DropdownMenu<TechnicianResults>(
+    child: DropdownMenu<TechnicianData>(
       leadingIcon: IconButton(onPressed: (){_editWidgetOfAgentsDialogValue(context, controller);}, icon: Icon(Icons.add)),
       inputDecorationTheme: InputDecorationTheme(
         focusColor: appColor,
@@ -475,7 +475,7 @@ Widget dropValuetoshowtechnicianName(BuildContext context, TicketListCreationCon
       initialSelection: null,
       requestFocusOnTap: true,
       label: Text('Assign To'.tr, style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color:Colors.grey),),
-      onSelected: (TechnicianResults? selectedTechnician) {
+      onSelected: (TechnicianData? selectedTechnician) {
         if (selectedTechnician != null) {
           controller.assignToController.text =
           "${selectedTechnician.firstName + selectedTechnician.lastName}";
@@ -483,9 +483,9 @@ Widget dropValuetoshowtechnicianName(BuildContext context, TicketListCreationCon
         }
       },
       dropdownMenuEntries: controller.filteredTechnicians
-          .map<DropdownMenuEntry<TechnicianResults>>(
-              (TechnicianResults technician) {
-            return DropdownMenuEntry<TechnicianResults>(
+          .map<DropdownMenuEntry<TechnicianData>>(
+              (TechnicianData technician) {
+            return DropdownMenuEntry<TechnicianData>(
               value: technician,
               label: "${technician.firstName + technician.lastName}" ?? 'Unknown Technician',
             );

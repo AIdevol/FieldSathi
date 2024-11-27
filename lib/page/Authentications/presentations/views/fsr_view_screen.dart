@@ -44,7 +44,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
                 ).paddingOnly(right: 10)
               ],
             ),
-            body: Column(
+            body: ListView(
               children: [
                 _buildSearchBar(controller),
                 Expanded(

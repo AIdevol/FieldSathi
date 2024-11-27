@@ -22,6 +22,7 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
     return MyAnnotatedRegion(
       child: GetBuilder<TechnicianListViewScreenController>(
         builder: (controller) => Scaffold(
+          backgroundColor: CupertinoColors.white,
           appBar: _buildAppBar(controller),
           body: SafeArea(
             child: Column(
@@ -161,73 +162,129 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
       ),
     );
   }
-
-  Widget _buildDataTableView(TechnicianListViewScreenController controller,BuildContext context) {
+  _buildEmptyState() {
+    return Center(
+      child: Column(
+        // mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            nullVisualImage,
+            width: 300,
+            height: 300,
+          ),
+          Text(
+            'No services found',
+            style: MontserratStyles.montserratNormalTextStyle(
+              // size: 18,
+              color: blackColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildDataTableView(TechnicianListViewScreenController controller, BuildContext context) {
     if (controller.isLoading.value) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (controller.filteredTechnicians.isEmpty) {
-      return const Center(child: Text('No technicians found'));
+    if (controller.paginatedTechnicians.isEmpty) {
+      return _buildEmptyState();
     }
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SingleChildScrollView(
-        child: DataTable(
-          columns: [
-            _buildTableHeader('Id'),
-            _buildTableHeader('Image'),
-            _buildTableHeader('Name'),
-            _buildTableHeader('Email'),
-            _buildTableHeader('Contact'),
-            _buildTableHeader('Casual Leaves'),
-            _buildTableHeader('Sick Leaves'),
-            _buildTableHeader('Check In'),
-            _buildTableHeader('Check Out'),
-            _buildTableHeader('Status'),
-            _buildTableHeader('Battery(%)'),
-            _buildTableHeader('GPS'),
-            _buildTableHeader('Actions'),
-          ],
-          rows: controller.filteredTechnicians.map((technician) {
-            return DataRow(
-              cells: [
-                DataCell(_ticketBoxIcons(technician.id.toString(), technician)),
-                DataCell(_technicianImage(technician.id.toString(), technician)),
-                DataCell(Text("${technician.firstName} ${technician.lastName}")),
-                DataCell(Text(technician.email)),
-                DataCell(Text(technician.phoneNumber)),
-                DataCell(Text(technician.allocatedCasualLeave.toString())),
-                DataCell(Text(technician.allocatedSickLeave.toString())),
-                DataCell(Text(_formatDateTime(
-                    technician.todayAttendance?['check_in'] ?? 'N/A'))),
-                DataCell(Text(_formatDateTime(
-                    technician.todayAttendance?['check_out'] ?? 'N/A'))),
-                DataCell(_buildAttendanceStatusBadge(
-                    technician.todayAttendance?['status'] ?? '')),
-                DataCell(Text(technician.batteryStatus  ?? 'N/A')),
-                DataCell(Text(technician.gpsStatus ? 'On' : 'Off')),
-                DataCell(_dropDownValueViews(controller,context, technician.id.toString(),technician )
-                  /*Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () => controller.editTechnician(technician),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => controller.deleteTechnician(technician.id),
-                    ),
-                  ],
-                )*/),
+    return Column(
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SingleChildScrollView(
+            child: DataTable(
+              columns: [
+                _buildTableHeader('Id'),
+                _buildTableHeader('Image'),
+                _buildTableHeader('Name'),
+                _buildTableHeader('Email'),
+                _buildTableHeader('Contact'),
+                _buildTableHeader('Casual Leaves'),
+                _buildTableHeader('Sick Leaves'),
+                _buildTableHeader('Check In'),
+                _buildTableHeader('Check Out'),
+                _buildTableHeader('Status'),
+                _buildTableHeader('Battery(%)'),
+                _buildTableHeader('GPS'),
+                _buildTableHeader('Actions'),
               ],
-            );
-          }).toList(),
+              rows: controller.paginatedTechnicians.map((technician) {
+                return DataRow(
+                  cells: [
+                    DataCell(_ticketBoxIcons(technician.id.toString(), technician)),
+                    DataCell(_technicianImage(technician.id.toString(), technician)),
+                    DataCell(Text("${technician.firstName} ${technician.lastName}")),
+                    DataCell(Text(technician.email)),
+                    DataCell(Text(technician.phoneNumber)),
+                    DataCell(Text(technician.allocatedCasualLeave.toString())),
+                    DataCell(Text(technician.allocatedSickLeave.toString())),
+                    DataCell(Text(_formatDateTime(
+                        technician.todayAttendance.startTime.toString()?? 'N/A'))),
+                    DataCell(Text(_formatDateTime(
+                        technician.todayAttendance.endTime.toString()?? 'N/A'))),
+                    DataCell(_buildAttendanceStatusBadge(
+                        technician.todayAttendance.status?? '')),
+                    DataCell(Text(technician.batteryStatus ?? 'N/A')),
+                    DataCell(Text(technician.gpsStatus ? 'On' : 'Off')),
+                    DataCell(_dropDownValueViews(controller, context, technician.id.toString(), technician)),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
         ),
-      ),
+        // Pagination Controls
+        _buildPaginationControls(controller),
+      ],
     );
+  }
+  Widget _buildPaginationControls(TechnicianListViewScreenController controller) {
+    return Obx(() => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // First Page Button
+          IconButton(
+            icon: Icon(Icons.first_page),
+            onPressed: controller.currentPage.value > 1
+                ? () => controller.goToFirstPage()
+                : null,
+          ),
+          // Previous Page Button
+          IconButton(
+            icon: Icon(Icons.chevron_left),
+            onPressed: controller.currentPage.value > 1
+                ? () => controller.previousPage()
+                : null,
+          ),
+          // Page Number Display
+          Text(
+            'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+            style: TextStyle(fontSize: 16),
+          ),
+          // Next Page Button
+          IconButton(
+            icon: Icon(Icons.chevron_right),
+            onPressed: controller.currentPage.value < controller.totalPages.value
+                ? () => controller.nextPage()
+                : null,
+          ),
+          // Last Page Button
+          IconButton(
+            icon: Icon(Icons.last_page),
+            onPressed: controller.currentPage.value < controller.totalPages.value
+                ? () => controller.goToLastPage()
+                : null,
+          ),
+        ],
+      ),
+    ));
   }
 
   DataColumn _buildTableHeader(String title) {
@@ -292,7 +349,7 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
     }
   }
 Widget _dropDownValueViews(TechnicianListViewScreenController controller, BuildContext context,
-    String agentId, TechnicianResults agentData) {
+    String agentId, TechnicianData agentData) {
   return Center(
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -356,7 +413,7 @@ Widget _dropDownValueViews(TechnicianListViewScreenController controller, BuildC
     ),
   );
 }
-Widget _ticketBoxIcons(String ticketId, TechnicianResults technician) {
+Widget _ticketBoxIcons(String ticketId, TechnicianData technician) {
   return Center(
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -379,7 +436,7 @@ Widget _ticketBoxIcons(String ticketId, TechnicianResults technician) {
     ),
   );
 }
-Widget _technicianImage(String ticketId, TechnicianResults technician) {
+Widget _technicianImage(String ticketId, TechnicianData technician) {
   return Center(
     child: Container(
       // padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -391,7 +448,7 @@ Widget _technicianImage(String ticketId, TechnicianResults technician) {
           width: 1,
         ),
       ),
-      child: CircleAvatar(radius: 25,backgroundImage: technician.profileImage != null?NetworkImage(technician.profileImage): AssetImage(userImageIcon),)
+      child: CircleAvatar(radius: 25,backgroundImage: technician.profileImage != null?NetworkImage("${technician.profileImage}"): AssetImage(userImageIcon),)
     ),
   );
 }
@@ -748,7 +805,7 @@ Widget _buildActionButton(
   );
 }
 
-void _editWidgetOfAgentsDialogValue(TechnicianListViewScreenController controller, BuildContext context, String agentId, TechnicianResults agentData) {
+void _editWidgetOfAgentsDialogValue(TechnicianListViewScreenController controller, BuildContext context, String agentId, TechnicianData agentData) {
   controller.firstNameController.text = agentData.firstName ?? '';
   controller.lastNameController.text = agentData.lastName ?? '';
   controller.emailController.text = agentData.email ?? '';
@@ -770,7 +827,7 @@ void _editWidgetOfAgentsDialogValue(TechnicianListViewScreenController controlle
 }
 
 
-Widget _form(TechnicianListViewScreenController controller, BuildContext context, String agentId, TechnicianResults agentData){
+Widget _form(TechnicianListViewScreenController controller, BuildContext context, String agentId, TechnicianData agentData){
   return Padding(
     padding: const EdgeInsets.all(18.0),
     child: ListView(

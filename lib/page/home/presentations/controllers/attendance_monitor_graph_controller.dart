@@ -25,8 +25,8 @@ class AttendanceGraphViewController extends GetxController {
   RxInt idleCount = 0.obs;
   RxInt totalCount = 0.obs;
 
-  RxList<TechnicianResults> attendanceResponses = <TechnicianResults>[].obs;
-  RxList<TechnicianResults> filteredTechnicians = <TechnicianResults>[].obs;
+  RxList<TechnicianData> attendanceResponses = <TechnicianData>[].obs;
+  RxList<TechnicianData> filteredTechnicians = <TechnicianData>[].obs;
 
   @override
   void onInit() {

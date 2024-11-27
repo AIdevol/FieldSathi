@@ -9,6 +9,25 @@ import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 class AMCScreenController extends GetxController {
   int? selectedNumberOfService;
+  final List<String> excelcoloumndata = [
+    "AMC Name",
+    "Activation Time",
+    "Activation Date",
+    "Remainder",
+    "Product Brand",
+    "Product Name",
+    "Serial Model No",
+    "Under Warranty",
+    "Service Amount",
+    "Received Amount",
+    "Status",
+    "Service Occurrence",
+    "Service Name",
+    "Customer Name",
+    "No of Service",
+    "Note",
+    "Expiry Date"
+  ];
 
   late TextEditingController amcNameController;
   late TextEditingController activationTimeController;
@@ -142,10 +161,14 @@ class AMCScreenController extends GetxController {
   }
 
   void hitGetAmcDetailsApiCall() async {
+    var amcParameter={
+      "page_size":"all"
+    };
     try {
       isLoading.value = true;
       customLoader.show();
-      final amcData = await Get.find<AuthenticationApiService>().getAmcDetailsApiCall();
+
+      final amcData = await Get.find<AuthenticationApiService>().getAmcDetailsApiCall(parameter: amcParameter);
       totalAmcCount.value = amcData.count ?? 0;
       amcResultData.assignAll(amcData.results);
       List<String> amcIds = amcResultData.map((amcLiveData)=>amcLiveData.id.toString()).toList();

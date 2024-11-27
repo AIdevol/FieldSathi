@@ -14,7 +14,7 @@ class ExpenditureScreenController extends GetxController{
   final isSearching = false.obs;
   RxBool isLoading = true.obs;
   RxList<TechnicianResponseModel> technicianData =<TechnicianResponseModel>[].obs;
-  RxList<TechnicianResults> technicianresults = <TechnicianResults>[].obs;
+  RxList<TechnicianData> technicianresults = <TechnicianData>[].obs;
   final searchController = TextEditingController();
 
   final hasError = false.obs;

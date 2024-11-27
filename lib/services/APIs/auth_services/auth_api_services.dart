@@ -30,6 +30,7 @@ import 'package:tms_sathi/services/APIs/dio_client.dart';
 import '../../../response_models/add_sales_response_model.dart';
 import '../../../response_models/check_points_response_model.dart';
 import '../../../response_models/export_import_directory/expense_export_response_model.dart';
+import '../../../response_models/export_ticket_models.dart';
 import '../../../response_models/holidays_calender_response_model.dart';
 import '../../../response_models/leave_allocation_response_model.dart';
 import '../../../response_models/register_response_model.dart';
@@ -221,9 +222,9 @@ implements AuthenticationApi {
     }
   }
   @override
-  Future<TicketResponseModel>getticketDetailsApiCall({Map<String, dynamic>? dataBody})async{
+  Future<TicketResponseModel>getticketDetailsApiCall({Map<String, dynamic>? dataBody, parameter})async{
     try{
-      final response = await dioClient!.get('${ApiEnd.get_ticketEnd}', data: dataBody, skipAuth: false);
+      final response = await dioClient!.get('${ApiEnd.get_ticketEnd}', data: dataBody,queryParameters: parameter, skipAuth: false);
       return TicketResponseModel.fromJson(response);
     }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
@@ -251,10 +252,22 @@ implements AuthenticationApi {
 
   @override
   Future<TicketResponseModel> postTicketDetailsApiCall(
-      {Map<String, dynamic>? dataBody}) async {
+      {Map<String, dynamic>? dataBody,}) async {
     try {
       final response = await dioClient!.post(
           "${ApiEnd.get_ticketEnd}", data: dataBody, skipAuth: false);
+      return TicketResponseModel.fromJson(response);
+    } catch (e) {
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+
+  @override
+  Future<TicketResponseModel> putTicketDetailsApiCall(
+      {Map<String, dynamic>? dataBody, String? id}) async {
+    try {
+      final response = await dioClient!.put(
+          "${ApiEnd.get_ticketEnd}$id/", data: dataBody, skipAuth: false);
       return TicketResponseModel.fromJson(response);
     } catch (e) {
       return Future.error(NetworkExceptions.getDioException(e));
@@ -275,16 +288,23 @@ implements AuthenticationApi {
   }
 
   @override
-  Future<Uint8List> exportTicketDataByDate({Map<String, dynamic>? dataBody, parameter})async{
+  Future<ExcelTicket>exportTicketDataByDate(
+      {Map<String, dynamic>? dataBody, parameter})async{
     try{
-      final response = await dioClient!.get(ApiEnd.exportTicketEnd, data: dataBody, skipAuth: false, queryParameters: parameter);
-      if (response.data == null){
-        throw Exception("Failed to download excel: Empty response");
-      }
-      return response.data;
+      final response =await dioClient!.get(ApiEnd.exportTicketEnd,data: dataBody, queryParameters: parameter, skipAuth: false);
+      return ExcelTicket.fromJson(response);
     }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }
+    // try{
+    //   final response = await dioClient!.get(ApiEnd.exportTicketEnd, data: dataBody, skipAuth: false, queryParameters: parameter);
+    //   if (response.data == null){
+    //     throw Exception("Failed to download excel: Empty response");
+    //   }
+    //   return response.data;
+    // }catch(error){
+    //   return Future.error(NetworkExceptions.getDioException(error));
+    // }
   }
 
   @override
@@ -306,10 +326,10 @@ implements AuthenticationApi {
   // ======================================================================================Leaves Api Call ==========================================================
   @override
   Future<LeaveResponseModel> getLeavesApiCall(
-      {Map<String, dynamic>? dataBody}) async {
+      {Map<String, dynamic>? dataBody,parameter}) async {
     try {
       final response = await dioClient!.get(
-          "${ApiEnd.leavesReportEnd}", data: dataBody, skipAuth: false);
+          "${ApiEnd.leavesReportEnd}", data: dataBody, queryParameters: parameter, skipAuth: false);
       return LeaveResponseModel.fromJson(response);
     } catch (e) {
       return Future.error(NetworkExceptions.getDioException(e));
@@ -402,9 +422,9 @@ implements AuthenticationApi {
 
   // ===================================================================================FSR Api Call ==============================================================================
   @override
-  Future<FsrResponseModel>getfsrDetailsApiCall({Map<String, dynamic>? dataBody})async{
+  Future<FsrResponseModel>getfsrDetailsApiCall({Map<String, dynamic>? dataBody, parameter})async{
     try{
-      final response = await dioClient!.get("${ApiEnd.fsrApiEnd}", data: dataBody, skipAuth: false,);
+      final response = await dioClient!.get("${ApiEnd.fsrApiEnd}", data: dataBody,queryParameters:parameter , skipAuth: false,);
       return FsrResponseModel.fromJson(response);
     }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
@@ -519,9 +539,9 @@ implements AuthenticationApi {
 
   // ==============================================================Agents details=============================================================================
   @override
-  Future<AmcResponseModel>getAmcDetailsApiCall({Map<String, dynamic>?dataBody})async{
+  Future<AmcResponseModel>getAmcDetailsApiCall({Map<String, dynamic>?dataBody, parameter})async{
     try{
-      final response = await dioClient!.get('${ApiEnd.amcEnd}', data: dataBody, skipAuth: false);
+      final response = await dioClient!.get('${ApiEnd.amcEnd}', data: dataBody,queryParameters: parameter, skipAuth: false);
       return AmcResponseModel.fromJson(response);
     }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
@@ -602,13 +622,13 @@ implements AuthenticationApi {
   }
 
   @override
-  Future<CustomerDataResponseModel> postCustomerListApiCall(
+  Future<CustomerListResponseModel> postCustomerListApiCall(
       {Map<String, dynamic>?dataBody, parameters}) async {
     try {
       final response = await dioClient!.post(
           "${ApiEnd.tmsUsersEnd}", queryParameters: parameters,
           skipAuth: false);
-      return CustomerDataResponseModel.fromJson(response);
+      return CustomerListResponseModel.fromJson(response);
     } catch (error) {
       return Future.error(NetworkExceptions.getDioException(error));
     }
@@ -753,10 +773,19 @@ implements AuthenticationApi {
 
 // ===============================================================Get Technician Attendance Api Call ==========================================
   @override
-  Future<TMSResponseModel>getuserDetailsApiCall({Map<String, dynamic>? dataBody})async{
+  Future<TMSResponseModel>getuserDetailsApiCall({Map<String, dynamic>? dataBody, parameter})async{
     try{
-      final response = await dioClient!.get("${ApiEnd.tmsUsersEnd}", data: dataBody, skipAuth: false);
+      final response = await dioClient!.get("${ApiEnd.tmsUsersEnd}", data: dataBody,queryParameters: parameter, skipAuth: false);
       return TMSResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+  @override
+  Future<AttendanceCountsReponseModel>getAttendanceCountApiCall({Map<String, dynamic>? dataBody, parameter})async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.attendanceCounts}", data: dataBody,queryParameters: parameter, skipAuth: false);
+      return AttendanceCountsReponseModel.fromJson(response);
     }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }

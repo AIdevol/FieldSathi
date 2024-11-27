@@ -80,9 +80,9 @@ class TicketListCreationController extends GetxController {
   RxBool isRateSelected = false.obs;
   RxList<TicketResult> ticketResult = <TicketResult>[].obs;
   RxList<TicketResult> ticketAll = <TicketResult>[].obs;
-  RxList<TechnicianResults> allTechnicians = <TechnicianResults>[].obs;
-  RxList<TechnicianResults> filteredTechnicians = <TechnicianResults>[].obs;
-  CustomerDataResponseModel CustomerDataStr = CustomerDataResponseModel();
+  RxList<TechnicianData> allTechnicians = <TechnicianData>[].obs;
+  RxList<TechnicianData> filteredTechnicians = <TechnicianData>[].obs;
+  // CustomerListResponseModel CustomerDataStr = CustomerListResponseModel();
   final RxList<Result> allFsr = <Result>[].obs;
   final RxList<Result> filteredFsr = <Result>[].obs;
   RxList<CustomerData> customerListData = <CustomerData>[].obs;
@@ -91,7 +91,7 @@ class TicketListCreationController extends GetxController {
   RxList<Service>servicesAllResponse=<Service>[].obs;
 
 
-  Rx<TechnicianResults?> selectedTechnician = Rx<TechnicianResults?>(null);
+  Rx<TechnicianData?> selectedTechnician = Rx<TechnicianData?>(null);
   RxInt selectedTechnicianId = RxInt(0);
   RxInt selectedCustomerId = RxInt(0);
   RxInt selectedfsrId = RxInt(0);

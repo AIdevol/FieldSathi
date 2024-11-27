@@ -491,3 +491,29 @@ class PunchInOutResponseModel {
     return data;
   }
 }
+//===========================================Attendance Counts============================================================
+class AttendanceCountsReponseModel {
+  int? totalCount;
+  int? totalPresent;
+  int? totalAbsent;
+  int? totalIdle;
+
+  AttendanceCountsReponseModel(
+      {this.totalCount, this.totalPresent, this.totalAbsent, this.totalIdle});
+
+  AttendanceCountsReponseModel.fromJson(Map<String, dynamic> json) {
+    totalCount = json['total_count'];
+    totalPresent = json['total_present'];
+    totalAbsent = json['total_absent'];
+    totalIdle = json['total_idle'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['total_count'] = this.totalCount;
+    data['total_present'] = this.totalPresent;
+    data['total_absent'] = this.totalAbsent;
+    data['total_idle'] = this.totalIdle;
+    return data;
+  }
+}

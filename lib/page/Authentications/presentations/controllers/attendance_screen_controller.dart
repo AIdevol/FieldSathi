@@ -24,8 +24,8 @@ class AttendanceScreenController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    hitGetAttendanceApiCall();
-    // hitGetUserAttendanceApiCall();
+    // hitGetAttendanceApiCall();
+    hitGetAttendanceCountApiCall();
   }
 
   @override
@@ -33,56 +33,55 @@ class AttendanceScreenController extends GetxController {
     super.onClose();
   }
 
-  void calculateStatistics() {
-    // Set total users from the count in response model
-    if (attendanceResponses.isNotEmpty) {
-      totalUsers.value = attendanceResponses.first.count;
-    }
-
-    // Reset counters
-    totalPresent.value = 0;
-    totalAbsent.value = 0;
-    totalIdle.value = 0;
-
-    for (var user in attendanceData) {
-      if (user.todayAttendance != null) {
-        // Check the status from todayAttendance
-        switch (user.todayAttendance?.status?.toLowerCase()) {
-          case 'present':
-            totalPresent.value++;
-            break;
-          case 'absent':
-            totalAbsent.value++;
-            break;
-          case 'idle':
-            totalIdle.value++;
-            break;
-        }
-      } else {
-        totalAbsent.value++;
-      }
-    }
-
-    if (totalUsers.value > 0) {
-      attendanceRate.value = ((totalPresent.value + totalIdle.value) / totalUsers.value) * 100;
-    }
-
-    update();
-  }
+  // void calculateStatistics() {
+  //   // Set total users from the count in response model
+  //   if (attendanceResponses.isNotEmpty) {
+  //     totalUsers.value = attendanceResponses.first.count!;
+  //   }
+  //
+  //   // Reset counters
+  //   totalPresent.value = 0;
+  //   totalAbsent.value = 0;
+  //   totalIdle.value = 0;
+  //
+  //   for (var user in attendanceData) {
+  //     if (user.todayAttendance != null) {
+  //       // Check the status from todayAttendance
+  //       switch (user.todayAttendance?.status?.toLowerCase()) {
+  //         case 'present':
+  //           totalPresent.value++;
+  //           break;
+  //         case 'absent':
+  //           totalAbsent.value++;
+  //           break;
+  //         case 'idle':
+  //           totalIdle.value++;
+  //           break;
+  //       }
+  //     } else {
+  //       totalAbsent.value++;
+  //     }
+  //   }
+  //
+  //   if (totalUsers.value > 0) {
+  //     attendanceRate.value = ((totalPresent.value + totalIdle.value) / totalUsers.value) * 100;
+  //   }
+  //
+  //   update();
+  // }
 
   void hitGetAttendanceApiCall() {
     isLoading.value = true;
     customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
-
     Get.find<AuthenticationApiService>().getuserDetailsApiCall().then((value) async {
       attendanceResponses.add(value);
-      attendanceData.assignAll(value.results);
+      attendanceData.assignAll(value.results!);
 
       // Store attendance IDs in local storage
       List<String> attendanceIds = attendanceData.map((user) => user.id.toString()).toList();
       await storage.write(attendanceId, attendanceIds);
-      calculateStatistics();
+      // calculateStatistics();
       customLoader.hide();
       toast('Attendance fetched successfully');
       isLoading.value = false;
@@ -94,23 +93,41 @@ class AttendanceScreenController extends GetxController {
     });
   }
 
+  void hitGetAttendanceCountApiCall(){
+    isLoading.value=true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().getAttendanceCountApiCall().then((countsValue){
+      totalUsers.value = countsValue.totalCount!;
+      totalPresent.value = countsValue.totalPresent!;
+      totalAbsent.value = countsValue.totalAbsent!;
+      totalIdle.value = countsValue.totalIdle!;
+      customLoader.hide();
+      toast("Counts fetched successfully");
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
+      customLoader.hide();
+    });
+  }
+
   void searchTechnicians(String query) {
     if (query.isEmpty) {
       hitGetAttendanceApiCall();
     } else {
       var filteredData = attendanceData.where((user) {
         final fullName = '${user.firstName ?? ''} ${user.lastName ?? ''}'.toLowerCase();
-        final email = user.email.toLowerCase();
-        final phone = user.phoneNumber.toLowerCase();
+        final email = user.email?.toLowerCase();
+        final phone = user.phoneNumber?.toLowerCase();
         final searchLower = query.toLowerCase();
 
         return fullName.contains(searchLower) ||
-            email.contains(searchLower) ||
-            phone.contains(searchLower);
+            email!.contains(searchLower) ||
+            phone!.contains(searchLower);
       }).toList();
 
       attendanceData.assignAll(filteredData);
-      calculateStatistics();
+      // calculateStatistics();
     }
   }
 

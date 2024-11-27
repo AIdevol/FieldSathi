@@ -167,10 +167,10 @@ Widget _listViewContainerElement(ExpenditureScreenController controller, index) 
               padding: const EdgeInsets.only(left: 10, right: 20),
               child: CircleAvatar(
                 radius: 35,
-                backgroundImage: technicianData.profileImage != null && technicianData.profileImage.isNotEmpty
-                    ? NetworkImage(technicianData.profileImage)
+                backgroundImage: technicianData.profileImage != null && technicianData.profileImage!.isNotEmpty
+                    ? NetworkImage(technicianData.profileImage.toString())
                     : null,
-                child: technicianData.profileImage == null || technicianData.profileImage.isEmpty
+                child: technicianData.profileImage == null || technicianData.profileImage!.isEmpty
                     ? const Icon(Icons.person, size: 35)
                     : null,
               ),

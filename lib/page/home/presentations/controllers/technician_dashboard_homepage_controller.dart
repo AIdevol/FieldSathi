@@ -13,8 +13,8 @@ class TechnicianDashboardHomepageController extends GetxController {
   final userrole = storage.read(userRole);
 
   // Rx<TechnicianResponseModel> technicianData = <TechnicianResponseModel>.obs;
-  RxList<TechnicianResults> allTechnicians = <TechnicianResults>[].obs;
-  RxList<TechnicianResults> filteredTechnicians = <TechnicianResults>[].obs;
+  RxList<TechnicianData> allTechnicians = <TechnicianData>[].obs;
+  RxList<TechnicianData> filteredTechnicians = <TechnicianData>[].obs;
   @override
   void onInit() {
     super.onInit();

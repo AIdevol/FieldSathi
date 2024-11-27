@@ -107,10 +107,12 @@ class FsrViewController extends GetxController {
   Future<void> hitGetFsrDetailsApiCall() async {
     isLoading.value = true;
     customLoader.show();
-
+    FocusManager.instance.primaryFocus!.unfocus();
+    var queryfsr = {
+      "page_size": "all"
+    };
     try {
-      final response = await Get.find<AuthenticationApiService>().getfsrDetailsApiCall();
-
+      final response = await Get.find<AuthenticationApiService>().getfsrDetailsApiCall(parameter: queryfsr);
       if (response != null) {
         // Update pagination info
         totalCount.value = response.count ?? 0;

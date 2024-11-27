@@ -9,7 +9,7 @@ import '../../../../constans/const_local_keys.dart';
 
 class CustomerListViewController extends GetxController{
   RxBool isLoading = false.obs;
-  CustomerDataResponseModel CustomerDataStr = CustomerDataResponseModel();
+  // CustomerDataResponseModel CustomerDataStr = CustomerDataResponseModel();
     RxList<CustomerData> customerListData = <CustomerData>[].obs;
     late TextEditingController customerNameController;
     late TextEditingController phoneController;
@@ -126,6 +126,7 @@ class CustomerListViewController extends GetxController{
     FocusManager.instance.primaryFocus!.context;
     var parameterdata = {
       "role":"customer",
+      "page_size":"all"
     };
     Get.find<AuthenticationApiService>().getCustomerListApiCall(parameters: parameterdata).then((value)async{
     customerListData.assignAll(value.results);

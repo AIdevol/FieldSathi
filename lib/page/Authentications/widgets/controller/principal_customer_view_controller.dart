@@ -34,7 +34,7 @@ class PrincipalCstomerViewController extends GetxController{
     late FocusNode countryFocusNode;
     late FocusNode selectedRegionFocusNode;
     RxBool isLoading = false.obs;
-    CustomerDataResponseModel CustomerDataStr = CustomerDataResponseModel();
+    // CustomerListResponseModel CustomerDataStr = CustomerListResponseModel.fromJson();
     @override
     void onInit(){
       companyNameController = TextEditingController();

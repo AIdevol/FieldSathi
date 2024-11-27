@@ -55,4 +55,5 @@ class ApiEnd{
   static const String statusLeadsCountsEnd= 'api/leads/status_counts/';
   static const String punchInApiEnd = 'users/attendance/punch_in/';
   static const String punchOutApiEnd = 'users/attendance/punch_out/';
+  static const String attendanceCounts = 'users/tms_users/attendance_counts/';
 }

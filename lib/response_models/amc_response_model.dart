@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class AmcResponseModel {
   final int count;
   final int totalPages;
@@ -16,11 +18,21 @@ class AmcResponseModel {
       count: json['count'] ?? 0,
       totalPages: json['total_pages'] ?? 0,
       currentPage: json['current_page'] ?? 0,
-      results: (json['results'] as List<dynamic>?)
-          ?.map((e) => AmcResult.fromJson(e))
-          .toList() ??
-          [],
+      results: json['results'] != null
+          ? List<AmcResult>.from(
+          json['results'].map((x) => AmcResult.fromJson(x))
+      )
+          : [],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'count': count,
+      'total_pages': totalPages,
+      'current_page': currentPage,
+      'results': results.map((x) => x.toJson()).toList(),
+    };
   }
 }
 
@@ -43,9 +55,9 @@ class AmcResult {
   final String noOfService;
   final String note;
   final String expiry;
-  final String createdAt;
-  final Service service;
-  final Customer customer;
+  final DateTime createdAt;
+  final ServiceDetails service;
+  final CustomerDetails customer;
   final int createdBy;
   final int admin;
 
@@ -78,7 +90,7 @@ class AmcResult {
   factory AmcResult.fromJson(Map<String, dynamic> json) {
     return AmcResult(
       id: json['id'] ?? 0,
-      remainingAmount: (json['remainingAmount'] ?? 0.0).toDouble(),
+      remainingAmount: json['remainingAmount'] ?? 0.0,
       serviceCompleted: json['serviceCompleted'] ?? 0,
       amcName: json['amcName'] ?? '',
       activationTime: json['activationTime'] ?? '',
@@ -95,28 +107,62 @@ class AmcResult {
       noOfService: json['no_of_service'] ?? '',
       note: json['note'] ?? '',
       expiry: json['expiry'] ?? '',
-      createdAt: json['created_at'] ?? '',
-      service: Service.fromJson(json['service'] ?? {}),
-      customer: Customer.fromJson(json['customer'] ?? {}),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      service: json['service'] != null
+          ? ServiceDetails.fromJson(json['service'])
+          : ServiceDetails.empty(),
+      customer: json['customer'] != null
+          ? CustomerDetails.fromJson(json['customer'])
+          : CustomerDetails.empty(),
       createdBy: json['created_by'] ?? 0,
       admin: json['admin'] ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'remainingAmount': remainingAmount,
+      'serviceCompleted': serviceCompleted,
+      'amcName': amcName,
+      'activationTime': activationTime,
+      'activationDate': activationDate,
+      'remainder': remainder,
+      'productBrand': productBrand,
+      'productName': productName,
+      'serialModelNo': serialModelNo,
+      'underWarranty': underWarranty,
+      'serviceAmount': serviceAmount,
+      'receivedAmount': receivedAmount,
+      'status': status,
+      'select_service_occurence': selectServiceOccurence,
+      'no_of_service': noOfService,
+      'note': note,
+      'expiry': expiry,
+      'created_at': createdAt.toIso8601String(),
+      'service': service.toJson(),
+      'customer': customer.toJson(),
+      'created_by': createdBy,
+      'admin': admin,
+    };
+  }
 }
 
-class Service {
+class ServiceDetails {
   final String serviceName;
-  final dynamic servicePrice;
+  final double? servicePrice;
   final String serviceContactNumber;
   final String serviceDescription;
-  final dynamic serviceImage1;
-  final dynamic serviceImage2;
-  final dynamic serviceImage3;
-  final dynamic serviceSubCategory;
-  final dynamic createdBy;
-  final dynamic admin;
+  final String? serviceImage1;
+  final String? serviceImage2;
+  final String? serviceImage3;
+  final String? serviceSubCategory;
+  final String? createdBy;
+  final String? admin;
 
-  Service({
+  ServiceDetails({
     required this.serviceName,
     this.servicePrice,
     required this.serviceContactNumber,
@@ -129,8 +175,8 @@ class Service {
     this.admin,
   });
 
-  factory Service.fromJson(Map<String, dynamic> json) {
-    return Service(
+  factory ServiceDetails.fromJson(Map<String, dynamic> json) {
+    return ServiceDetails(
       serviceName: json['service_name'] ?? '',
       servicePrice: json['service_price'],
       serviceContactNumber: json['service_contact_number'] ?? '',
@@ -143,59 +189,82 @@ class Service {
       admin: json['admin'],
     );
   }
+
+  factory ServiceDetails.empty() {
+    return ServiceDetails(
+      serviceName: '',
+      serviceContactNumber: '',
+      serviceDescription: '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'service_name': serviceName,
+      'service_price': servicePrice,
+      'service_contact_number': serviceContactNumber,
+      'service_description': serviceDescription,
+      'service_image1': serviceImage1,
+      'service_image2': serviceImage2,
+      'service_image3': serviceImage3,
+      'service_sub_category': serviceSubCategory,
+      'created_by': createdBy,
+      'admin': admin,
+    };
+  }
 }
 
-class Customer {
+class CustomerDetails {
   final int id;
-  final TodayAttendance todayAttendance;
+  final TodayAttendance? todayAttendance;
   final List<String> brandNames;
-  final dynamic lastLogin;
-  final dynamic firstName;
-  final dynamic lastName;
+  final String? lastLogin;
+  final String? firstName;
+  final String? lastName;
   final String email;
   final String phoneNumber;
   final String companyName;
   final String employees;
-  final dynamic dob;
+  final String? dob;
   final String otp;
   final bool otpVerified;
   final bool isStaff;
   final bool isSuperuser;
   final bool isActive;
-  final dynamic profileImage;
+  final String? profileImage;
   final String customerName;
-  final dynamic customerTag;
+  final String? customerTag;
   final String modelNo;
-  final dynamic socialId;
+  final String? socialId;
   final bool deactivate;
   final String role;
   final String customerType;
-  final dynamic batteryStatus;
+  final String? batteryStatus;
   final bool gpsStatus;
-  final dynamic longitude;
-  final dynamic latitude;
-  final dynamic companyAddress;
-  final dynamic companyCity;
-  final dynamic companyState;
-  final dynamic companyPincode;
-  final dynamic companyCountry;
-  final dynamic companyRegion;
-  final dynamic companyLandlineNo;
-  final dynamic gstNo;
-  final dynamic cinNo;
-  final dynamic panNo;
-  final dynamic companyContactNo;
-  final dynamic companyWebsite;
-  final dynamic bankName;
-  final dynamic ifscSwift;
-  final dynamic accountNumber;
-  final dynamic branchAddress;
-  final dynamic upiId;
-  final dynamic paymentLink;
-  final dynamic fileUpload;
+  final String? longitude;
+  final String? latitude;
+  final String? companyAddress;
+  final String? companyCity;
+  final String? companyState;
+  final String? companyPincode;
+  final String? companyCountry;
+  final String? companyRegion;
+  final String? companyLandlineNo;
+  final String? gstNo;
+  final String? cinNo;
+  final String? panNo;
+  final String? companyContactNo;
+  final String? companyWebsite;
+  final String? bankName;
+  final String? ifscSwift;
+  final String? accountNumber;
+  final String? branchAddress;
+  final String? upiId;
+  final String? paymentLink;
+  final String? fileUpload;
   final String primaryAddress;
   final String landmarkPaci;
-  final dynamic notes;
+  final String? notes;
   final String state;
   final String country;
   final String city;
@@ -203,21 +272,21 @@ class Customer {
   final String region;
   final int allocatedSickLeave;
   final int allocatedCasualLeave;
-  final dynamic dateJoined;
+  final String? dateJoined;
   final int maxEmployeesAllowed;
   final int employeesCreated;
   final bool isLeaveAllocated;
-  final dynamic empId;
+  final String? empId;
   final bool isDisabled;
-  final String createdAt;
-  final int createdBy;
+  final DateTime createdAt;
+  final String createdBy;
   final int admin;
-  final dynamic customerId;
-  final dynamic subscription;
+  final String? customerId;
+  final String? subscription;
 
-  Customer({
+  CustomerDetails({
     required this.id,
-    required this.todayAttendance,
+    this.todayAttendance,
     required this.brandNames,
     this.lastLogin,
     this.firstName,
@@ -286,11 +355,15 @@ class Customer {
     this.subscription,
   });
 
-  factory Customer.fromJson(Map<String, dynamic> json) {
-    return Customer(
+  factory CustomerDetails.fromJson(Map<String, dynamic> json) {
+    return CustomerDetails(
       id: json['id'] ?? 0,
-      todayAttendance: TodayAttendance.fromJson(json['today_attendance'] ?? {}),
-      brandNames: List<String>.from(json['brand_names'] ?? []),
+      todayAttendance: json['today_attendance'] != null
+          ? TodayAttendance.fromJson(json['today_attendance'])
+          : null,
+      brandNames: json['brand_names'] != null
+          ? List<String>.from(json['brand_names'])
+          : [],
       lastLogin: json['last_login'],
       firstName: json['first_name'],
       lastName: json['last_name'],
@@ -351,20 +424,135 @@ class Customer {
       isLeaveAllocated: json['is_leave_allocated'] ?? false,
       empId: json['emp_id'],
       isDisabled: json['is_disabled'] ?? false,
-      createdAt: json['created_at'] ?? '',
-      createdBy: json['created_by'] ?? 0,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      createdBy: json['created_by'] ?? '',
       admin: json['admin'] ?? 0,
       customerId: json['customer_id'],
       subscription: json['subscription'],
     );
+  }
+
+  // Continuation of the CustomerDetails class from previous artifact
+
+  factory CustomerDetails.empty() {
+    return CustomerDetails(
+      id: 0,
+      brandNames: [],
+      email: '',
+      phoneNumber: '',
+      companyName: '',
+      employees: '',
+      otp: '',
+      otpVerified: false,
+      isStaff: false,
+      isSuperuser: false,
+      isActive: false,
+      customerName: '',
+      modelNo: '',
+      deactivate: false,
+      role: '',
+      customerType: '',
+      gpsStatus: false,
+      primaryAddress: '',
+      landmarkPaci: '',
+      state: '',
+      country: '',
+      city: '',
+      zipcode: '',
+      region: '',
+      allocatedSickLeave: 0,
+      allocatedCasualLeave: 0,
+      maxEmployeesAllowed: 0,
+      employeesCreated: 0,
+      isLeaveAllocated: false,
+      isDisabled: false,
+      createdAt: DateTime.now(),
+      createdBy: '',
+      admin: 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'today_attendance': todayAttendance?.toJson(),
+      'brand_names': brandNames,
+      'last_login': lastLogin,
+      'first_name': firstName,
+      'last_name': lastName,
+      'email': email,
+      'phone_number': phoneNumber,
+      'company_name': companyName,
+      'employees': employees,
+      'dob': dob,
+      'otp': otp,
+      'otp_verified': otpVerified,
+      'is_staff': isStaff,
+      'is_superuser': isSuperuser,
+      'is_active': isActive,
+      'profile_image': profileImage,
+      'customer_name': customerName,
+      'customer_tag': customerTag,
+      'model_no': modelNo,
+      'social_id': socialId,
+      'deactivate': deactivate,
+      'role': role,
+      'customer_type': customerType,
+      'battery_status': batteryStatus,
+      'gps_status': gpsStatus,
+      'longitude': longitude,
+      'latitude': latitude,
+      'companyAddress': companyAddress,
+      'companyCity': companyCity,
+      'companyState': companyState,
+      'companyPincode': companyPincode,
+      'companyCountry': companyCountry,
+      'companyRegion': companyRegion,
+      'companyLandlineNo': companyLandlineNo,
+      'gstNo': gstNo,
+      'cinNo': cinNo,
+      'panNo': panNo,
+      'companyContactNo': companyContactNo,
+      'companyWebsite': companyWebsite,
+      'bankName': bankName,
+      'ifscSwift': ifscSwift,
+      'accountNumber': accountNumber,
+      'branchAddress': branchAddress,
+      'upiId': upiId,
+      'paymentLink': paymentLink,
+      'fileUpload': fileUpload,
+      'primary_address': primaryAddress,
+      'landmark_paci': landmarkPaci,
+      'notes': notes,
+      'state': state,
+      'country': country,
+      'city': city,
+      'zipcode': zipcode,
+      'region': region,
+      'allocated_sick_leave': allocatedSickLeave,
+      'allocated_casual_leave': allocatedCasualLeave,
+      'date_joined': dateJoined,
+      'max_employees_allowed': maxEmployeesAllowed,
+      'employees_created': employeesCreated,
+      'is_leave_allocated': isLeaveAllocated,
+      'emp_id': empId,
+      'is_disabled': isDisabled,
+      'created_at': createdAt.toIso8601String(),
+      'created_by': createdBy,
+      'admin': admin,
+      'customer_id': customerId,
+      'subscription': subscription,
+    };
   }
 }
 
 class TodayAttendance {
   final int id;
   final int user;
-  final dynamic punchIn;
-  final dynamic punchOut;
+  final String? punchIn;
+  final String? punchOut;
   final String status;
   final String date;
 
@@ -387,6 +575,15 @@ class TodayAttendance {
       date: json['date'] ?? '',
     );
   }
-}
-//========================================================================================================================
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user': user,
+      'punch_in': punchIn,
+      'punch_out': punchOut,
+      'status': status,
+      'date': date,
+    };
+  }
+}

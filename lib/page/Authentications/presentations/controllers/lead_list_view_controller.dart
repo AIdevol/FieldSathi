@@ -64,8 +64,11 @@ class LeadListViewController extends GetxController{
   isLoading.value = true;
   // customLoader.show();
   FocusManager.instance.primaryFocus!.context;
-    Get.find<AuthenticationApiService>().getLeadListApiCall().then((value){
-      leadListData.assignAll(value.results!);
+  var leadDatalist = {
+    "page_size":"all"
+  };
+    Get.find<AuthenticationApiService>().getLeadListApiCall(parameters: leadDatalist).then((value){
+      leadListData.assignAll(value.results);
       customLoader.hide();
       toast("Lead list fetched successfully");
       update();

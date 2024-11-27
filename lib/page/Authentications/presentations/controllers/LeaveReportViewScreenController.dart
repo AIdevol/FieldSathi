@@ -25,12 +25,13 @@ class LeaveReportViewScreenController extends GetxController {
 
   RxString defaultSelectedStatus = 'Submitted'.obs;
   RxString selectedFilter = "Select Status".obs;
-  Rx<LeaveResponseModel> leaveManagementData = LeaveResponseModel().obs;
-  RxList<Results> filteredLeaves = <Results>[].obs;
+  // Rx<LeaveResponseModel> leaveManagementData = LeaveResponseModel().obs;
+  RxList<LeaveResult> leavesData = <LeaveResult>[].obs;
+  RxList<LeaveResult> filteredLeaves = <LeaveResult>[].obs;
     RxBool isLoading = false.obs;
   RxString searchQuery = ''.obs;
 
-  LeaveResponseModel resultsData = LeaveResponseModel();
+  // LeaveResponseModel resultsData = LeaveResponseModel();
 
   @override
   void onInit() {
@@ -42,23 +43,29 @@ class LeaveReportViewScreenController extends GetxController {
     customLoader.show();
     isLoading.value = true;
     FocusManager.instance.primaryFocus?.unfocus();
-    Get.find<AuthenticationApiService>().getLeavesApiCall().then((value) {
-       // resultsData.assignAll(leaveManagementData.value.results);
-      if (value is LeaveResponseModel){
-        leaveManagementData.value = value;
-        if (leaveManagementData.value.results != null && leaveManagementData.value.results!.isNotEmpty) {
-          leaveManagementData.value.results!.forEach((result) async {
-            print('Leave ID: ${result.id}');
-            await storage.write(leavesId, result.id??"");
-          });
-        } else {
-          print('No leave results found');
-        }
+    var leavefilteredPage = {
+      // "page":1,
+      "page_size":"all"
+    };
+    Get.find<AuthenticationApiService>().getLeavesApiCall(parameter:leavefilteredPage).then((value) {
+      leavesData.assignAll(value.results);
+      filteredLeaves.assignAll(value.results);
 
-      } else {
-        throw Exception('Unexpected response format: ${value.runtimeType}');
-      }
-      applyFilters();
+      // if (value is LeaveResponseModel){
+      //   leaveManagementData.value = value;
+      //   if (leaveManagementData.value.results != null && leaveManagementData.value.results!.isNotEmpty) {
+      //     leaveManagementData.value.results!.forEach((result) async {
+      //       print('Leave ID: ${result.id}');
+      //       await storage.write(leavesId, result.id??"");
+      //     });
+      //   } else {
+      //     print('No leave results found');
+      //   }
+      //
+      // } else {
+      //   throw Exception('Unexpected response format: ${value.runtimeType}');
+      // }
+      // applyFilters();
       customLoader.hide();
       isLoading.value = false;
       update();
@@ -77,7 +84,7 @@ class LeaveReportViewScreenController extends GetxController {
       "status": defaultSelectedStatus
     };
     Get.find<AuthenticationApiService>().putLeavesApiCall(dataBody: statusValue, id: leaveId).then((value){
-       leaveManagementData.value = value;
+       // leaveManagementData.value = value;
        customLoader.hide();
        toast("Successfully updated Status ");
        hitLeavesApiCall();
@@ -92,7 +99,7 @@ class LeaveReportViewScreenController extends GetxController {
   void updateSelectedFilter(String? newValue) {
     if (newValue != null) {
       selectedFilter.value = newValue;
-      applyFilters();
+      // applyFilters();
     }
   }
 
@@ -104,22 +111,22 @@ void updateSelectedStatus(String? newValue){
 }
   void updateSearchQuery(String query) {
     searchQuery.value = query;
-    applyFilters();
+    // applyFilters();
   }
 
-  void applyFilters() {
-    if (leaveManagementData.value == null) return;
+  // void applyFilters() {
+  //   if (leaveManagementData.value == null) return;
+  //
+  //   filteredLeaves.value = leaveManagementData.value!.results!.where((leave) {
+  //     final nameMatch = '${leave.userId?.firstName ?? ''} ${leave.userId?.lastName ?? ''}'
+  //         .toLowerCase()
+  //         .contains(searchQuery.value.toLowerCase());
+  //     final statusMatch = selectedFilter.value == "Select Status" || leave.status == selectedFilter.value;
+  //     return nameMatch && statusMatch;
+  //   }).toList();
+  // }
 
-    filteredLeaves.value = leaveManagementData.value!.results!.where((leave) {
-      final nameMatch = '${leave.userId?.firstName ?? ''} ${leave.userId?.lastName ?? ''}'
-          .toLowerCase()
-          .contains(searchQuery.value.toLowerCase());
-      final statusMatch = selectedFilter.value == "Select Status" || leave.status == selectedFilter.value;
-      return nameMatch && statusMatch;
-    }).toList();
-  }
-
-  void showLeaveDetails(Results leave) {
+  void showLeaveDetails(LeaveResult leave) {
     Get.dialog(
       AlertDialog(
         title: Text('Leave Details'),
@@ -137,7 +144,7 @@ void updateSelectedStatus(String? newValue){
               Text('Reason: ${leave.reason ?? ''}'),
               Text('Status: ${leave.status ?? ''}'),
               Text('Leave Type: ${leave.leaveType ?? ''}'),
-              Text('Company: ${leave.userId?.companyName ?? ''}'),
+              Text('Company: ${leave.userId.firstName ?? ''}'),
               Text('Email: ${leave.userId?.email ?? ''}'),
             ],
           ),

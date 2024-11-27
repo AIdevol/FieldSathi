@@ -356,11 +356,11 @@ class TicketListScreen extends GetView<TicketListController> {
           DataCell(_ticketBoxIcons(ticket.id.toString() ?? 'NA')),
           DataCell(_buildDataCell(ticket.taskName?.toString() ?? 'NA')),
           DataCell(_buildDataCell(
-            ticket.customerDetails.customerName ?? 'NA',
+            "${ticket.customerDetails.firstName}${ticket.customerDetails.lastName}" ?? 'NA',
             maxWidth: columnWidths['Customer Name'],
           )),
           DataCell(_buildDataCell(
-            ticket.subCustomerDetails.customerName ?? 'NA',
+           "${ticket.subCustomerDetails?.firstName}${ticket.subCustomerDetails?.lastName}"?? 'NA',
             maxWidth: columnWidths['Sub-Customer'],
           )),
           DataCell(_buildDataCell(
@@ -368,11 +368,11 @@ class TicketListScreen extends GetView<TicketListController> {
             maxWidth: columnWidths['Technician'],
           )),
           DataCell(_buildDataCell(
-            ticket.startDateTime ?? 'NA',
+            "${ticket.startDateTime}" ?? 'NA',
             maxWidth: columnWidths['Start Date/Time'],
           )),
           DataCell(_buildDataCell(
-            ticket.endDateTime ?? 'NA',
+            "${ticket.endDateTime}" ?? 'NA',
             maxWidth: columnWidths['End Date/Time'],
           )),
           DataCell(_buildDataCell(
@@ -555,7 +555,7 @@ class TicketListScreen extends GetView<TicketListController> {
   PopupMenuItem<String> _buildPopupMenuItem(
       String text, IconData icon, Color iconColor, BuildContext context, TicketListController controller, String? tickId) {
     return PopupMenuItem<String>(
-      onTap: ()=> controller.downloadTicketData(tickId),
+      onTap: ()=> controller.downloadTicketData(),
       value: text,
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1011,7 +1011,7 @@ Widget _buildInstructionsField(BuildContext context,TicketListController control
 }
 
 Widget _buildListCustomerDetails(BuildContext context,TicketListController controller, TicketResult? ticket) {
-  controller.customerNameController.text = ticket!.customerDetails.customerName.toString();
+  controller.customerNameController.text = "${ticket!.customerDetails.firstName}${ticket!.customerDetails.lastName}";
   controller.productNameController.text = ticket!.brand.toString();
   controller.modelNoController.text = ticket!.model.toString();
 
@@ -1077,7 +1077,7 @@ Widget _buildButtonView(BuildContext context,TicketListController controller, Ti
         ),
         hGap(20),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () {controller.hitUpdateTicketApiCall(ticket?.id.toString());},
           style: _buttonStyle(),
           child: Text(
             "Add Ticket",
@@ -1107,142 +1107,142 @@ ButtonStyle _buttonStyle() {
 }
 
 
-void _downLoadExportModelView(BuildContext context, TicketListController controller) {
-  final startDateController = TextEditingController();
-  final endDateController = TextEditingController();
-  DateTime? startDate;
-  DateTime? endDate;
+  void _downLoadExportModelView(BuildContext context, TicketListController controller) {
 
-  Future<DateTime?> _selectDate(BuildContext context, {DateTime? initialDate, DateTime? firstDate, DateTime? lastDate}) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: initialDate ?? DateTime.now(),
-      firstDate: firstDate ?? DateTime(2000),
-      lastDate: lastDate ?? DateTime.now(),
-    );
-    return picked;
-  }
+    DateTime? startDate;
+    DateTime? endDate;
 
-  void _handleStartDateSelection() async {
-    final picked = await _selectDate(
-      context,
-      initialDate: startDate ?? DateTime.now(),
-      lastDate: endDate ?? DateTime.now(),
-    );
-    if (picked != null) {
-      startDate = picked;
-      startDateController.text = DateFormat('dd-MM-yyyy').format(picked);
+    Future<DateTime?> _selectDate(BuildContext context, {DateTime? initialDate, DateTime? firstDate, DateTime? lastDate}) async {
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: initialDate ?? DateTime.now(),
+        firstDate: firstDate ?? DateTime(2000),
+        lastDate: lastDate ?? DateTime.now(),
+      );
+      return picked;
     }
-  }
 
-  void _handleEndDateSelection() async {
-    final picked = await _selectDate(
-      context,
-      initialDate: endDate ?? DateTime.now(),
-      firstDate: startDate ?? DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null) {
-      endDate = picked;
-      endDateController.text = DateFormat('dd-MM-yyyy').format(picked);
+    void _handleStartDateSelection() async {
+      final picked = await _selectDate(
+        context,
+        initialDate: startDate ?? DateTime.now(),
+        lastDate: endDate ?? DateTime.now(),
+      );
+      if (picked != null) {
+        startDate = picked;
+        controller.startDateController.text = DateFormat('dd-MM-yyyy').format(picked);
+      }
     }
-  }
 
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Container(
-          constraints: BoxConstraints(
-            maxHeight: Get.height * 0.8,
-            maxWidth: Get.width * 0.8,
+    void _handleEndDateSelection() async {
+      final picked = await _selectDate(
+        context,
+        initialDate: endDate ?? DateTime.now(),
+        firstDate: startDate ?? DateTime(2000),
+        lastDate: DateTime.now(),
+      );
+      if (picked != null) {
+        endDate = picked;
+        controller.endDateController.text = DateFormat('dd-MM-yyyy').format(picked);
+      }
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.dialog(
+        Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Download Tickets Report",
-                style: MontserratStyles.montserratBoldTextStyle(
-                  size: 15,
-                  color: Colors.black,
-                ),
-              ),
-              divider(color: Colors.grey),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Expanded(
-                    child: CustomTextField(
-                      controller: startDateController,
-                      labletext: 'Start Date',
-                      hintText: "dd-mm-yyyy",
-                      readOnly: true,
-                      onTap: _handleStartDateSelection,
-                    ),
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: Get.height * 0.8,
+              maxWidth: Get.width * 0.8,
+            ),
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Download Tickets Report",
+                  style: MontserratStyles.montserratBoldTextStyle(
+                    size: 15,
+                    color: Colors.black,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      "To",
-                      style: MontserratStyles.montserratBoldTextStyle(
-                        size: 15,
-                        color: Colors.black,
+                ),
+                divider(color: Colors.grey),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        controller: controller.startDateController,
+                        labletext: 'Start Date',
+                        hintText: "dd-mm-yyyy",
+                        readOnly: true,
+                        onTap: _handleStartDateSelection,
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: CustomTextField(
-                      controller: endDateController,
-                      labletext: 'End Date',
-                      hintText: "dd-mm-yyyy",
-                      readOnly: true,
-                      onTap: _handleEndDateSelection,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        "To",
+                        style: MontserratStyles.montserratBoldTextStyle(
+                          size: 15,
+                          color: Colors.black,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              vGap(30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildActionButton(
-                    context,
-                    'Cancel',
-                    Icons.cancel,
-                    onTap: () {
-                      Get.back();
-                    },
-                  ),
-                  _buildActionButton(
-                    context,
-                    'Download Excel',
-                    Icons.download,
-                    onTap: () {
-                      if (startDate == null || endDate == null) {
-                        Get.snackbar(
-                          'Error',
-                          'Please select both start and end dates',
-                          snackPosition: SnackPosition.BOTTOM,
-                        );
-                        return;
-                      }
-                      // Add your download logic here
-                      // You can access the selected dates using startDate and endDate
-                    },
-                  ),
-                ],
-              )
-            ],
+                    Expanded(
+                      child: CustomTextField(
+                        controller: controller.endDateController,
+                        labletext: 'End Date',
+                        hintText: "dd-mm-yyyy",
+                        readOnly: true,
+                        onTap: _handleEndDateSelection,
+                      ),
+                    ),
+                  ],
+                ),
+                vGap(30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildActionButton(
+                      context,
+                      'Cancel',
+                      Icons.cancel,
+                      onTap: () {
+                        Get.back();
+                      },
+                    ),
+                    _buildActionButton(
+                      context,
+                      'Download Excel',
+                      Icons.download,
+                      onTap: () {
+                        if (startDate == null || endDate == null) {
+                          Get.snackbar(
+                            'Error',
+                            'Please select both start and end dates',
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                          return;
+                        }
+                        controller.downloadTicketData();
+                        // Add your download logic here
+                        // You can access the selected dates using startDate and endDate
+                      },
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  });
-}
+      );
+    });
+  }
 
 void _showImportModelView(BuildContext context,TicketListController controller) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1571,8 +1571,8 @@ Future<void> showDialogWidgetContext(BuildContext context, TicketListController 
                       ),
                       Divider(),
                       ...[
-                        "Customer Name: ${ticket.customerDetails.customerName}",
-                        "Subcustomer Name: ${ticket.subCustomerDetails.customerName} ",
+                        "Customer Name: ${ticket.customerDetails.firstName} ${ticket.customerDetails.lastName}",
+                        "Subcustomer Name: ${ticket.subCustomerDetails?.firstName} ${ticket.subCustomerDetails?.lastName}",
                         "FSR: ${ticket.fsrDetails.fsrName}",
                         "Phone Number: ${ticket.customerDetails.phoneNumber}",
                         "Service: ${ticket.serviceDetails}",

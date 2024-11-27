@@ -250,7 +250,7 @@ class TechnicianDashboardHomepage extends GetView<TechnicianDashboardHomepageCon
               return ListTile(
                 leading: CircleAvatar(
                   backgroundColor: appColor,
-                  backgroundImage: NetworkImage(technician.profileImage) ,
+                  backgroundImage: NetworkImage(technician.profileImage.toString()) ,
                   // child: Text(
                   //   technician.firstName[0].toUpperCase(),
                   //   style: TextStyle(color: whiteColor),

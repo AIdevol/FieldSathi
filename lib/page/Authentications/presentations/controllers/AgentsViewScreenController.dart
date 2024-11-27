@@ -172,7 +172,8 @@ class AgentsViewScreenController extends GetxController {
     customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
     var parameterdata = {
-      "role": "agent"
+      "role": "agent",
+      "page_size":"all"
     };
     Get.find<AuthenticationApiService>().getAgentDetailsApiCall(
         parameters: parameterdata).then((value) async {

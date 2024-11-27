@@ -1,13 +1,15 @@
 import 'dart:convert';
 
 class SuperUsersResponseModel {
-  final int count;
-  final int totalPages;
-  final List<Result> results;
+  int count;
+  int totalPages;
+  int currentPage;
+  List<Result> results;
 
   SuperUsersResponseModel({
     required this.count,
     required this.totalPages,
+    required this.currentPage,
     required this.results,
   });
 
@@ -15,6 +17,7 @@ class SuperUsersResponseModel {
     return SuperUsersResponseModel(
       count: json['count'],
       totalPages: json['total_pages'],
+      currentPage: json['current_page'],
       results: List<Result>.from(json['results'].map((x) => Result.fromJson(x))),
     );
   }
@@ -23,73 +26,81 @@ class SuperUsersResponseModel {
     return {
       'count': count,
       'total_pages': totalPages,
-      'results': List<dynamic>.from(results.map((x) => x.toJson())),
+      'current_page': currentPage,
+      'results': results.map((x) => x.toJson()).toList(),
     };
   }
 }
 
 class Result {
-  final int id;
-  final TodayAttendance? todayAttendance;
-  final List<dynamic> brandNames;
-  final dynamic lastLogin;
-  final String firstName;
-  final String lastName;
-  final String email;
-  final String phoneNumber;
-  final String companyName;
-  final String employees;
-  final dynamic dob;
-  final String otp;
-  final bool otpVerified;
-  final bool isStaff;
-  final bool isSuperuser;
-  final bool isActive;
-  final dynamic profileImage;
-  final dynamic customerName;
-  final dynamic customerTag;
-  final dynamic modelNo;
-  final dynamic socialId;
-  final bool deactivate;
-  final String role;
-  final dynamic customerType;
-  final dynamic batteryStatus;
-  final bool gpsStatus;
-  final dynamic longitude;
-  final dynamic latitude;
-  final dynamic companyAddress;
-  final dynamic companyCity;
-  final dynamic companyState;
-  final dynamic companyPincode;
-  final dynamic companyCountry;
-  final dynamic companyRegion;
-  final dynamic companyLandlineNo;
-  final dynamic gstNo;
-  final dynamic cinNo;
-  final dynamic panNo;
-  final dynamic companyContactNo;
-  final dynamic companyWebsite;
-  final dynamic bankName;
-  final dynamic ifscSwift;
-  final dynamic accountNumber;
-  final dynamic branchAddress;
-  final dynamic upiId;
-  final dynamic paymentLink;
-  final dynamic fileUpload;
-  final dynamic primaryAddress;
-  final dynamic landmarkPaci;
-  final dynamic notes;
-  final dynamic state;
-  final dynamic country;
-  final dynamic city;
-  final dynamic zipcode;
-  final dynamic region;
-  final int allocatedSickLeave;
-  final int allocatedCasualLeave;
-  final dynamic dateJoined;
-  final int createdBy;
-  final int admin;
-  final dynamic customerId;
+  int id;
+  TodayAttendance todayAttendance;
+  List<dynamic> brandNames;
+  String? lastLogin;
+  String firstName;
+  String lastName;
+  String email;
+  String phoneNumber;
+  String? companyName;
+  String? employees;
+  String? dob;
+  String? otp;
+  bool otpVerified;
+  bool isStaff;
+  bool isSuperuser;
+  bool isActive;
+  String? profileImage;
+  String? customerName;
+  String? customerTag;
+  String? modelNo;
+  String? socialId;
+  bool deactivate;
+  String role;
+  String? customerType;
+  String? batteryStatus;
+  bool gpsStatus;
+  String? longitude;
+  String? latitude;
+  String? companyAddress;
+  String? companyCity;
+  String? companyState;
+  String? companyPincode;
+  String? companyCountry;
+  String? companyRegion;
+  String? companyLandlineNo;
+  String? gstNo;
+  String? cinNo;
+  String? panNo;
+  String? companyContactNo;
+  String? companyWebsite;
+  String? bankName;
+  String? ifscSwift;
+  String? accountNumber;
+  String? branchAddress;
+  String? upiId;
+  String? paymentLink;
+  String? fileUpload;
+  String? primaryAddress;
+  String? landmarkPaci;
+  String? notes;
+  String? state;
+  String? country;
+  String? city;
+  String? zipcode;
+  String? region;
+  int allocatedSickLeave;
+  int allocatedCasualLeave;
+  String dateJoined;
+  int maxEmployeesAllowed;
+  int employeesCreated;
+  bool isLeaveAllocated;
+  String empId;
+  bool isDisabled;
+  String createdAt;
+  String createdBy;
+  int admin;
+  String? customerId;
+  String? subscription;
 
   Result({
     required this.id,
@@ -100,10 +111,10 @@ class Result {
     required this.lastName,
     required this.email,
     required this.phoneNumber,
-    required this.companyName,
-    required this.employees,
+    this.companyName,
+    this.employees,
     this.dob,
-    required this.otp,
+    this.otp,
     required this.otpVerified,
     required this.isStaff,
     required this.isSuperuser,
@@ -149,26 +160,31 @@ class Result {
     this.region,
     required this.allocatedSickLeave,
     required this.allocatedCasualLeave,
-    this.dateJoined,
+    required this.dateJoined,
+    required this.maxEmployeesAllowed,
+    required this.employeesCreated,
+    required this.isLeaveAllocated,
+    required this.empId,
+    required this.isDisabled,
+    required this.createdAt,
     required this.createdBy,
     required this.admin,
     this.customerId,
+    this.subscription,
   });
 
   factory Result.fromJson(Map<String, dynamic> json) {
     return Result(
       id: json['id'],
-      todayAttendance: json['today_attendance'] != null
-          ? TodayAttendance.fromJson(json['today_attendance'])
-          : null,
-      brandNames: List<dynamic>.from(json['brand_names'].map((x) => x)),
+      todayAttendance: TodayAttendance.fromJson(json['today_attendance']),
+      brandNames: List<dynamic>.from(json['brand_names']),
       lastLogin: json['last_login'],
       firstName: json['first_name'],
       lastName: json['last_name'],
       email: json['email'],
       phoneNumber: json['phone_number'],
-      companyName: json['company_name'] ?? '',
-      employees: json['employees'] ?? '',
+      companyName: json['company_name'],
+      employees: json['employees'],
       dob: json['dob'],
       otp: json['otp'],
       otpVerified: json['otp_verified'],
@@ -217,17 +233,24 @@ class Result {
       allocatedSickLeave: json['allocated_sick_leave'],
       allocatedCasualLeave: json['allocated_casual_leave'],
       dateJoined: json['date_joined'],
+      maxEmployeesAllowed: json['max_employees_allowed'],
+      employeesCreated: json['employees_created'],
+      isLeaveAllocated: json['is_leave_allocated'],
+      empId: json['emp_id'],
+      isDisabled: json['is_disabled'],
+      createdAt: json['created_at'],
       createdBy: json['created_by'],
       admin: json['admin'],
       customerId: json['customer_id'],
+      subscription: json['subscription'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'today_attendance': todayAttendance?.toJson(),
-      'brand_names': List<dynamic>.from(brandNames.map((x) => x)),
+      'today_attendance': todayAttendance.toJson(),
+      'brand_names': brandNames,
       'last_login': lastLogin,
       'first_name': firstName,
       'last_name': lastName,
@@ -283,12 +306,20 @@ class Result {
       'allocated_sick_leave': allocatedSickLeave,
       'allocated_casual_leave': allocatedCasualLeave,
       'date_joined': dateJoined,
+      'max_employees_allowed': maxEmployeesAllowed,
+      'employees_created': employeesCreated,
+      'is_leave_allocated': isLeaveAllocated,
+      'emp_id': empId,
+      'is_disabled': isDisabled,
+      'created_at': createdAt,
       'created_by': createdBy,
       'admin': admin,
       'customer_id': customerId,
+      'subscription': subscription,
     };
   }
 }
+
 
 class TodayAttendance {
   final int id;
