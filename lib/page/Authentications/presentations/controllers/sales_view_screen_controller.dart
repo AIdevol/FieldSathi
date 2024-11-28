@@ -59,7 +59,8 @@ class SalesViewScreenController extends GetxController{
     customLoader.show();
     FocusManager.instance.primaryFocus!.unfocus();
     var salesParameters={
-      "role":"sales"
+      "role":"sales",
+      "page_size":"all"
     };
     Get.find<AuthenticationApiService>().getSalesDetailsApiCall(parameters: salesParameters).then((value){
       salesData.assignAll(value.results);

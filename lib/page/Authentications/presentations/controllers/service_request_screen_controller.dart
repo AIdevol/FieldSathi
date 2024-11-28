@@ -95,9 +95,9 @@
         if (searchText.value.isNotEmpty) {
           final query = searchText.value.toLowerCase();
           results = results.where((request) {
-            final matchesTaskName = request.ticket.taskName?.toLowerCase().contains(query) ?? false;
-            final matchesCustomerName = request.ticket.custName?.toLowerCase().contains(query) ?? false;
-            final matchesTechnicianName = request.ticket.technicianName?.toLowerCase().contains(query) ?? false;
+            final matchesTaskName = request.ticket!.taskName?.toLowerCase().contains(query) ?? false;
+            final matchesCustomerName = request.ticket!.custName?.toLowerCase().contains(query) ?? false;
+            final matchesTechnicianName = request.ticket!.technicianName?.toLowerCase().contains(query) ?? false;
 
             return matchesTaskName || matchesCustomerName || matchesTechnicianName;
           }).toList();
@@ -106,7 +106,7 @@
         // Apply status filter if a status is selected
         if (dropDownValue.value != "--Please Select Status--") {
           results = results.where((request) =>
-          request.status.toLowerCase() == dropDownValue.value.toLowerCase()
+          request.status?.toLowerCase() == dropDownValue.value.toLowerCase()
           ).toList();
         }
 
@@ -131,9 +131,12 @@
         isLoading.value = true;
         customLoader.show();
         FocusManager.instance.primaryFocus!.context;
-        Get.find<AuthenticationApiService>().getServiceRequestsApiCall().then((value) async{
+        var parameterAllServicesRequets={
+          "page_size":"all"
+        };
+        Get.find<AuthenticationApiService>().getServiceRequestsApiCall(parameters:parameterAllServicesRequets ).then((value) async{
           ServiceRequestsDetails.add(value);
-          servicesRequestsData.assignAll(value.results);
+          servicesRequestsData.assignAll(value.results!);
           List<String> serviceRequetsIds = servicesRequestsData.map((technician) => technician.id.toString()).toList();
           List<String> statusValue = servicesRequestsData.map((technician) => technician.status.toString()).toList();
           await storage.write(serviceRequestsId, serviceRequetsIds);
@@ -208,7 +211,7 @@
       Map<String, int> getStatusCounts() {
         Map<String, int> counts = {};
         for (var request in servicesRequestsData) {
-          counts[request.status] = (counts[request.status] ?? 0) + 1;
+          counts[request.status.toString()] = (counts[request.status] ?? 0) + 1;
         }
         return counts;
       }
@@ -220,7 +223,6 @@
         // Get.find<AuthenticationApiService>().
       }
     }
-
 
 
     // import 'package:get/get.dart';

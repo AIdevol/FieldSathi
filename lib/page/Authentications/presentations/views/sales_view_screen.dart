@@ -529,11 +529,11 @@ Widget _buildDataTableView(SalesViewScreenController controller, BuildContext co
             DataCell(Text(f.allocatedCasualLeave.toString())),
             DataCell(Text(f.allocatedSickLeave.toString())),
             DataCell(Text(_formatDateTime(
-            f.todayAttendance?['check_in'] ?? 'N/A'))),
+            f.todayAttendance.punchIn?? 'N/A'))),
             DataCell(Text(_formatDateTime(
-            f.todayAttendance?['check_out'] ?? 'N/A'))),
+            f.todayAttendance.punchOut ?? 'N/A'))),
             DataCell(_buildAttendanceStatusBadge(
-            f.todayAttendance?['status'] ?? '')),
+            f.todayAttendance.status ?? '')),
             DataCell(Text(f.batteryStatus  ?? 'N/A')),
             DataCell(Text(f.gpsStatus ? 'On' : 'Off')),
             DataCell(_dropDownValueViews(controller,f.id.toString(),f, context))

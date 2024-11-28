@@ -533,7 +533,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
                 DataCell(Text(amc.customer.customerName ?? 'N/A')),
                 DataCell(Text('${amc.serviceCompleted ?? 'N/A'}'+'${'/'}'+'${amc.createdBy ?? 'N/A'}')),
                 DataCell(Text(amc.serviceAmount.toString())),
-                DataCell(Text(amc.selectServiceOccurence ?? 'N/A')),
+                DataCell(Text(amc.selectServiceOccurrence ?? 'N/A')),
                 DataCell(Text(amc.receivedAmount.toString())),
                 DataCell(Text(amc.remainder ?? 'N/A')),
                 DataCell(Text(amc.status ?? 'N/A')),
@@ -662,7 +662,7 @@ _amcDetailsEditWidget(BuildContext context, AMCScreenController controller, AmcR
     controller.datesController.text = amcData.activationDate ?? '';
     controller.noOfServiceController.text = amcData.noOfService?.toString() ?? '';
     controller.reminderController.text = amcData.remainder ?? '';
-    controller.serviceOccurrenceController.text = amcData.selectServiceOccurence ?? '';
+    controller.serviceOccurrenceController.text = amcData.selectServiceOccurrence ?? '';
     controller.productNameController.text = amcData.productName ?? '';
     controller.productBrandController.text = amcData.productBrand ?? '';
     controller.serialModelNoController.text = amcData.serialModelNo ?? '';
@@ -1128,7 +1128,7 @@ _detailsViewsWidget(AMCScreenController controller, AmcResult amcData) {
                 ),
               ),
               Text(
-                "Service Occurrence: ${amcData.selectServiceOccurence ?? 'N/A'}",
+                "Service Occurrence: ${amcData.selectServiceOccurrence ?? 'N/A'}",
                 style: MontserratStyles.montserratSemiBoldTextStyle(
                   size: 15,
                   color: Colors.black,

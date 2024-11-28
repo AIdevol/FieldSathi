@@ -257,17 +257,17 @@ class TechnicianDashboardHomepage extends GetView<TechnicianDashboardHomepageCon
                   // ),
                 ),
                 title: Text('${technician.firstName} ${technician.lastName}'),
-                subtitle: Text(technician.email),
+                subtitle: Text(technician.email!),
                 trailing: Container(
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: technician.isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                    color: technician.isActive! ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    technician.isActive ? 'Active' : 'Inactive',
+                    technician.isActive !? 'Active' : 'Inactive',
                     style: TextStyle(
-                      color: technician.isActive ? Colors.green : Colors.red,
+                      color: technician.isActive! ? Colors.green : Colors.red,
                       fontSize: 12,
                     ),
                   ),

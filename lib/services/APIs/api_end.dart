@@ -53,6 +53,8 @@ class ApiEnd{
 
   /*=============================================================Status Counts Lead ==========================================================================*/
   static const String statusLeadsCountsEnd= 'api/leads/status_counts/';
+  static const String ticketCountsEnd = 'api/tickets/ticket_count/';
+  static const String amcStatusCounts="api/amcs/amc_count/";
   static const String punchInApiEnd = 'users/attendance/punch_in/';
   static const String punchOutApiEnd = 'users/attendance/punch_out/';
   static const String attendanceCounts = 'users/tms_users/attendance_counts/';

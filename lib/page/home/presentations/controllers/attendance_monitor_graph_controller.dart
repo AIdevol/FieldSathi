@@ -67,14 +67,14 @@ class AttendanceGraphViewController extends GetxController {
       final response = await Get.find<AuthenticationApiService>()
           .getTechnicianApiCall(parameters: roleWiseData);
 
-      attendanceResponses.assignAll(response.results);
-      filteredTechnicians.assignAll(response.results);
+      attendanceResponses.assignAll(response.results!);
+      filteredTechnicians.assignAll(response.results!);
 
       // Calculate attendance based on total count from response
-      calculateAttendance(response.count);
+      calculateAttendance(response.count!);
 
       // Store technician IDs
-      final technicianIds = response.results.map((e) => e.id.toString()).toList();
+      final technicianIds = response.results!.map((e) => e.id.toString()).toList();
       await storage.write(attendanceId, technicianIds.join(','));
 
       toast('Technicians fetched successfully');

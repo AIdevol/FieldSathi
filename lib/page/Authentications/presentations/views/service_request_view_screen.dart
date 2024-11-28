@@ -198,12 +198,12 @@ Widget _mainDataTable(BuildContext context, ServiceRequestScreenController contr
 
             return DataRow(cells: [
               // DataCell(Center(child: Text("${index + 1}"))),
-              DataCell(_ticketBoxIcons(request.ticket.id.toString())),
-              DataCell(Center(child: Text(request.ticket.taskName.toString()))),
-              DataCell(Center(child: Text(request.ticket.customerDetails.customerName.toString()))),
-              DataCell(Center(child: Text("${request.ticket.subCustomerDetails.firstName} ${request.ticket.subCustomerDetails.lastName}".trim().isNotEmpty ? "${request.ticket.subCustomerDetails.firstName} ${request.ticket.subCustomerDetails.lastName}" : 'NA'))),
-              DataCell(Center(child: Text("${request.ticket.assignTo.firstName} ${request.ticket.assignTo.lastName}"))),
-              DataCell(Center(child: Text("${request.ticket.ticketAddress.city}, ${request.ticket.ticketAddress.state}, ${request.ticket.ticketAddress.country}"))),
+              DataCell(_ticketBoxIcons(request.ticket?.id.toString())),
+              DataCell(Center(child: Text(request.ticket!.taskName.toString()))),
+              DataCell(Center(child: Text(request.ticket!.customerDetails!.customerName.toString()))),
+              DataCell(Center(child: Text("${request.ticket?.subCustomerDetails?.firstName} ${request.ticket?.subCustomerDetails?.lastName}".trim().isNotEmpty ? "${request.ticket?.subCustomerDetails?.firstName} ${request.ticket?.subCustomerDetails?.lastName}" : 'NA'))),
+              DataCell(Center(child: Text("${request.ticket?.assignTo?.firstName} ${request.ticket?.assignTo?.lastName}"))),
+              DataCell(Center(child: Text("${request.ticket?.assignTo?.city}, ${request.ticket?.assignTo?.state}, ${request.ticket?.assignTo?.country}"))),
               DataCell(Text(request.materialRequired.toString().isNotEmpty ? request.materialRequired.toString() : "No Materials")),
               DataCell(Center(child: Text(request.status.toString()))),
               DataCell(Center(child: Text(request.courierContactNumber.toString()))),
@@ -255,7 +255,7 @@ Widget _remarkViewsWidget(String? remark) {
 
 Widget _statusSelectUpdateWidget(ServiceRequestScreenController controller, ServiceRequest request) {
   // Initialize the dropdown value with the current status
-  controller.dropDownValue.value = request.status ;
+  controller.dropDownValue.value = request.status! ;
 
   return Container(
     height: Get.height * 0.35,

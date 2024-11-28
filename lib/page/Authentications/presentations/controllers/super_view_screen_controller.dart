@@ -43,7 +43,8 @@ class SuperViewScreenController extends GetxController{
     customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
     var dataParameters ={
-      "role": "superuser"
+      "role": "superuser",
+      "page_size":"all"
     };
     Get.find<AuthenticationApiService>().getSuperUserApiCall(parameters: dataParameters).then((value){
      filteredData.assignAll(value.results);

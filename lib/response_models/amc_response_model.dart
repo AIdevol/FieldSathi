@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class AmcResponseModel {
   final int count;
   final int totalPages;
@@ -18,11 +16,9 @@ class AmcResponseModel {
       count: json['count'] ?? 0,
       totalPages: json['total_pages'] ?? 0,
       currentPage: json['current_page'] ?? 0,
-      results: json['results'] != null
-          ? List<AmcResult>.from(
-          json['results'].map((x) => AmcResult.fromJson(x))
-      )
-          : [],
+      results: (json['results'] as List<dynamic>?)
+          ?.map((result) => AmcResult.fromJson(result))
+          .toList() ?? [],
     );
   }
 
@@ -31,7 +27,7 @@ class AmcResponseModel {
       'count': count,
       'total_pages': totalPages,
       'current_page': currentPage,
-      'results': results.map((x) => x.toJson()).toList(),
+      'results': results.map((result) => result.toJson()).toList(),
     };
   }
 }
@@ -51,14 +47,14 @@ class AmcResult {
   final String serviceAmount;
   final String receivedAmount;
   final String status;
-  final String selectServiceOccurence;
+  final String selectServiceOccurrence;
   final String noOfService;
   final String note;
   final String expiry;
-  final DateTime createdAt;
+  final String createdAt;
   final ServiceDetails service;
   final CustomerDetails customer;
-  final int createdBy;
+  final String createdBy;
   final int admin;
 
   AmcResult({
@@ -76,7 +72,7 @@ class AmcResult {
     required this.serviceAmount,
     required this.receivedAmount,
     required this.status,
-    required this.selectServiceOccurence,
+    required this.selectServiceOccurrence,
     required this.noOfService,
     required this.note,
     required this.expiry,
@@ -90,7 +86,9 @@ class AmcResult {
   factory AmcResult.fromJson(Map<String, dynamic> json) {
     return AmcResult(
       id: json['id'] ?? 0,
-      remainingAmount: json['remainingAmount'] ?? 0.0,
+      remainingAmount: json['remainingAmount'] is num
+          ? (json['remainingAmount'] as num).toDouble()
+          : 0.0,
       serviceCompleted: json['serviceCompleted'] ?? 0,
       amcName: json['amcName'] ?? '',
       activationTime: json['activationTime'] ?? '',
@@ -103,20 +101,14 @@ class AmcResult {
       serviceAmount: json['serviceAmount'] ?? '',
       receivedAmount: json['receivedAmount'] ?? '',
       status: json['status'] ?? '',
-      selectServiceOccurence: json['select_service_occurence'] ?? '',
+      selectServiceOccurrence: json['select_service_occurence'] ?? '',
       noOfService: json['no_of_service'] ?? '',
       note: json['note'] ?? '',
       expiry: json['expiry'] ?? '',
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
-          : DateTime.now(),
-      service: json['service'] != null
-          ? ServiceDetails.fromJson(json['service'])
-          : ServiceDetails.empty(),
-      customer: json['customer'] != null
-          ? CustomerDetails.fromJson(json['customer'])
-          : CustomerDetails.empty(),
-      createdBy: json['created_by'] ?? 0,
+      createdAt: json['created_at'] ?? '',
+      service: ServiceDetails.fromJson(json['service'] ?? {}),
+      customer: CustomerDetails.fromJson(json['customer'] ?? {}),
+      createdBy: json['created_by'] ?? '',
       admin: json['admin'] ?? 0,
     );
   }
@@ -137,11 +129,11 @@ class AmcResult {
       'serviceAmount': serviceAmount,
       'receivedAmount': receivedAmount,
       'status': status,
-      'select_service_occurence': selectServiceOccurence,
+      'select_service_occurence': selectServiceOccurrence,
       'no_of_service': noOfService,
       'note': note,
       'expiry': expiry,
-      'created_at': createdAt.toIso8601String(),
+      'created_at': createdAt,
       'service': service.toJson(),
       'customer': customer.toJson(),
       'created_by': createdBy,
@@ -160,7 +152,7 @@ class ServiceDetails {
   final String? serviceImage3;
   final String? serviceSubCategory;
   final String? createdBy;
-  final String? admin;
+  final int? admin;
 
   ServiceDetails({
     required this.serviceName,
@@ -178,7 +170,9 @@ class ServiceDetails {
   factory ServiceDetails.fromJson(Map<String, dynamic> json) {
     return ServiceDetails(
       serviceName: json['service_name'] ?? '',
-      servicePrice: json['service_price'],
+      servicePrice: json['service_price'] is num
+          ? (json['service_price'] as num?)?.toDouble()
+          : null,
       serviceContactNumber: json['service_contact_number'] ?? '',
       serviceDescription: json['service_description'] ?? '',
       serviceImage1: json['service_image1'],
@@ -187,14 +181,6 @@ class ServiceDetails {
       serviceSubCategory: json['service_sub_category'],
       createdBy: json['created_by'],
       admin: json['admin'],
-    );
-  }
-
-  factory ServiceDetails.empty() {
-    return ServiceDetails(
-      serviceName: '',
-      serviceContactNumber: '',
-      serviceDescription: '',
     );
   }
 
@@ -278,7 +264,7 @@ class CustomerDetails {
   final bool isLeaveAllocated;
   final String? empId;
   final bool isDisabled;
-  final DateTime createdAt;
+  final String createdAt;
   final String createdBy;
   final int admin;
   final String? customerId;
@@ -361,9 +347,9 @@ class CustomerDetails {
       todayAttendance: json['today_attendance'] != null
           ? TodayAttendance.fromJson(json['today_attendance'])
           : null,
-      brandNames: json['brand_names'] != null
-          ? List<String>.from(json['brand_names'])
-          : [],
+      brandNames: (json['brand_names'] as List<dynamic>?)
+          ?.map((name) => name.toString())
+          .toList() ?? [],
       lastLogin: json['last_login'],
       firstName: json['first_name'],
       lastName: json['last_name'],
@@ -424,9 +410,7 @@ class CustomerDetails {
       isLeaveAllocated: json['is_leave_allocated'] ?? false,
       empId: json['emp_id'],
       isDisabled: json['is_disabled'] ?? false,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
-          : DateTime.now(),
+      createdAt: json['created_at'] ?? '',
       createdBy: json['created_by'] ?? '',
       admin: json['admin'] ?? 0,
       customerId: json['customer_id'],
@@ -434,46 +418,7 @@ class CustomerDetails {
     );
   }
 
-  // Continuation of the CustomerDetails class from previous artifact
-
-  factory CustomerDetails.empty() {
-    return CustomerDetails(
-      id: 0,
-      brandNames: [],
-      email: '',
-      phoneNumber: '',
-      companyName: '',
-      employees: '',
-      otp: '',
-      otpVerified: false,
-      isStaff: false,
-      isSuperuser: false,
-      isActive: false,
-      customerName: '',
-      modelNo: '',
-      deactivate: false,
-      role: '',
-      customerType: '',
-      gpsStatus: false,
-      primaryAddress: '',
-      landmarkPaci: '',
-      state: '',
-      country: '',
-      city: '',
-      zipcode: '',
-      region: '',
-      allocatedSickLeave: 0,
-      allocatedCasualLeave: 0,
-      maxEmployeesAllowed: 0,
-      employeesCreated: 0,
-      isLeaveAllocated: false,
-      isDisabled: false,
-      createdAt: DateTime.now(),
-      createdBy: '',
-      admin: 0,
-    );
-  }
-
+  // Continuing the toJson() method for CustomerDetails
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -539,7 +484,7 @@ class CustomerDetails {
       'is_leave_allocated': isLeaveAllocated,
       'emp_id': empId,
       'is_disabled': isDisabled,
-      'created_at': createdAt.toIso8601String(),
+      'created_at': createdAt,
       'created_by': createdBy,
       'admin': admin,
       'customer_id': customerId,
@@ -584,6 +529,40 @@ class TodayAttendance {
       'punch_out': punchOut,
       'status': status,
       'date': date,
+    };
+  }
+}
+//========================================================================================================================
+class AmcCountResponseModel {
+  final int total;
+  final int upcoming;
+  final int renewal;
+  final int completed;
+
+  AmcCountResponseModel({
+    required this.total,
+    required this.upcoming,
+    required this.renewal,
+    required this.completed,
+  });
+
+  // Factory method to create an instance from JSON
+  factory AmcCountResponseModel.fromJson(Map<String, dynamic> json) {
+    return AmcCountResponseModel(
+      total: json['total'] ?? 0,
+      upcoming: json['upcoming'] ?? 0,
+      renewal: json['renewal'] ?? 0,
+      completed: json['completed'] ?? 0,
+    );
+  }
+
+  // Method to convert the instance to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'total': total,
+      'upcoming': upcoming,
+      'renewal': renewal,
+      'completed': completed,
     };
   }
 }

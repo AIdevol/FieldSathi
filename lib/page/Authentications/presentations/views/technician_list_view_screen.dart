@@ -219,18 +219,18 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
                     DataCell(_ticketBoxIcons(technician.id.toString(), technician)),
                     DataCell(_technicianImage(technician.id.toString(), technician)),
                     DataCell(Text("${technician.firstName} ${technician.lastName}")),
-                    DataCell(Text(technician.email)),
-                    DataCell(Text(technician.phoneNumber)),
+                    DataCell(Text(technician.email.toString())),
+                    DataCell(Text(technician.phoneNumber.toString())),
                     DataCell(Text(technician.allocatedCasualLeave.toString())),
                     DataCell(Text(technician.allocatedSickLeave.toString())),
                     DataCell(Text(_formatDateTime(
-                        technician.todayAttendance.startTime.toString()?? 'N/A'))),
+                        technician.todayAttendance!.punchIn.toString()?? 'N/A'))),
                     DataCell(Text(_formatDateTime(
-                        technician.todayAttendance.endTime.toString()?? 'N/A'))),
+                        technician.todayAttendance!.punchOut.toString()?? 'N/A'))),
                     DataCell(_buildAttendanceStatusBadge(
-                        technician.todayAttendance.status?? '')),
+                        technician.todayAttendance!.status?? '')),
                     DataCell(Text(technician.batteryStatus ?? 'N/A')),
-                    DataCell(Text(technician.gpsStatus ? 'On' : 'Off')),
+                    DataCell(Text(technician!.gpsStatus ? 'On' : 'Off')),
                     DataCell(_dropDownValueViews(controller, context, technician.id.toString(), technician)),
                   ],
                 );

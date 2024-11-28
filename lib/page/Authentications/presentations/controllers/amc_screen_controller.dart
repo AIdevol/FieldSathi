@@ -106,6 +106,7 @@ class AMCScreenController extends GetxController {
     notesFocusNode = FocusNode();
     super.onInit();
     hitGetAmcDetailsApiCall();
+    hitAmcCountApiCall();
     focusNode.addListener(() {
       isFocused.value = focusNode.hasFocus;
     });
@@ -175,7 +176,7 @@ class AMCScreenController extends GetxController {
       await storage.write(amcId, amcIds);
       print("amc id dekh le bhai= ${storage.read(amcId)}");
       filteredAmcData.assignAll(amcData.results);
-      _calculateAmcCounts();
+      // _calculateAmcCounts();
       toast("AMC successfully Fetched");
       update();
     } catch (error) {
@@ -186,33 +187,33 @@ class AMCScreenController extends GetxController {
     }
   }
 
-  void _calculateAmcCounts() {
-    if (amcResultData.isEmpty) return;
-
-    int upcoming = 0;
-    int renewal = 0;
-    int completed = 0;
-
-    for (var amc in amcResultData) {
-      String status = amc.status?.toLowerCase() ?? '';
-
-      switch (status) {
-        case 'upcoming':
-          upcoming++;
-          break;
-        case 'renewal':
-          renewal++;
-          break;
-        case 'completed':
-          completed++;
-          break;
-      }
-    }
-
-    upcomingCount.value = upcoming;
-    renewalCount.value = renewal;
-    completedCount.value = completed;
-  }
+  // void _calculateAmcCounts() {
+  //   if (amcResultData.isEmpty) return;
+  //
+  //   int upcoming = 0;
+  //   int renewal = 0;
+  //   int completed = 0;
+  //
+  //   for (var amc in amcResultData) {
+  //     String status = amc.status?.toLowerCase() ?? '';
+  //
+  //     switch (status) {
+  //       case 'upcoming':
+  //         upcoming++;
+  //         break;
+  //       case 'renewal':
+  //         renewal++;
+  //         break;
+  //       case 'completed':
+  //         completed++;
+  //         break;
+  //     }
+  //   }
+  //
+  //   upcomingCount.value = upcoming;
+  //   renewalCount.value = renewal;
+  //   completedCount.value = completed;
+  // }
 
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -254,6 +255,21 @@ class AMCScreenController extends GetxController {
     }
   }
 
-
+void hitAmcCountApiCall(){
+    isLoading.value = true;
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().getAmcCountsApiCall().then((value){
+      totalAmcCount.value = value.total;
+      upcomingCount.value = value.upcoming;
+      renewalCount.value = value.renewal;
+      completedCount.value = value.completed;
+      toast("Amc Counts fetched successfully");
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
+      customLoader.hide();
+      isLoading.value = false;
+    });
+}
 
 }

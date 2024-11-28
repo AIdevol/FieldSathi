@@ -72,6 +72,7 @@ class CustomerListViewController extends GetxController{
       customerFocusNode = FocusNode();
       phoneFocusNode = FocusNode();
       emailFocusNode = FocusNode();
+      companyNameFocusNode= FocusNode();
       customerFocusNode = FocusNode();
       modelNoFocusNode = FocusNode();
       productTypeFocusNode = FocusNode();
@@ -89,34 +90,33 @@ class CustomerListViewController extends GetxController{
 
     @override
     void onClose(){
-      companyNameController.dispose();
-      customerNameController.dispose();
-      phoneController.dispose();
+       customerNameController.dispose();
+       phoneController.dispose();
       emailController.dispose();
-      customerNameController.dispose();
+  companyNameController.dispose();
       modelNoController.dispose();
-      productTypeController.dispose();
+       productTypeController.dispose();
       addressNameController.dispose();
-      landMarkController.dispose();
+       landMarkController.dispose();
       cityController.dispose();
       stateController.dispose();
-      zipController.dispose();
-      countryController.dispose();
-      selectedRegionController.dispose();
+       zipController.dispose();
+    countryController.dispose();
+       selectedRegionController.dispose();
 
-      customerFocusNode.dispose();
-      phoneFocusNode.dispose();
-      emailFocusNode.dispose();
-      customerFocusNode.dispose();
-      modelNoFocusNode.dispose();
-      productTypeFocusNode.dispose();
-      addressNamedFocusNode.dispose();
-      landMarkFocusNode.dispose();
-      cityFocusNode.dispose();
-      stateFocusNode.dispose();
-      zipFocusNode.dispose();
-      countryFocusNode.dispose();
-      selectedRegionFocusNode.dispose();
+        customerFocusNode.dispose();
+       phoneFocusNode.dispose();
+       emailFocusNode.dispose();
+       companyNameFocusNode.dispose();
+        modelNoFocusNode.dispose();
+        productTypeFocusNode.dispose();
+        addressNamedFocusNode.dispose();
+        landMarkFocusNode.dispose();
+        cityFocusNode.dispose();
+        stateFocusNode.dispose();
+        zipFocusNode.dispose();
+        countryFocusNode.dispose();
+        selectedRegionFocusNode.dispose();
       super.onClose();
     }
 

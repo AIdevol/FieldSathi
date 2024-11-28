@@ -108,10 +108,10 @@ class TechnicianListViewScreenController extends GetxController {
       filteredTechnicians.assignAll(allTechnicians);
     } else {
       filteredTechnicians.assignAll(allTechnicians.where((technician) =>
-      technician.firstName.toLowerCase().contains(query) ||
-          technician.lastName.toLowerCase().contains(query) ||
-          technician.email.toLowerCase().contains(query) ||
-          technician.phoneNumber.toLowerCase().contains(query)));
+      technician.firstName!.toLowerCase().contains(query) ||
+          technician.lastName!.toLowerCase().contains(query) ||
+          technician.email!.toLowerCase().contains(query) ||
+          technician.phoneNumber!.toLowerCase().contains(query)));
     }
 
     // Update total pages and current page for filtered results
@@ -129,8 +129,8 @@ class TechnicianListViewScreenController extends GetxController {
 
       final roleWiseData = {
         'role': 'technician',
-        "page": currentPage.value,
-        "page_size": itemsPerPage
+        // "page": currentPage.value,
+        "page_size": "all"
 
       };
 
@@ -138,14 +138,14 @@ class TechnicianListViewScreenController extends GetxController {
           .getTechnicianApiCall(parameters: roleWiseData);
 
       // Update both lists
-      allTechnicians.assignAll(response.results);
-      filteredTechnicians.assignAll(response.results); // Initialize filtered list
-      paginatedTechnicians.assignAll(response.results);
+      allTechnicians.assignAll(response.results!);
+      filteredTechnicians.assignAll(response.results!); // Initialize filtered list
+      paginatedTechnicians.assignAll(response.results!);
       // Store technician IDs
       calculateTotalPages();
       updatePaginatedTechnicians();
-      final technicianIds = response.results.map((e) => e.id.toString()).toList();
-      await storage.write(attendanceId, technicianIds.join(','));
+      final technicianIds = response.results?.map((e) => e.id.toString()).toList();
+      await storage.write(attendanceId, technicianIds?.join(','));
 
       customLoader.hide();
       toast('Technicians fetched successfully');

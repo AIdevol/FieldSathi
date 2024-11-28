@@ -69,10 +69,11 @@ class ExpenditureScreenController extends GetxController{
     customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
     var roleWiseData = {
-      'role': ['technician', 'sales']
+      'role': ['technician', 'sales'],
+      'page_size':"all"
     };
     Get.find<AuthenticationApiService>().getTechnicianApiCall(parameters: roleWiseData).then((value) async {
-      technicianresults.assignAll(value.results);
+      technicianresults.assignAll(value.results!);
       List<String> technicianIds = technicianresults.map((result) => result.id.toString()).toList();
       await storage.write(attendanceId, technicianIds.join(','));
       print("technician data: ${storage.read(attendanceId)}");
@@ -116,7 +117,8 @@ class ExpenditureScreenController extends GetxController{
     // customLoader.show();
     FocusManager.instance.primaryFocus!.context;
     var expencesData = {
-      'technician': technicianId
+      'technician': technicianId,
+      "page_size":"all"
     };
     Get.find<AuthenticationApiService>().getExpensesApiCall(parameters: expencesData).then((value){
       expenseResult.assignAll(value.results);

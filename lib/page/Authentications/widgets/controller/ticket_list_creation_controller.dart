@@ -323,7 +323,7 @@ class TicketListCreationController extends GetxController {
     if(query.isEmpty){
       ticketAll.assignAll(ticketResult);
     }else{
-      ticketAll.value = ticketResult.where((tickets)=> tickets.brand.toLowerCase().contains(query.toLowerCase())).toList();
+      ticketAll.value = ticketResult.where((tickets)=> tickets.brand!.toLowerCase().contains(query.toLowerCase())).toList();
     }
   }
 
@@ -338,11 +338,11 @@ class TicketListCreationController extends GetxController {
           .getTechnicianApiCall(parameters: roleWiseData);
 
       // Update both lists
-      allTechnicians.assignAll(response.results);
-      filteredTechnicians.assignAll(response.results); // Initialize filtered list
+      allTechnicians.assignAll(response.results!);
+      filteredTechnicians.assignAll(response.results!); // Initialize filtered list
 
       // Store technician IDs
-      final technicianIds = response.results.map((e) => e.id.toString()).toList();
+      final technicianIds = response.results!.map((e) => e.id.toString()).toList();
       await storage.write(attendanceId, technicianIds.join(','));
 
       customLoader.hide();

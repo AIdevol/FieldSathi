@@ -79,7 +79,7 @@ class TicketResult {
   final String model;
   final String purpose;
   final String? acceptedNote;
-  final TicketAddress ticketAddress;
+  final String? ticketAddress;
   final String createdAt;
   final FsrDetails fsrDetails;
   final ServiceDetails serviceDetails;
@@ -187,7 +187,7 @@ class TicketResult {
       model: json['model'] ?? '',
       purpose: json['purpose'] ?? '',
       acceptedNote: json['acceptedNote'],
-      ticketAddress: TicketAddress.fromJson(json['ticket_address'] ?? {}),
+      ticketAddress: json['ticket_address']/*TicketAddress.fromJson(json['ticket_address'] ?? {})*/,
       createdAt: json['created_at'] ?? '',
       fsrDetails: FsrDetails.fromJson(json['fsrDetails'] ?? {}),
       serviceDetails: ServiceDetails.fromJson(json['serviceDetails'] ?? {}),
@@ -240,7 +240,7 @@ class TicketResult {
       'model': model,
       'purpose': purpose,
       'acceptedNote': acceptedNote,
-      'ticket_address': ticketAddress.toJson(),
+      'ticket_address': ticketAddress,
       'created_at': createdAt,
       'fsrDetails': fsrDetails.toJson(),
       'serviceDetails': serviceDetails.toJson(),
@@ -619,5 +619,47 @@ class ServiceCategory {
       'created_by': createdBy,
       'admin': admin,
     };
+  }
+}
+
+//=====================================================================================================
+class TicketCountsResponseModel {
+  int? total;
+  int? completed;
+  int? rejected;
+  int? ongoing;
+  int? onHold;
+  int? inactive;
+  int? accepted;
+
+  TicketCountsResponseModel(
+      {this.total,
+        this.completed,
+        this.rejected,
+        this.ongoing,
+        this.onHold,
+        this.inactive,
+        this.accepted});
+
+  TicketCountsResponseModel.fromJson(Map<String, dynamic> json) {
+    total = json['total'];
+    completed = json['completed'];
+    rejected = json['rejected'];
+    ongoing = json['ongoing'];
+    onHold = json['on-hold'];
+    inactive = json['inactive'];
+    accepted = json['accepted'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['total'] = this.total;
+    data['completed'] = this.completed;
+    data['rejected'] = this.rejected;
+    data['ongoing'] = this.ongoing;
+    data['on-hold'] = this.onHold;
+    data['inactive'] = this.inactive;
+    data['accepted'] = this.accepted;
+    return data;
   }
 }

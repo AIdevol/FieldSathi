@@ -478,7 +478,7 @@ Widget dropValuetoshowtechnicianName(BuildContext context, TicketListCreationCon
       onSelected: (TechnicianData? selectedTechnician) {
         if (selectedTechnician != null) {
           controller.assignToController.text =
-          "${selectedTechnician.firstName + selectedTechnician.lastName}";
+          selectedTechnician.firstName! + selectedTechnician.lastName.toString();
           controller.selectedTechnicianId.value = selectedTechnician.id ?? 0;
         }
       },
@@ -487,7 +487,7 @@ Widget dropValuetoshowtechnicianName(BuildContext context, TicketListCreationCon
               (TechnicianData technician) {
             return DropdownMenuEntry<TechnicianData>(
               value: technician,
-              label: "${technician.firstName + technician.lastName}" ?? 'Unknown Technician',
+              label: "${technician.firstName! + technician.lastName.toString()}" ?? 'Unknown Technician',
             );
           }).toList(),
     ),

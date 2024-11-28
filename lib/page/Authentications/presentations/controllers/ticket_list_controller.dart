@@ -172,7 +172,7 @@ void onClose(){
           case "Status":
             return ticket.status.toLowerCase().contains(query);
           case "Region":
-            return ticket.ticketAddress.country?.toLowerCase().contains(
+            return ticket.ticketAddress!.toLowerCase().contains(
                 query) ?? false;
           default:
           // Search across all fields when no specific filter is selected
@@ -181,7 +181,7 @@ void onClose(){
                 ("${ticket.subCustomerDetails?.firstName?.toLowerCase()}${ticket.subCustomerDetails?.firstName?.toLowerCase()}"
                     .contains(query) ?? false) ||
                 (ticket.status.toLowerCase().contains(query)) ||
-                (ticket.ticketAddress.country?.toLowerCase().contains(query) ??
+                (ticket.ticketAddress!.contains(query) ??
                     false) ||
                 ('${ticket.assignTo.firstName ?? ''} ${ticket.assignTo
                     .lastName ?? ''}'.trim().toLowerCase().contains(query));

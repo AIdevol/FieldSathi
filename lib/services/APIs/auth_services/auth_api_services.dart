@@ -230,6 +230,15 @@ implements AuthenticationApi {
       return Future.error(NetworkExceptions.getDioException(error));
     }
   }
+  @override
+  Future<TicketCountsResponseModel>getTicketCountsApiCall({Map<String, dynamic>? dataBody, parameter})async{
+    try{
+      final response = await dioClient!.get('${ApiEnd.ticketCountsEnd}', data: dataBody,queryParameters: parameter, skipAuth: false);
+      return TicketCountsResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
   // Future<List<TicketResponseModel>> getticketDetailsApiCall(
   //     {Map<String, dynamic>? dataBody}) async {
   //   try {
@@ -543,6 +552,15 @@ implements AuthenticationApi {
     try{
       final response = await dioClient!.get('${ApiEnd.amcEnd}', data: dataBody,queryParameters: parameter, skipAuth: false);
       return AmcResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+  @override
+  Future<AmcCountResponseModel>getAmcCountsApiCall({Map<String, dynamic>?dataBody, parameter})async{
+    try{
+      final response = await dioClient!.get('${ApiEnd.amcStatusCounts}', data: dataBody,queryParameters: parameter, skipAuth: false);
+      return AmcCountResponseModel.fromJson(response);
     }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }

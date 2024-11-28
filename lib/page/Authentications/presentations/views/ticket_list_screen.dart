@@ -380,11 +380,11 @@ class TicketListScreen extends GetView<TicketListController> {
             maxWidth: columnWidths['Total Time'],
           )),
           DataCell(_buildDataCell(
-            '${ticket.ticketAddress?.city ?? ''}, ${ticket.ticketAddress?.state ?? ''}'.trim(),
+            '${ticket.ticketAddress}'.trim(),
             maxWidth: columnWidths['Address'],
           )),
           DataCell(_buildDataCell(
-            ticket.ticketAddress?.country ?? 'NA',
+            ticket.ticketAddress ?? 'NA',
             maxWidth: columnWidths['Region'],
           )),
           DataCell(_buildDataCell(

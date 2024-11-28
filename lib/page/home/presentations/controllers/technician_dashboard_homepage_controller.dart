@@ -36,7 +36,7 @@ class TechnicianDashboardHomepageController extends GetxController {
   // Method to update dashboard statistics
   void updateDashboardStats(TechnicianResponseModel technicianData) {
     // Set total tickets from the model's count
-    totalTickets.value = technicianData.count;
+    totalTickets.value = technicianData.count!;
 
     // Initialize counters
     int completed = 0;
@@ -45,11 +45,11 @@ class TechnicianDashboardHomepageController extends GetxController {
     int rejected = 0;
 
     // Count tickets based on status
-    for (var technician in technicianData.results) {
-      if (!technician.isActive) {
+    for (var technician in technicianData.results!) {
+      if (!technician.isActive!) {
         inactive++;
       }
-      if (technician.isDisabled) {
+      if (technician.isDisabled!) {
         rejected++;
       }
     }
@@ -81,10 +81,10 @@ class TechnicianDashboardHomepageController extends GetxController {
         final response = await Get.find<AuthenticationApiService>()
             .getTechnicianApiCall(parameters: roleWiseData);
         // technicianData.add(value.);
-        allTechnicians.assignAll(response.results);
-        filteredTechnicians.assignAll(response.results);
+        allTechnicians.assignAll(response.results!);
+        filteredTechnicians.assignAll(response.results!);
 
-        final technicianIds = response.results.map((e) => e.id.toString())
+        final technicianIds = response.results!.map((e) => e.id.toString())
             .toList();
         await storage.write(attendanceId, technicianIds.join(','));
 
