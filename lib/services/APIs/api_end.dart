@@ -46,7 +46,8 @@ class ApiEnd{
   static const String importAMCsEnd = 'api/import-amcs/';
   static const String importTicketsEnd = 'api/import-tickets/';
   static const String exportTicketEnd = 'api/export-tickets/';
-
+  static const String importServiceSubCategoriesEnd= 'api/service-sub-category-image/';
+  static const String importServiceCategoriesEnd = 'api/service-category-image/';
 
 /*============================================================= History Apis ==============================================================*/
   static const String ticketHistoryViewEnd = 'api/ticket_history_view/';

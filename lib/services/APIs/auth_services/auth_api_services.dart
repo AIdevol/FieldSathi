@@ -408,6 +408,28 @@ implements AuthenticationApi {
       return Future.error(NetworkExceptions.getDioException(e));
     }
   }
+  @override
+  Future<AddTechnicianResponseModel> updateTechnicialPostApiCall(
+      {Map<String, dynamic>? dataBody, parameters, String? id}) async {
+    try {
+      final response = await dioClient!.put(
+          "${ApiEnd.tmsUsersEnd}$id/", data: dataBody,
+          skipAuth: false,
+          queryParameters: parameters);
+      return AddTechnicianResponseModel.fromJson(response);
+    } catch (e) {
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+  @override
+  Future<TechnicianResponseModel>deleteTechnicianDetailsApiCall({Map<String, dynamic>? dataBody, parameters,String? id})async{
+    try{
+      final response = await dioClient!.delete('${ApiEnd.tmsUsersEnd}$id/', data: dataBody, queryParameters:parameters,skipAuth: false);
+      return TechnicianResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
   // ===================================================================================Sales Api call ===================================================================
   @override
   Future<SalesResponseModel>getSalesDetailsApiCall({Map<String, dynamic>? dataBody, parameters})async{
@@ -427,8 +449,25 @@ implements AuthenticationApi {
       return Future.error(NetworkExceptions.getDioException(error));
     }
   }
+  @override
+  Future<AddSalesResponseModel>updateAddSalesDetailsApiCall({Map<String, dynamic>? dataBody, parameters,String? id})async{
+    try{
+      final response = await dioClient!.put('${ApiEnd.tmsUsersEnd}$id/', data: dataBody, queryParameters:parameters,skipAuth: false);
+      return AddSalesResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
 
-
+  @override
+  Future<SalesResponseModel>deleteAddSalesDetailsApiCall({Map<String, dynamic>? dataBody, parameters, String? id})async{
+    try{
+      final response = await dioClient!.delete('${ApiEnd.tmsUsersEnd}$id/', data: dataBody, queryParameters:parameters,skipAuth: false);
+      return SalesResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
   // ===================================================================================FSR Api Call ==============================================================================
   @override
   Future<FsrResponseModel>getfsrDetailsApiCall({Map<String, dynamic>? dataBody, parameter})async{
@@ -748,10 +787,10 @@ implements AuthenticationApi {
     }
   }
 */
-  Future<ServiceCategoryResponseModel>getServiceCategoriesApiCall({Map<String, dynamic>? dataBody})async{
+  Future<ServiceCategoryResponseModel>getServiceCategoriesApiCall({Map<String, dynamic>? dataBody, parameters})async{
     try{
         final response = await dioClient!.get(
-        "${ApiEnd.serviceCategories}", skipAuth: false, data: dataBody);
+        "${ApiEnd.serviceCategories}",data: dataBody,queryParameters: parameters,skipAuth: false,);
         return ServiceCategoryResponseModel.fromJson(response);
     }catch(error){
           return Future.error(NetworkExceptions.getDioException(error));

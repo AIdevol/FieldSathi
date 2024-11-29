@@ -127,9 +127,12 @@ class ServiceCategoriesController extends GetxController {
     isLoading.value = true;
     // customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
-    Get.find<AuthenticationApiService>().getServiceCategoriesApiCall().then((value){
-      allServices.assignAll(value.results);
-      // filteredServices.assignAll(value);
+    var page_parameters = {
+      "page_size":"all"
+    };
+    Get.find<AuthenticationApiService>().getServiceCategoriesApiCall(parameters: page_parameters).then((value){
+      allServices.assignAll(value.results!);
+
       customLoader.hide();
       toast('Fetch Service Categories');
       isLoading.value = false;

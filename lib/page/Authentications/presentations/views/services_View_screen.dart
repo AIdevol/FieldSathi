@@ -89,68 +89,100 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
   }
 
   Widget _buildServicesList(List<ServiceCategory> services) {
-    return ListView.separated(
+    return ListView.builder(
       itemCount: services.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 10),
-      itemBuilder: (context, index) =>
-          Container(
-            height: Get.height * 0.1,
-            width: Get.width * 0.4,
-            decoration: BoxDecoration(
-              color: whiteColor,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 1,
-                  blurRadius: 5,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-              border: Border.all(
-                width: 0.80,
-                color: Colors.black,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      itemBuilder: (context, index) => Padding(
+        padding: const EdgeInsets.only(bottom: 15),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(15),
+              onTap: () {
+                // Add your tap action here
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: _listViewContainerElement(services[index], controller),
               ),
             ),
-            child: _listViewContainerElement(services[index], controller),
           ),
+        ),
+      ),
     );
   }
 
-  Widget _listViewContainerElement(ServiceCategory service,
-      ServiceCategoriesController controller,) {
+  Widget _listViewContainerElement(
+      ServiceCategory service,
+      ServiceCategoriesController controller,
+      ) {
     return Row(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 10, right: 20),
-          child: CircleAvatar(
-            radius: 40,
-            backgroundImage: service.serviceCatImage != null &&  service.serviceCatImage!.isNotEmpty
-                ? AssetImage(userImageIcon)
-                : null,
+        // Circular Avatar with gradient border
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: [
+                Colors.blue.shade200,
+                Colors.blue.shade400,
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue.shade100,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(3.0),
+            child: CircleAvatar(
+              radius: 35,
+              backgroundColor: Colors.white,
+              backgroundImage: service.serviceCatImage?.isNotEmpty == true
+                  ? NetworkImage(service.serviceCatImage!)
+                  : AssetImage(appIcon),
+            ),
           ),
         ),
+
+        // Service Details
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  service.serviceCategoryName,
+                  service.serviceCategoryName!,
                   style: MontserratStyles.montserratSemiBoldTextStyle(
-                    size: 15,
-                    color: blackColor,
+                    size: 16,
+                    color: Colors.black87,
                   ),
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 5),
                 Text(
-                  service.serviceCatDescriptions,
+                  service.serviceCatDescriptions!,
                   style: MontserratStyles.montserratSemiBoldTextStyle(
-                    size: 13,
-                    color: Colors.grey,
+                    size: 14,
+                    color: Colors.grey.shade600,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -159,9 +191,12 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
             ),
           ),
         ),
+
+        // Edit/Delete Option
         _customripValueMenuforEditAndDeletingServices(
-          controller: controller,
-          context: Get.context!,
+          service,
+          controller,
+          Get.context!,
         ),
       ],
     );
@@ -342,8 +377,8 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
   //   ]);
   // }
 
-  Widget _customripValueMenuforEditAndDeletingServices(
-      {required ServiceCategoriesController controller, required BuildContext context}) {
+  Widget _customripValueMenuforEditAndDeletingServices(ServiceCategory services,
+      ServiceCategoriesController controller,BuildContext context) {
     return PopupMenuButton<String>(
       color: CupertinoColors.white,
       offset: Offset(0, 56),
@@ -352,7 +387,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
         PopupMenuItem<String>(
           value: 'Edit',
           onTap: () {
-            _showMenuUpdateforAddingServiceScreen(controller,);
+            _showMenuUpdateforAddingServiceScreen(services, controller,context);
           },
           child: const ListTile(
             leading: Icon(
@@ -375,7 +410,13 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
   }
 
   void _showMenuUpdateforAddingServiceScreen(
-      ServiceCategoriesController controller) {
+      ServiceCategory service,
+      ServiceCategoriesController controller,
+      BuildContext context) {
+    // Pre-fill text controllers with existing service category data
+    controller.CategoryController.text = service.serviceCategoryName ?? '';
+    controller.CategoryDescriptionController.text = service.serviceCatDescriptions ?? '';
+
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -402,6 +443,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                 ),
                 SizedBox(height: 8),
                 TextField(
+                  controller: controller.CategoryController,
                   decoration: InputDecoration(
                     hintText: "Enter category name",
                     border: OutlineInputBorder(
@@ -419,6 +461,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                 ),
                 SizedBox(height: 8),
                 TextField(
+                  controller: controller.CategoryDescriptionController,
                   maxLines: 8,
                   decoration: InputDecoration(
                     hintText: "Enter category description",
@@ -439,18 +482,34 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                 Row(
                   children: [
                     InkWell(
-                      onTap: () {
-                        // Add icon selection logic here
-                      },
+                      onTap: () => controller.showImagePickerDialog(),
                       child: Container(
-                        width: 80,
-                        height: 80,
+                        alignment: Alignment.center,
+                        width: 60,
+                        height: 60,
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Icon(
-                            FontAwesomeIcons.upload, size: 32, color: appColor),
+                        child: Obx(() =>
+                        controller.selectedImage.value != null
+                            ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            controller.selectedImage.value!,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                            : (service.serviceCatImage != null && service.serviceCatImage!.isNotEmpty
+                            ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            service.serviceCatImage!,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                            : Icon(FontAwesomeIcons.upload, size: 32, color: appColor)),
+                        ),
                       ),
                     ),
                     SizedBox(width: 16),
@@ -476,7 +535,9 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                     SizedBox(width: 16),
                     ElevatedButton(
                       onPressed: () {
-                        // Add save logic here
+                        // Add update logic here
+                        // You might want to call a method in the controller to update the service category
+                        // controller.Upda(service);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: appColor,
@@ -486,12 +547,11 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                             horizontal: 24, vertical: 12),
                       ),
                       child: Text(
-                        "Submit",
+                        "Update",
                         style: MontserratStyles.montserratBoldTextStyle(
                             size: 16, color: Colors.white),
                       ),
                     ),
-
                   ],
                 ),
               ],
@@ -501,7 +561,6 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
       ),
     );
   }
-
   void _popUpScreenDetailsForAddingServiceScreen(
       ServiceCategoriesController controller) {
     Get.dialog(

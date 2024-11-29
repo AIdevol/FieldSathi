@@ -17,6 +17,7 @@ import '../../../../constans/string_const.dart';
 
 
 class TechnicianListViewScreen extends GetView<TechnicianListViewScreenController> {
+  final GlobalKey formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return MyAnnotatedRegion(
@@ -363,7 +364,7 @@ Widget _dropDownValueViews(TechnicianListViewScreenController controller, BuildC
               //     controller, Get.context!, agentId, agentData);
               break;
             case 'Delete':
-              // controller.hitDeleteStatuApiValue(agentId);
+              controller.deleteTechnician(agentId);
               break;
             case 'Deactivate':
               // controller.hitUpdateStatusValue(agentId);
@@ -448,7 +449,7 @@ Widget _technicianImage(String ticketId, TechnicianData technician) {
           width: 1,
         ),
       ),
-      child: CircleAvatar(radius: 25,backgroundImage: technician.profileImage != null?NetworkImage("${technician.profileImage}"): AssetImage(userImageIcon),)
+      child: CircleAvatar(radius: 18,backgroundImage: technician.profileImage != null?NetworkImage("${technician.profileImage}"): AssetImage(userImageIcon),)
     ),
   );
 }
@@ -816,11 +817,14 @@ void _editWidgetOfAgentsDialogValue(TechnicianListViewScreenController controlle
   Get.dialog(
       Dialog(
         insetAnimationDuration: Duration(milliseconds: 3),
-        child: Container(
-          height: Get.height,
-          width: Get.width,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-          child: _form(controller, context, agentId, agentData),
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Container(
+            height: Get.height,
+            width: Get.width,
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+            child: _form(controller, context, agentId, agentData),
+          ),
         ),
       )
   );
@@ -828,30 +832,34 @@ void _editWidgetOfAgentsDialogValue(TechnicianListViewScreenController controlle
 
 
 Widget _form(TechnicianListViewScreenController controller, BuildContext context, String agentId, TechnicianData agentData){
+  final GlobalKey formKey = GlobalKey<FormState>();
   return Padding(
     padding: const EdgeInsets.all(18.0),
-    child: ListView(
-      // controller: ,
-        children: [
-          vGap(20),
-          Text('Edit Technician',style: MontserratStyles.montserratBoldTextStyle(size: 15, color: Colors.black),),
-          Divider(color: Colors.black,),
-          vGap(20),
-          _employeIdField(controller, context,),
-          vGap(20),
-          _joiningDateField(controller, context),
-          vGap(20),
-          _firstNameField(controller, context),
-          vGap(20),
-          _lastNameField(controller, context),
-          vGap(20),
-          _emailField(controller, context),
-          vGap(20),
-          _phoneNumberField(controller, context),
-          vGap(40),
-          _buildOptionButtons(controller, context),
-          vGap(20),
-        ]
+    child: Form(
+      key: formKey,
+      child: ListView(
+        // controller: ,
+          children: [
+            vGap(20),
+            Text('Edit Technician',style: MontserratStyles.montserratBoldTextStyle(size: 15, color: Colors.black),),
+            Divider(color: Colors.black,),
+            vGap(20),
+            _employeIdField(controller, context,),
+            vGap(20),
+            _joiningDateField(controller, context),
+            vGap(20),
+            _firstNameField(controller, context),
+            vGap(20),
+            _lastNameField(controller, context),
+            vGap(20),
+            _emailField(controller, context),
+            vGap(20),
+            _phoneNumberField(controller, context),
+            vGap(40),
+            _buildOptionButtons(controller, context,agentData.id.toString()),
+            vGap(20),
+          ]
+      ),
     ),
   );
 }
@@ -861,7 +869,7 @@ _employeIdField(TechnicianListViewScreenController controller, BuildContext cont
     controller: controller.employeeIdController,
     hintText: 'Employee Id',
     labletext: 'Employee Id',
-    prefix: Icon(Icons.perm_identity),
+    // prefix: Icon(Icons.perm_identity),
     validator: (value){
       if (value == null || value.isEmpty) {
         return 'Please select a Employee Id';
@@ -873,9 +881,10 @@ _employeIdField(TechnicianListViewScreenController controller, BuildContext cont
 
 _joiningDateField(TechnicianListViewScreenController controller, BuildContext context) {
   return CustomTextField(
+    onTap: ()=> controller.selectDate(context),
     controller: controller.joiningDateController,
-    hintText: 'Joining date',
-    labletext: 'Joining date',
+    hintText: 'Date of Joining',
+    labletext: 'Date of Joining',
     validator: (value) {
       if (value == null || value.isEmpty) {
         return 'Please select a joining date';
@@ -884,17 +893,18 @@ _joiningDateField(TechnicianListViewScreenController controller, BuildContext co
     },
     suffix: IconButton(
       onPressed: () async {
-        final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2100),
-        );
-        if (picked != null) {
-          String formattedDate="${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
-          // String formattedDate = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";  /*YYYY-MM-D*/
-          controller.joiningDateController.text = formattedDate;
-        }
+        controller.selectDate(context);
+        // final DateTime? picked = await showDatePicker(
+        //   context: context,
+        //   initialDate: DateTime.now(),
+        //   firstDate: DateTime(2000),
+        //   lastDate: DateTime(2100),
+        // );
+        // if (picked != null) {
+        //   String formattedDate="${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
+        //   // String formattedDate = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";  /*YYYY-MM-D*/
+        //   controller.joiningDateController.text = formattedDate;
+        // }
 
       },
       icon: Icon(Icons.calendar_month_outlined),
@@ -943,9 +953,9 @@ _phoneNumberField(TechnicianListViewScreenController controller, BuildContext co
   );
 }
 
-_buildOptionButtons(TechnicianListViewScreenController controller, BuildContext context) {
+_buildOptionButtons(TechnicianListViewScreenController controller, BuildContext context, String agentId) {
   return Row(
-    mainAxisAlignment: MainAxisAlignment.end,
+    mainAxisAlignment: MainAxisAlignment.center,
     children: [
       ElevatedButton(
         onPressed: () {
@@ -961,7 +971,8 @@ _buildOptionButtons(TechnicianListViewScreenController controller, BuildContext 
       hGap(20),
       ElevatedButton(
         onPressed: () {
-          // controller.hitPostAddSupperApiCallApiCall();
+          controller.updateTechnicianApiCall(agentId);
+          print("rajesh data: $agentId");
         },
         child: Text(
           'Submit',

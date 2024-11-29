@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/main.dart';
+import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
+
+import '../../../../response_models/add_technician_response_model.dart';
 
 class AddTechnicianListController extends GetxController{
 
@@ -65,24 +70,38 @@ class AddTechnicianListController extends GetxController{
     customLoader.show();
     FocusManager.instance.primaryFocus!.context;
     var elementBody={
+      "emp_id":employeeIdController.text,
       "first_name":firstNameController.text,
       "last_name": lastNameController.text,
       "email": emailController.text,
       "phone_number":phoneController.text,
-      "dob": dateJoiningController.text
+      "dob": dateJoiningController.text,
+      "role":"technician"
     };
-    var parameterBody = {
-      "role": "technician"
-    };
-    Get.find<AuthenticationApiService>().addTechnicialPostApiCall(dataBody: elementBody, parameters: parameterBody).then((value){
+    // var parameterBody = {
+    //   "role": "technician"
+    // };
+    Get.find<AuthenticationApiService>().addTechnicialPostApiCall(dataBody: elementBody).then((value){
       var mainData = value;
       print("maindata of technician= $mainData");
       customLoader.hide();
       toast('Technician Added Successfully!');
+      Get.toNamed(AppRoutes.ticketListScreen);
       update();  // update to the method after data entered
     }).onError((error, stackError){
       customLoader.hide();
+      // toast(error.toString());
       toast(error.toString());
+      // if (error is String) {
+      //   try {
+      //     final parsedError = ErrorResponseModel.fromJson(json.decode(error));
+      //     toast(parsedError.toString());
+      //   } catch (e) {
+      //     toast(error);
+      //   }
+      // } else {
+      //   toast(error.toString());
+      // }
     });
   }
 }

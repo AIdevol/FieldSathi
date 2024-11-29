@@ -10,9 +10,10 @@ import 'package:tms_sathi/utilities/helper_widget.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../controller/add_technician_list_controller.dart';
+import 'package:tms_sathi/Extentions/text_field_extentions.dart';
 
 class AddTechnicianList extends GetView<AddTechnicianListController> {
-
+      final formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return MyAnnotatedRegion(
@@ -42,23 +43,26 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
       color: whiteColor,
       child: Padding(
         padding: const EdgeInsets.all(18.0),
-        child: ListView(
-          children: [
-            _buildEmployeeId(controller),
-            vGap(20),
-            _buildDateOfJoining(controller,context),
-            vGap(20),
-            _buildFirstName(controller),
-            vGap(20),
-            _buildLastName(controller),
-            vGap(20),
-            _buildEmail(controller),
-            vGap(20),
-            _buildPhoneNumber(controller),
-            vGap(20),
+        child: Form(
+          key: formKey,
+          child: ListView(
+            children: [
+              _buildEmployeeId(controller),
+              vGap(20),
+              _buildDateOfJoining(controller,context),
+              vGap(20),
+              _buildFirstName(controller),
+              vGap(20),
+              _buildLastName(controller),
+              vGap(20),
+              _buildEmail(controller),
+              vGap(20),
+              _buildPhoneNumber(controller),
+              vGap(20),
 
-            _buildOptionButtons(controller),
-          ],
+              _buildOptionButtons(controller),
+            ],
+          ),
         ),
       ),
     );
@@ -67,10 +71,13 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
     return CustomTextField(
       hintText: "Employee Id".tr,
       controller: controller.employeeIdController,
-      textInputType: TextInputType.text,
+      textInputType: TextInputType.number,
       focusNode: controller.employeeIdFocusNode,
       onFieldSubmitted: (String? value) {
         FocusScope.of(Get.context!).requestFocus(controller.lastFocusNode);
+      },
+      validator: (value) {
+        return value?.isEmptyField(messageTitle: "emp id");
       },
       labletext: "Employee Id".tr,
       prefix: Icon(Icons.person, color: Colors.black),
@@ -90,6 +97,9 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
         },
         icon: Icon(Icons.calendar_month, color: Colors.black),
       ),
+      validator: (value) {
+        return value?.isEmptyField(messageTitle: "date");
+      },
     );
   }
 
@@ -104,6 +114,9 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
       },
       labletext: "First Name".tr,
       prefix: Icon(Icons.person, color: Colors.black),
+      validator: (value) {
+        return value?.isEmptyField(messageTitle: "first name");
+      },
     );
   }
 
@@ -132,6 +145,9 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
       },
       labletext: "Email".tr,
       prefix: Icon(Icons.mail, color: Colors.black),
+      validator: (value) {
+        return value?.isEmptyField(messageTitle: "email");
+      },
     );
   }
 
@@ -146,6 +162,9 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
       },
       labletext: "Phone Number".tr,
       prefix: Icon(Icons.phone_android_rounded, color: Colors.black),
+      validator: (value) {
+        return value?.isEmptyField(messageTitle: "name");
+      },
     );
   }
 

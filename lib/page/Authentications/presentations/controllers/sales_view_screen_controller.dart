@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
@@ -21,6 +22,7 @@ class SalesViewScreenController extends GetxController{
 
   late FocusNode employeeIdFocusNode;
   late FocusNode lastFocusNode;
+  late FocusNode dateJoiningFocusNode;
   late FocusNode firstFocusNode;
   late FocusNode emailFocusNode;
   late FocusNode phoneFocusNode;
@@ -36,6 +38,7 @@ class SalesViewScreenController extends GetxController{
 
     lastFocusNode = FocusNode();
     employeeIdFocusNode = FocusNode();
+    dateJoiningFocusNode = FocusNode();
     firstFocusNode = FocusNode();
     emailFocusNode = FocusNode();
     phoneFocusNode = FocusNode();
@@ -50,9 +53,60 @@ class SalesViewScreenController extends GetxController{
     dateJoiningController.dispose();
     emailController.dispose();
     phoneController.dispose();
+
+    lastFocusNode.dispose();
+    dateJoiningFocusNode.dispose();
+    employeeIdFocusNode.dispose();
+    firstFocusNode.dispose();
+    emailFocusNode.dispose();
+    phoneFocusNode.dispose();
     super.onClose();
   }
 
+  int _currentPage = 0;
+  final int _itemsPerPage = 10;
+
+  int get currentPage => _currentPage;
+  int get totalPages => (salesData.length / _itemsPerPage).ceil();
+
+  List<SalesResutls> getPaginatedSalesData() {
+    if (salesData.isEmpty) return [];
+    final startIndex = _currentPage * _itemsPerPage;
+    final endIndex = startIndex + _itemsPerPage;
+
+    return salesData.sublist(
+        startIndex,
+        endIndex > salesData.length ? salesData.length : endIndex
+    );
+  }
+
+  void initializePagination() {
+    _currentPage = 0;
+    update();
+  }
+
+  bool canPreviousPage() => _currentPage > 0;
+  bool canNextPage() => _currentPage < totalPages - 1;
+
+  void previousPage() {
+    if (canPreviousPage()) {
+      _currentPage--;
+      update();
+    }
+  }
+
+  void nextPage() {
+    if (canNextPage()) {
+      _currentPage++;
+      update();
+    }
+  }
+
+  // Method to be called when sales data is first loaded or refreshed
+  // void setSalesData(SalesResutls data) {
+  //   salesData = data;
+  //   initializePagination();
+  // }
 
   void hitGetSalesApiCall(){
     isLoading.value = true;
@@ -79,11 +133,11 @@ class SalesViewScreenController extends GetxController{
   }
   void initializeWithSalesData(SalesResutls salesData) {
     employeeIdController.text = salesData.empId ?? '';
-    dateJoiningController.text = salesData.dateJoined ?? '';
+    dateJoiningController.text = salesData.dateJoined.toString() ?? '';
     firstNameController.text = salesData.firstName ?? '';
     lastNameController.text = salesData.lastName ?? '';
-    emailController.text = salesData.email;
-    phoneController.text = salesData.phoneNumber;
+    emailController.text = salesData.email!;
+    phoneController.text = salesData.phoneNumber!;
   }
 
   Future<void> selectDate(BuildContext context) async {
@@ -94,14 +148,15 @@ class SalesViewScreenController extends GetxController{
       lastDate: DateTime(2101),
     );
     if (picked != null) {
-      dateJoiningController.text = "${picked.day}-${picked.month}-${picked.year}";
+      String formattedDate = DateFormat('yyyy-MM-dd').format(picked);
+      dateJoiningController.text = formattedDate;
     }
   }
 
-  void updateSalesData(SalesResutls salesData, String agentId) {
+  void updateSalesData(String agentId) {
     var updateData = {
       "employee_id": employeeIdController.text,
-      "date_of_joining": dateJoiningController.text,
+      "date_joined": dateJoiningController.text,
       "first_name": firstNameController.text,
       "last_name": lastNameController.text,
       "email": emailController.text,
@@ -110,8 +165,9 @@ class SalesViewScreenController extends GetxController{
 
     customLoader.show();
     Get.find<AuthenticationApiService>()
-        .postAddSalesDetailsApiCall(
-      parameters: updateData,
+        .updateAddSalesDetailsApiCall(
+      dataBody: updateData,
+      id: agentId
       // agentId: agentId,
     )
         .then((value) {
@@ -132,6 +188,21 @@ class SalesViewScreenController extends GetxController{
     lastNameController.clear();
     emailController.clear();
     phoneController.clear();
+  }
+
+  Future<void> deleteSalesData(String id)async {
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().deleteAddSalesDetailsApiCall(id: id).then((value){
+      customLoader.hide();
+      toast("deleted sales person");
+      hitGetSalesApiCall();
+      update();
+    }).onError((error,stackError){
+      customLoader.hide();
+      hitGetSalesApiCall();
+    });
   }
 }
 

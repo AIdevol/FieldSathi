@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 import '../../../../constans/const_local_keys.dart';
@@ -121,6 +122,19 @@ class TechnicianListViewScreenController extends GetxController {
     update();
   }
 
+  Future<void> selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      String formattedDate = DateFormat('yyyy-MM-dd').format(picked);
+      joiningDateController.text = formattedDate;
+    }
+  }
+
   Future<void> hitGetTechnicianApiCall() async {
     try {
       isLoading.value = true;
@@ -129,9 +143,7 @@ class TechnicianListViewScreenController extends GetxController {
 
       final roleWiseData = {
         'role': 'technician',
-        // "page": currentPage.value,
         "page_size": "all"
-
       };
 
       final response = await Get.find<AuthenticationApiService>()
@@ -164,27 +176,48 @@ class TechnicianListViewScreenController extends GetxController {
     hitGetTechnicianApiCall();
   }
 
-  // Add method to handle technician deletion
-  Future<void> deleteTechnician(int technicianId) async {
-    try {
-      // Add your API call to delete technician here
-      // await Get.find<AuthenticationApiService>().deleteTechnician(technicianId);
-
-      // Remove from lists
-      allTechnicians.removeWhere((tech) => tech.id == technicianId);
-      filteredTechnicians.removeWhere((tech) => tech.id == technicianId);
-
-      toast('Technician deleted successfully');
+  Future<void> deleteTechnician(String technicianId) async {
+    isLoading.value = true;
+    FocusManager.instance.primaryFocus!.unfocus;
+    Get.find<AuthenticationApiService>().deleteTechnicianDetailsApiCall(id: technicianId).then((value){
+      customLoader.hide();
+      toast("Deleted data successfully");
+      hitGetTechnicianApiCall();
       update();
-    } catch (error) {
-      toast('Error deleting technician: ${error.toString()}');
-    }
+    }).onError((error, stackError){
+      hitGetTechnicianApiCall();
+      customLoader.hide();
+      isLoading.value = false;
+    });
+
   }
 
   // Add method to handle technician editing
-  void editTechnician(TechnicianData technician) {
-    // Navigate to edit screen or show edit dialog
-    // Get.toNamed('/edit-technician', arguments: technician);
+  void updateTechnicianApiCall(String agentId){
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.context;
+    var elementBody={
+      "emp_id":employeeIdController.text,
+      "first_name":firstNameController.text,
+      "last_name": lastNameController.text,
+      "email": emailController.text,
+      "phone_number":phoneController.text,
+      "date_joined": joiningDateController.text,
+      "role":"technician"
+    };
+
+    Get.find<AuthenticationApiService>().updateTechnicialPostApiCall(dataBody: elementBody,id: agentId).then((value){
+      var mainData = value;
+      print("maindata of technician= $mainData");
+      customLoader.hide();
+      toast('Technician Updated Successfully!');
+      update();
+      Get.back();
+    }).onError((error, stackError){
+      customLoader.hide();
+      // toast(error.toString());
+      toast(error.toString());
+    });
   }
 
   void importTechnicians() {

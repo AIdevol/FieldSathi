@@ -5,6 +5,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:tms_sathi/navigations/navigation.dart';
 
 import '../../../../main.dart';
 import '../../../../services/APIs/auth_services/auth_api_services.dart';
@@ -68,22 +69,25 @@ class AddSalesScreenController extends GetxController{
 
   void hitAddTechnicianApiCall(){
     customLoader.show();
-    FocusManager.instance.primaryFocus!.context;
+    FocusManager.instance.primaryFocus!.unfocus();
     var elementBody={
+      "emp_id":employeeIdController.text,
       "first_name":firstNameController.text,
       "last_name": lastNameController.text,
       "email": emailController.text,
       "phone_number":phoneController.text,
-      "dob": dateJoiningController.text
+      "date_joined": dateJoiningController.text,
+      "role": "sales"
     };
-    var parameterBody = {
-      "role": "technician"
-    };
-    Get.find<AuthenticationApiService>().postAddSalesDetailsApiCall(dataBody: elementBody, parameters: parameterBody).then((value){
+    // var parameterBody = {
+    //   "role": "technician"
+    // };
+    Get.find<AuthenticationApiService>().postAddSalesDetailsApiCall(dataBody: elementBody).then((value){
       var mainData = value;
-      print("maindata of technician= $mainData");
+      print("maindata of sales= $mainData");
       customLoader.hide();
-      toast('Technician Added Successfully!');
+      toast('Sales Added Successfully!');
+      Get.offAllNamed(AppRoutes.salesListScreen);
       update();  // update to the method after data entered
     }).onError((error, stackError){
       customLoader.hide();

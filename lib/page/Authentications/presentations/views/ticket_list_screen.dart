@@ -201,13 +201,45 @@ class TicketListScreen extends GetView<TicketListController> {
     );
   }
 
+   Widget _buildPaginationControls() {
+     return Obx(() => Row(
+       mainAxisAlignment: MainAxisAlignment.center,
+       children: [
+         IconButton(
+           icon: Icon(Icons.chevron_left),
+           onPressed: controller.currentPage.value > 1
+               ? () => controller.goToPreviousPage()
+               : null,
+         ),
+         Text(
+           'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+           style: MontserratStyles.montserratSemiBoldTextStyle(
+             size: 14,
+             color: Colors.black87,
+           ),
+         ),
+         IconButton(
+           icon: Icon(Icons.chevron_right),
+           onPressed: controller.currentPage.value < controller.totalPages.value
+               ? () => controller.goToNextPage()
+               : null,
+         ),
+       ],
+     ));
+   }
+
    Widget _buildContent(BuildContext context, TicketListController controller) {
      return Obx(() {
        if (controller.ticketResult.isEmpty) {
          return _buildEmptyState();
        }
 
-       return _buildTicketTable(context, controller);
+       return Column(
+         children: [
+           Expanded(child: _buildTicketTable(context, controller)),
+           _buildPaginationControls(),
+         ],
+       );
      });
    }
 

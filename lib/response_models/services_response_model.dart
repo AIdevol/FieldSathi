@@ -223,58 +223,75 @@
 //   }
 // }
 class ServiceCategoryResponseModel {
-  final int count;
-  final int totalPages;
-  final int currentPage;
-  final List<ServiceCategory> results;
+  int? count;
+  int? totalPages;
+  int? currentPage;
+  List<ServiceCategory>? results;
 
-  ServiceCategoryResponseModel({
-    required this.count,
-    required this.totalPages,
-    required this.currentPage,
-    required this.results,
-  });
+  ServiceCategoryResponseModel(
+      {this.count, this.totalPages, this.currentPage, this.results});
 
-  factory ServiceCategoryResponseModel.fromJson(Map<String, dynamic> json) {
-    return ServiceCategoryResponseModel(
-      count: json['count'],
-      totalPages: json['total_pages'],
-      currentPage: json['current_page'],
-      results: List<ServiceCategory>.from(
-        json['results'].map((item) => ServiceCategory.fromJson(item)),
-      ),
-    );
+  ServiceCategoryResponseModel.fromJson(Map<String, dynamic> json) {
+    count = json['count'];
+    totalPages = json['total_pages'];
+    currentPage = json['current_page'];
+    if (json['results'] != null) {
+      results = <ServiceCategory>[];
+      json['results'].forEach((v) {
+        results!.add(new ServiceCategory.fromJson(v));
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['count'] = this.count;
+    data['total_pages'] = this.totalPages;
+    data['current_page'] = this.currentPage;
+    if (this.results != null) {
+      data['results'] = this.results!.map((v) => v.toJson()).toList();
+    }
+    return data;
   }
 }
 
 class ServiceCategory {
-  final int id;
-  final String serviceCategoryName;
-  final String serviceCatDescriptions;
-  final String? serviceCatImage;
-  final int createdBy;
-  final int admin;
+  int? id;
+  String? serviceCategoryName;
+  String? serviceCatDescriptions;
+  String? serviceCatImage;
+  int? createdBy;
+  int? admin;
 
-  ServiceCategory({
-    required this.id,
-    required this.serviceCategoryName,
-    required this.serviceCatDescriptions,
-    this.serviceCatImage,
-    required this.createdBy,
-    required this.admin,
-  });
+  ServiceCategory(
+      {this.id,
+        this.serviceCategoryName,
+        this.serviceCatDescriptions,
+        this.serviceCatImage,
+        this.createdBy,
+        this.admin});
 
-  factory ServiceCategory.fromJson(Map<String, dynamic> json) {
-    return ServiceCategory(
-      id: json['id'],
-      serviceCategoryName: json['service_category_name'],
-      serviceCatDescriptions: json['service_cat_descriptions'],
-      serviceCatImage: json['service_cat_image'],
-      createdBy: json['created_by'],
-      admin: json['admin'],
-    );
+  ServiceCategory.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    serviceCategoryName = json['service_category_name'];
+    serviceCatDescriptions = json['service_cat_descriptions'];
+    serviceCatImage = json['service_cat_image'];
+    createdBy = json['created_by'];
+    admin = json['admin'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['service_category_name'] = this.serviceCategoryName;
+    data['service_cat_descriptions'] = this.serviceCatDescriptions;
+    data['service_cat_image'] = this.serviceCatImage;
+    data['created_by'] = this.createdBy;
+    data['admin'] = this.admin;
+    return data;
   }
 }
+
 //====================================================================post Api Call ====================================
 class PostServiceCategoryResponseModel {
   int? id;

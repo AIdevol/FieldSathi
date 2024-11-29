@@ -52,7 +52,7 @@ class AddSalesScreen extends GetView<AddSalesScreenController> {
             _buildEmail(controller),
             vGap(20),
             _buildPhoneNumber(controller),
-            vGap(20),
+            vGap(40),
 
             _buildOptionButtons(controller),
           ],
@@ -64,8 +64,8 @@ class AddSalesScreen extends GetView<AddSalesScreenController> {
     return CustomTextField(
       hintText: "Employee Id".tr,
       controller: controller.employeeIdController,
-      textInputType: TextInputType.text,
-      focusNode: controller.firstFocusNode,
+      textInputType: TextInputType.number,
+      focusNode: controller.employeeIdFocusNode,
       onFieldSubmitted: (String? value) {
         FocusScope.of(Get.context!).requestFocus(controller.lastFocusNode);
       },
@@ -150,7 +150,7 @@ class AddSalesScreen extends GetView<AddSalesScreenController> {
 
   Widget _buildOptionButtons(AddSalesScreenController controller) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton(
           onPressed: () {

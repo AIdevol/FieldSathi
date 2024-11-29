@@ -37,7 +37,11 @@ class TicketListController extends GetxController {
   RxBool isLoading = false.obs;
   RxString searchQuery = ''.obs;
   Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
-
+  final RxInt currentPage = 1.obs;
+  final int itemsPerPage = 10;
+  final RxInt totalPages = 0.obs;
+  final RxList<TicketResult> _allTickets = <TicketResult>[].obs;
+  // final RxList<TicketResult> ticketResult = <TicketResult>[].obs;
   TextEditingController dateController = TextEditingController();
   FocusNode focusNode = FocusNode();
   bool isAmcSelected = false;
@@ -91,6 +95,41 @@ void onClose(){
    instructionController.dispose();
     super.onClose();
 }
+
+  void loadPage(int page) {
+    if (page < 1 || page > totalPages.value) return;
+
+    currentPage.value = page;
+    int startIndex = (page - 1) * itemsPerPage;
+    int endIndex = startIndex + itemsPerPage;
+    endIndex = endIndex > _allTickets.length ? _allTickets.length : endIndex;
+    ticketResult.value = _allTickets.sublist(
+        startIndex,
+        endIndex
+    );
+  }
+
+  void goToNextPage() {
+    if (currentPage.value < totalPages.value) {
+      loadPage(currentPage.value + 1);
+    }
+  }
+
+  void goToPreviousPage() {
+    if (currentPage.value > 1) {
+      loadPage(currentPage.value - 1);
+    }
+  }
+
+  void setTickets(List<TicketResult> tickets) {
+    _allTickets.value = tickets;
+    initializePagination();
+  }
+
+  void initializePagination() {
+    totalPages.value = (_allTickets.length / itemsPerPage).ceil();
+    loadPage(1);
+  }
   void fetchTicketsApiCall() async {
     isLoading.value = true;
     customLoader.show();
@@ -154,42 +193,64 @@ void onClose(){
     var filteredTickets = List<TicketResult>.from(ticketResult);
 
     if (searchQuery.isNotEmpty) {
-      final query = searchQuery.value.toLowerCase();
+      final query = searchQuery.value.toLowerCase().trim();
 
       filteredTickets = filteredTickets.where((ticket) {
+        // Default search across multiple fields if no specific filter is selected
+        if (selectedFilter.value == "Select By") {
+          return _performGenericSearch(ticket, query);
+        }
+
+        // Specific filter-based search
         switch (selectedFilter.value) {
           case "Customer Name":
-            return "${ticket.customerDetails.firstName?.toLowerCase()}${ticket.customerDetails.firstName?.toLowerCase()}".contains(
-                query) ??
-                false;
+            return _searchCustomerName(ticket, query);
           case "Sub-Customer Name":
-            return "${ticket.subCustomerDetails?.firstName?.toLowerCase()}${ticket.subCustomerDetails?.firstName?.toLowerCase()}"
-                .contains(query) ?? false;
+            return _searchSubCustomerName(ticket, query);
           case "Technician Name":
-            final techName = '${ticket.assignTo.firstName ?? ''} ${ticket
-                .assignTo.lastName ?? ''}'.trim().toLowerCase();
-            return techName.contains(query);
+            return _searchTechnicianName(ticket, query);
           case "Status":
             return ticket.status.toLowerCase().contains(query);
-          case "Region":
-            return ticket.ticketAddress!.toLowerCase().contains(
-                query) ?? false;
+          // case "Region":
+          //   return _searchRegion(ticket, query);
           default:
-          // Search across all fields when no specific filter is selected
-            return ("${ticket.customerDetails.firstName?.toLowerCase()}${ticket.customerDetails.firstName?.toLowerCase()}".contains(
-                query) ?? false) ||
-                ("${ticket.subCustomerDetails?.firstName?.toLowerCase()}${ticket.subCustomerDetails?.firstName?.toLowerCase()}"
-                    .contains(query) ?? false) ||
-                (ticket.status.toLowerCase().contains(query)) ||
-                (ticket.ticketAddress!.contains(query) ??
-                    false) ||
-                ('${ticket.assignTo.firstName ?? ''} ${ticket.assignTo
-                    .lastName ?? ''}'.trim().toLowerCase().contains(query));
+            return _performGenericSearch(ticket, query);
         }
       }).toList();
     }
 
+    // Update the ticket result with filtered data
     ticketResult.value = filteredTickets;
+  }
+
+  bool _searchCustomerName(TicketResult ticket, String query) {
+    return (ticket.customerDetails.firstName?.toLowerCase().contains(query) ?? false) ||
+        (ticket.customerDetails.lastName?.toLowerCase().contains(query) ?? false);
+  }
+
+  bool _searchSubCustomerName(TicketResult ticket, String query) {
+    return (ticket.subCustomerDetails?.firstName?.toLowerCase().contains(query) ?? false) ||
+        (ticket.subCustomerDetails?.lastName?.toLowerCase().contains(query) ?? false);
+  }
+
+  bool _searchTechnicianName(TicketResult ticket, String query) {
+    final techFirstName = ticket.assignTo.firstName?.toLowerCase() ?? '';
+    final techLastName = ticket.assignTo.lastName?.toLowerCase() ?? '';
+    return techFirstName.contains(query) || techLastName.contains(query);
+  }
+
+  // bool _searchRegion(TicketResult ticket, String query) {
+  //   return (ticket.ticketAddress?.city?.toLowerCase().contains(query) ?? false) ||
+  //       (ticket.ticketAddress?.state?.toLowerCase().contains(query) ?? false) ||
+  //       (ticket.ticketAddress?.country?.toLowerCase().contains(query) ?? false);
+  // }
+
+  bool _performGenericSearch(TicketResult ticket, String query) {
+    return _searchCustomerName(ticket, query) ||
+        _searchSubCustomerName(ticket, query) ||
+        _searchTechnicianName(ticket, query) ||
+        (ticket.status.toLowerCase().contains(query));
+        // _searchRegion(ticket, query);
   }
 
   void updateSelectedFilter(String? newValue) {

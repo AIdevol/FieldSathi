@@ -23,10 +23,12 @@ class SalesViewScreen extends GetView<SalesViewScreenController>{
       init: SalesViewScreenController(),
         builder: (controller)=>
     Scaffold(
+      backgroundColor: CupertinoColors.white,
       appBar: _buildAppBar(controller),
       body: SafeArea(child: Column(children: [
         _buildTopBar(context, controller),
-        Expanded(child: _buildDataTableView(controller, context))
+        Expanded(child: _buildDataTableView(controller, context)),
+        _buildPaginationControls(controller)
       ],)),
     )));
   }
@@ -503,14 +505,29 @@ Widget _buildActionButton(
 }
 
 Widget _buildDataTableView(SalesViewScreenController controller, BuildContext context){
+  if(controller.salesData.isEmpty){
+    return Center(child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset(nullVisualImage),
+        Text("No Sales Data",style: MontserratStyles.montserratSemiBoldTextStyle(color: Colors.black),)
+      ],
+    ),);
+  }
+
+  // Get paginated data
+  final paginatedData = controller.getPaginatedSalesData();
+
   return SingleChildScrollView(
     scrollDirection: Axis.horizontal,
     child: SingleChildScrollView(
       child: DataTable(columns: [
         _buildTableHeader('Id'),
+        _buildTableHeader('Image'),
         _buildTableHeader('Name'),
         _buildTableHeader('Email'),
         _buildTableHeader('Contact'),
+        _buildTableHeader('Date of Joining'),
         _buildTableHeader('Casual Leaves'),
         _buildTableHeader('Sick Leaves'),
         _buildTableHeader('Check In'),
@@ -520,30 +537,75 @@ Widget _buildDataTableView(SalesViewScreenController controller, BuildContext co
         _buildTableHeader('GPS'),
         _buildTableHeader('Actions'),
       ],
-          rows: controller.salesData.map((f){
-        return DataRow(cells: [
-        DataCell(_ticketBoxIcons(f.id.toString())),
-            DataCell(Text("${f.firstName} ${f.lastName}")),
-            DataCell(Text(f.email)),
-            DataCell(Text(f.phoneNumber)),
-            DataCell(Text(f.allocatedCasualLeave.toString())),
-            DataCell(Text(f.allocatedSickLeave.toString())),
-            DataCell(Text(_formatDateTime(
-            f.todayAttendance.punchIn?? 'N/A'))),
-            DataCell(Text(_formatDateTime(
-            f.todayAttendance.punchOut ?? 'N/A'))),
-            DataCell(_buildAttendanceStatusBadge(
-            f.todayAttendance.status ?? '')),
-            DataCell(Text(f.batteryStatus  ?? 'N/A')),
-            DataCell(Text(f.gpsStatus ? 'On' : 'Off')),
-            DataCell(_dropDownValueViews(controller,f.id.toString(),f, context))
-        ],
+          rows: paginatedData.map((f){
+            return DataRow(cells: [
+              DataCell(_ticketBoxIcons(f.empId.toString())),
+              DataCell(_salesImage(f.id.toString(), f)),
+              DataCell(Text("${f.firstName} ${f.lastName}")),
+              DataCell(Text(f.email.toString())),
+              DataCell(Text(f.phoneNumber.toString())),
+              DataCell(Text(f.dateJoined.toString())),
+              DataCell(Text(f.allocatedCasualLeave.toString())),
+              DataCell(Text(f.allocatedSickLeave.toString())),
+              DataCell(Text(_formatDateTime(
+                  f.todayAttendance?.punchIn.toString()?? 'N/A'))),
+              DataCell(Text(_formatDateTime(
+                  f.todayAttendance?.punchOut ?? 'N/A'))),
+              DataCell(_buildAttendanceStatusBadge(
+                  f.todayAttendance?.status ?? '')),
+              DataCell(Text(f.batteryStatus  ?? 'N/A')),
+              DataCell(Text(f.gpsStatus ? 'On' : 'Off')),
+              DataCell(_dropDownValueViews( controller, context,f,f.id.toString()))
+            ],
             );
-      }
-       ).toList()),
+          }).toList()),
     ),
   );
 }
+Widget _salesImage(String salesId, SalesResutls sales) {
+  return Center(
+    child: Container(
+      // padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        decoration: BoxDecoration(
+          color: normalBlue,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: Colors.blue.shade300,
+            width: 1,
+          ),
+        ),
+        child: CircleAvatar(radius: 18,backgroundImage: sales.profileImage != null?NetworkImage("${sales.profileImage}"): AssetImage(userImageIcon),)
+    ),
+  );
+}
+Widget _buildPaginationControls(SalesViewScreenController controller) {
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          onPressed: controller.canPreviousPage()
+              ? () => controller.previousPage()
+              : null,
+        ),
+        Text(
+          'Page ${controller.currentPage + 1} of ${controller.totalPages}',
+          style: MontserratStyles.montserratSemiBoldTextStyle(),
+        ),
+        IconButton(
+          icon: Icon(Icons.arrow_forward_ios),
+          onPressed: controller.canNextPage()
+              ? () => controller.nextPage()
+              : null,
+        ),
+      ],
+    ),
+  );
+}
+
+
 DataColumn _buildTableHeader(String title) {
   return DataColumn(
     label: Text(
@@ -622,8 +684,7 @@ Widget _buildAttendanceStatusBadge(String status) {
   );
 }
 
-Widget _dropDownValueViews(SalesViewScreenController controller,
-    String agentId, SalesResutls salesData, BuildContext context) {
+Widget _dropDownValueViews(SalesViewScreenController controller, BuildContext context, SalesResutls salesData,String salesId) {
   return Center(
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -632,10 +693,10 @@ Widget _dropDownValueViews(SalesViewScreenController controller,
         onSelected: (String result) {
           switch (result) {
             case 'Edit':
-              showDialogBoxForDataUpdating(controller, context, salesData,agentId);
+              showDialogBoxForDataUpdating(controller, context, salesData,salesId);
               break;
             case 'Delete':
-            // controller.hitDeleteStatuApiValue(agentId);
+            controller.deleteSalesData(salesId);
               break;
             case 'Deactivate':
             // controller.hitUpdateStatusValue(agentId);
@@ -711,7 +772,7 @@ Widget _form(
     SalesViewScreenController controller,
     BuildContext context,
     SalesResutls salesData,
-    String agentId,
+    String salesId,
     ) {
   return SingleChildScrollView(
     child: Padding(
@@ -751,7 +812,7 @@ Widget _form(
           _buildPhoneNumber(controller),
           vGap(20),
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
                 onPressed: () => Get.back(),
@@ -766,7 +827,7 @@ Widget _form(
               ),
               hGap(20),
               ElevatedButton(
-                onPressed: () => controller.updateSalesData(salesData, agentId),
+                onPressed: () => controller.updateSalesData(salesId),
                 style: _buttonStyle(),
                 child: Text(
                   'Update',
@@ -818,7 +879,7 @@ Widget _buildEmployeeId(SalesViewScreenController controller) {
     hintText: "Employee Id".tr,
     controller: controller.employeeIdController,
     textInputType: TextInputType.text,
-    focusNode: controller.firstFocusNode,
+    focusNode: controller.employeeIdFocusNode,
     onFieldSubmitted: (_) => _shiftFocus(controller.lastFocusNode),
     labletext: "Employee Id".tr,
     prefix: Icon(Icons.person, color: Colors.black),
@@ -827,8 +888,9 @@ Widget _buildEmployeeId(SalesViewScreenController controller) {
 
 Widget _buildDateOfJoining(SalesViewScreenController controller, BuildContext context) {
   return CustomTextField(
-    hintText: "dd-mm-yyyy".tr,
+    hintText: "YYYY-MM-DD".tr,
     controller: controller.dateJoiningController,
+    focusNode: controller.dateJoiningFocusNode,
     textInputType: TextInputType.datetime,
     labletext: "Date of Joining".tr,
     onTap: () => controller.selectDate(context),
