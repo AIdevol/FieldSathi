@@ -140,8 +140,14 @@ class AgentsViewScreenController extends GetxController {
   late FocusNode lastNameFocusNode;
   late FocusNode emailFocusnode;
   late FocusNode phoneFocusNode;
+
+  RxInt currentPage = 1.obs;
+  RxInt totalPages = 0.obs;
+  final int itemsPerPage = 10;
   RxBool isLoading = false.obs;
   RxList<Result> agentsData = <Result>[].obs;
+  RxList<Result> filteredAgentsData = <Result>[].obs;
+  RxList<Result> agentsPaginationsData = <Result>[].obs;
 
   @override
   void onInit() {
@@ -166,7 +172,65 @@ class AgentsViewScreenController extends GetxController {
     phoneController.dispose();
     super.onClose();
   }
+  void calculateTotalPages() {
+    totalPages.value = (filteredAgentsData.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+  }
 
+  void updatePaginatedTechnicians() {
+    List<Result> sourceList = filteredAgentsData.isEmpty
+        ? agentsData
+        : filteredAgentsData;
+    totalPages.value = (sourceList.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+
+    int startIndex = (currentPage.value - 1) * itemsPerPage;
+    int endIndex = startIndex + itemsPerPage;
+    endIndex = endIndex > sourceList.length ? sourceList.length : endIndex;
+    agentsPaginationsData.value = sourceList.sublist(
+        startIndex,
+        endIndex
+    );
+
+    update();
+  }
+
+  void nextPage() {
+    if (currentPage.value < totalPages.value) {
+      currentPage.value++;
+      updatePaginatedTechnicians();
+      print("next page tapped value: ${currentPage.value}");
+    }
+  }
+
+  void previousPage() {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+      updatePaginatedTechnicians();
+      print("previous page tapped value: ${currentPage.value}");
+
+    }
+  }
+
+  void goToFirstPage() {
+    currentPage.value = 1;
+    updatePaginatedTechnicians();
+  }
+
+  void goToLastPage() {
+    currentPage.value = totalPages.value;
+    updatePaginatedTechnicians();
+  }
   void hitGetAgentsDetailsApiCall() {
     isLoading.value = true;
     customLoader.show();
@@ -178,9 +242,12 @@ class AgentsViewScreenController extends GetxController {
     Get.find<AuthenticationApiService>().getAgentDetailsApiCall(
         parameters: parameterdata).then((value) async {
       agentsData.assignAll(value.results);
+      filteredAgentsData.assignAll(value.results);
+      agentsPaginationsData.assignAll(value.results);
       List<String> agentIds = agentsData.map((agent) => agent.id.toString()).toList();
       await storage.write(agentId, agentIds.join(','));
       customLoader.hide();
+      calculateTotalPages();
       toast("Agents Fetched Successfully");
       update();
     }).onError((error, stackError) {
@@ -242,5 +309,9 @@ class AgentsViewScreenController extends GetxController {
     customLoader.show();
     FocusManager.instance.primaryFocus!.unfocus();
 
+  }
+
+  Future<void>hitRefreshApiData()async{
+    hitGetAgentsDetailsApiCall();
   }
 }

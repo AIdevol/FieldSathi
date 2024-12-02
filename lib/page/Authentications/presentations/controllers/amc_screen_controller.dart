@@ -57,6 +57,9 @@ class AMCScreenController extends GetxController {
   late FocusNode customerNameFocusNode;
   late FocusNode notesFocusNode;
 
+  RxInt currentPage = 1.obs;
+  RxInt totalPages = 0.obs;
+  final int itemsPerPage = 10;
 
   FocusNode focusNode = FocusNode();
   RxBool isLoading = false.obs;
@@ -66,6 +69,7 @@ class AMCScreenController extends GetxController {
   Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
   RxList<AmcResult> amcResultData = <AmcResult>[].obs;
   RxList<AmcResult> filteredAmcData = <AmcResult>[].obs;
+  RxList<AmcResult> amcPaginationData =<AmcResult>[].obs;
 
   void initializeNumberOfService() {
     selectedNumberOfService = 1;
@@ -147,6 +151,66 @@ class AMCScreenController extends GetxController {
     super.onClose();
   }
 
+  void calculateTotalPages() {
+    totalPages.value = (filteredAmcData.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+  }
+
+  void updatePaginatedTechnicians() {
+    List<AmcResult> sourceList = filteredAmcData.isEmpty
+        ? amcResultData
+        : filteredAmcData;
+    totalPages.value = (sourceList.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+
+    int startIndex = (currentPage.value - 1) * itemsPerPage;
+    int endIndex = startIndex + itemsPerPage;
+    endIndex = endIndex > sourceList.length ? sourceList.length : endIndex;
+    amcPaginationData.value = sourceList.sublist(
+        startIndex,
+        endIndex
+    );
+
+    update();
+  }
+
+  void nextPage() {
+    if (currentPage.value < totalPages.value) {
+      currentPage.value++;
+      updatePaginatedTechnicians();
+      print("next page tapped value: ${currentPage.value}");
+    }
+  }
+
+  void previousPage() {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+      updatePaginatedTechnicians();
+      print("previous page tapped value: ${currentPage.value}");
+
+    }
+  }
+
+  void goToFirstPage() {
+    currentPage.value = 1;
+    updatePaginatedTechnicians();
+  }
+
+  void goToLastPage() {
+    currentPage.value = totalPages.value;
+    updatePaginatedTechnicians();
+  }
+
   void _onSearchChanged() {
     final query = searchController.text.toLowerCase();
     if (query.isEmpty) {
@@ -172,11 +236,13 @@ class AMCScreenController extends GetxController {
       final amcData = await Get.find<AuthenticationApiService>().getAmcDetailsApiCall(parameter: amcParameter);
       totalAmcCount.value = amcData.count ?? 0;
       amcResultData.assignAll(amcData.results);
+      amcPaginationData.assignAll(amcData.results);
       List<String> amcIds = amcResultData.map((amcLiveData)=>amcLiveData.id.toString()).toList();
       await storage.write(amcId, amcIds);
       print("amc id dekh le bhai= ${storage.read(amcId)}");
       filteredAmcData.assignAll(amcData.results);
       // _calculateAmcCounts();
+      calculateTotalPages();
       toast("AMC successfully Fetched");
       update();
     } catch (error) {
@@ -272,4 +338,8 @@ void hitAmcCountApiCall(){
     });
 }
 
+Future<void>hitRefreshApiCalls()async{
+  hitGetAmcDetailsApiCall();
+  hitAmcCountApiCall();
+}
 }

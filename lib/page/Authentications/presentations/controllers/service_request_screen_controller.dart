@@ -51,13 +51,16 @@
       final isSearching = false.obs;
       final RxString searchText = ''.obs;
       final RxList<ServiceRequest> servicesRequestsData = <ServiceRequest>[].obs;
+      final RxList<ServiceRequest> servicesPaginationsData = <ServiceRequest>[].obs;
       final RxSet<ServiceRequestResponseModel> ServiceRequestsDetails = <ServiceRequestResponseModel>{}.obs;
       final RxBool isLoading = true.obs;
       RxList<ExportServiceResponse> exportData = <ExportServiceResponse>[].obs;
       final RxList<ServiceRequest> filteredRequests = <ServiceRequest>[].obs;
 
       final approvalRemarkController = TextEditingController();
-
+      RxInt currentPage = 1.obs;
+      RxInt totalPages = 0.obs;
+      final int itemsPerPage = 10;
 
       @override
       void onInit() {
@@ -88,7 +91,63 @@
           // filteredRequests.assignAll(serviceRequests);
         }
       }
+      void nextPage() {
+        if (currentPage.value < totalPages.value) {
+          currentPage.value++;
+          updatePaginatedTechnicians();
+          print("next page tapped value: ${currentPage.value}");
+        }
+      }
 
+      void previousPage() {
+        if (currentPage.value > 1) {
+          currentPage.value--;
+          updatePaginatedTechnicians();
+          print("previous page tapped value: ${currentPage.value}");
+
+        }
+      }
+
+      void goToFirstPage() {
+        currentPage.value = 1;
+        updatePaginatedTechnicians();
+      }
+
+      void goToLastPage() {
+        currentPage.value = totalPages.value;
+        updatePaginatedTechnicians();
+      }
+      void calculateTotalPages() {
+        totalPages.value = (filteredRequests.length / itemsPerPage).ceil();
+        if (currentPage.value > totalPages.value) {
+          currentPage.value = totalPages.value;
+        }
+        if (currentPage.value < 1) {
+          currentPage.value = 1;
+        }
+      }
+      void updatePaginatedTechnicians() {
+        List<ServiceRequest> sourceList = filteredRequests.isEmpty
+            ? servicesRequestsData
+            : filteredRequests;
+        totalPages.value = (sourceList.length / itemsPerPage).ceil();
+        if (currentPage.value > totalPages.value) {
+          currentPage.value = totalPages.value;
+        }
+        if (currentPage.value < 1) {
+          currentPage.value = 1;
+        }
+
+        int startIndex = (currentPage.value - 1) * itemsPerPage;
+        int endIndex = startIndex + itemsPerPage;
+        endIndex = endIndex > sourceList.length ? sourceList.length : endIndex;
+        servicesPaginationsData.value = sourceList.sublist(
+            startIndex,
+            endIndex
+        );
+
+        update();
+      }
       void _applyFilters() {
         List<ServiceRequest> results = servicesRequestsData;
 
@@ -136,12 +195,15 @@
         };
         Get.find<AuthenticationApiService>().getServiceRequestsApiCall(parameters:parameterAllServicesRequets ).then((value) async{
           ServiceRequestsDetails.add(value);
-          servicesRequestsData.assignAll(value.results!);
+          servicesRequestsData.assignAll(value.results);
+          filteredRequests.assignAll(value.results);
+          servicesPaginationsData.assignAll(value.results);
           List<String> serviceRequetsIds = servicesRequestsData.map((technician) => technician.id.toString()).toList();
           List<String> statusValue = servicesRequestsData.map((technician) => technician.status.toString()).toList();
           await storage.write(serviceRequestsId, serviceRequetsIds);
           statusController.text = statusValue.join(',');
           print("ajfaf: ${statusController.text}");
+          calculateTotalPages();
           customLoader.hide();
           toast('Service fetched Successfully');
           update();
@@ -222,6 +284,10 @@
         FocusManager.instance.primaryFocus!.unfocus();
         // Get.find<AuthenticationApiService>().
       }
+
+     Future<void>hitRefreshservicesApiCall()async{
+       hitGetServiceRequestsResponseAPiCall();
+     }
     }
 
 

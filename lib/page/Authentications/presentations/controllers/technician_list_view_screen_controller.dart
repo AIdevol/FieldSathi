@@ -83,6 +83,7 @@ class TechnicianListViewScreenController extends GetxController {
     if (currentPage.value < totalPages.value) {
       currentPage.value++;
       updatePaginatedTechnicians();
+      print("next page tapped value: ${currentPage.value}");
     }
   }
 
@@ -90,6 +91,8 @@ class TechnicianListViewScreenController extends GetxController {
     if (currentPage.value > 1) {
       currentPage.value--;
       updatePaginatedTechnicians();
+      print("previous page tapped value: ${currentPage.value}");
+
     }
   }
 
@@ -143,7 +146,8 @@ class TechnicianListViewScreenController extends GetxController {
 
       final roleWiseData = {
         'role': 'technician',
-        "page_size": "all"
+        "page":currentPage.value,
+        "page_size": 'all'
       };
 
       final response = await Get.find<AuthenticationApiService>()

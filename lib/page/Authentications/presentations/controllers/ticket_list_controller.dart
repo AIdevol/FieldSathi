@@ -34,6 +34,9 @@ class TicketListController extends GetxController {
 
   RxString selectedFilter = "Select By".obs;
   RxList<TicketResult> ticketResult = <TicketResult>[].obs;
+  RxList<TicketResult> filteredtickets = <TicketResult>[].obs;
+  RxList<TicketResult> ticketPaginationsData = <TicketResult>[].obs;
+
   RxBool isLoading = false.obs;
   RxString searchQuery = ''.obs;
   Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
@@ -96,45 +99,73 @@ void onClose(){
     super.onClose();
 }
 
-  void loadPage(int page) {
-    if (page < 1 || page > totalPages.value) return;
+  void calculateTotalPages() {
+    totalPages.value = (filteredtickets.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+  }
 
-    currentPage.value = page;
-    int startIndex = (page - 1) * itemsPerPage;
+  void updatePaginatedTechnicians() {
+    List<TicketResult> sourceList = filteredtickets.isEmpty
+        ? ticketResult
+        : filteredtickets;
+    totalPages.value = (sourceList.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+
+    int startIndex = (currentPage.value - 1) * itemsPerPage;
     int endIndex = startIndex + itemsPerPage;
-    endIndex = endIndex > _allTickets.length ? _allTickets.length : endIndex;
-    ticketResult.value = _allTickets.sublist(
+    endIndex = endIndex > sourceList.length ? sourceList.length : endIndex;
+    ticketPaginationsData.value = sourceList.sublist(
         startIndex,
         endIndex
     );
+
+    update();
   }
 
-  void goToNextPage() {
+  void nextPage() {
     if (currentPage.value < totalPages.value) {
-      loadPage(currentPage.value + 1);
+      currentPage.value++;
+      updatePaginatedTechnicians();
+      print("next page tapped value: ${currentPage.value}");
     }
   }
 
-  void goToPreviousPage() {
+  void previousPage() {
     if (currentPage.value > 1) {
-      loadPage(currentPage.value - 1);
+      currentPage.value--;
+      updatePaginatedTechnicians();
+      print("previous page tapped value: ${currentPage.value}");
+
     }
   }
 
-  void setTickets(List<TicketResult> tickets) {
-    _allTickets.value = tickets;
-    initializePagination();
+  void goToFirstPage() {
+    currentPage.value = 1;
+    updatePaginatedTechnicians();
   }
 
-  void initializePagination() {
-    totalPages.value = (_allTickets.length / itemsPerPage).ceil();
-    loadPage(1);
+  void goToLastPage() {
+    currentPage.value = totalPages.value;
+    updatePaginatedTechnicians();
   }
+
+
   void fetchTicketsApiCall() async {
     isLoading.value = true;
     customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
     var ticketParameterData = {
+      'page':currentPage.value,
       "page_size":"all"
     };
     try {
@@ -142,11 +173,14 @@ void onClose(){
           .getticketDetailsApiCall(parameter: ticketParameterData);
       if (response != null) {
         ticketResult.assignAll(response.results);
+        ticketPaginationsData.assignAll(response.results);
+        filteredtickets.assignAll(response.results);
         applyFilters(); // Apply initial filters
       }
       List<String> ticketids = ticketResult.map((ids) => ids.id.toString())
           .toList();
       await storage.write(ticketId, ticketids);
+      calculateTotalPages();
     } catch (error) {
       toast('Error fetching ticket details: ${error.toString()}');
     } finally {

@@ -14,13 +14,17 @@ class ShowTechnicianDataController extends GetxController {
   RxBool isLoading = true.obs;
   RxList<TMSResponseModel> attendanceResponses = <TMSResponseModel>[].obs;
   RxList<TMSResult> attendanceResultsData = <TMSResult>[].obs;
-  RxSet<AttendanceUserResponseModel> userAttendanceData = <AttendanceUserResponseModel>{}.obs;
-  RxList<UserAttendanceResults> userAttendance = <UserAttendanceResults>[].obs;
+  RxList<TMSResult> attendanceFilterdata = <TMSResult>[].obs;
+  RxList<TMSResult> attendancePaginationData = <TMSResult>[].obs;
+  RxList<AttendanceUserResponseModel> userAttendanceData = <AttendanceUserResponseModel>[].obs;
+  // RxList<UserAttendanceResults> userAttendance = <UserAttendanceResults>[].obs;
   RxString searchQuery = ''.obs;
   final color = '#1976D2'.obs;
   final selectedDate = DateTime.now().obs;
   final attendanceDatas = <DateTime, bool>{}.obs;
-
+  final RxInt currentPage = 1.obs;
+  final int itemsPerPage = 10;
+  final RxInt totalPages = 0.obs;
   void markAttendance(DateTime date, bool isPresent) {
     attendanceDatas[date] = isPresent;
     update();
@@ -56,7 +60,7 @@ class ShowTechnicianDataController extends GetxController {
   }
 
   String? getAttendanceDateForDay(DateTime day) {
-    for (var result in userAttendance) {
+    for (var result in userAttendanceData) {
       DateTime attendanceDate = DateTime.parse(result.date!);
       if (isSameDay(day, attendanceDate)) {
         return DateFormat('yyyy-MM-dd').format(attendanceDate);
@@ -73,6 +77,65 @@ class ShowTechnicianDataController extends GetxController {
     hitGetAttendanceApiCall();
     // hitGetUserAttendanceApiCall();
   }
+  void calculateTotalPages() {
+    totalPages.value = (attendanceFilterdata.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+  }
+
+  void updatePaginatedTechnicians() {
+    List<TMSResult> sourceList = attendanceFilterdata.isEmpty
+        ? attendanceResultsData
+        : attendanceFilterdata;
+    totalPages.value = (sourceList.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+
+    int startIndex = (currentPage.value - 1) * itemsPerPage;
+    int endIndex = startIndex + itemsPerPage;
+    endIndex = endIndex > sourceList.length ? sourceList.length : endIndex;
+    attendancePaginationData.value = sourceList.sublist(
+        startIndex,
+        endIndex
+    );
+
+    update();
+  }
+
+  void nextPage() {
+    if (currentPage.value < totalPages.value) {
+      currentPage.value++;
+      updatePaginatedTechnicians();
+      print("next page tapped value: ${currentPage.value}");
+    }
+  }
+
+  void previousPage() {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+      updatePaginatedTechnicians();
+      print("previous page tapped value: ${currentPage.value}");
+
+    }
+  }
+
+  void goToFirstPage() {
+    currentPage.value = 1;
+    updatePaginatedTechnicians();
+  }
+
+  void goToLastPage() {
+    currentPage.value = totalPages.value;
+    updatePaginatedTechnicians();
+  }
 
   void hitGetAttendanceApiCall() {
     isLoading.value = true;
@@ -87,9 +150,11 @@ class ShowTechnicianDataController extends GetxController {
     };
     Get.find<AuthenticationApiService>().getuserDetailsApiCall(parameter: rolesParameters).then((value) async {
       attendanceResultsData.assignAll(value.results!);
-
+      attendanceFilterdata.assignAll(value.results!);
+      attendancePaginationData.assignAll(value.results!);
       customLoader.hide();
       toast('Team members data fetched successfully');
+      calculateTotalPages();
       isLoading.value = false;
       update();
     }).catchError((error, stackTrace) {
@@ -100,30 +165,48 @@ class ShowTechnicianDataController extends GetxController {
   }
 
 
-  void hitGetUserAttendanceApiCall(String attendanceid){
+  hitGetUserAttendanceApiCall(String attendanceid){
     isLoading.value = true;
     customLoader.show();
     FocusManager.instance.primaryFocus!.unfocus();
-    var userIdParameter = {
-      'user_id': attendanceid
-    };
-    Get.find<AuthenticationApiService>().getCalenderViewUserAttendanceApiCall(parameter: userIdParameter).then((value){
-      userAttendanceData.add(value);
-      userAttendance.assignAll(value.results!);
+
+    var userIdParameter = {'user_id': attendanceid};
+
+    Get.find<AuthenticationApiService>()
+        .getCalenderViewUserAttendanceApiCall(parameter: userIdParameter)
+        .then((value){
+      userAttendanceData.assignAll(value);
+
+      attendanceDatas.clear();
+      for (var result in value) {
+        if (result.date != null) {
+          DateTime attendanceDate = DateTime.parse(result.date!);
+          attendanceDatas[attendanceDate] = _determineAttendanceStatus(result.status);
+        }
+      }
+      hitGetAttendanceApiCall();
       customLoader.hide();
       toast("Attendance Fetched Successfully");
       update();
-      attendanceDatas.clear();
-      for (var result in value.results!) {
-        DateTime attendanceDate = DateTime.parse(result.date!);
-        attendanceDatas[attendanceDate] = result.status == 'absent' ? false : true;
-      }
-      // for(var )
-    }).onError((error,stackError){
+    })
+        .onError((error, stackError){
       customLoader.hide();
       toast(error.toString());
       isLoading.value = false;
     });
+  }
+
+// Helper method to determine attendance status more flexibly
+  bool _determineAttendanceStatus(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'present':
+      case 'checkedin':
+        return true;
+      case 'absent':
+      case 'idle':
+      default:
+        return false;
+    }
   }
 }
 

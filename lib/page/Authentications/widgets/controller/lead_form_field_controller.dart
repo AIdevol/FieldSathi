@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/response_models/lead_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
@@ -73,6 +74,37 @@ class LeadFormFieldController extends GetxController{
     additionalNotesController.dispose();
     sourceController.dispose();
     super.onClose();
+  }
+
+  void hitPostLeadListAPiCall(){
+    if (!validateForm()) return;
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+    var leadFormData = {
+      "companyName":companyController.text,
+      "firstName":firstNameController.text,
+      "lastName":lastNameController.text,
+      "email":emailController.text,
+      "mobile":phoneController.text,
+      "address":addressController.text,
+      "country":countryController.text,
+      "state":stateController.text,
+      "city":cityController.text,
+      "notes":additionalNotesController.text,
+      "source":sourceController.text
+    };
+    print("lead data: $leadFormData");
+    Get.find<AuthenticationApiService>().postLeadListApiCall(dataBody: leadFormData).then((value){
+      customLoader.hide();
+      toast("Lead Created successfully");
+      // Get.toNamed(AppRoutes.leadListScreen);
+      Get.back();
+      update();
+    }).onError((error, stackError){
+      toast(error.toString());
+      customLoader.hide();
+    });
   }
 
   // void hitPostLeadlistApiCall(){

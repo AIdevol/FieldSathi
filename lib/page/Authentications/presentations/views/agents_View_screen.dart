@@ -1,5 +1,6 @@
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/constans/string_const.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/AgentsViewScreenController.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/amc_screen_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/agents_list_creation.dart';
 import 'package:tms_sathi/utilities/common_textFields.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
@@ -22,6 +24,8 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
         child: GetBuilder<AgentsViewScreenController>(
           builder: (controller) =>
               Scaffold(
+                bottomNavigationBar: _buildPaginationControls(controller),
+                backgroundColor: CupertinoColors.white,
                   appBar: AppBar(
                     leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
                     backgroundColor: appColor,
@@ -39,12 +43,15 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
                       ).paddingOnly(left: 20.0)
                     ],
                   ),
-                  body: ListView(
-                    children: [
-                      _viewTopBar(context,controller),
-                      SizedBox(height: 20),
-                      _dataTableViewScreen(controller),
-                    ],
+                  body: RefreshIndicator(
+                    onRefresh: ()=>controller.hitRefreshApiData(),
+                    child: ListView(
+                      children: [
+                        _viewTopBar(context,controller),
+                        SizedBox(height: 20),
+                        _dataTableViewScreen(controller),
+                      ],
+                    ),
                   )
               ),
         ),
@@ -166,7 +173,7 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
               DataColumn(label: Text('Status')),
               DataColumn(label: Text('')),
             ],
-            rows: controller.agentsData.map((resultsData) {
+            rows: controller.agentsPaginationsData.map((resultsData) {
               return DataRow(
                   cells: [
                     DataCell(
@@ -186,26 +193,69 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
                         controller, resultsData.id.toString() ?? '',
                         resultsData)),
                   ],
-                  onSelectChanged: (selected) {
-                    if (selected == true) {
-                      _editWidgetOfAgentsDialogValue(
-                          controller, Get.context!,
-                          resultsData.id.toString() ?? '',
-                          resultsData);
-                    }
-                  }
+                  // onSelectChanged: (selected) {
+                  //   if (selected == true) {
+                  //     _editWidgetOfAgentsDialogValue(
+                  //         controller, Get.context!,
+                  //         resultsData.id.toString() ?? '',
+                  //         resultsData);
+                  //   }
+                  // }
               );
             }).toList(),
           )),
     );
   }
-
+  Widget _buildPaginationControls(AgentsViewScreenController controller) {
+    return Obx(() => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // First Page Button
+          IconButton(
+            icon: Icon(Icons.first_page),
+            onPressed: controller.currentPage.value > 1
+                ? () => controller.goToFirstPage()
+                : null,
+          ),
+          // Previous Page Button
+          IconButton(
+            icon: Icon(Icons.chevron_left),
+            onPressed: controller.currentPage.value > 1
+                ? () => controller.previousPage()
+                : null,
+          ),
+          // Page Number Display
+          Text(
+            'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+            style: TextStyle(fontSize: 16),
+          ),
+          // Next Page Button
+          IconButton(
+            icon: Icon(Icons.chevron_right),
+            onPressed: controller.currentPage.value < controller.totalPages.value
+                ? () => controller.nextPage()
+                : null,
+          ),
+          // Last Page Button
+          IconButton(
+            icon: Icon(Icons.last_page),
+            onPressed: controller.currentPage.value < controller.totalPages.value
+                ? () => controller.goToLastPage()
+                : null,
+          ),
+        ],
+      ),
+    ));
+  }
   Widget _dropDownValueViews(AgentsViewScreenController controller,
       String agentId, Result agentData) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
         child: PopupMenuButton<String>(
+          color: CupertinoColors.white,
           icon: Icon(Icons.more_vert),
           onSelected: (String result) {
             switch (result) {

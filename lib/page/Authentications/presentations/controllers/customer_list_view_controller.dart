@@ -9,8 +9,13 @@ import '../../../../constans/const_local_keys.dart';
 
 class CustomerListViewController extends GetxController{
   RxBool isLoading = false.obs;
+  RxInt currentPage = 1.obs;
+  RxInt totalPages = 0.obs;
+  final int itemsPerPage = 10;
   // CustomerDataResponseModel CustomerDataStr = CustomerDataResponseModel();
     RxList<CustomerData> customerListData = <CustomerData>[].obs;
+  RxList<CustomerData> filteredCustomerListData = <CustomerData>[].obs;
+  RxList<CustomerData> customerPaginationData = <CustomerData>[].obs;
     late TextEditingController customerNameController;
     late TextEditingController phoneController;
     late TextEditingController emailController;
@@ -49,6 +54,65 @@ class CustomerListViewController extends GetxController{
     String defaultValue  = 'North';
   void updateRegion(String newValue){
     defaultValue = newValue;
+    update();
+  }
+  void nextPage() {
+    if (currentPage.value < totalPages.value) {
+      currentPage.value++;
+      updatePaginatedTechnicians();
+      print("next page tapped value: ${currentPage.value}");
+    }
+  }
+
+  void previousPage() {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+      updatePaginatedTechnicians();
+      print("previous page tapped value: ${currentPage.value}");
+
+    }
+  }
+
+  void goToFirstPage() {
+    currentPage.value = 1;
+    updatePaginatedTechnicians();
+  }
+
+  void goToLastPage() {
+    currentPage.value = totalPages.value;
+    updatePaginatedTechnicians();
+  }
+
+  void calculateTotalPages() {
+    totalPages.value = (filteredCustomerListData.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+  }
+
+  void updatePaginatedTechnicians() {
+    List<CustomerData> sourceList = filteredCustomerListData.isEmpty
+        ? customerListData
+        : filteredCustomerListData;
+    totalPages.value = (sourceList.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+
+    int startIndex = (currentPage.value - 1) * itemsPerPage;
+    int endIndex = startIndex + itemsPerPage;
+    endIndex = endIndex > sourceList.length ? sourceList.length : endIndex;
+    customerPaginationData.value = sourceList.sublist(
+        startIndex,
+        endIndex
+    );
+
     update();
   }
 
@@ -126,13 +190,17 @@ class CustomerListViewController extends GetxController{
     FocusManager.instance.primaryFocus!.context;
     var parameterdata = {
       "role":"customer",
+      'page': currentPage.value,
       "page_size":"all"
     };
     Get.find<AuthenticationApiService>().getCustomerListApiCall(parameters: parameterdata).then((value)async{
     customerListData.assignAll(value.results);
+    filteredCustomerListData.assignAll(value.results);
+    customerPaginationData.assignAll(value.results);
     List<String> customerIds = customerListData.map((agent) => agent.id.toString()).toList();
     await storage.write(customerId, customerIds.join(','));
     print('customer id : ${await storage.read(customerId)}');
+    calculateTotalPages();
     customLoader.hide();
     toast('Customer List Successfully Fetched');
     update();
@@ -141,5 +209,9 @@ class CustomerListViewController extends GetxController{
         toast(error.toString());
         isLoading.value = false;
     });
+  }
+
+  Future<void> hitRefresshApiCall() async{
+    hitGetCustomerListApiCall();
   }
 }

@@ -19,7 +19,12 @@ class LeadListViewController extends GetxController{
   RxString dropdownValue = "Select Status".obs;
   RxBool isLoading = true.obs;
   RxList<LeadResult> leadListData = <LeadResult>[].obs;
+  RxList<LeadResult> leadFilters = <LeadResult>[].obs;
+  RxList<LeadResult> leadPaginationsData = <LeadResult>[].obs;
 
+  RxInt currentPage = 1.obs;
+  RxInt totalPages = 0.obs;
+  final int itemsPerPage = 10;
   RxString InActiveValue = "".obs ;
   RxString IntractValue = "".obs ;
   RxString IndiscussionValue = "".obs ;
@@ -41,7 +46,7 @@ class LeadListViewController extends GetxController{
   void onInit(){
   super.onInit();
   fetchedLeadListApiCall();
-  fetchLeadStatusListApiCall();
+
 }
 
 @override
@@ -59,16 +64,81 @@ class LeadListViewController extends GetxController{
   sourceController.dispose();
   super.onClose();
 }
+  void calculateTotalPages() {
+    totalPages.value = (leadFilters.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+  }
+
+  void updatePaginatedTechnicians() {
+    List<LeadResult> sourceList = leadFilters.isEmpty
+        ? leadListData
+        : leadFilters;
+    totalPages.value = (sourceList.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+
+    int startIndex = (currentPage.value - 1) * itemsPerPage;
+    int endIndex = startIndex + itemsPerPage;
+    endIndex = endIndex > sourceList.length ? sourceList.length : endIndex;
+    leadPaginationsData.value = sourceList.sublist(
+        startIndex,
+        endIndex
+    );
+
+    update();
+  }
+
+
+  void nextPage() {
+    if (currentPage.value < totalPages.value) {
+      currentPage.value++;
+      updatePaginatedTechnicians();
+      print("next page tapped value: ${currentPage.value}");
+    }
+  }
+
+  void previousPage() {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+      updatePaginatedTechnicians();
+      print("previous page tapped value: ${currentPage.value}");
+
+    }
+  }
+
+  void goToFirstPage() {
+    currentPage.value = 1;
+    updatePaginatedTechnicians();
+  }
+
+  void goToLastPage() {
+    currentPage.value = totalPages.value;
+    updatePaginatedTechnicians();
+  }
 
   void fetchedLeadListApiCall(){
   isLoading.value = true;
-  // customLoader.show();
+  customLoader.show();
   FocusManager.instance.primaryFocus!.context;
   var leadDatalist = {
+    "page":currentPage.value,
     "page_size":"all"
   };
     Get.find<AuthenticationApiService>().getLeadListApiCall(parameters: leadDatalist).then((value){
       leadListData.assignAll(value.results);
+      leadFilters.assignAll(value.results);
+      leadPaginationsData.assignAll(value.results);
+      calculateTotalPages();
+      fetchLeadStatusListApiCall();
       customLoader.hide();
       toast("Lead list fetched successfully");
       update();
@@ -82,7 +152,6 @@ class LeadListViewController extends GetxController{
 
 void fetchLeadStatusListApiCall(){
   isLoading.value = true;
-  customLoader.show();
   FocusManager.instance.primaryFocus!.unfocus();
   Get.find<AuthenticationApiService>().getLeadStatusApiCall().then((value){
     InActiveValue.value = value.inactive.toString();

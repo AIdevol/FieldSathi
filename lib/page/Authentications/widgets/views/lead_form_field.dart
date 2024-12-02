@@ -59,7 +59,7 @@ _mainScreen(LeadFormFieldController controller, BuildContext context){
       _customerAdditionalContainer(controller),
       vGap(20),
       _customerSourceContainer(controller),
-      vGap(20),
+      vGap(40),
       _customButtonViewWidget(controller: controller,context: context),
       vGap(20),
     ],),
@@ -206,11 +206,11 @@ _customerSourceContainer(LeadFormFieldController controller){
 
 Widget _customButtonViewWidget({required LeadFormFieldController controller,required BuildContext context}) {
   return Row(
-    mainAxisAlignment: MainAxisAlignment.end,
+    mainAxisAlignment: MainAxisAlignment.center,
     children: [
       _buildButton('Cancel',onPressed: ()=>Get.back(), controller: controller),
       hGap(10),
-      _buildButton('Add', onPressed: (){}/*controller.hitPostLeadlistApiCall()*/, controller:  controller),
+      _buildButton('Add', onPressed: ()=>controller.hitPostLeadListAPiCall(), controller:  controller),
       hGap(10),
       // _buildRateTextField(),
     ],
@@ -226,7 +226,7 @@ Widget _buildButton(String text,{required LeadFormFieldController controller,req
     ),
     style: ElevatedButton.styleFrom(
       foregroundColor: Colors.white, backgroundColor: appColor,
-      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
       elevation: 5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),

@@ -47,6 +47,7 @@ class TicketListScreen extends GetView<TicketListController> {
         init: TicketListController(),
         builder: (controller) => SafeArea(
           child: Scaffold(
+            bottomNavigationBar:  _buildPaginationControls(controller),
             backgroundColor: CupertinoColors.white,
             resizeToAvoidBottomInset: true,
             appBar: _buildAppBar(),
@@ -201,30 +202,47 @@ class TicketListScreen extends GetView<TicketListController> {
     );
   }
 
-   Widget _buildPaginationControls() {
-     return Obx(() => Row(
-       mainAxisAlignment: MainAxisAlignment.center,
-       children: [
-         IconButton(
-           icon: Icon(Icons.chevron_left),
-           onPressed: controller.currentPage.value > 1
-               ? () => controller.goToPreviousPage()
-               : null,
-         ),
-         Text(
-           'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
-           style: MontserratStyles.montserratSemiBoldTextStyle(
-             size: 14,
-             color: Colors.black87,
+   Widget _buildPaginationControls(TicketListController controller) {
+     return Obx(() => Padding(
+       padding: const EdgeInsets.symmetric(vertical: 10),
+       child: Row(
+         mainAxisAlignment: MainAxisAlignment.center,
+         children: [
+           // First Page Button
+           IconButton(
+             icon: Icon(Icons.first_page),
+             onPressed: controller.currentPage.value > 1
+                 ? () => controller.goToFirstPage()
+                 : null,
            ),
-         ),
-         IconButton(
-           icon: Icon(Icons.chevron_right),
-           onPressed: controller.currentPage.value < controller.totalPages.value
-               ? () => controller.goToNextPage()
-               : null,
-         ),
-       ],
+           // Previous Page Button
+           IconButton(
+             icon: Icon(Icons.chevron_left),
+             onPressed: controller.currentPage.value > 1
+                 ? () => controller.previousPage()
+                 : null,
+           ),
+           // Page Number Display
+           Text(
+             'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+             style: TextStyle(fontSize: 16),
+           ),
+           // Next Page Button
+           IconButton(
+             icon: Icon(Icons.chevron_right),
+             onPressed: controller.currentPage.value < controller.totalPages.value
+                 ? () => controller.nextPage()
+                 : null,
+           ),
+           // Last Page Button
+           IconButton(
+             icon: Icon(Icons.last_page),
+             onPressed: controller.currentPage.value < controller.totalPages.value
+                 ? () => controller.goToLastPage()
+                 : null,
+           ),
+         ],
+       ),
      ));
    }
 
@@ -237,7 +255,7 @@ class TicketListScreen extends GetView<TicketListController> {
        return Column(
          children: [
            Expanded(child: _buildTicketTable(context, controller)),
-           _buildPaginationControls(),
+
          ],
        );
      });
@@ -378,7 +396,7 @@ class TicketListScreen extends GetView<TicketListController> {
 
 
   List<DataRow> _buildTableRows(BuildContext context, TicketListController controller) {
-    return controller.ticketResult.map((ticket) {
+    return controller.ticketPaginationsData.map((ticket) {
       return DataRow(
         onSelectChanged:(selected) {
           if(selected != null){ showDialogWidgetContext(

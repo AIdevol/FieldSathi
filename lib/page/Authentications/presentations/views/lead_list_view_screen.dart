@@ -21,6 +21,7 @@ class LeadListViewScreen extends GetView<LeadListViewController> {
     return MyAnnotatedRegion(
       child: GetBuilder<LeadListViewController>(
         builder: (controller) => Scaffold(
+          bottomNavigationBar: _buildPaginationControls(controller),
           appBar: AppBar(
             backgroundColor: appColor,
             leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
@@ -214,7 +215,7 @@ _dataTableViewScreen({required LeadListViewController controller, required Build
         DataColumn(label: Text('Lead Status')),
         DataColumn(label: Text(' ')),
         DataColumn(label: Text('')),
-      ], rows: controller.leadListData.map((leadData)=>
+      ], rows: controller.leadPaginationsData.map((leadData)=>
            DataRow(cells: [
              DataCell(_ticketBoxIcons(leadData.id.toString())/*Text("${leadData.id.toString()}")*/),
              DataCell(Text("${leadData.firstName.toString()+ leadData.lastName.toString()}")),
@@ -234,6 +235,44 @@ _dataTableViewScreen({required LeadListViewController controller, required Build
   });
 }
 
+Widget _buildPaginationControls(LeadListViewController controller) {
+  return Obx(() => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 10),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          icon: Icon(Icons.first_page),
+          onPressed: controller.currentPage.value > 1
+              ? () => controller.goToFirstPage()
+              : null,
+        ),
+        IconButton(
+          icon: Icon(Icons.chevron_left),
+          onPressed: controller.currentPage.value > 1
+              ? () => controller.previousPage()
+              : null,
+        ),
+        Text(
+          'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+          style: TextStyle(fontSize: 16),
+        ),
+        IconButton(
+          icon: Icon(Icons.chevron_right),
+          onPressed: controller.currentPage.value < controller.totalPages.value
+              ? () => controller.nextPage()
+              : null,
+        ),
+        IconButton(
+          icon: Icon(Icons.last_page),
+          onPressed: controller.currentPage.value < controller.totalPages.value
+              ? () => controller.goToLastPage()
+              : null,
+        ),
+      ],
+    ),
+  ));
+}
 // void _showImportModelView(BuildContext context) {
 //   showDialog(
 //     context: context,

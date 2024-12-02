@@ -11,43 +11,51 @@ import 'package:tms_sathi/utilities/helper_widget.dart';
 class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-            onPressed: () => Get.back(),
-            icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)
-        ),
-        backgroundColor: appColor,
-        title: Text(
-          'Leaves',
-          style: MontserratStyles.montserratBoldTextStyle(
-            size: 18,
-            color: Colors.black,
+    return MyAnnotatedRegion(
+      child: GetBuilder<LeaveReportViewScreenController>(
+      builder: (controller)=> Scaffold(
+          bottomNavigationBar: _buildPaginationControls(controller),
+          appBar: AppBar(
+            leading: IconButton(
+                onPressed: () => Get.back(),
+                icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)
+            ),
+            backgroundColor: appColor,
+            title: Text(
+              'Leaves',
+              style: MontserratStyles.montserratBoldTextStyle(
+                size: 18,
+                color: Colors.black,
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.refresh),
+                onPressed: controller.hitLeavesApiCall,
+              ),
+              IconButton(
+                icon: Icon(Icons.add, size: 30),
+                onPressed: () => Get.toNamed(AppRoutes.leaveUpdateScreen),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: controller.hitLeavesApiCall,
-          ),
-          IconButton(
-            icon: Icon(Icons.add, size: 30),
-            onPressed: () => Get.toNamed(AppRoutes.leaveUpdateScreen),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          _buildTopBar(),
-          _buildSearchBar(),
-          Expanded(
-            child: Obx(
-                  () => controller.isLoading.value
-                  ? Center(child: CircularProgressIndicator())
-                  : _buildDataTable(),
+          body: RefreshIndicator(
+            onRefresh: ()=>controller.hitRefreshApiCall(),
+            child: Column(
+              children: [
+                _buildTopBar(),
+                _buildSearchBar(),
+                Expanded(
+                  child: Obx(
+                        () => controller.isLoading.value
+                        ? Center(child: CircularProgressIndicator())
+                        : _buildDataTable(),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -142,7 +150,7 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
         child: Container(
           padding: EdgeInsets.all(16),
           child: Obx(() {
-            final filteredData = controller.filteredLeaves;
+            final filteredData = controller.leavesPaginationsData;
             return DataTable(
               headingRowColor: MaterialStateColor.resolveWith((states) => appColor.withOpacity(0.1)),
               dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
@@ -201,7 +209,44 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
       ),
     );
   }
-
+  Widget _buildPaginationControls(LeaveReportViewScreenController controller) {
+    return Obx(() => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: Icon(Icons.first_page),
+            onPressed: controller.currentPage.value > 1
+                ? () => controller.goToFirstPage()
+                : null,
+          ),
+          IconButton(
+            icon: Icon(Icons.chevron_left),
+            onPressed: controller.currentPage.value > 1
+                ? () => controller.previousPage()
+                : null,
+          ),
+          Text(
+            'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+            style: TextStyle(fontSize: 16),
+          ),
+          IconButton(
+            icon: Icon(Icons.chevron_right),
+            onPressed: controller.currentPage.value < controller.totalPages.value
+                ? () => controller.nextPage()
+                : null,
+          ),
+          IconButton(
+            icon: Icon(Icons.last_page),
+            onPressed: controller.currentPage.value < controller.totalPages.value
+                ? () => controller.goToLastPage()
+                : null,
+          ),
+        ],
+      ),
+    ));
+  }
   Widget _buildStatusCell(String status) {
     Color statusColor;
     switch (status.toLowerCase()) {

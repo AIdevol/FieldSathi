@@ -18,6 +18,7 @@ class ServiceRequestViewScreen extends GetView<ServiceRequestScreenController> {
       child: SafeArea(
         child: GetBuilder<ServiceRequestScreenController>(
           builder: (controller) => Scaffold(
+            bottomNavigationBar: _buildPaginationControls(controller,context),
             appBar: AppBar(
               backgroundColor: appColor,
               leading: IconButton(
@@ -38,7 +39,7 @@ class ServiceRequestViewScreen extends GetView<ServiceRequestScreenController> {
                 ),
               ],
             ),
-            body: _mainScreen(controller, context),
+            body: RefreshIndicator(onRefresh: ()=> controller.hitRefreshservicesApiCall(),child: _mainScreen(controller, context)),
           ),
         ),
       ),
@@ -160,71 +161,119 @@ Widget _buildSelectStatusField(ServiceRequestScreenController controller) {
   );
 }
 Widget _mainDataTable(BuildContext context, ServiceRequestScreenController controller) {
-  return SingleChildScrollView(
-    scrollDirection: Axis.vertical,
-    child: SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Obx(() {
-        return DataTable(
-          border: TableBorder(
-            horizontalInside: BorderSide(width: 1, color: Colors.grey.shade300),
-          ),
-          columnSpacing: 20,
-          headingRowColor: MaterialStateProperty.resolveWith<Color>(
-                  (Set<MaterialState> states) {
-                return Colors.grey.shade100;
-              }
-          ),
-          columns: const [
-            // DataColumn(label: Center(child: Text('S No.'))),
-            DataColumn(label: Center(child: Text('Ticket Id'))),
-            DataColumn(label: Center(child: Text('Task Name'))),
-            DataColumn(label: Center(child: Text('Customer Name'))),
-            DataColumn(label: Center(child: Text('Sub Customer Name'))),
-            DataColumn(label: Center(child: Text('Technician Name'))),
-            DataColumn(label: Center(child: Text('Address'))),
-            DataColumn(label: Center(child: Text('Materials Required'))),
-            DataColumn(label: Center(child: Text('Status'))),
-            DataColumn(label: Center(child: Text('Courier CNO.'))),
-            DataColumn(label: Center(child: Text('Dockt No'))),
-            DataColumn(label: Center(child: Text('Hub Address'))),
-            DataColumn(label: Center(child: Text('Dispatched Location'))),
-            DataColumn(label: Center(child: Text('Remark'))),
-            DataColumn(label: Center(child: Text('  '))),
-          ],
-          rows: controller.servicesRequestsData.map((entry) {
-            // final index = entry.key;
-            final request = entry;
+  return Column(
+    children: [
+      SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Obx(() {
+            return DataTable(
+              border: TableBorder(
+                horizontalInside: BorderSide(width: 1, color: Colors.grey.shade300),
+              ),
+              columnSpacing: 20,
+              headingRowColor: MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return Colors.grey.shade100;
+                  }
+              ),
+              columns: const [
+                // DataColumn(label: Center(child: Text('S No.'))),
+                DataColumn(label: Center(child: Text('Ticket Id'))),
+                DataColumn(label: Center(child: Text('Task Name'))),
+                DataColumn(label: Center(child: Text('Customer Name'))),
+                DataColumn(label: Center(child: Text('Sub Customer Name'))),
+                DataColumn(label: Center(child: Text('Technician Name'))),
+                DataColumn(label: Center(child: Text('Address'))),
+                DataColumn(label: Center(child: Text('Materials Required'))),
+                DataColumn(label: Center(child: Text('Status'))),
+                DataColumn(label: Center(child: Text('Courier CNO.'))),
+                DataColumn(label: Center(child: Text('Dockt No'))),
+                DataColumn(label: Center(child: Text('Hub Address'))),
+                DataColumn(label: Center(child: Text('Dispatched Location'))),
+                DataColumn(label: Center(child: Text('Remark'))),
+                DataColumn(label: Center(child: Text('  '))),
+              ],
+              rows: controller.servicesRequestsData.map((entry) {
+                // final index = entry.key;
+                final request = entry;
 
-            return DataRow(cells: [
-              // DataCell(Center(child: Text("${index + 1}"))),
-              DataCell(_ticketBoxIcons(request.ticket?.id.toString())),
-              DataCell(Center(child: Text(request.ticket!.taskName.toString()))),
-              DataCell(Center(child: Text(request.ticket!.customerDetails!.customerName.toString()))),
-              DataCell(Center(child: Text("${request.ticket?.subCustomerDetails?.firstName} ${request.ticket?.subCustomerDetails?.lastName}".trim().isNotEmpty ? "${request.ticket?.subCustomerDetails?.firstName} ${request.ticket?.subCustomerDetails?.lastName}" : 'NA'))),
-              DataCell(Center(child: Text("${request.ticket?.assignTo?.firstName} ${request.ticket?.assignTo?.lastName}"))),
-              DataCell(Center(child: Text("${request.ticket?.assignTo?.city}, ${request.ticket?.assignTo?.state}, ${request.ticket?.assignTo?.country}"))),
-              DataCell(Text(request.materialRequired.toString().isNotEmpty ? request.materialRequired.toString() : "No Materials")),
-              DataCell(Center(child: Text(request.status.toString()))),
-              DataCell(Center(child: Text(request.courierContactNumber.toString()))),
-              DataCell(Center(child: Text(request.docktNo.toString()))),
-              DataCell(Center(child: Text(request.hubAddress.toString()))),
-              DataCell(Center(child: _remarkViewsWidget(request.whereToDispatched.toString()))),
-              DataCell(Center(child: Text(request.dispatchedRemark.toString()))),
-              DataCell(Center(
-                child: IconButton(
-                  icon: Icon(Icons.edit, color: appColor),
-                  onPressed: () => updateFilterStatusData(controller,request),
-                ),
-              )),
-            ]);
-          }).toList(),
-        );
-      }),
-    ),
+                return DataRow(cells: [
+                  // DataCell(Center(child: Text("${index + 1}"))),
+                  DataCell(_ticketBoxIcons(request.ticket?.id.toString())),
+                  DataCell(Center(child: Text(request.ticket!.taskName.toString()))),
+                  DataCell(Center(child: Text(request.ticket!.customerDetails!.customerName.toString()))),
+                  DataCell(Center(child: Text("${request.ticket?.subCustomerDetails?.firstName} ${request.ticket?.subCustomerDetails?.lastName}".trim().isNotEmpty ? "${request.ticket?.subCustomerDetails?.firstName} ${request.ticket?.subCustomerDetails?.lastName}" : 'NA'))),
+                  DataCell(Center(child: Text("${request.ticket?.assignTo?.firstName} ${request.ticket?.assignTo?.lastName}"))),
+                  DataCell(Center(child: Text("${request.ticket?.assignTo?.city}, ${request.ticket?.assignTo?.state}, ${request.ticket?.assignTo?.country}"))),
+                  DataCell(Text(request.materialRequired.toString().isNotEmpty ? request.materialRequired.toString() : "No Materials")),
+                  DataCell(Center(child: Text(request.status.toString()))),
+                  DataCell(Center(child: Text(request.courierContactNumber.toString()))),
+                  DataCell(Center(child: Text(request.docktNo.toString()))),
+                  DataCell(Center(child: Text(request.hubAddress.toString()))),
+                  DataCell(Center(child: _remarkViewsWidget(request.whereToDispatched.toString()))),
+                  DataCell(Center(child: Text(request.dispatchedRemark.toString()))),
+                  DataCell(Center(
+                    child: IconButton(
+                      icon: Icon(Icons.edit, color: appColor),
+                      onPressed: () => updateFilterStatusData(controller,request),
+                    ),
+                  )),
+                ]);
+              }).toList(),
+            );
+          }),
+        ),
+      ),
+      vGap(20),
+
+    ],
   );
 }
-
+Widget _buildPaginationControls(ServiceRequestScreenController controller, BuildContext context) {
+  return Obx(() => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 10),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // First Page Button
+        IconButton(
+          icon: Icon(Icons.first_page),
+          onPressed: controller.currentPage.value > 1
+              ? () => controller.goToFirstPage()
+              : null,
+        ),
+        // Previous Page Button
+        IconButton(
+          icon: Icon(Icons.chevron_left),
+          onPressed: controller.currentPage.value > 1
+              ? () => controller.previousPage()
+              : null,
+        ),
+        // Page Number Display
+        Text(
+          'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+          style: TextStyle(fontSize: 16),
+        ),
+        // Next Page Button
+        IconButton(
+          icon: Icon(Icons.chevron_right),
+          onPressed: controller.currentPage.value < controller.totalPages.value
+              ? () => controller.nextPage()
+              : null,
+        ),
+        // Last Page Button
+        IconButton(
+          icon: Icon(Icons.last_page),
+          onPressed: controller.currentPage.value < controller.totalPages.value
+              ? () => controller.goToLastPage()
+              : null,
+        ),
+      ],
+    ),
+  ));
+}
 Widget _ticketBoxIcons(String? ticketId) {
   return Center(
     child: Container(

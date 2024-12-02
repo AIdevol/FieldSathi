@@ -23,13 +23,17 @@ class SalesViewScreen extends GetView<SalesViewScreenController>{
       init: SalesViewScreenController(),
         builder: (controller)=>
     Scaffold(
+      bottomNavigationBar: _buildPaginationControls(controller, context),
       backgroundColor: CupertinoColors.white,
       appBar: _buildAppBar(controller),
-      body: SafeArea(child: Column(children: [
-        _buildTopBar(context, controller),
-        Expanded(child: _buildDataTableView(controller, context)),
-        _buildPaginationControls(controller)
-      ],)),
+      body: RefreshIndicator(
+        onRefresh: ()=> controller.hitRefreshGetSalesApiCall(),
+        child: Column(children: [
+          _buildTopBar(context, controller),
+          Expanded(child: _buildDataTableView(controller, context)),
+
+        ],),
+      ),
     )));
   }
 }
@@ -515,51 +519,54 @@ Widget _buildDataTableView(SalesViewScreenController controller, BuildContext co
     ),);
   }
 
-  // Get paginated data
-  final paginatedData = controller.getPaginatedSalesData();
+  return Column(
+    children: [
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SingleChildScrollView(
+          child: DataTable(columns: [
+            _buildTableHeader('Id'),
+            _buildTableHeader('Image'),
+            _buildTableHeader('Name'),
+            _buildTableHeader('Email'),
+            _buildTableHeader('Contact'),
+            _buildTableHeader('Date of Joining'),
+            _buildTableHeader('Casual Leaves'),
+            _buildTableHeader('Sick Leaves'),
+            _buildTableHeader('Check In'),
+            _buildTableHeader('Check Out'),
+            _buildTableHeader('Status'),
+            _buildTableHeader('Battery(%)'),
+            _buildTableHeader('GPS'),
+            _buildTableHeader('Actions'),
+          ],
+              rows: controller.salesPaginationData.map((f){
+                return DataRow(cells: [
+                  DataCell(_ticketBoxIcons(f.empId.toString())),
+                  DataCell(_salesImage(f.id.toString(), f)),
+                  DataCell(Text("${f.firstName} ${f.lastName}")),
+                  DataCell(Text(f.email.toString())),
+                  DataCell(Text(f.phoneNumber.toString())),
+                  DataCell(Text(f.dateJoined.toString())),
+                  DataCell(Text(f.allocatedCasualLeave.toString())),
+                  DataCell(Text(f.allocatedSickLeave.toString())),
+                  DataCell(Text(_formatDateTime(
+                      f.todayAttendance?.punchIn.toString()?? 'N/A'))),
+                  DataCell(Text(_formatDateTime(
+                      f.todayAttendance?.punchOut ?? 'N/A'))),
+                  DataCell(_buildAttendanceStatusBadge(
+                      f.todayAttendance?.status ?? '')),
+                  DataCell(Text(f.batteryStatus  ?? 'N/A')),
+                  DataCell(Text(f.gpsStatus ? 'On' : 'Off')),
+                  DataCell(_dropDownValueViews( controller, context,f,f.id.toString()))
+                ],
+                );
+              }).toList()),
+        ),
 
-  return SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: SingleChildScrollView(
-      child: DataTable(columns: [
-        _buildTableHeader('Id'),
-        _buildTableHeader('Image'),
-        _buildTableHeader('Name'),
-        _buildTableHeader('Email'),
-        _buildTableHeader('Contact'),
-        _buildTableHeader('Date of Joining'),
-        _buildTableHeader('Casual Leaves'),
-        _buildTableHeader('Sick Leaves'),
-        _buildTableHeader('Check In'),
-        _buildTableHeader('Check Out'),
-        _buildTableHeader('Status'),
-        _buildTableHeader('Battery(%)'),
-        _buildTableHeader('GPS'),
-        _buildTableHeader('Actions'),
-      ],
-          rows: paginatedData.map((f){
-            return DataRow(cells: [
-              DataCell(_ticketBoxIcons(f.empId.toString())),
-              DataCell(_salesImage(f.id.toString(), f)),
-              DataCell(Text("${f.firstName} ${f.lastName}")),
-              DataCell(Text(f.email.toString())),
-              DataCell(Text(f.phoneNumber.toString())),
-              DataCell(Text(f.dateJoined.toString())),
-              DataCell(Text(f.allocatedCasualLeave.toString())),
-              DataCell(Text(f.allocatedSickLeave.toString())),
-              DataCell(Text(_formatDateTime(
-                  f.todayAttendance?.punchIn.toString()?? 'N/A'))),
-              DataCell(Text(_formatDateTime(
-                  f.todayAttendance?.punchOut ?? 'N/A'))),
-              DataCell(_buildAttendanceStatusBadge(
-                  f.todayAttendance?.status ?? '')),
-              DataCell(Text(f.batteryStatus  ?? 'N/A')),
-              DataCell(Text(f.gpsStatus ? 'On' : 'Off')),
-              DataCell(_dropDownValueViews( controller, context,f,f.id.toString()))
-            ],
-            );
-          }).toList()),
-    ),
+      ),
+      vGap(20),
+    ],
   );
 }
 Widget _salesImage(String salesId, SalesResutls sales) {
@@ -578,31 +585,48 @@ Widget _salesImage(String salesId, SalesResutls sales) {
     ),
   );
 }
-Widget _buildPaginationControls(SalesViewScreenController controller) {
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
+Widget _buildPaginationControls(SalesViewScreenController controller, BuildContext context) {
+  return Obx(() => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 10),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        // First Page Button
         IconButton(
-          icon: Icon(Icons.arrow_back_ios),
-          onPressed: controller.canPreviousPage()
+          icon: Icon(Icons.first_page),
+          onPressed: controller.currentPage.value > 1
+              ? () => controller.goToFirstPage()
+              : null,
+        ),
+        // Previous Page Button
+        IconButton(
+          icon: Icon(Icons.chevron_left),
+          onPressed: controller.currentPage.value > 1
               ? () => controller.previousPage()
               : null,
         ),
+        // Page Number Display
         Text(
-          'Page ${controller.currentPage + 1} of ${controller.totalPages}',
-          style: MontserratStyles.montserratSemiBoldTextStyle(),
+          'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+          style: TextStyle(fontSize: 16),
         ),
+        // Next Page Button
         IconButton(
-          icon: Icon(Icons.arrow_forward_ios),
-          onPressed: controller.canNextPage()
+          icon: Icon(Icons.chevron_right),
+          onPressed: controller.currentPage.value < controller.totalPages.value
               ? () => controller.nextPage()
+              : null,
+        ),
+        // Last Page Button
+        IconButton(
+          icon: Icon(Icons.last_page),
+          onPressed: controller.currentPage.value < controller.totalPages.value
+              ? () => controller.goToLastPage()
               : null,
         ),
       ],
     ),
-  );
+  ));
 }
 
 
@@ -689,6 +713,7 @@ Widget _dropDownValueViews(SalesViewScreenController controller, BuildContext co
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: PopupMenuButton<String>(
+        color: CupertinoColors.white,
         icon: Icon(Icons.more_vert),
         onSelected: (String result) {
           switch (result) {

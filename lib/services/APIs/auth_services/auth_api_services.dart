@@ -702,6 +702,15 @@ implements AuthenticationApi {
     }
   }
   @override
+  Future<PostLeadListResponeModel> postLeadListApiCall({Map<String, dynamic>?dataBody, parameters})async{
+    try{
+      final response = await dioClient!.post( "${ApiEnd.leadEnd}",data: dataBody, queryParameters: parameters, skipAuth: false);
+      return PostLeadListResponeModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+  @override
   Future<LeadStatusResponseModel> getLeadStatusApiCall({Map<String, dynamic>?dataBody})async{
     try{
       final response = await dioClient!.get( "${ApiEnd.statusLeadsCountsEnd}" ,skipAuth: false);
@@ -849,13 +858,28 @@ implements AuthenticationApi {
   }
 
   @override
-  Future<AttendanceUserResponseModel>getCalenderViewUserAttendanceApiCall({Map<String, dynamic>? dataBody, parameter})async{
-    try{
-      final response = await dioClient!.get("${ApiEnd.userAttendanceCalendarApiEnd}", data: dataBody, skipAuth: false, queryParameters: parameter);
-      return AttendanceUserResponseModel.fromJson(response);
-    }catch(error){
-      return Future.error(NetworkExceptions.getDioException(error));
-    }
+  Future<List<AttendanceUserResponseModel>>getCalenderViewUserAttendanceApiCall({Map<String, dynamic>? dataBody, parameter})async{
+      try {
+        final response = await dioClient!.get("${ApiEnd.userAttendanceCalendarApiEnd}", data: dataBody,queryParameters: parameter, skipAuth: false);
+        if (response is List) {
+          return response.map((item) =>
+              AttendanceUserResponseModel.fromJson(item)).toList();
+        }else if (response is Map<String, dynamic> && response.containsKey('data')) {
+          final List<dynamic>data = response['data'];
+          return data.map((item) =>
+              AttendanceUserResponseModel.fromJson(item)).toList();
+        }
+        return [];
+        // return TMSResponseModel.fromJson(response);
+      } catch (e) {
+        return Future.error(NetworkExceptions.getDioException(e));
+      }
+    // try{
+    //   final response = await dioClient!.get("${ApiEnd.userAttendanceCalendarApiEnd}", data: dataBody, skipAuth: false, queryParameters: parameter);
+    //   return AttendanceUserResponseModel.fromJson(response);
+    // }catch(error){
+    //   return Future.error(NetworkExceptions.getDioException(error));
+    // }
   }
 
   // @override

@@ -29,6 +29,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
     return MyAnnotatedRegion(
         child: GetBuilder<AMCScreenController>(builder: (controller) =>
             Scaffold(
+              bottomNavigationBar: _buildPaginationControls(controller),
               appBar: AppBar(
                 leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
                 backgroundColor: appColor,
@@ -54,14 +55,17 @@ class AMCViewScreen extends GetView<AMCScreenController> {
                   ).paddingSymmetric(horizontal: 20.0),
                 ],
               ),
-              body: ListView(
-                children: [
-                  _buildTopBar(context, controller),
-                  vGap(10),
-                  _mainData(controller),
-                  vGap(10),
-                  _dataTableViewScreen(amcIds),
-                ],
+              body: RefreshIndicator(
+                onRefresh: ()=>controller.hitRefreshApiCalls(),
+                child: ListView(
+                  children: [
+                    _buildTopBar(context, controller),
+                    vGap(10),
+                    _mainData(controller),
+                    vGap(10),
+                    _dataTableViewScreen(amcIds),
+                  ],
+                ),
               )
              /* controller.isLoading.value
                   ? Center(child: CircularProgressIndicator(),)
@@ -82,7 +86,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
-        height: 200, // Consider making this responsive
+        height: 150, // Consider making this responsive
         child: ListView(
           scrollDirection: Axis.horizontal,
           children: [
@@ -134,7 +138,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
 
   Widget _totalAmcWidget(AMCScreenController controller) {
     return Container(
-      height: 150,
+      height: 100,
       width: 150,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -162,7 +166,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
 
   Widget _totalUpcomingWidget() {
     return Container(
-      height: 150,
+      height: 100,
       width: 150,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -190,7 +194,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
 
   Widget _totalRenewalWidget() {
     return Container(
-      height: 150,
+      height: 100,
       width: 150,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -218,7 +222,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
 
   Widget _totalCompletedWidget() {
     return Container(
-      height: 150,
+      height: 100,
       width: 150,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -525,7 +529,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
               DataColumn(label: Text(' ')),
               DataColumn(label: Text(' ')),
               DataColumn(label: Text(' ')),
-            ], rows: controller.amcResultData.map((amc) {
+            ], rows: controller.amcPaginationData.map((amc) {
               return DataRow(cells: [
                 DataCell(_ticketBoxIcons(amc.id.toString(), amc.productName.toString())/*Text(amc.id.toString())*/),
                 DataCell(Text(amc.customer.customerName.toString()?? 'N/A')),
@@ -546,7 +550,49 @@ class AMCViewScreen extends GetView<AMCScreenController> {
       ),
     );
   }
-
+  Widget _buildPaginationControls(AMCScreenController controller) {
+    return Obx(() => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // First Page Button
+          IconButton(
+            icon: Icon(Icons.first_page),
+            onPressed: controller.currentPage.value > 1
+                ? () => controller.goToFirstPage()
+                : null,
+          ),
+          // Previous Page Button
+          IconButton(
+            icon: Icon(Icons.chevron_left),
+            onPressed: controller.currentPage.value > 1
+                ? () => controller.previousPage()
+                : null,
+          ),
+          // Page Number Display
+          Text(
+            'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+            style: TextStyle(fontSize: 16),
+          ),
+          // Next Page Button
+          IconButton(
+            icon: Icon(Icons.chevron_right),
+            onPressed: controller.currentPage.value < controller.totalPages.value
+                ? () => controller.nextPage()
+                : null,
+          ),
+          // Last Page Button
+          IconButton(
+            icon: Icon(Icons.last_page),
+            onPressed: controller.currentPage.value < controller.totalPages.value
+                ? () => controller.goToLastPage()
+                : null,
+          ),
+        ],
+      ),
+    ));
+  }
 
   _viewDetailsButton(AMCScreenController controller, AmcResult amcData) {
     return ElevatedButton(onPressed: () {

@@ -19,6 +19,7 @@ class SuperViewScreen extends GetView<SuperViewScreenController>{
   @override
   Widget build(BuildContext context){
     return MyAnnotatedRegion(child: GetBuilder<SuperViewScreenController>(builder: (controller)=>Scaffold(
+      bottomNavigationBar: _buildPaginationControls(controller),
       appBar: AppBar(
         title: Text("Managers", style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),),
         backgroundColor: appColor,
@@ -162,10 +163,15 @@ Widget _mainData(SuperViewScreenController controller){
     child:  DataTable(columns: const[
       DataColumn(label: Text('Name')),
       DataColumn(label: Text('Email')),
-      DataColumn(label: Text('Contact Number')),
+      DataColumn(label: Text('Phone')),//
+      DataColumn(label: Text('Date of Joining')),
+      DataColumn(label: Text('Casual Leaves')),
+      DataColumn(label: Text('Sick Leaves')),
+      DataColumn(label: Text('Check in times')),
+      DataColumn(label: Text('Check out times')),
       DataColumn(label: Text('Status')),
       DataColumn(label: Text(" ")),
-    ], rows: controller.filteredData.map((superData){
+    ], rows: controller.filterePaginationsData.map((superData){
         return DataRow(cells: [
           DataCell(Row(
             children: [
@@ -179,8 +185,13 @@ Widget _mainData(SuperViewScreenController controller){
             ],
           )),
           DataCell(Text(superData.email)),
-          DataCell(Text(superData.phoneNumber)),
-          DataCell(_buildStatusIndicator(superData.isActive)),
+          DataCell(Text(superData.phoneNumber)),//
+          DataCell(Text(superData.dateJoined)),
+          DataCell(Text(superData.allocatedCasualLeave.toString())),
+          DataCell(Text(superData.allocatedSickLeave.toString())),
+          DataCell(Text(superData.todayAttendance.punchIn.toString())),
+          DataCell(Text(superData.todayAttendance.punchOut.toString())),
+          DataCell(_buildStatusIndicator(superData,superData.isActive)),
           DataCell(_dropDownValueViews(controller, SuperUserId, superData))
         ],
         );
@@ -224,37 +235,89 @@ Widget _mainData(SuperViewScreenController controller){
   //   ),
   // );
 }
-Widget _buildStatusIndicator(bool isActive) {
-  return Container(
-    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-    decoration: BoxDecoration(
-      color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(
-        color: isActive ? Colors.green : Colors.red,width: 1,
-      ),
-    ),
+Widget _buildPaginationControls(SuperViewScreenController controller) {
+  return Obx(() => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 10),
     child: Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive ? Colors.green : Colors.red,
-          ),
+        // First Page Button
+        IconButton(
+          icon: Icon(Icons.first_page),
+          onPressed: controller.currentPage.value > 1
+              ? () => controller.goToFirstPage()
+              : null,
         ),
-        SizedBox(width: 6),
+        // Previous Page Button
+        IconButton(
+          icon: Icon(Icons.chevron_left),
+          onPressed: controller.currentPage.value > 1
+              ? () => controller.previousPage()
+              : null,
+        ),
+        // Page Number Display
         Text(
-          isActive ? 'Active' : 'Inactive',
-          style: MontserratStyles.montserratSemiBoldTextStyle(
-            color: isActive ? Colors.green : Colors.red,
-            size: 12,
-          ),
+          'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+          style: TextStyle(fontSize: 16),
+        ),
+        // Next Page Button
+        IconButton(
+          icon: Icon(Icons.chevron_right),
+          onPressed: controller.currentPage.value < controller.totalPages.value
+              ? () => controller.nextPage()
+              : null,
+        ),
+        // Last Page Button
+        IconButton(
+          icon: Icon(Icons.last_page),
+          onPressed: controller.currentPage.value < controller.totalPages.value
+              ? () => controller.goToLastPage()
+              : null,
         ),
       ],
     ),
+  ));
+}
+
+Widget _buildStatusIndicator(Result superdata,bool isActive) {
+  return Column(
+    children: [
+      Text("${superdata.todayAttendance.status}",style: MontserratStyles.montserratSemiBoldTextStyle(
+       color: Colors.black54,
+      ),),
+
+      Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive ? Colors.green : Colors.red,width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isActive ? Colors.green : Colors.red,
+              ),
+            ),
+            SizedBox(width: 6),
+            Text(
+              isActive ? 'Active' : 'Inactive',
+              style: MontserratStyles.montserratSemiBoldTextStyle(
+                color: isActive ? Colors.green : Colors.red,
+                size: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
   );
 }
 Widget _dropDownValueViews(SuperViewScreenController controller, String agentId, Result superData) {

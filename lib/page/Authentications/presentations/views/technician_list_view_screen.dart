@@ -355,6 +355,7 @@ Widget _dropDownValueViews(TechnicianListViewScreenController controller, BuildC
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: PopupMenuButton<String>(
+        color: CupertinoColors.white,
         icon: Icon(Icons.more_vert),
         onSelected: (String result) {
           switch (result) {

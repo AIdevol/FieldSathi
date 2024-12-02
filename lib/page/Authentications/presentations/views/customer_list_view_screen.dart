@@ -25,6 +25,7 @@ class CustomerListViewScreen extends GetView<CustomerListViewController>{
       child: SafeArea(
         child: GetBuilder<CustomerListViewController>(
           builder: (controller) => Scaffold(
+            bottomNavigationBar: _buildPaginationControls(controller,context),
             appBar: AppBar(
               leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
               backgroundColor: appColor,
@@ -39,11 +40,15 @@ class CustomerListViewScreen extends GetView<CustomerListViewController>{
 
                 }, icon: Icon(FeatherIcons.plus)).paddingSymmetric(horizontal: 20.0)],
             ),
-              body: ListView(children: [
-                  _buildTopBar(context, controller),
-                vGap(25),
-                _dataTableViewScreen(controller, context),
-              ],),
+              body: RefreshIndicator(
+                onRefresh: ()=>controller.hitRefresshApiCall(),
+                child: ListView(children: [
+                    _buildTopBar(context, controller),
+                  vGap(25),
+                  _dataTableViewScreen(controller, context),
+                  vGap(25),
+                ],),
+              ),
           ),
         ),
       ),
@@ -141,74 +146,120 @@ Widget _buildSearchField(CustomerListViewController controller) {
 }
 
 Widget _dataTableViewScreen(CustomerListViewController controller, BuildContext context) {
-  return SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Obx(() => DataTable(
-      columnSpacing: 20, // Add consistent spacing between columns
-      columns: [
-        DataColumn(label: Text('ID')),
-        DataColumn(label: Text('Profile')),
-        DataColumn(label: Text('Customer Name')),
-        DataColumn(label: Text('Company Name')),
-        DataColumn(label: Text('Email')),
-        DataColumn(label: Text('Mobile No.')),
-        DataColumn(label: Text('Address')),
-        DataColumn(label: Text('Region')),
-        DataColumn(label: Text('Model No.')),
-        DataColumn(label: Text('Status')),
-        DataColumn(label: Container(width: 50, child: Text('Action'))), // Fixed width for action column
-        DataColumn(label: Container(width: 50, child: Text(''))), // Fixed width for more options
-      ],
-      rows: controller.customerListData.map((customerData) {
-        return DataRow(cells: [
-          DataCell(_ticketBoxIcons(customerData.id.toString())),
-          DataCell(CircleAvatar(
-            radius: 15,
-            backgroundImage: customerData.profileImage != null
-                ? NetworkImage(customerData.profileImage!)
-                : AssetImage(userImageIcon) as ImageProvider,
+  return Column(
+    children: [
+      SingleChildScrollView(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Obx(() => DataTable(
+            columnSpacing: 20, // Add consistent spacing between columns
+            columns: [
+              DataColumn(label: Text('ID')),
+              DataColumn(label: Text('Profile')),
+              DataColumn(label: Text('Customer Name')),
+              DataColumn(label: Text('Company Name')),
+              DataColumn(label: Text('Email')),
+              DataColumn(label: Text('Mobile No.')),
+              DataColumn(label: Text('Address')),
+              DataColumn(label: Text('Region')),
+              DataColumn(label: Text('Model No.')),
+              DataColumn(label: Text('Status')),
+              DataColumn(label: Container(width: 50, child: Text('Action'))), // Fixed width for action column
+              DataColumn(label: Container(width: 50, child: Text(''))), // Fixed width for more options
+            ],
+            rows: controller.customerPaginationData.map((customerData) {
+              return DataRow(cells: [
+                DataCell(_ticketBoxIcons(customerData.id.toString())),
+                DataCell(CircleAvatar(
+                  radius: 15,
+                  backgroundImage: customerData.profileImage != null
+                      ? NetworkImage(customerData.profileImage!)
+                      : AssetImage(userImageIcon) as ImageProvider,
+                )),
+                DataCell(Text(customerData.customerName.toString())),
+                DataCell(Text(customerData.companyName.toString())),
+                DataCell(Text(customerData.email.toString())),
+                DataCell(Text(customerData.phoneNumber.toString())),
+                DataCell(Text(customerData.primaryAddress?.toString() ?? "None")),
+                DataCell(Text(customerData.region?.toString() ?? "N/A")),
+                DataCell(Text(customerData.modelNo.toString())),
+                DataCell(_buildStatusIndicator(customerData.isActive)),
+                DataCell(Container(
+                  width: 50,
+                  alignment: Alignment.center,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                    onPressed: () async{
+                      final Uri url = Uri.parse('https://wa.me/91${customerData.phoneNumber}');
+                      if (!await launchUrl(url)) {
+                      throw Exception('Could not launch $url');
+                      }
+                    },
+                    icon: Image.asset(whatsappIcon, width: 24, height: 24),
+                  ),
+                )),
+                DataCell( _dropDownValueViews(controller, context, customerData.id.toString(), customerData)/*IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints(),
+                  onPressed: () {
+                    _dropDownValueViews(controller, context, customerData.id.toString(), customerData);
+                  },
+                  icon: Icon(Icons.more_vert, size: 24),
+                )*/),
+              ]);
+            }).toList(),
           )),
-          DataCell(Text(customerData.customerName.toString())),
-          DataCell(Text(customerData.companyName.toString())),
-          DataCell(Text(customerData.email.toString())),
-          DataCell(Text(customerData.phoneNumber.toString())),
-          DataCell(Text(customerData.primaryAddress?.toString() ?? "None")),
-          DataCell(Text(customerData.region?.toString() ?? "N/A")),
-          DataCell(Text(customerData.modelNo.toString())),
-          DataCell(_buildStatusIndicator(customerData.isActive)),
-          DataCell(Container(
-            width: 50,
-            alignment: Alignment.center,
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              constraints: BoxConstraints(),
-              onPressed: () async{
-                final Uri url = Uri.parse('https://wa.me/91${customerData.phoneNumber}');
-                if (!await launchUrl(url)) {
-                throw Exception('Could not launch $url');
-                }
-              },
-              icon: Image.asset(whatsappIcon, width: 24, height: 24),
-            ),
-          )),
-          DataCell(Container(
-            width: 50,
-            alignment: Alignment.center,
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              constraints: BoxConstraints(),
-              onPressed: () {
-                _editWidgetOfAgentsDialogValue(controller, context, customerData.id.toString(), customerData);
-              },
-              icon: Icon(Icons.more_vert, size: 24),
-            ),
-          )),
-        ]);
-      }).toList(),
-    )),
+        ),
+      ),
+      vGap(20),
+
+    ],
   );
 }
-
+Widget _buildPaginationControls(CustomerListViewController controller, BuildContext context) {
+  return Obx(() => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 10),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // First Page Button
+        IconButton(
+          icon: Icon(Icons.first_page),
+          onPressed: controller.currentPage.value > 1
+              ? () => controller.goToFirstPage()
+              : null,
+        ),
+        // Previous Page Button
+        IconButton(
+          icon: Icon(Icons.chevron_left),
+          onPressed: controller.currentPage.value > 1
+              ? () => controller.previousPage()
+              : null,
+        ),
+        // Page Number Display
+        Text(
+          'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+          style: TextStyle(fontSize: 16),
+        ),
+        // Next Page Button
+        IconButton(
+          icon: Icon(Icons.chevron_right),
+          onPressed: controller.currentPage.value < controller.totalPages.value
+              ? () => controller.nextPage()
+              : null,
+        ),
+        // Last Page Button
+        IconButton(
+          icon: Icon(Icons.last_page),
+          onPressed: controller.currentPage.value < controller.totalPages.value
+              ? () => controller.goToLastPage()
+              : null,
+        ),
+      ],
+    ),
+  ));
+}
 Widget _buildStatusIndicator(bool isActive) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -261,6 +312,72 @@ Widget _ticketBoxIcons(String? ticketId) {
           fontWeight: FontWeight.w600,
           fontSize: 13,
         ),
+      ),
+    ),
+  );
+}
+Widget _dropDownValueViews(CustomerListViewController controller, BuildContext context,
+    String agentId, CustomerData agentData) {
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: PopupMenuButton<String>(
+        color: CupertinoColors.white,
+        icon: Icon(Icons.more_vert),
+        onSelected: (String result) {
+          switch (result) {
+            case 'Edit':
+              _editWidgetOfAgentsDialogValue(controller, context, agentId, agentData);
+              // _editWidgetOfAgentsDialogValue(
+              //     controller, Get.context!, agentId, agentData);
+              break;
+            case 'Delete':
+              // controller.deleteTechnician(agentId);
+              break;
+            case 'Deactivate':
+            // controller.hitUpdateStatusValue(agentId);
+              break;
+          }
+        },
+        itemBuilder: (BuildContext context) =>
+        <PopupMenuEntry<String>>[
+          PopupMenuItem<String>(
+            value: 'Edit',
+            child: ListTile(
+              leading: Icon(Icons.edit_calendar_outlined, size: 20,
+                  color: Colors.black),
+              title: Text(
+                  'Edit', style: MontserratStyles.montserratBoldTextStyle(
+                color: blackColor,
+                size: 13,
+              )),
+            ),
+          ),
+          PopupMenuItem<String>(
+            value: 'Delete',
+            child: ListTile(
+              leading: Icon(Icons.delete, color: Colors.red, size: 20),
+              title: Text('Delete',
+                  style: MontserratStyles.montserratBoldTextStyle(
+                    color: blackColor,
+                    size: 13,
+                  )),
+            ),
+          ),
+          PopupMenuItem<String>(
+            value: 'Deactivate',
+            child: ListTile(
+              leading: Image.asset(wrongRoundedImage, color: Colors.black,
+                height: 25,
+                width: 25,),
+              title: Text('Deactivate',
+                  style: MontserratStyles.montserratBoldTextStyle(
+                    color: blackColor,
+                    size: 13,
+                  )),
+            ),
+          ),
+        ],
       ),
     ),
   );

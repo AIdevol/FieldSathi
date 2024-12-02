@@ -84,7 +84,10 @@ _buildEmpId({required AgentsListController controller, required BuildContext con
 }
 _buildJoiningDate({required AgentsListController controller, required BuildContext context}) {
   return GestureDetector(
-    onTap: () => _showDatePicker(context, controller),
+    onTap: () {
+      _showDatePicker(context, controller);
+      print("Gesture detection0");
+    },
     child: CustomTextField(
       hintText: "Select Joining Date".tr,
       controller: controller.joiningDateController,

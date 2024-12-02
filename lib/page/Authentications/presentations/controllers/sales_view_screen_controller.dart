@@ -12,6 +12,11 @@ class SalesViewScreenController extends GetxController{
   RxBool isLoading = true.obs;
   RxSet<SalesResponseModel> salesResponse = <SalesResponseModel>{}.obs;
   RxList<SalesResutls> salesData = <SalesResutls>[].obs;
+  RxList<SalesResutls> filteredSalesData = <SalesResutls>[].obs;
+  RxList<SalesResutls> salesPaginationData = <SalesResutls>[].obs;
+  RxInt currentPage = 1.obs;
+  RxInt totalPages = 0.obs;
+  final int itemsPerPage = 10;
 
   late TextEditingController employeeIdController;
   late TextEditingController dateJoiningController;
@@ -62,51 +67,63 @@ class SalesViewScreenController extends GetxController{
     phoneFocusNode.dispose();
     super.onClose();
   }
-
-  int _currentPage = 0;
-  final int _itemsPerPage = 10;
-
-  int get currentPage => _currentPage;
-  int get totalPages => (salesData.length / _itemsPerPage).ceil();
-
-  List<SalesResutls> getPaginatedSalesData() {
-    if (salesData.isEmpty) return [];
-    final startIndex = _currentPage * _itemsPerPage;
-    final endIndex = startIndex + _itemsPerPage;
-
-    return salesData.sublist(
-        startIndex,
-        endIndex > salesData.length ? salesData.length : endIndex
-    );
+  void nextPage() {
+    if (currentPage.value < totalPages.value) {
+      currentPage.value++;
+      updatePaginatedTechnicians();
+      print("next page tapped value: ${currentPage.value}");
+    }
   }
-
-  void initializePagination() {
-    _currentPage = 0;
-    update();
-  }
-
-  bool canPreviousPage() => _currentPage > 0;
-  bool canNextPage() => _currentPage < totalPages - 1;
 
   void previousPage() {
-    if (canPreviousPage()) {
-      _currentPage--;
-      update();
+    if (currentPage.value > 1) {
+      currentPage.value--;
+      updatePaginatedTechnicians();
+      print("previous page tapped value: ${currentPage.value}");
+
     }
   }
 
-  void nextPage() {
-    if (canNextPage()) {
-      _currentPage++;
-      update();
-    }
+  void goToFirstPage() {
+    currentPage.value = 1;
+    updatePaginatedTechnicians();
   }
 
-  // Method to be called when sales data is first loaded or refreshed
-  // void setSalesData(SalesResutls data) {
-  //   salesData = data;
-  //   initializePagination();
-  // }
+  void goToLastPage() {
+    currentPage.value = totalPages.value;
+    updatePaginatedTechnicians();
+  }
+  void calculateTotalPages() {
+    totalPages.value = (filteredSalesData.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+  }
+  void updatePaginatedTechnicians() {
+    List<SalesResutls> sourceList = filteredSalesData.isEmpty
+        ? salesData
+        : filteredSalesData;
+    totalPages.value = (sourceList.length / itemsPerPage).ceil();
+    if (currentPage.value > totalPages.value) {
+      currentPage.value = totalPages.value;
+    }
+    if (currentPage.value < 1) {
+      currentPage.value = 1;
+    }
+
+    int startIndex = (currentPage.value - 1) * itemsPerPage;
+    int endIndex = startIndex + itemsPerPage;
+    endIndex = endIndex > sourceList.length ? sourceList.length : endIndex;
+    salesPaginationData.value = sourceList.sublist(
+        startIndex,
+        endIndex
+    );
+
+    update();
+  }
 
   void hitGetSalesApiCall(){
     isLoading.value = true;
@@ -114,10 +131,14 @@ class SalesViewScreenController extends GetxController{
     FocusManager.instance.primaryFocus!.unfocus();
     var salesParameters={
       "role":"sales",
+      "page":currentPage.value,
       "page_size":"all"
     };
     Get.find<AuthenticationApiService>().getSalesDetailsApiCall(parameters: salesParameters).then((value){
       salesData.assignAll(value.results);
+      filteredSalesData.assignAll(value.results);
+      salesPaginationData.assignAll(value.results);
+      calculateTotalPages();
       customLoader.hide();
       toast("Sales fetch successfully");
       update();
@@ -128,7 +149,7 @@ class SalesViewScreenController extends GetxController{
     });
   }
 
-  void hitRefreshGetSalesApiCall(){
+  Future<void>hitRefreshGetSalesApiCall()async{
     hitGetSalesApiCall();
   }
   void initializeWithSalesData(SalesResutls salesData) {
@@ -172,7 +193,6 @@ class SalesViewScreenController extends GetxController{
     )
         .then((value) {
       customLoader.hide();
-      Get.back(); // Close dialog
       hitRefreshGetSalesApiCall(); // Refresh the list
       toast("Sales data updated successfully");
     }).catchError((error) {
@@ -204,6 +224,10 @@ class SalesViewScreenController extends GetxController{
       hitGetSalesApiCall();
     });
   }
+
+  // Future<void>refreshDataUi()async{
+  //
+  // }
 }
 
   // selectDate(BuildContext context) {}
