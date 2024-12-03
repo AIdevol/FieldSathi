@@ -83,21 +83,19 @@ _buildEmpId({required AgentsListController controller, required BuildContext con
 
 }
 _buildJoiningDate({required AgentsListController controller, required BuildContext context}) {
-  return GestureDetector(
-    onTap: () {
-      _showDatePicker(context, controller);
-      print("Gesture detection0");
+  return CustomTextField(
+    hintText: "Select Joining Date".tr,
+    controller: controller.joiningDateController,
+    textInputType: TextInputType.text,
+    focusNode: controller.joiningDateFocusNode,
+    labletext: "Joining Date".tr,
+    onTap: (){
+        _showDatePicker(context, controller);
+        print("Gesture detection0");
     },
-    child: CustomTextField(
-      hintText: "Select Joining Date".tr,
-      controller: controller.joiningDateController,
-      textInputType: TextInputType.text,
-      focusNode: controller.joiningDateFocusNode,
-      labletext: "Joining Date".tr,
-      prefix: Icon(Icons.calendar_today, color: Colors.black),
-      suffix: Icon(Icons.arrow_drop_down, color: Colors.black),
-      readOnly: true,
-    ),
+    prefix: Icon(Icons.calendar_today, color: Colors.black),
+    suffix: Icon(Icons.arrow_drop_down, color: Colors.black),
+    readOnly: true,
   );
 }
 

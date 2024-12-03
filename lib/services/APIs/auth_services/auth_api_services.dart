@@ -679,13 +679,40 @@ implements AuthenticationApi {
   }
 
   @override
-  Future<CustomerListResponseModel> postCustomerListApiCall(
+  Future<CustomerListResponseModel> deleteCustomerListApiCall(
+      {Map<String, dynamic>?dataBody, parameters, String? id}) async {
+    try {
+      final response = await dioClient!.delete(
+          "${ApiEnd.tmsUsersEnd}$id/", queryParameters: parameters,
+          skipAuth: false);
+      return CustomerListResponseModel.fromJson(response);
+    } catch (error) {
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
+  @override
+  Future<PostCustomerListResponseModel> putCustomerListApiCall(
+      {Map<String, dynamic>?dataBody, parameters, String? id}) async {
+    try {
+      final response = await dioClient!.put(
+          "${ApiEnd.tmsUsersEnd}$id/",data: dataBody,
+          skipAuth: false);
+      return PostCustomerListResponseModel.fromJson(response);
+    } catch (error) {
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+
+  }
+
+  @override
+  Future<PostCustomerListResponseModel> postCustomerListApiCall(
       {Map<String, dynamic>?dataBody, parameters}) async {
     try {
       final response = await dioClient!.post(
-          "${ApiEnd.tmsUsersEnd}", queryParameters: parameters,
+          "${ApiEnd.tmsUsersEnd}",data: dataBody,
           skipAuth: false);
-      return CustomerListResponseModel.fromJson(response);
+      return PostCustomerListResponseModel.fromJson(response);
     } catch (error) {
       return Future.error(NetworkExceptions.getDioException(error));
     }
@@ -702,10 +729,30 @@ implements AuthenticationApi {
     }
   }
   @override
+  Future<PostLeadListResponeModel> putLeadListApiCall({Map<String, dynamic>?dataBody, parameters, String? id})async{
+    try{
+      final response = await dioClient!.put( "${ApiEnd.leadEnd}$id/",data: dataBody, queryParameters: parameters, skipAuth: false);
+      return PostLeadListResponeModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
+  @override
   Future<PostLeadListResponeModel> postLeadListApiCall({Map<String, dynamic>?dataBody, parameters})async{
     try{
       final response = await dioClient!.post( "${ApiEnd.leadEnd}",data: dataBody, queryParameters: parameters, skipAuth: false);
       return PostLeadListResponeModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
+  @override
+  Future<LeadGetResponseModel> deleteLeadListApiCall({Map<String, dynamic>?dataBody, parameters, String? id})async{
+    try{
+      final response = await dioClient!.delete( "${ApiEnd.leadEnd}$id/",data: dataBody, queryParameters: parameters, skipAuth: false);
+      return LeadGetResponseModel.fromJson(response);
     }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }
@@ -805,25 +852,33 @@ implements AuthenticationApi {
           return Future.error(NetworkExceptions.getDioException(error));
     }
 }
+  // @override
+  // Future<PostServiceCategoryResponseModel> postServiceCategoriesApiCall(
+  //     {required dioo.FormData dataBody}) async {
+  //   try {
+  //     // String? fileName = imageFile?.path
+  //     //     .split('/')
+  //     //     .last;
+  //     // dioo.FormData formData = dioo.FormData.fromMap({
+  //     //   "profile_image": await dioo.MultipartFile.fromFile(
+  //     //     imageFile!.path, filename: fileName,),
+  //     // });
+  //     final response = await dioClient!.post(
+  //         ApiEnd.serviceCategories, data: dataBody, options: dioo.Options(contentType: 'multipart/form-data'),skipAuth: false);
+  //     return PostServiceCategoryResponseModel.fromJson(response);
+  //   } catch (error) {
+  //     return Future.error(NetworkExceptions.getDioException(error));
+  //   }
+  // }
   @override
-  Future<PostServiceCategoryResponseModel> postServiceCategoriesApiCall(
-      {required dioo.FormData dataBody}) async {
-    try {
-      // String? fileName = imageFile?.path
-      //     .split('/')
-      //     .last;
-      // dioo.FormData formData = dioo.FormData.fromMap({
-      //   "profile_image": await dioo.MultipartFile.fromFile(
-      //     imageFile!.path, filename: fileName,),
-      // });
-      final response = await dioClient!.post(
-          ApiEnd.serviceCategories, data: dataBody, options: dioo.Options(contentType: 'multipart/form-data'),skipAuth: false);
+Future<PostServiceCategoryResponseModel>postServiceCategoriesApiCall({required dioo.FormData dataBody})async{
+    try{
+      final response = await dioClient!.post(ApiEnd.serviceCategories,data: dataBody, skipAuth: false);
       return PostServiceCategoryResponseModel.fromJson(response);
-    } catch (error) {
+    }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }
-  }
-
+}
   // ====================================================Sub Service Api Call =======================================================
   @override
   Future<SubService> getSub_ServiceCategoriesApiCall(

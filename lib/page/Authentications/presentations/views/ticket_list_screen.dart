@@ -51,7 +51,8 @@ class TicketListScreen extends GetView<TicketListController> {
             backgroundColor: CupertinoColors.white,
             resizeToAvoidBottomInset: true,
             appBar: _buildAppBar(),
-            body: RefreshIndicator(child:  Column(
+            body: RefreshIndicator(
+                child:  Column(
               children: [
                 _buildTopBar(context, controller),
                 _buildSearchBar(),

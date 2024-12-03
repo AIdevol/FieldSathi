@@ -169,4 +169,48 @@ void fetchLeadStatusListApiCall(){
     isLoading.value = false;
   });
   }
+
+  void hitLeadPutMethodApiCall(String id){
+  isLoading.value = true;
+  customLoader.show();
+  FocusManager.instance.primaryFocus!.unfocus();
+  var primaryLeadData = {
+    "companyName":companyController.text.trim()??"",
+    "firstName":firstNameController.text.trim()??"",
+    "lastName":lastNameController.text.trim()??"",
+    "email":emailController.text.trim()??"",
+    "mobile":phoneController.text.trim()??"",
+    "address":addressController.text.trim()??"",
+    "country":countryController.text.trim()??"",
+    "state":stateController.text.trim()??"",
+    "city":cityController.text.trim()??'',
+    "notes":addressController.text ?? "",
+    "source":sourceController.text.trim()
+  };
+  Get.find<AuthenticationApiService>().putLeadListApiCall(dataBody: primaryLeadData,id: id).then((value){
+    toast("Updated Lead Successfully");
+    customLoader.hide();
+    fetchedLeadListApiCall();
+    Get.back();
+    update();
+  }).onError((error, stackError){
+    toast(error.toString());
+    customLoader.hide();
+    isLoading.value = false;
+  });
+  }
+
+  void hitDeleteLeadListApiCall(String id){
+  isLoading.value = true;
+  FocusManager.instance.primaryFocus!.unfocus();
+  Get.find<AuthenticationApiService>().deleteLeadListApiCall(id: id).then((value){
+    toast("deleted Lead List Successfully");
+    fetchedLeadListApiCall();
+    update();
+  }).onError((error, stackError){
+    toast(error.toString());
+    isLoading.value = false;
+    fetchedLeadListApiCall();
+  });
+  }
 }

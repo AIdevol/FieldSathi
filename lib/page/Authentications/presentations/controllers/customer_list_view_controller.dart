@@ -43,19 +43,19 @@ class CustomerListViewController extends GetxController{
     late FocusNode zipFocusNode;
     late FocusNode countryFocusNode;
     late FocusNode selectedRegionFocusNode;
-    List<String> regionValues = [
+    RxList<String> regionValues = [
       // 'Select Region'
       "North",
       "West",
       'East',
       'South'
-    ];
+    ].obs;
 
-    String defaultValue  = 'North';
-  void updateRegion(String newValue){
-    defaultValue = newValue;
-    update();
-  }
+    RxString defaultValue  = 'North'.obs;
+      void updateRegion(String newValue){
+        defaultValue.value = newValue;
+        update();
+      }
   void nextPage() {
     if (currentPage.value < totalPages.value) {
       currentPage.value++;
@@ -205,13 +205,61 @@ class CustomerListViewController extends GetxController{
     toast('Customer List Successfully Fetched');
     update();
  }).onError((error , stackError){
-        customLoader.hide();
-        toast(error.toString());
-        isLoading.value = false;
+    customLoader.hide();
+    toast(error.toString());
+    isLoading.value = false;
     });
   }
 
   Future<void> hitRefresshApiCall() async{
     hitGetCustomerListApiCall();
   }
+
+  void hitPutMethoApiCalltoUpdateCustomerListApiCall(String id){
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+    var primaryCustomerData= {
+      "email": emailController.text.trim(),
+      "phone_number": phoneController.text.trim(),
+      "customer_name": customerNameController.text.trim(),
+      "company_name": companyNameController.text.trim() ?? "",
+      "brand_names": [productTypeController.text.trim() ?? ""],
+      "model_no": modelNoController.text.trim() ?? "",
+      "customer_type": "",
+      "primary_address": addressNameController.text.trim() ?? "",
+      "landmark_paci": landMarkController.text.trim() ?? "",
+      "country": countryController.text.trim() ?? "",
+      "state": stateController.text.trim() ?? "",
+      "city": cityController.text.trim() ?? "",
+      "zipcode": zipController.text.trim() ?? "",
+      "region": defaultValue.value ?? "North",
+      "role": "customer"
+    };
+    Get.find<AuthenticationApiService>().putCustomerListApiCall(id: id,dataBody: primaryCustomerData).then((value){
+        toast('Customer Data Updated Successfully');
+        customLoader.hide();
+        hitGetCustomerListApiCall();
+        update();
+    }).onError((error, stackError){
+        toast(error.toString());
+        customLoader.hide();
+        isLoading.value = false;
+    });
+  }
+
+  void hitDeletemethodApiCall(String id){
+    isLoading.value = true;
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().deleteCustomerListApiCall(id: id).then((value){
+      toast("Deleted successfully");
+      hitGetCustomerListApiCall();
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
+      isLoading.value= false;
+    });
+  }
+
+
 }

@@ -332,7 +332,7 @@ Widget _dropDownValueViews(CustomerListViewController controller, BuildContext c
               //     controller, Get.context!, agentId, agentData);
               break;
             case 'Delete':
-              // controller.deleteTechnician(agentId);
+              controller.hitDeletemethodApiCall(agentId);
               break;
             case 'Deactivate':
             // controller.hitUpdateStatusValue(agentId);
@@ -382,10 +382,11 @@ Widget _dropDownValueViews(CustomerListViewController controller, BuildContext c
     ),
   );
 }
-void _editWidgetOfAgentsDialogValue(CustomerListViewController controller, BuildContext context, String agentId,CustomerData customdata) {
+Future<void> _editWidgetOfAgentsDialogValue(CustomerListViewController controller, BuildContext context, String agentId,CustomerData customdata) {
 
-  Get.dialog(
-      Dialog(
+ return showDialog(
+   context: context,
+      builder: (context)=>Dialog(
         insetAnimationDuration: Duration(milliseconds: 3),
         child: Container(
           height: Get.height,
@@ -393,7 +394,7 @@ void _editWidgetOfAgentsDialogValue(CustomerListViewController controller, Build
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
           child: _form(controller, context, agentId,customdata),
         ),
-      )
+      ),
   );
 }
 Widget _form(CustomerListViewController controller, BuildContext context, String? agentId, CustomerData customData) {
@@ -403,7 +404,6 @@ Widget _form(CustomerListViewController controller, BuildContext context, String
   controller.emailController.text = customData.email ?? '';
     controller.companyNameController.text = customData.companyName ?? '';
     controller.modelNoController.text = customData.modelNo ?? '';
-    // controller.productTypeController.text = customData. ?? '';
     controller.addressNameController.text = customData.primaryAddress ?? '';
     controller.landMarkController.text = customData.landmarkPaci ?? '';
     controller.cityController.text = customData.city ?? '';
@@ -458,7 +458,7 @@ Widget _form(CustomerListViewController controller, BuildContext context, String
           vGap(20),
           _buildSelectedRegion(controller,context),
           vGap(20),
-          _buildOptionbutton(controller,context)
+          _buildOptionbutton(controller,context,customData)
         ],
       ),
     ),
@@ -588,14 +588,10 @@ Widget _buildSelectedRegion(CustomerListViewController controller, BuildContext 
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
     labletext: "Selected Region".tr,
-    controller: TextEditingController(text: controller.defaultValue),
+    onTap: ()=>_showRegionSelection(controller, context),
+    controller: TextEditingController(text: controller.defaultValue.value),
     readOnly: true,
-    suffix: IconButton(
-      onPressed: () {
-        _showRegionSelection(controller, context);
-      },
-      icon: Icon(Icons.keyboard_arrow_down, color: Colors.black),
-    ),
+    suffix: Icon(Icons.keyboard_arrow_down, color: Colors.black)
   );
 }
 
@@ -626,9 +622,9 @@ void _showRegionSelection(CustomerListViewController controller, BuildContext co
   );
 }
 
-_buildOptionbutton(CustomerListViewController controller, BuildContext context){
+_buildOptionbutton(CustomerListViewController controller, BuildContext context, CustomerData customData){
   return  Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton(
           onPressed: () => Get.back(),
@@ -649,9 +645,9 @@ _buildOptionbutton(CustomerListViewController controller, BuildContext context){
         hGap(20),
         ElevatedButton(
           onPressed: (){
-            // controller.hitPostCustomerApiCall();
+            controller.hitPutMethoApiCalltoUpdateCustomerListApiCall(customData.id.toString());
             Get.back();},
-          child: Text('Add',style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),),
+          child: Text('Update',style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),),
           style: ButtonStyle(
             backgroundColor: WidgetStateProperty.all(appColor),
             foregroundColor: WidgetStateProperty.all(Colors.white),
@@ -668,31 +664,52 @@ _buildOptionbutton(CustomerListViewController controller, BuildContext context){
       ]
   );
 }
-
+// controller.productTypeController.text = customData.brandNames ?? '';
 class ProductTypeBuilder extends StatefulWidget {
+  final CustomerData? customerData;
+
+  const ProductTypeBuilder({Key? key, this.customerData}) : super(key: key);
+
   @override
   _ProductTypeBuilderState createState() => _ProductTypeBuilderState();
 }
 
 class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
-  List<Widget> _productTypeFields = [];
+  List<TextEditingController> _productTypeControllers = [];
 
   @override
   void initState() {
     super.initState();
-    _productTypeFields.add(_buildProductTypeField(isFirst: true));
+    _initializeProductTypes();
   }
 
-  Widget _buildProductTypeField({required bool isFirst}) {
+  void _initializeProductTypes() {
+    if (widget.customerData != null && widget.customerData!.brandNames != null) {
+      List<String> brandNames = widget.customerData!.brandNames
+          .map((brand) => brand.trim())
+          .toList();
+      _productTypeControllers = brandNames
+          .map((brand) => TextEditingController(text: brand))
+          .toList();
+    }
+
+    // Ensure at least one controller exists
+    if (_productTypeControllers.isEmpty) {
+      _productTypeControllers.add(TextEditingController());
+    }
+  }
+
+  Widget _buildProductTypeField(int index) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Expanded(
             child: CustomTextField(
+              controller: _productTypeControllers[index],
               hintText: "Product Type".tr,
               textInputType: TextInputType.text,
-              onFieldSubmitted: (String? value) {},
               labletext: "Product Type".tr,
               prefix: Icon(Icons.production_quantity_limits, color: Colors.black),
             ),
@@ -702,7 +719,7 @@ class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
             children: [
               _buildAddButton(),
               vGap(10),
-              if (!isFirst) _buildDeleteButton(),
+              if (_productTypeControllers.length > 1) _buildDeleteButton(index),
             ],
           )
         ],
@@ -710,7 +727,7 @@ class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
     );
   }
 
-  Widget _buildDeleteButton() {
+  Widget _buildDeleteButton(int index) {
     return Container(
       width: 40,
       height: 40,
@@ -719,9 +736,7 @@ class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
         backgroundColor: Colors.red,
         onPressed: () {
           setState(() {
-            if (_productTypeFields.length > 1) {
-              _productTypeFields.removeLast();
-            }
+            _productTypeControllers.removeAt(index);
           });
         },
         mini: true,
@@ -741,7 +756,7 @@ class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
         backgroundColor: Colors.blue,
         onPressed: () {
           setState(() {
-            _productTypeFields.add(_buildProductTypeField(isFirst: false));
+            _productTypeControllers.add(TextEditingController());
           });
         },
         mini: true,
@@ -752,13 +767,34 @@ class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
     );
   }
 
+  // Method to get all product types (useful when saving or processing)
+  List<String> getProductTypes() {
+    return _productTypeControllers
+        .map((controller) => controller.text.trim())
+        .where((text) => text.isNotEmpty)
+        .toList();
+  }
+
+  @override
+  void dispose() {
+    // Dispose all controllers to prevent memory leaks
+    for (var controller in _productTypeControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: _productTypeFields,
+      children: List.generate(
+        _productTypeControllers.length,
+            (index) => _buildProductTypeField(index),
+      ),
     );
   }
 }
+
 // Widget _form(CustomerListViewController controller, BuildContext context, String agentId,CustomerData customdata) {
 //   WidgetsBinding.instance.addPostFrameCallback((_){
 //     controller.firstNameController.text = customdata.firstName ?? '';

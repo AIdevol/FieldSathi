@@ -36,12 +36,11 @@ class PrincipalCstomerViewController extends GetxController{
     RxBool isLoading = false.obs;
     // CustomerListResponseModel CustomerDataStr = CustomerListResponseModel.fromJson();
     @override
-    void onInit(){
+    void onInit() {
       companyNameController = TextEditingController();
       customerNameController = TextEditingController();
       phoneController = TextEditingController();
       emailController = TextEditingController();
-      customerNameController = TextEditingController();
       modelNoController = TextEditingController();
       productTypeController = TextEditingController();
       addressNameController = TextEditingController();
@@ -55,7 +54,7 @@ class PrincipalCstomerViewController extends GetxController{
       customerFocusNode = FocusNode();
       phoneFocusNode = FocusNode();
       emailFocusNode = FocusNode();
-      customerFocusNode = FocusNode();
+      companyNameFocusNode = FocusNode();
       modelNoFocusNode = FocusNode();
       productTypeFocusNode = FocusNode();
       addressNamedFocusNode = FocusNode();
@@ -65,15 +64,17 @@ class PrincipalCstomerViewController extends GetxController{
       zipFocusNode = FocusNode();
       countryFocusNode = FocusNode();
       selectedRegionFocusNode = FocusNode();
+
       super.onInit();
     }
 
-    void onClose(){
+
+    @override
+    void onClose() {
       companyNameController.dispose();
       customerNameController.dispose();
       phoneController.dispose();
       emailController.dispose();
-      customerNameController.dispose();
       modelNoController.dispose();
       productTypeController.dispose();
       addressNameController.dispose();
@@ -87,7 +88,7 @@ class PrincipalCstomerViewController extends GetxController{
       customerFocusNode.dispose();
       phoneFocusNode.dispose();
       emailFocusNode.dispose();
-      customerFocusNode.dispose();
+      companyNameFocusNode.dispose();
       modelNoFocusNode.dispose();
       productTypeFocusNode.dispose();
       addressNamedFocusNode.dispose();
@@ -97,55 +98,66 @@ class PrincipalCstomerViewController extends GetxController{
       zipFocusNode.dispose();
       countryFocusNode.dispose();
       selectedRegionFocusNode.dispose();
+
       super.onClose();
     }
-  List<String> regionValues = [
+
+    RxList<String> regionValues = [
     // 'Select Region'
     "North",
     "West",
     'East',
     'South'
-  ];
+  ].obs;
 
-  String defaultValue  = 'North';
+  RxString defaultValue  = 'North'.obs;
 
   void updateRegion(String newValue){
-    defaultValue = newValue;
+    defaultValue.value = newValue;
     update();
   }
 
-  void hitPostCustomerApiCall(){
+    void hitPostCustomerApiCall() {
+      // Validate input fields
+      if (emailController.text.isEmpty ||
+          phoneController.text.isEmpty ||
+          customerNameController.text.isEmpty) {
+        toast("Please fill in required fields");
+        return;
+      }
+
       isLoading.value = true;
       customLoader.show();
-      FocusManager.instance.primaryFocus!.context;
+
       var primaryData = {
-        "customer_name": customerNameController.text,
-        "phone_number": phoneController.text,
-        "email":emailController.text,
-        "company_name": companyNameController.text,
-        "model_no":modelNoController.text,
-        "customer_type":productTypeController.text,
-        "primary_address":addressNameController.text,
-        "landmark_paci":landMarkController.text,
-        "city":cityController.text,
-        "state":stateController.text,
-        "zipcode":zipController.text,
-        "country":countryController.text,
-        "region": defaultValue,
-      };
-      var parameterData = {
+        "email": emailController.text.trim(),
+        "phone_number": phoneController.text.trim(),
+        "customer_name": customerNameController.text.trim(),
+        "company_name": companyNameController.text.trim() ?? "",
+        "brand_names": [productTypeController.text.trim() ?? ""],
+        "model_no": modelNoController.text.trim() ?? "",
+        "customer_type": "",
+        "primary_address": addressNameController.text.trim() ?? "",
+        "landmark_paci": landMarkController.text.trim() ?? "",
+        "country": countryController.text.trim() ?? "",
+        "state": stateController.text.trim() ?? "",
+        "city": cityController.text.trim() ?? "",
+        "zipcode": zipController.text.trim() ?? "",
+        "region": defaultValue.value ?? "North",
         "role": "customer"
       };
-      Get.find<AuthenticationApiService>().postCustomerListApiCall(dataBody: primaryData, parameters: parameterData).then((value){
-        var CustomerDataStr = value;
-        print("customerdata : $CustomerDataStr");
+      print("customer data ${primaryData}");
+      Get.find<AuthenticationApiService>()
+          .postCustomerListApiCall(dataBody: primaryData)
+          .then((value) {
+        print("customerdata : $value");
         customLoader.hide();
-      toast("Customer Added Successfully");
-      update();
-      }).onError((error, stackError){
+        toast("Customer Added Successfully");
+        update();
+      }).onError((error, stackTrace) {
         customLoader.hide();
         toast(error.toString());
         isLoading.value = false;
       });
-  }
+    }
 }

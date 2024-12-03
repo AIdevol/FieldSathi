@@ -218,7 +218,7 @@ _dataTableViewScreen({required LeadListViewController controller, required Build
       ], rows: controller.leadPaginationsData.map((leadData)=>
            DataRow(cells: [
              DataCell(_ticketBoxIcons(leadData.id.toString())/*Text("${leadData.id.toString()}")*/),
-             DataCell(Text("${leadData.firstName.toString()+ leadData.lastName.toString()}")),
+             DataCell(Text("${leadData.firstName.toString() +" "+ leadData.lastName.toString()}")),
              DataCell(Text("${leadData.companyName.toString()}")),
              DataCell(Text(leadData.source.toString())),
              DataCell(Text(leadData.createdAt.toString())),
@@ -345,7 +345,7 @@ _rowIconButtonData(LeadListViewController controller,BuildContext context,LeadRe
     GestureDetector(onTap: (){
       showModelEditwidget(controller, context, leadMobile);
     },child: Icon(Icons.edit),),
-    GestureDetector(onTap: (){print("delete tapped");},child: Icon(Icons.delete, color: Colors.red,),)
+    GestureDetector(onTap: (){controller.hitDeleteLeadListApiCall(leadMobile.id.toString());},child: Icon(Icons.delete, color: Colors.red,),)
   ],);
 }
 
@@ -880,7 +880,7 @@ _formEdit(LeadListViewController controller, BuildContext context, LeadResult le
       vGap(20),
       _customerSourceContainer(controller),
       vGap(20),
-      _customButtonViewWidget(controller: controller,context: context),
+      _customButtonViewWidget(controller,context,leadMobile),
       vGap(20),
     ],),
   );
@@ -1024,13 +1024,13 @@ _customerSourceContainer(LeadListViewController controller){
   );
 }
 
-Widget _customButtonViewWidget({required LeadListViewController controller,required BuildContext context}) {
+Widget _customButtonViewWidget( LeadListViewController controller,BuildContext context,LeadResult leadMobile) {
   return Row(
-    mainAxisAlignment: MainAxisAlignment.end,
+    mainAxisAlignment: MainAxisAlignment.center,
     children: [
       _buildButton('Cancel',onPressed: ()=>Get.back(), controller: controller),
       hGap(10),
-      _buildButton('Add', onPressed: (){}/*controller.hitPostLeadlistApiCall()*/, controller:  controller),
+      _buildButton('Update', onPressed: ()=>controller.hitLeadPutMethodApiCall(leadMobile.id.toString()), controller:  controller),
       hGap(10),
       // _buildRateTextField(),
     ],

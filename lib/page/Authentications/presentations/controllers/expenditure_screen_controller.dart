@@ -114,8 +114,8 @@ class ExpenditureScreenController extends GetxController{
 
   void hitGetExpenseApiCallDetails(String technicianId)async{
     isLoading.value = true;
-    // customLoader.show();
-    FocusManager.instance.primaryFocus!.context;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
     var expencesData = {
       'technician': technicianId,
       "page_size":"all"
@@ -132,7 +132,12 @@ class ExpenditureScreenController extends GetxController{
     });
   }
 
-
+Future<void>refreshApiCall()async {
+  hitGetTechnicianApiCall();
+}
+  Future<void>refreshExpenseApiCall(String id)async {
+    hitGetExpenseApiCallDetails(id);
+  }
   void clearExpenseResults() {
     expenseResult.clear();
     update();

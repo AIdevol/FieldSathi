@@ -398,10 +398,8 @@ class TicketListCreation extends GetView<TicketListCreationController> {
       textInputType: TextInputType.datetime,
       focusNode: controller.focusNode,
       labletext: "Date".tr,
-      prefix: IconButton(
-        onPressed: () => controller.selectDate(context),
-        icon: const Icon(Icons.calendar_month, color: Colors.black),
-      ),
+      onTap: (){controller.selectDate(context);},
+      prefix:Icon(Icons.calendar_month, color: Colors.black)
     );
   }
 

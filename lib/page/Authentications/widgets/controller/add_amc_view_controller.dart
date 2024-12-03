@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 
@@ -182,7 +183,7 @@ class AddAmcViewController extends GetxController {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: Colors.blue,
+              primary: appColor,
               onPrimary: Colors.white,
               onSurface: Colors.black,
             ),

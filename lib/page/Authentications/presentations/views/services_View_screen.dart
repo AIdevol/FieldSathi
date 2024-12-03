@@ -43,7 +43,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
           ),
           decoration: InputDecoration(
             hintText: 'Search Service Categories...',
-            hintStyle: MontserratStyles.montserratRegularTextStyle(
+            hintStyle: MontserratStyles.montserratNormalTextStyle(
               size: 16,
               color: Colors.black54,
             ),
@@ -929,6 +929,3 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
   }
 }
 
-// extension on Object {
-//   get service => controller.all;
-// }

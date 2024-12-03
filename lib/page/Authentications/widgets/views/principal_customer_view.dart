@@ -43,6 +43,8 @@ class PrincipalCustomerView extends GetView<PrincipalCstomerViewController> {
 
   Widget _widgetView({required BuildContext context}) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      // mainAxisAlignment: MainAxisAlignment.center,
       children: [
         vGap(20),
         _buildCustomerName(context: context),
@@ -78,7 +80,7 @@ class PrincipalCustomerView extends GetView<PrincipalCstomerViewController> {
         _countryView(context: context),
         vGap(20),
         _buildSelectedRegion(context: context),
-        vGap(20),
+        vGap(40),
         _buildOptionbutton(controller: controller, context: context)
       ],
     );
@@ -184,7 +186,7 @@ class PrincipalCustomerView extends GetView<PrincipalCstomerViewController> {
     return CustomTextField(
       hintText: "Zip code".tr,
       controller: controller.zipController,
-      textInputType: TextInputType.text,
+      textInputType: TextInputType.number,
       onFieldSubmitted: (String? value) {},
       labletext: "Zip code".tr,
     );
@@ -207,14 +209,12 @@ class PrincipalCustomerView extends GetView<PrincipalCstomerViewController> {
       textInputType: TextInputType.text,
       onFieldSubmitted: (String? value) {},
       labletext: "Selected Region".tr,
-      controller: TextEditingController(text: controller.defaultValue),
+      controller: TextEditingController(text: controller.defaultValue.value),
+      onTap: (){
+        _showRegionSelection(controller, context);
+      },
       readOnly: true,
-      suffix: IconButton(
-        onPressed: () {
-          _showRegionSelection(controller, context);
-        },
-        icon: Icon(Icons.keyboard_arrow_down, color: Colors.black),
-      ),
+      suffix: Icon(Icons.keyboard_arrow_down, color: Colors.black)
     );
   }
 
@@ -247,7 +247,7 @@ class PrincipalCustomerView extends GetView<PrincipalCstomerViewController> {
 }
 _buildOptionbutton({required PrincipalCstomerViewController controller,required BuildContext context}){
   return  Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton(
           onPressed: () => Get.back(),
@@ -303,39 +303,46 @@ class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
   }
 
   Widget _buildProductTypeField({required bool isFirst}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        children: [
-          Expanded(
-            child: CustomTextField(
-              hintText: "Product Type".tr,
-              textInputType: TextInputType.text,
-              onFieldSubmitted: (String? value) {},
-              labletext: "Product Type".tr,
-              prefix: Icon(Icons.production_quantity_limits, color: Colors.black),
+    return GetBuilder<PrincipalCstomerViewController>(
+      init: PrincipalCstomerViewController(),
+      builder: (controller)=>
+       Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,  // Align to the bottom
+          children: [
+            Expanded(
+              child: CustomTextField(
+                controller: controller.productTypeController,
+                hintText: "Product Type".tr,
+                textInputType: TextInputType.text,
+                onFieldSubmitted: (String? value) {},
+                labletext: "Product Type".tr,
+                prefix: Icon(Icons.production_quantity_limits, color: Colors.black),
+              ),
             ),
-          ),
-          hGap(20),
-          Column(
-            children: [
-              _buildAddButton(),
-              vGap(10),
-              if (!isFirst) _buildDeleteButton(),
-            ],
-          )
-        ],
+            SizedBox(width: 20),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildAddButton(),
+                if (!isFirst) ...[
+                  SizedBox(height: 10),
+                  _buildDeleteButton(),
+                ],
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildDeleteButton() {
-    return Container(
+    return SizedBox(
       width: 40,
       height: 40,
       child: FloatingActionButton(
-        child: Icon(Icons.delete, color: Colors.white),
-        backgroundColor: Colors.red,
         onPressed: () {
           setState(() {
             if (_productTypeFields.length > 1) {
@@ -343,30 +350,32 @@ class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
             }
           });
         },
+        backgroundColor: Colors.red,
         mini: true,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
         ),
+        child: Icon(Icons.delete, color: Colors.white),
       ),
     );
   }
 
   Widget _buildAddButton() {
-    return Container(
+    return SizedBox(
       width: 40,
       height: 40,
       child: FloatingActionButton(
-        child: Icon(Icons.add, color: Colors.white),
-        backgroundColor: Colors.blue,
         onPressed: () {
           setState(() {
             _productTypeFields.add(_buildProductTypeField(isFirst: false));
           });
         },
+        backgroundColor: Colors.blue,
         mini: true,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
         ),
+        child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }

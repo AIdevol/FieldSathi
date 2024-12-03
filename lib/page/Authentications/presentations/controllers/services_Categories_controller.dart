@@ -160,37 +160,43 @@ class ServiceCategoriesController extends GetxController {
     // }
   }
 
-  void hitPostServiceCategoriesApiCall(){
+  void hitPostServiceCategoriesApiCall() {
     isLoading.value = true;
     customLoader.show();
-    FocusManager.instance.primaryFocus!.context;
+    FocusManager.instance.primaryFocus?.unfocus();
+
     var serviceData = {
       "service_category_name": CategoryController.text,
       "service_cat_descriptions": CategoryDescriptionController.text,
-      // "service_cat_image":selectedImage.value != null ? selectedImage.value!.path : ""
     };
-    File?  selectedFile = selectedImage.value;
-      dioo.FormData formData = dioo.FormData.fromMap({
-    ...serviceData,
-    if (selectedFile != null)
-      "service_cat_image": dioo.MultipartFile.fromFileSync(
-        selectedFile.path,
-        filename: selectedFile.path.split('/').last,
-      ),
-  });
+    File? selectedFile = selectedImage.value;
+    dioo.FormData formData = dioo.FormData.fromMap({
+      ...serviceData,
+      if (selectedFile != null)
+        "service_cat_image": dioo.MultipartFile.fromFileSync(
+          selectedFile.path,
+          filename: selectedFile.path.split('/').last,
+        ),
+    });
 
-    Get.find<AuthenticationApiService>().postServiceCategoriesApiCall(dataBody: formData).then((value){
+    Get.find<AuthenticationApiService>()
+        .postServiceCategoriesApiCall(dataBody: formData)
+        .then((value) {
       customLoader.hide();
       toast('Services Added Successfully');
+      // Clear controllers and selected image after successful upload
+      CategoryController.clear();
+      CategoryDescriptionController.clear();
+      clearSelectedImage();
       update();
       Get.back();
-    }).onError((error, stackError){
+    }).onError((error, stackError) {
       customLoader.hide();
       toast(error.toString());
       isLoading.value = false;
     });
-
   }
+
 
   void hitGetSubServicesCategoriesApiCall(){
     isLoading.value = true;
