@@ -405,7 +405,7 @@ class TicketListCreation extends GetView<TicketListCreationController> {
 
   Widget _buildButtonView(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton(
           onPressed: () {},
@@ -774,7 +774,7 @@ _phoneNumberField(TicketListCreationController controller, BuildContext context)
 
 _buildOptionButtons(TicketListCreationController controller, BuildContext context) {
   return Row(
-    mainAxisAlignment: MainAxisAlignment.end,
+    mainAxisAlignment: MainAxisAlignment.center,
     children: [
       ElevatedButton(
         onPressed: () {

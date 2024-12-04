@@ -37,6 +37,7 @@ import '../../../response_models/register_response_model.dart';
 import '../../../response_models/resend_otp_api_call.dart';
 import '../../../response_models/sales_response_model.dart';
 import '../../../response_models/service_requests_response_model.dart';
+import '../../../response_models/sub_service_by_subServiceId_response_model.dart';
 import '../../../response_models/super_user_response_model.dart';
 import '../api_end.dart';
 import '../network_except.dart';
@@ -879,15 +880,53 @@ Future<PostServiceCategoryResponseModel>postServiceCategoriesApiCall({required d
       return Future.error(NetworkExceptions.getDioException(error));
     }
 }
+  @override
+  Future<PostServiceCategoryResponseModel>deleteServiceCategoriesApiCall({Map<String, dynamic>? dataBody, parameters, String? id})async{
+    try{
+      final response = await dioClient!.delete("${ApiEnd.serviceCategories}$id/",data: dataBody, skipAuth: false);
+      return PostServiceCategoryResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
   // ====================================================Sub Service Api Call =======================================================
   @override
-  Future<SubService> getSub_ServiceCategoriesApiCall(
-      {Map<String, dynamic>? dataBody}) async {
+  Future<SubServiceResponseModel> getSub_ServiceCategoriesApiCall(
+      {Map<String, dynamic>? dataBody, parameters}) async {
     try {
       final response = await dioClient!.get(
-          ApiEnd.serviceSubCategories, data: dataBody, skipAuth: false);
-      return SubService.fromJson(response);
+          "${ApiEnd.serviceSubCategories}", data: dataBody,queryParameters: parameters, skipAuth: false);
+      return SubServiceResponseModel.fromJson(response);
     } catch (error) {
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+  @override
+  Future<SubServiceBySubServiceIdResponseModel> getSub_ServiceCategoriesByIdApiCall(
+      {Map<String, dynamic>? dataBody, parameters}) async {
+    try {
+      final response = await dioClient!.get(
+          "${ApiEnd.serviceEnd}", data: dataBody,queryParameters: parameters, skipAuth: false);
+      return SubServiceBySubServiceIdResponseModel.fromJson(response);
+    } catch (error) {
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+  @override
+  Future<PostServiceCategoryResponseModel> PostSub_ServiceCategoriesByIdApiCall({required dioo.FormData dataBody}) async {
+    try {
+      final response = await dioClient!.post("${ApiEnd.serviceEnd}", data: dataBody, skipAuth: false);
+      return PostServiceCategoryResponseModel.fromJson(response);
+    } catch (error) {
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+  @override
+  Future<PostSubServiceResponseModel>postSubServiceCategoriesApiCall({required dioo.FormData dataBody})async{
+    try{
+      final response = await dioClient!.post(ApiEnd.serviceSubCategories,data: dataBody, skipAuth: false);
+      return PostSubServiceResponseModel.fromJson(response);
+    }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }
   }

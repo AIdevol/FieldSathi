@@ -382,7 +382,16 @@ class ExpenseTableView extends GetView<ExpenditureScreenController> {
       DataCell(Text(description, style: _cellTextStyle())),
       DataCell(_buildStatusChip(status)),
       DataCell(Text(remark, style: _cellTextStyle())),
-      DataCell(Text(image, style: _cellTextStyle())),
+      DataCell(Row(
+        children: [
+          Text(image, style: _cellTextStyle()),
+          if (image.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.download, color: appColor, size: 20),
+              onPressed: () {},
+            ),
+        ],
+      )),
       DataCell(
           _addTicketViewButton(expenseId)
         // IconButton(

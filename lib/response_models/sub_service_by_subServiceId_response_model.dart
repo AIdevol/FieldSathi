@@ -1,20 +1,20 @@
-class SubServiceResponseModel {
+class SubServiceBySubServiceIdResponseModel {
   int? count;
   int? totalPages;
   int? currentPage;
-  List<SubService>? results;
+  List<Results>? results;
 
-  SubServiceResponseModel(
+  SubServiceBySubServiceIdResponseModel(
       {this.count, this.totalPages, this.currentPage, this.results});
 
-  SubServiceResponseModel.fromJson(Map<String, dynamic> json) {
+  SubServiceBySubServiceIdResponseModel.fromJson(Map<String, dynamic> json) {
     count = json['count'];
     totalPages = json['total_pages'];
     currentPage = json['current_page'];
     if (json['results'] != null) {
-      results = <SubService>[];
+      results = <Results>[];
       json['results'].forEach((v) {
-        results!.add(new SubService.fromJson(v));
+        results!.add(new Results.fromJson(v));
       });
     }
   }
@@ -31,16 +31,77 @@ class SubServiceResponseModel {
   }
 }
 
-class SubService {
+class Results {
+  int? id;
+  String? serviceName;
+  String? servicePrice;
+  String? serviceContactNumber;
+  String? serviceDescription;
+  String? serviceImage1;
+  String? serviceImage2;
+  Null? serviceImage3;
+  ServiceSubCategory? serviceSubCategory;
+  int? createdBy;
+  int? admin;
+
+  Results(
+      {this.id,
+        this.serviceName,
+        this.servicePrice,
+        this.serviceContactNumber,
+        this.serviceDescription,
+        this.serviceImage1,
+        this.serviceImage2,
+        this.serviceImage3,
+        this.serviceSubCategory,
+        this.createdBy,
+        this.admin});
+
+  Results.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    serviceName = json['service_name'];
+    servicePrice = json['service_price'];
+    serviceContactNumber = json['service_contact_number'];
+    serviceDescription = json['service_description'];
+    serviceImage1 = json['service_image1'];
+    serviceImage2 = json['service_image2'];
+    serviceImage3 = json['service_image3'];
+    serviceSubCategory = json['service_sub_category'] != null
+        ? new ServiceSubCategory.fromJson(json['service_sub_category'])
+        : null;
+    createdBy = json['created_by'];
+    admin = json['admin'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['service_name'] = this.serviceName;
+    data['service_price'] = this.servicePrice;
+    data['service_contact_number'] = this.serviceContactNumber;
+    data['service_description'] = this.serviceDescription;
+    data['service_image1'] = this.serviceImage1;
+    data['service_image2'] = this.serviceImage2;
+    data['service_image3'] = this.serviceImage3;
+    if (this.serviceSubCategory != null) {
+      data['service_sub_category'] = this.serviceSubCategory!.toJson();
+    }
+    data['created_by'] = this.createdBy;
+    data['admin'] = this.admin;
+    return data;
+  }
+}
+
+class ServiceSubCategory {
   int? id;
   String? serviceSubCategoryName;
   String? serviceSubCatDescription;
   String? serviceSubImage;
-  ServiceCategories? serviceCategory;
+  ServiceCategoriesDetails? serviceCategory;
   int? createdBy;
   int? admin;
 
-  SubService(
+  ServiceSubCategory(
       {this.id,
         this.serviceSubCategoryName,
         this.serviceSubCatDescription,
@@ -49,13 +110,13 @@ class SubService {
         this.createdBy,
         this.admin});
 
-  SubService.fromJson(Map<String, dynamic> json) {
+  ServiceSubCategory.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     serviceSubCategoryName = json['service_sub_category_name'];
     serviceSubCatDescription = json['service_sub_cat_description'];
     serviceSubImage = json['service_sub_image'];
     serviceCategory = json['service_category'] != null
-        ? new ServiceCategories.fromJson(json['service_category'])
+        ? new ServiceCategoriesDetails.fromJson(json['service_category'])
         : null;
     createdBy = json['created_by'];
     admin = json['admin'];
@@ -76,7 +137,7 @@ class SubService {
   }
 }
 
-class ServiceCategories {
+class ServiceCategoriesDetails {
   int? id;
   String? serviceCategoryName;
   String? serviceCatDescriptions;
@@ -84,7 +145,7 @@ class ServiceCategories {
   int? createdBy;
   int? admin;
 
-  ServiceCategories(
+  ServiceCategoriesDetails(
       {this.id,
         this.serviceCategoryName,
         this.serviceCatDescriptions,
@@ -92,7 +153,7 @@ class ServiceCategories {
         this.createdBy,
         this.admin});
 
-  ServiceCategories.fromJson(Map<String, dynamic> json) {
+  ServiceCategoriesDetails.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     serviceCategoryName = json['service_category_name'];
     serviceCatDescriptions = json['service_cat_descriptions'];
@@ -112,18 +173,78 @@ class ServiceCategories {
     return data;
   }
 }
+//========================================================================sub service post model =======================
+class PostSubServiceCategoryResponseModel {
+  int? id;
+  String? serviceName;
+  String? servicePrice;
+  String? serviceContactNumber;
+  String? serviceDescription;
+  String? serviceImage1;
+  String? serviceImage2;
+  Null? serviceImage3;
+  ServiceSubCategory? serviceSubCategory;
+  int? createdBy;
+  int? admin;
 
-// ==============================================================post service==========================================
-class PostSubServiceResponseModel {
+  PostSubServiceCategoryResponseModel(
+      {this.id,
+        this.serviceName,
+        this.servicePrice,
+        this.serviceContactNumber,
+        this.serviceDescription,
+        this.serviceImage1,
+        this.serviceImage2,
+        this.serviceImage3,
+        this.serviceSubCategory,
+        this.createdBy,
+        this.admin});
+
+  PostSubServiceCategoryResponseModel.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    serviceName = json['service_name'];
+    servicePrice = json['service_price'];
+    serviceContactNumber = json['service_contact_number'];
+    serviceDescription = json['service_description'];
+    serviceImage1 = json['service_image1'];
+    serviceImage2 = json['service_image2'];
+    serviceImage3 = json['service_image3'];
+    serviceSubCategory = json['service_sub_category'] != null
+        ? new ServiceSubCategory.fromJson(json['service_sub_category'])
+        : null;
+    createdBy = json['created_by'];
+    admin = json['admin'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['service_name'] = this.serviceName;
+    data['service_price'] = this.servicePrice;
+    data['service_contact_number'] = this.serviceContactNumber;
+    data['service_description'] = this.serviceDescription;
+    data['service_image1'] = this.serviceImage1;
+    data['service_image2'] = this.serviceImage2;
+    data['service_image3'] = this.serviceImage3;
+    if (this.serviceSubCategory != null) {
+      data['service_sub_category'] = this.serviceSubCategory!.toJson();
+    }
+    data['created_by'] = this.createdBy;
+    data['admin'] = this.admin;
+    return data;
+  }
+}
+
+class ServiceSubCategoryModel {
   int? id;
   String? serviceSubCategoryName;
   String? serviceSubCatDescription;
   String? serviceSubImage;
-  ServiceCategoryDetails? serviceCategory;
+  ServiceCategoryModels? serviceCategory;
   int? createdBy;
   int? admin;
 
-  PostSubServiceResponseModel(
+  ServiceSubCategoryModel(
       {this.id,
         this.serviceSubCategoryName,
         this.serviceSubCatDescription,
@@ -132,13 +253,13 @@ class PostSubServiceResponseModel {
         this.createdBy,
         this.admin});
 
-  PostSubServiceResponseModel.fromJson(Map<String, dynamic> json) {
+  ServiceSubCategoryModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     serviceSubCategoryName = json['service_sub_category_name'];
     serviceSubCatDescription = json['service_sub_cat_description'];
     serviceSubImage = json['service_sub_image'];
     serviceCategory = json['service_category'] != null
-        ? new ServiceCategoryDetails.fromJson(json['service_category'])
+        ? new ServiceCategoryModels.fromJson(json['service_category'])
         : null;
     createdBy = json['created_by'];
     admin = json['admin'];
@@ -159,7 +280,7 @@ class PostSubServiceResponseModel {
   }
 }
 
-class ServiceCategoryDetails {
+class ServiceCategoryModels {
   int? id;
   String? serviceCategoryName;
   String? serviceCatDescriptions;
@@ -167,7 +288,7 @@ class ServiceCategoryDetails {
   int? createdBy;
   int? admin;
 
-  ServiceCategoryDetails(
+  ServiceCategoryModels(
       {this.id,
         this.serviceCategoryName,
         this.serviceCatDescriptions,
@@ -175,7 +296,7 @@ class ServiceCategoryDetails {
         this.createdBy,
         this.admin});
 
-  ServiceCategoryDetails.fromJson(Map<String, dynamic> json) {
+  ServiceCategoryModels.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     serviceCategoryName = json['service_category_name'];
     serviceCatDescriptions = json['service_cat_descriptions'];

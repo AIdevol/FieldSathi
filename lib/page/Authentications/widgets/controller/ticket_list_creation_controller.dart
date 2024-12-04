@@ -290,6 +290,8 @@ class TicketListCreationController extends GetxController {
     Get.find<AuthenticationApiService>().postTicketDetailsApiCall(dataBody:ticketData).then((value){
       customLoader.hide();
       toast("Ticket have been added");
+      Get.back();
+      fetchTicketsApiCall();
       update();
     }).onError((error, stackError){
       customLoader.hide();
