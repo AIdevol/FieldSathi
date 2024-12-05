@@ -101,7 +101,7 @@ class HomeScreen extends GetView<HomeScreenController> {
 
   Widget _buildTicketSection(BuildContext context) {
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.99,
+      height: MediaQuery.of(context).size.height * 1,
       child: _buildDashboardCard(
         context: context,
         title: 'Ticket Details',

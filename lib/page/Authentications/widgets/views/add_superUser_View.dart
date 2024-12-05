@@ -133,7 +133,7 @@ _phoneNumberField(AddSuperUserViewController controller, BuildContext context){
 
 _buildOptionButtons(AddSuperUserViewController controller, BuildContext context) {
   return Row(
-    mainAxisAlignment: MainAxisAlignment.end,
+    mainAxisAlignment: MainAxisAlignment.center,
     children: [
       ElevatedButton(
         onPressed: () {

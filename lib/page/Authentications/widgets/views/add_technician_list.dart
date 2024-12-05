@@ -172,7 +172,7 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
 
   Widget _buildOptionButtons(AddTechnicianListController controller) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton(
           onPressed: () {

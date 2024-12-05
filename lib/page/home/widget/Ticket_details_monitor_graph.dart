@@ -19,7 +19,6 @@ class GraphViewScreen extends GetView<GraphViewController> {
             : SingleChildScrollView(
           child: Column(
             children: [
-              // Pie Chart Section with fixed height
               SizedBox(
                 height: 300,
                 child: Container(

@@ -124,4 +124,9 @@ class GraphViewController extends GetxController {
       customLoader.hide();
     });
   }
+
+  Future<void>refreshTicketData()async{
+    fetchTicketsApiCall();
+    hitTicketCountsApiCall();
+  }
 }

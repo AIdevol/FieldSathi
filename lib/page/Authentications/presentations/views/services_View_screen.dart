@@ -15,6 +15,7 @@ import 'package:tms_sathi/utilities/helper_widget.dart';
 
 import '../../../../constans/string_const.dart';
 import '../../../../response_models/services_response_model.dart';
+import '../../../../response_models/sub_service_by_subServiceId_response_model.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 
 class ServicesViewScreen extends GetView<ServiceCategoriesController> {
@@ -910,13 +911,13 @@ class SubServiceScreenView extends GetView<ServiceCategoriesController> {
               ),
             ),
           ),
-          body: _buildSubServiceContent(controller, serviceCategoryId),
+          body: _buildSubServiceContent(controller, context,serviceCategoryId),
         ),
       ),
     );
   }
 
-  Widget _buildSubServiceContent(ServiceCategoriesController controller, int serviceCategoryId) {
+  Widget _buildSubServiceContent(ServiceCategoriesController controller,BuildContext context, int serviceCategoryId) {
     return Obx(() {
       if (controller.subServicesAll.isEmpty) {
         return _buildEmptyState();
@@ -1057,7 +1058,7 @@ class SubServiceScreenView extends GetView<ServiceCategoriesController> {
                             ],
                           ),
                         ),
-                        IconButton(onPressed: (){}, icon: Icon(Icons.more_vert, color: Colors.blue.shade700,)),
+                    _customripValueMenuforEditAndDeletingServices(controller,context,subServices[index]),
 
                         // Expand/Collapse Indicator
                         Icon(
@@ -1065,6 +1066,7 @@ class SubServiceScreenView extends GetView<ServiceCategoriesController> {
                               ? Icons.keyboard_arrow_up
                               : Icons.keyboard_arrow_down,
                           color: Colors.blue.shade700,
+                          size: 30,
                         ),
                       ],
                     ),
@@ -1092,48 +1094,6 @@ class SubServiceScreenView extends GetView<ServiceCategoriesController> {
                       _buildButton("Add Services",onPressed: ()=>_addIngServicesforSubServices(context,controller)),
                       vGap(15),
                       TableViewForSubServiceContentsDetails(subServiceId: subServices[index].id!.toInt(),)
-                      // _tableViewForSubServiceContentsDetails(context,controller,subServices[index])
-                      // Text(
-                      //   'Additional Details',
-                      //   style: TextStyle(
-                      //     fontSize: 16,
-                      //     fontWeight: FontWeight.bold,
-                      //     color: Colors.blue.shade900,
-                      //   ),
-                      // ),
-                      // const SizedBox(height: 10),
-                      // // TODO: Implement your detailed view here
-                      // Text(
-                      //   'Placeholder for detailed information about the service. '
-                      //       'You can add more specific details, pricing, description, '
-                      //       'or any other relevant information.',
-                      //   style: TextStyle(
-                      //     fontSize: 14,
-                      //     color: Colors.grey.shade700,
-                      //   ),
-                      // ),
-                      // const SizedBox(height: 10),
-                      // Center(
-                      //   child: ElevatedButton(
-                      //     style: ElevatedButton.styleFrom(
-                      //       backgroundColor: Colors.blue.shade600,
-                      //       shape: RoundedRectangleBorder(
-                      //         borderRadius: BorderRadius.circular(10),
-                      //       ),
-                      //     ),
-                      //     onPressed: () {
-                      //       // TODO: Implement action when button is pressed
-                      //       print('Service ${subServices[index].id} action triggered');
-                      //     },
-                      //     child: Text(
-                      //       'View More',
-                      //       style: TextStyle(
-                      //         color: Colors.white,
-                      //         fontWeight: FontWeight.bold,
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),
@@ -1144,6 +1104,227 @@ class SubServiceScreenView extends GetView<ServiceCategoriesController> {
     );
   }
 }
+Widget _customripValueMenuforEditAndDeletingServices(ServiceCategoriesController controller,BuildContext context,SubService services) {
+  return PopupMenuButton<String>(
+    iconColor: Colors.blue.shade700,
+    color: CupertinoColors.white,
+    offset: Offset(0, 56),
+    itemBuilder: (BuildContext context) =>
+    <PopupMenuEntry<String>>[
+      PopupMenuItem<String>(
+        value: 'Edit',
+        onTap: () {
+          _popUpScreenDetailsForAddingSubServiceScreen(controller,services);
+        },
+        child: const ListTile(
+          leading: Icon(
+            Icons.edit_calendar_outlined, size: 20, color: Colors.black,),
+          title: Text('Edit'),
+        ),
+      ),
+      PopupMenuItem<String>(
+        value: 'Delete',
+        onTap: () {
+        },
+        child: const ListTile(
+          leading: Icon(Icons.delete, size: 20, color: Colors.red,),
+          title: Text('Delete'),
+        ),
+      ),
+    ],
+  );
+}
+
+void _popUpScreenDetailsForAddingSubServiceScreen(
+    ServiceCategoriesController controller,  SubService service) {
+  // String selectedType = controller.filteredServices.first;
+  Get.dialog(
+    Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: SingleChildScrollView(
+        child: Container(
+          width: Get.width * 0.8,
+          padding: EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Text(
+                  "Add Sub-Service Category",
+                  style: MontserratStyles.montserratBoldTextStyle(
+                      size: 24, color: blackColor),
+                ),
+              ),
+              SizedBox(height: 24),
+              Text(
+                "Sub-Category Name",
+                style: MontserratStyles.montserratMediumTextStyle(
+                    size: 16, color: Colors.grey),
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: controller.SubCategoryController,
+                decoration: InputDecoration(
+                  hintText: "Enter sub-category name",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                ),
+              ),
+              SizedBox(height: 24),
+              Text(
+                "Sub-Category Description",
+                style: MontserratStyles.montserratMediumTextStyle(
+                    size: 16, color: Colors.grey),
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: controller.SubCategoryDescriptionController,
+                maxLines: 8,
+                decoration: InputDecoration(
+                  hintText: "Enter Sub-category description",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                ),
+              ),
+              SizedBox(height: 24),
+              Text(
+                "Select Service",
+                style: MontserratStyles.montserratMediumTextStyle(
+                    size: 16, color: Colors.grey),
+              ),
+              SizedBox(height: 8),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[300]!),
+                  color: Colors.grey[100],
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<ServiceCategory>(
+                    isExpanded: true,
+                    value: controller.selectedServiceCategory.value,
+                    items: controller.filteredServices.map((categoryValue) {
+                      return DropdownMenuItem<ServiceCategory>(
+                        value: categoryValue,
+                        child: Text(categoryValue.serviceCategoryName.toString()),
+                      );
+                    }).toList(),
+                    onChanged: (ServiceCategory? newValue) {
+                      if(newValue != null){
+                        controller.selectedServiceCategory.value = newValue;
+                        controller.CategoryController.text = newValue.serviceCategoryName.toString();
+                        controller.subServiceCategoryId.value = newValue.id ?? 0;
+                        print("selected service: ${controller.CategoryController}");
+                      }
+                    },
+                  ),
+                ),
+              ),
+              SizedBox(height: 24),
+              Text(
+                "Category Icon",
+                style: MontserratStyles.montserratMediumTextStyle(
+                    size: 16, color: Colors.grey),
+              ),
+              SizedBox(height: 8),
+              // Replace your existing image selection Row with this:
+              Row(
+                children: [
+                  InkWell(
+                    onTap: () => controller.showImagePickerDialog(),
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Obx(() => controller.selectedImage.value != null
+                          ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
+                          controller.selectedImage.value!,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                          : Icon(FontAwesomeIcons.upload, size: 32, color: appColor),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Upload Image",
+                          style: MontserratStyles.montserratRegularTextStyle(
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        if (controller.isImageSelected.value)
+                          TextButton(
+                            onPressed: () => controller.clearSelectedImage(),
+                            child: Text(
+                              "Clear Selection",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Get.back(),
+                    child: Text(
+                      "Cancel",
+                      style: MontserratStyles.montserratMediumTextStyle(
+                          size: 16, color: Colors.grey),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      // controller.hitPostSubServiceCategoriesApiCall();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: appColor,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                    ),
+                    child: Text(
+                      "Submit",
+                      style: MontserratStyles.montserratBoldTextStyle(
+                          size: 16, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+
+
 
 class TableViewForSubServiceContentsDetails extends StatefulWidget {
   final int subServiceId;
@@ -1164,7 +1345,6 @@ class _TableViewForSubServiceContentsDetailsState
   @override
   void initState() {
     super.initState();
-    // Call API only once when the widget is first created
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Get.find<ServiceCategoriesController>()
           .hitGetSubServiceByIdApiCall(widget.subServiceId.toString());
@@ -1205,6 +1385,7 @@ class _TableViewForSubServiceContentsDetailsState
             width: 1,
           ),
           columns: [
+            DataColumn(label: Text('Image', style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13))),
             DataColumn(label: Text('Service Name', style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13))),
             DataColumn(label: Text('Service Estimate', style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13))),
             DataColumn(label: Text('Service Description', style: MontserratStyles.montserratBoldTextStyle(color: Colors.black, size: 13))),
@@ -1212,10 +1393,13 @@ class _TableViewForSubServiceContentsDetailsState
           ],
           rows: controller.SubserviceById.map((subService) {
             return DataRow(cells: [
-              DataCell(Text(subService.serviceName.toString())),
+              DataCell(CircleAvatar(backgroundImage: subService.serviceImage1 != null
+                  ? NetworkImage(subService.serviceImage1!)
+                  : AssetImage(appIcon) as ImageProvider,)),
+              DataCell(_SubserviceBoxIcons(subService.id.toString(),subService.serviceName.toString())/*Text(subService.serviceName.toString())*/),
               DataCell(Text(subService.servicePrice.toString())),
               DataCell(Text(subService.serviceDescription.toString())),
-              DataCell(Text(subService.id.toString())),
+              DataCell(_ValueMenuforEditAndDeletingServices(controller,context, subService)),
             ]);
           }).toList(),
         ),
@@ -1224,7 +1408,36 @@ class _TableViewForSubServiceContentsDetailsState
   }
 }
 
-
+Widget _ValueMenuforEditAndDeletingServices(ServiceCategoriesController controller,BuildContext context,Results services) {
+  return PopupMenuButton<String>(
+    // iconColor: Colors.blue.shade700,
+    color: CupertinoColors.white,
+    offset: Offset(0, 56),
+    itemBuilder: (BuildContext context) =>
+    <PopupMenuEntry<String>>[
+      PopupMenuItem<String>(
+        value: 'Edit',
+        onTap: () {
+          // _popUpScreenDetailsForAddingSubServiceScreen(controller);
+        },
+        child: const ListTile(
+          leading: Icon(
+            Icons.edit_calendar_outlined, size: 20, color: Colors.black,),
+          title: Text('Edit'),
+        ),
+      ),
+      PopupMenuItem<String>(
+        value: 'Delete',
+        onTap: () {
+        },
+        child: const ListTile(
+          leading: Icon(Icons.delete, size: 20, color: Colors.red,),
+          title: Text('Delete'),
+        ),
+      ),
+    ],
+  );
+}
 Widget _buildButton(String text,{required onPressed}) {
   return Container(
     alignment: Alignment.topRight,
