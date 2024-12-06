@@ -28,6 +28,7 @@ class ServiceCategoriesController extends GetxController {
   final TextEditingController serviceDescriptionController = TextEditingController();
   final isSearching = false.obs;
   final searchController = TextEditingController();
+  String? selectedSubcategory;
   final RxList<ServiceCategory> allServices = <ServiceCategory>[].obs;
   final RxList<ServiceCategory> filteredServices = <ServiceCategory>[].obs;
   final RxList<SubService> subServicesAll = <SubService>[].obs;
@@ -50,6 +51,9 @@ class ServiceCategoriesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(Get.context!).requestFocus(FocusNode());
+    });
     hitServiceCategoriesApiCall();
   }
 
@@ -124,34 +128,7 @@ class ServiceCategoriesController extends GetxController {
   }
 
   // Show image picker dialog
-  void showImagePickerDialog() {
-    Get.dialog(
-      AlertDialog(
-        title: Text('Select Image Source'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.camera_alt),
-              title: Text('Camera'),
-              onTap: () {
-                Get.back();
-                pickImage(ImageSource.camera);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.photo_library),
-              title: Text('Gallery'),
-              onTap: () {
-                Get.back();
-                pickImage(ImageSource.gallery);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   void _clearControllers() {
     subcategoryController.clear();
@@ -410,6 +387,116 @@ class ServiceCategoriesController extends GetxController {
       toast(error.toString());
       customLoader.hide();
     });
+  }
+
+
+  void showImagePickerDialog() {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Choose Image Source',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildImageSourceButton(
+                    icon: Icons.camera_alt,
+                    label: 'Camera',
+                    color: Colors.blue,
+                    onTap: () {
+                      Get.back();
+                      pickImage(ImageSource.camera);
+                    },
+                  ),
+                  _buildImageSourceButton(
+                    icon: Icons.photo_library,
+                    label: 'Gallery',
+                    color: Colors.green,
+                    onTap: () {
+                      Get.back();
+                      pickImage(ImageSource.gallery);
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              TextButton(
+                onPressed: () => Get.back(),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
+  }
+
+// Helper method to create a styled image source button
+  Widget _buildImageSourceButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            padding: const EdgeInsets.all(15),
+            child: Icon(
+              icon,
+              size: 40,
+              color: color,
+            ),
+          ),
+          SizedBox(height: 10),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

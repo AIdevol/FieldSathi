@@ -69,7 +69,7 @@ abstract class AuthenticationApi {
   Future<AgentsPostResponseModel> putAgentDetailwsApiCall({Map<String, dynamic>? dataBody, parameters,required String id});
   Future<CustomerListResponseModel>getCustomerListApiCall({Map<String, dynamic>?dataBody, parameters});
   Future<PostCustomerListResponseModel> putCustomerListApiCall({Map<String, dynamic>?dataBody, parameters, String? id});
-  Future<CustomerListResponseModel> deleteCustomerListApiCall({Map<String, dynamic>?dataBody, parameters, String? id});
+  Future<DeleteUserResponseModel> deleteCustomerListApiCall({Map<String, dynamic>?dataBody, parameters, String? id});
   Future<PostCustomerListResponseModel> postCustomerListApiCall({Map<String, dynamic>?dataBody, parameters});
   Future<LeadGetResponseModel> getLeadListApiCall({Map<String, dynamic>?dataBody, parameters});
   Future<PostLeadListResponeModel> putLeadListApiCall({Map<String, dynamic>?dataBody, parameters, String? id});

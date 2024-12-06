@@ -1,5 +1,7 @@
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
@@ -105,7 +107,34 @@ class PrincipalCustomerView extends GetView<PrincipalCstomerViewController> {
       textInputType: TextInputType.phone,
       onFieldSubmitted: (String? value) {},
       labletext: "Mobile No".tr,
-      prefix: Icon(Icons.phone_android_rounded, color: Colors.black),
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(10),
+      ],
+      validator: (String? value) {
+        if (value == null || value.isEmpty) {
+          return "Mobile number cannot be empty";
+        } else if (value.length > 10) {
+          return "Mobile number cannot exceed 10 digits";
+        }
+        return null;
+      },
+      prefix:Container(  margin: const EdgeInsets.only(right: 10),
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(30),
+              topLeft: Radius.circular(30)),
+          // color: Colors.white,
+          border: Border.all(color: Colors.grey.shade300, width: 0.5),
+        ),child: CountryCodePicker(
+            flagWidth: 15.0,
+            initialSelection: 'IN',
+            boxDecoration: const BoxDecoration(color: Colors.transparent),
+            showCountryOnly: true,
+            onChanged: (value) {
+              controller.phoneCountryCode.value = value.dialCode.toString();
+              // controller.update();
+            }),) ,
     );
   }
 
@@ -189,6 +218,18 @@ class PrincipalCustomerView extends GetView<PrincipalCstomerViewController> {
       textInputType: TextInputType.number,
       onFieldSubmitted: (String? value) {},
       labletext: "Zip code".tr,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(6),
+      ],
+      validator: (String? value){
+    if (value == null || value.isEmpty) {
+    return "Mobile number cannot be empty";
+    } else if (value.length > 10) {
+    return "Mobile number cannot exceed 10 digits";
+    }
+    return null;
+      },
     );
   }
 
@@ -223,27 +264,58 @@ class PrincipalCustomerView extends GetView<PrincipalCstomerViewController> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          // title: Text("Select Region"),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Text(
+            "Select Region",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: appColor,
+            ),
+          ),
           content: Container(
             width: double.maxFinite,
-            child: ListView.builder(
+            child: ListView.separated(
               shrinkWrap: true,
               itemCount: controller.regionValues.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(controller.regionValues[index]),
+                return GestureDetector(
                   onTap: () {
                     controller.updateRegion(controller.regionValues[index]);
                     Navigator.of(context).pop();
                   },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.grey[200],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          controller.regionValues[index],
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
+                        ),
+                        Icon(
+                          Icons.location_on,
+                          color: appColor,
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               },
+              separatorBuilder: (context, index) => SizedBox(height: 8),
             ),
           ),
         );
       },
     );
   }
+
 }
 _buildOptionbutton({required PrincipalCstomerViewController controller,required BuildContext context}){
   return  Row(
@@ -269,7 +341,7 @@ _buildOptionbutton({required PrincipalCstomerViewController controller,required 
         ElevatedButton(
           onPressed: (){
             controller.hitPostCustomerApiCall();
-            Get.back();},
+        },
           child: Text('Add',style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),),
           style: ButtonStyle(
             backgroundColor: WidgetStateProperty.all(appColor),
@@ -294,46 +366,67 @@ class ProductTypeBuilder extends StatefulWidget {
 }
 
 class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
+  List<TextEditingController> _controllers = [];
   List<Widget> _productTypeFields = [];
 
   @override
   void initState() {
     super.initState();
-    _productTypeFields.add(_buildProductTypeField(isFirst: true));
+    _addNewProductTypeField();
   }
 
-  Widget _buildProductTypeField({required bool isFirst}) {
-    return GetBuilder<PrincipalCstomerViewController>(
-      init: PrincipalCstomerViewController(),
-      builder: (controller)=>
-       Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,  // Align to the bottom
-          children: [
-            Expanded(
-              child: CustomTextField(
-                controller: controller.productTypeController,
-                hintText: "Product Type".tr,
-                textInputType: TextInputType.text,
-                onFieldSubmitted: (String? value) {},
-                labletext: "Product Type".tr,
-                prefix: Icon(Icons.production_quantity_limits, color: Colors.black),
-              ),
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _addNewProductTypeField() {
+    // Create a new text editing controller
+    final newController = TextEditingController();
+    _controllers.add(newController);
+
+    setState(() {
+      _productTypeFields.add(_buildProductTypeField(
+          controller: newController,
+          isFirst: _productTypeFields.isEmpty
+      ));
+    });
+  }
+
+  Widget _buildProductTypeField({
+    required TextEditingController controller,
+    required bool isFirst
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: CustomTextField(
+              controller: controller,
+              hintText: "Product Type".tr,
+              textInputType: TextInputType.text,
+              onFieldSubmitted: (String? value) {},
+              labletext: "Product Type".tr,
+              prefix: Icon(Icons.production_quantity_limits, color: Colors.black),
             ),
-            SizedBox(width: 20),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildAddButton(),
-                if (!isFirst) ...[
-                  SizedBox(height: 10),
-                  _buildDeleteButton(),
-                ],
+          ),
+          SizedBox(width: 20),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildAddButton(),
+              if (!isFirst) ...[
+                SizedBox(height: 10),
+                _buildDeleteButton(),
               ],
-            )
-          ],
-        ),
+            ],
+          )
+        ],
       ),
     );
   }
@@ -346,7 +439,10 @@ class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
         onPressed: () {
           setState(() {
             if (_productTypeFields.length > 1) {
+              // Remove the last field and its corresponding controller
               _productTypeFields.removeLast();
+              _controllers.last.dispose();
+              _controllers.removeLast();
             }
           });
         },
@@ -365,11 +461,7 @@ class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
       width: 40,
       height: 40,
       child: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _productTypeFields.add(_buildProductTypeField(isFirst: false));
-          });
-        },
+        onPressed: _addNewProductTypeField,
         backgroundColor: Colors.blue,
         mini: true,
         shape: RoundedRectangleBorder(

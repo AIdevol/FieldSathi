@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cross_file/src/types/interface.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -1418,8 +1419,8 @@ Widget _ValueMenuforEditAndDeletingServices(ServiceCategoriesController controll
       PopupMenuItem<String>(
         value: 'Edit',
         onTap: () {
-          // _popUpScreenDetailsForAddingSubServiceScreen(controller);
-        },
+          _updatingServicesforSubServices(context,controller,services);
+          },
         child: const ListTile(
           leading: Icon(
             Icons.edit_calendar_outlined, size: 20, color: Colors.black,),
@@ -1520,6 +1521,63 @@ _buildEmptyState() {
   );
 }
 
+_updatingServicesforSubServices(BuildContext context, ServiceCategoriesController controller, Results services){
+  return Get.dialog(
+      Dialog(
+        child: _form1(context, controller,services),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+      ));
+}
+
+_form1(BuildContext context, ServiceCategoriesController controller, Results services){
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  controller.subcategoryController.text = services.serviceSubCategory.toString()??"";
+  controller.serviceNameController.text = services.serviceName.toString()??"";
+  controller.servicePriceController.text = services.servicePrice.toString()??"";
+  controller.contactNumberController.text = services.serviceContactNumber.toString()??"";
+  controller.serviceDescriptionController.text = services.serviceDescription.toString()??"";
+  // List<XFile> imageFiles = [];
+  // if (services.serviceImage1 != null) {
+  //   imageFiles.add(XFile(services.serviceImage1!));
+  // }
+  // if (services.serviceImage2 != null) {
+  //   imageFiles.add(XFile(services.serviceImage2!));
+  // }
+  // if (services.serviceImage3 != null) {
+  //   imageFiles.add(XFile(services.serviceImage3!));
+  // }
+  // controller.selectedImages.value = imageFiles;
+  return Padding(
+    padding: const EdgeInsets.all(18.0),
+    child: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          vGap(10),
+          Text("Add Service",style: MontserratStyles.montserratBoldTextStyle(size: 20, color: Colors.black),),
+          vGap(10),
+          Divider(),
+          vGap(10),
+          _selectSubcategores(context, controller),
+          vGap(10),
+          _serviceNameContext(context, controller),
+          vGap(10),
+          _servicePriceContext(context,controller),
+          vGap(10),
+          _contactNumberContext(context, controller),
+          vGap(10),
+          _serviceDescriptionContext(context, controller),
+          vGap(10),
+          _selectMultiPleImageContext(context, controller),
+          vGap(10),
+          _buttonViewWidget(context,controller),
+          vGap(20),
+        ],),
+    ),
+  );
+}
 _addIngServicesforSubServices(BuildContext context, ServiceCategoriesController controller){
   return Get.dialog(
       Dialog(
@@ -1563,18 +1621,42 @@ _form(BuildContext context, ServiceCategoriesController controller){
   );
 }
 
-_selectSubcategores(BuildContext context,ServiceCategoriesController controller){
-  return TextField(
-    controller: controller.subcategoryController,
-    decoration: InputDecoration(
-      hintText: "Select Subcategory",
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+Widget _selectSubcategores(BuildContext context, ServiceCategoriesController controller) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        "Select Subcategory",
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),
-      filled: true,
-      fillColor: Colors.grey[100],
-    ),
-
+      SizedBox(height: 8),
+      DropdownButtonFormField<String>(
+        value: controller.selectedSubcategory,
+        items: controller.SubserviceById.map((subcategory) {
+          return DropdownMenuItem<String>(
+            value: subcategory.id.toString(),
+            child: Text(subcategory.serviceName.toString()),
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          if (newValue != null) {
+            var selectedSubcategory = controller.SubserviceById.firstWhere(
+                    (subcategory) => subcategory.id.toString() == newValue
+            );
+            controller.selectedSubcategory = newValue;
+            controller.subcategoryController.text = selectedSubcategory.serviceName!;
+          }
+        },
+        decoration: InputDecoration(
+          hintText: "Select Subcategory",
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          filled: true,
+          fillColor: Colors.grey[100],
+        ),
+      ),
+    ],
   );
 }
 
@@ -1645,26 +1727,38 @@ Widget _selectMultiPleImageContext(BuildContext context, ServiceCategoriesContro
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      InkWell(
+      GestureDetector(
         onTap: () {
           controller.selectMultipleImages();
         },
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: 'Select Images',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(12),
           ),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                controller.selectedImages.isNotEmpty
-                    ? '${controller.selectedImages.length} image(s) selected'
-                    : 'Tap to select images',
+              Expanded(
+                child: Text(
+                  controller.selectedImages.isNotEmpty
+                      ? '${controller.selectedImages.length} image(s) selected'
+                      : 'Tap to select images',
+                  style: TextStyle(
+                    color: controller.selectedImages.isNotEmpty
+                        ? Colors.black87
+                        : Colors.grey,
+                    fontSize: 16,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              const Icon(Icons.upload_file, color: appColor),
+              Icon(
+                Icons.cloud_upload_outlined,
+                color: appColor,
+                size: 28,
+              ),
             ],
           ),
         ),
@@ -1673,49 +1767,62 @@ Widget _selectMultiPleImageContext(BuildContext context, ServiceCategoriesContro
       // Display selected images with delete option
       if (controller.selectedImages.isNotEmpty)
         Padding(
-          padding: const EdgeInsets.only(top: 10),
+          padding: const EdgeInsets.only(top: 15),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: List.generate(
                 controller.selectedImages.length,
                     (index) => Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Stack(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          image: DecorationImage(
-                            image: FileImage(File(controller.selectedImages[index].path)),
+                  padding: const EdgeInsets.only(right: 12),
+                  child: Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade200),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.shade100,
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.file(
+                            File(controller.selectedImages[index].path),
                             fit: BoxFit.cover,
                           ),
                         ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: () {
-                            // Remove the image at the specific index
-                            controller.removeImageAtIndex(index);
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.7),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 20,
+                        Positioned(
+                          top: 5,
+                          right: 5,
+                          child: GestureDetector(
+                            onTap: () {
+                              // Remove the image at the specific index
+                              controller.removeImageAtIndex(index);
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.8),
+                                shape: BoxShape.circle,
+                              ),
+                              padding: const EdgeInsets.all(4),
+                              child: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 16,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1725,7 +1832,6 @@ Widget _selectMultiPleImageContext(BuildContext context, ServiceCategoriesContro
     ],
   );
 }
-
 _buttonViewWidget(BuildContext context, ServiceCategoriesController controller){
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   return Row(
@@ -1735,6 +1841,9 @@ _buttonViewWidget(BuildContext context, ServiceCategoriesController controller){
         child: ElevatedButton(
           onPressed: () => Get.back(), // Close the dialog
           style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
             backgroundColor: Colors.grey[300],
           ),
           child: const Text('Cancel'),
@@ -1751,6 +1860,9 @@ _buttonViewWidget(BuildContext context, ServiceCategoriesController controller){
             // }
           },
           style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
             backgroundColor:appColor,
           ),
           child: const Text('Add'),

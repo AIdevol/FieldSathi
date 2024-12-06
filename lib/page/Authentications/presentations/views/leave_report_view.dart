@@ -8,6 +8,8 @@ import 'package:tms_sathi/page/Authentications/presentations/controllers/LeaveRe
 import 'package:tms_sathi/response_models/leaves_response_model.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
+import '../../../../constans/string_const.dart';
+
 class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
   @override
   Widget build(BuildContext context) {
@@ -142,7 +144,27 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
       ),
     );
   }
-
+  _buildEmptyState() {
+    return Center(
+      child: Column(
+        // mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            nullVisualImage,
+            width: 300,
+            height: 300,
+          ),
+          Text(
+            'No services found',
+            style: MontserratStyles.montserratNormalTextStyle(
+              // size: 18,
+              color: blackColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
   Widget _buildDataTable() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,

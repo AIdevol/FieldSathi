@@ -1,5 +1,7 @@
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
@@ -123,6 +125,26 @@ _customerPhoneContainer(LeadFormFieldController controller){
     textInputType: TextInputType.phone,
     onFieldSubmitted: (String? value) {},
     labletext: "Mobile No.".tr,
+    inputFormatters: [
+      FilteringTextInputFormatter.digitsOnly,
+      LengthLimitingTextInputFormatter(10),
+    ],
+    prefix: Container(  margin: const EdgeInsets.only(right: 10),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(30),
+            topLeft: Radius.circular(30)),
+        // color: Colors.white,
+        border: Border.all(color: Colors.grey.shade300, width: 0.5),
+      ),child: CountryCodePicker(
+          flagWidth: 15.0,
+          initialSelection: 'IN',
+          boxDecoration: const BoxDecoration(color: Colors.transparent),
+          showCountryOnly: true,
+          onChanged: (value) {
+            controller.phoneCountryCode.value = value.dialCode.toString();
+            // controller.update();
+          }),) ,
     // suffix: IconButton(onPressed: (){
     //   Get.toNamed(AppRoutes.principleCustomerScreen);
     // }, icon: Icon(Icons.keyboard_arrow_down, color: Colors.black)),

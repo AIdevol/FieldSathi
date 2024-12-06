@@ -680,13 +680,13 @@ implements AuthenticationApi {
   }
 
   @override
-  Future<CustomerListResponseModel> deleteCustomerListApiCall(
+  Future<DeleteUserResponseModel> deleteCustomerListApiCall(
       {Map<String, dynamic>?dataBody, parameters, String? id}) async {
     try {
       final response = await dioClient!.delete(
           "${ApiEnd.tmsUsersEnd}$id/", queryParameters: parameters,
           skipAuth: false);
-      return CustomerListResponseModel.fromJson(response);
+      return DeleteUserResponseModel.fromJson(response);
     } catch (error) {
       return Future.error(NetworkExceptions.getDioException(error));
     }

@@ -1105,7 +1105,9 @@ Widget _buildListCustomerDetails(BuildContext context,TicketListController contr
 /// ShowPrincipalView
 _buildBottomsheet(BuildContext context){
   return showBottomSheet(context: context, builder: (BuildContext context){
-    return PrincipalCustomerView();
+    return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: PrincipalCustomerView());
   });
 }
 

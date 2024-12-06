@@ -13,6 +13,7 @@ import '../../../../services/APIs/auth_services/auth_api_services.dart';
 
 class OtpViewController extends GetxController {
   late TextEditingController otpviewController;
+  late FocusNode otpFocusNode;
   final loginScreenController = Get.put(LoginScreenController());
   final registerScreenController = Get.put(RegisterScreenController());
   final isResending = false.obs;
@@ -24,6 +25,7 @@ class OtpViewController extends GetxController {
   @override
   void onInit() {
     otpviewController = TextEditingController();
+    otpFocusNode = FocusNode();
     super.onInit();
     startTimer();
     checkVerificationStatus();
@@ -60,6 +62,7 @@ class OtpViewController extends GetxController {
   @override
   void onClose() {
     otpviewController.dispose();
+    otpFocusNode.dispose();
     _timer?.cancel();
     super.onClose();
   }

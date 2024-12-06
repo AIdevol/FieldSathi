@@ -197,7 +197,27 @@ class LeadListViewScreen extends GetView<LeadListViewController> {
     );
   }
 }
-
+_buildEmptyState() {
+  return Center(
+    child: Column(
+      // mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset(
+          nullVisualImage,
+          width: 300,
+          height: 300,
+        ),
+        Text(
+          'No services found',
+          style: MontserratStyles.montserratNormalTextStyle(
+            // size: 18,
+            color: blackColor,
+          ),
+        ),
+      ],
+    ),
+  );
+}
 _dataTableViewScreen({required LeadListViewController controller, required BuildContext context}){
   return Obx((){
     return SingleChildScrollView(

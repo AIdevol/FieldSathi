@@ -32,6 +32,8 @@ class LeadFormFieldController extends GetxController{
 
   String defaultValue  = 'Select Region';
 
+  var phoneCountryCode ="".obs;
+
   void updateRegion(String newValue){
     defaultValue = newValue;
     update();

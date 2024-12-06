@@ -13,6 +13,7 @@ import 'package:tms_sathi/response_models/amc_response_model.dart';
 
 import '../../../../constans/color_constants.dart';
 import '../../../../constans/const_local_keys.dart';
+import '../../../../constans/string_const.dart';
 import '../../../../main.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
@@ -509,7 +510,27 @@ class AMCViewScreen extends GetView<AMCScreenController> {
       );
     });
   }
-
+  _buildEmptyState() {
+    return Center(
+      child: Column(
+        // mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            nullVisualImage,
+            width: 300,
+            height: 300,
+          ),
+          Text(
+            'No services found',
+            style: MontserratStyles.montserratNormalTextStyle(
+              // size: 18,
+              color: blackColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
   _dataTableViewScreen(amcIds) {
     return SingleChildScrollView(
       child: SingleChildScrollView(

@@ -21,6 +21,7 @@ class OtpViewScreen extends GetView<OtpViewController>{
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: whiteColor,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

@@ -24,6 +24,8 @@ class AddSalesScreenController extends GetxController{
   late FocusNode emailFocusNode;
   late FocusNode phoneFocusNode;
 
+  var phoneCountryCode = ''.obs;
+
 
   @override
   void onInit(){
@@ -75,7 +77,7 @@ class AddSalesScreenController extends GetxController{
       "first_name":firstNameController.text,
       "last_name": lastNameController.text,
       "email": emailController.text,
-      "phone_number":phoneController.text,
+      "phone_number":phoneCountryCode.value + phoneController.text,
       "date_joined": dateJoiningController.text,
       "role": "sales"
     };

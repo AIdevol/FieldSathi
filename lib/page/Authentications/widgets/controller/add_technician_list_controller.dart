@@ -24,7 +24,7 @@ class AddTechnicianListController extends GetxController{
   late FocusNode firstFocusNode;
   late FocusNode lastFocusNode;
   late FocusNode phoneFocusNode;
-
+  RxString phoneCountryCode = ''.obs;
   @override
   void onInit(){
     employeeIdController = TextEditingController();
@@ -74,7 +74,7 @@ class AddTechnicianListController extends GetxController{
       "first_name":firstNameController.text,
       "last_name": lastNameController.text,
       "email": emailController.text,
-      "phone_number":phoneController.text,
+      "phone_number":phoneCountryCode.value+phoneController.text,
       "dob": dateJoiningController.text,
       "role":"technician"
     };
@@ -86,22 +86,11 @@ class AddTechnicianListController extends GetxController{
       print("maindata of technician= $mainData");
       customLoader.hide();
       toast('Technician Added Successfully!');
-      Get.toNamed(AppRoutes.ticketListScreen);
+      Get.offAllNamed(AppRoutes.technicianListsScreen);
       update();  // update to the method after data entered
     }).onError((error, stackError){
       customLoader.hide();
-      // toast(error.toString());
       toast(error.toString());
-      // if (error is String) {
-      //   try {
-      //     final parsedError = ErrorResponseModel.fromJson(json.decode(error));
-      //     toast(parsedError.toString());
-      //   } catch (e) {
-      //     toast(error);
-      //   }
-      // } else {
-      //   toast(error.toString());
-      // }
     });
   }
 }

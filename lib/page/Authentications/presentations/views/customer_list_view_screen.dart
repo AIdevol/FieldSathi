@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -25,6 +26,7 @@ class CustomerListViewScreen extends GetView<CustomerListViewController>{
       child: SafeArea(
         child: GetBuilder<CustomerListViewController>(
           builder: (controller) => Scaffold(
+            backgroundColor: CupertinoColors.white,
             bottomNavigationBar: _buildPaginationControls(controller,context),
             appBar: AppBar(
               leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
@@ -113,6 +115,28 @@ class CustomerListViewScreen extends GetView<CustomerListViewController>{
   }
 }
 
+_buildEmptyState() {
+  return Center(
+    child: Column(
+      // mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset(
+          nullVisualImage,
+          width: 300,
+          height: 300,
+        ),
+        Text(
+          'No services found',
+          style: MontserratStyles.montserratNormalTextStyle(
+            // size: 18,
+            color: blackColor,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 Widget _buildSearchField(CustomerListViewController controller) {
   return Container(
     height: Get.height * 0.05,
@@ -146,6 +170,9 @@ Widget _buildSearchField(CustomerListViewController controller) {
 }
 
 Widget _dataTableViewScreen(CustomerListViewController controller, BuildContext context) {
+  if(controller.customerPaginationData.isEmpty){
+    return Center(child: _buildEmptyState(),);
+  }
   return Column(
     children: [
       SingleChildScrollView(
@@ -424,6 +451,9 @@ Widget _form(CustomerListViewController controller, BuildContext context, String
       child: ListView(
         children: [
           vGap(20),
+          Text("Edit Details", style: MontserratStyles.montserratBoldTextStyle(size: 25, color: Colors.black),),
+          Divider(color: Colors.black,),
+          vGap(20),
           _buildCustomerName(controller,context),
           vGap(20),
           _buildMobileNoTextContainer(controller,context),
@@ -484,6 +514,7 @@ Widget _buildMobileNoTextContainer(CustomerListViewController controller, BuildC
     textInputType: TextInputType.phone,
     onFieldSubmitted: (String? value) {},
     labletext: "Mobile No".tr,
+
     prefix: Icon(Icons.phone_android_rounded, color: Colors.black),
   );
 }
@@ -568,6 +599,10 @@ Widget _buildzipcode(CustomerListViewController controller, BuildContext context
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
     labletext: "Zip code".tr,
+    inputFormatters: [
+      FilteringTextInputFormatter.digitsOnly,
+      LengthLimitingTextInputFormatter(6),
+    ],
   );
 }
 
@@ -666,40 +701,45 @@ _buildOptionbutton(CustomerListViewController controller, BuildContext context, 
 }
 // controller.productTypeController.text = customData.brandNames ?? '';
 class ProductTypeBuilder extends StatefulWidget {
-  final CustomerData? customerData;
-
-  const ProductTypeBuilder({Key? key, this.customerData}) : super(key: key);
-
   @override
   _ProductTypeBuilderState createState() => _ProductTypeBuilderState();
 }
 
 class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
-  List<TextEditingController> _productTypeControllers = [];
+  List<TextEditingController> _controllers = [];
+  List<Widget> _productTypeFields = [];
 
   @override
   void initState() {
     super.initState();
-    _initializeProductTypes();
+    _addNewProductTypeField();
   }
 
-  void _initializeProductTypes() {
-    if (widget.customerData != null && widget.customerData!.brandNames != null) {
-      List<String> brandNames = widget.customerData!.brandNames
-          .map((brand) => brand.trim())
-          .toList();
-      _productTypeControllers = brandNames
-          .map((brand) => TextEditingController(text: brand))
-          .toList();
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
     }
-
-    // Ensure at least one controller exists
-    if (_productTypeControllers.isEmpty) {
-      _productTypeControllers.add(TextEditingController());
-    }
+    super.dispose();
   }
 
-  Widget _buildProductTypeField(int index) {
+  void _addNewProductTypeField() {
+    // Create a new text editing controller
+    final newController = TextEditingController();
+    _controllers.add(newController);
+
+    setState(() {
+      _productTypeFields.add(_buildProductTypeField(
+          controller: newController,
+          isFirst: _productTypeFields.isEmpty
+      ));
+    });
+  }
+
+  Widget _buildProductTypeField({
+    required TextEditingController controller,
+    required bool isFirst
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -707,19 +747,23 @@ class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
         children: [
           Expanded(
             child: CustomTextField(
-              controller: _productTypeControllers[index],
+              controller: controller,
               hintText: "Product Type".tr,
               textInputType: TextInputType.text,
+              onFieldSubmitted: (String? value) {},
               labletext: "Product Type".tr,
               prefix: Icon(Icons.production_quantity_limits, color: Colors.black),
             ),
           ),
-          hGap(20),
+          SizedBox(width: 20),
           Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               _buildAddButton(),
-              vGap(10),
-              if (_productTypeControllers.length > 1) _buildDeleteButton(index),
+              if (!isFirst) ...[
+                SizedBox(height: 10),
+                _buildDeleteButton(),
+              ],
             ],
           )
         ],
@@ -727,70 +771,51 @@ class _ProductTypeBuilderState extends State<ProductTypeBuilder> {
     );
   }
 
-  Widget _buildDeleteButton(int index) {
-    return Container(
+  Widget _buildDeleteButton() {
+    return SizedBox(
       width: 40,
       height: 40,
       child: FloatingActionButton(
-        child: Icon(Icons.delete, color: Colors.white),
-        backgroundColor: Colors.red,
         onPressed: () {
           setState(() {
-            _productTypeControllers.removeAt(index);
+            if (_productTypeFields.length > 1) {
+              // Remove the last field and its corresponding controller
+              _productTypeFields.removeLast();
+              _controllers.last.dispose();
+              _controllers.removeLast();
+            }
           });
         },
+        backgroundColor: Colors.red,
         mini: true,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
         ),
+        child: Icon(Icons.delete, color: Colors.white),
       ),
     );
   }
 
   Widget _buildAddButton() {
-    return Container(
+    return SizedBox(
       width: 40,
       height: 40,
       child: FloatingActionButton(
-        child: Icon(Icons.add, color: Colors.white),
+        onPressed: _addNewProductTypeField,
         backgroundColor: Colors.blue,
-        onPressed: () {
-          setState(() {
-            _productTypeControllers.add(TextEditingController());
-          });
-        },
         mini: true,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
         ),
+        child: Icon(Icons.add, color: Colors.white),
       ),
     );
-  }
-
-  // Method to get all product types (useful when saving or processing)
-  List<String> getProductTypes() {
-    return _productTypeControllers
-        .map((controller) => controller.text.trim())
-        .where((text) => text.isNotEmpty)
-        .toList();
-  }
-
-  @override
-  void dispose() {
-    // Dispose all controllers to prevent memory leaks
-    for (var controller in _productTypeControllers) {
-      controller.dispose();
-    }
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: List.generate(
-        _productTypeControllers.length,
-            (index) => _buildProductTypeField(index),
-      ),
+      children: _productTypeFields,
     );
   }
 }

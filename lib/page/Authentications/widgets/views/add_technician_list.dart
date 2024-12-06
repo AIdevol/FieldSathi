@@ -1,3 +1,4 @@
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
@@ -161,7 +162,22 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
         // You might want to handle this, e.g., move focus to next field or submit form
       },
       labletext: "Phone Number".tr,
-      prefix: Icon(Icons.phone_android_rounded, color: Colors.black),
+      prefix: Container(  margin: const EdgeInsets.only(right: 10),
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(30),
+              topLeft: Radius.circular(30)),
+          // color: Colors.white,
+          border: Border.all(color: Colors.grey.shade300, width: 0.5),
+        ),child: CountryCodePicker(
+            flagWidth: 15.0,
+            initialSelection: 'IN',
+            boxDecoration: const BoxDecoration(color: Colors.transparent),
+            showCountryOnly: true,
+            onChanged: (value) {
+              controller.phoneCountryCode.value = value.dialCode.toString();
+              // controller.update();
+            }),) ,
       validator: (value) {
         return value?.isEmptyField(messageTitle: "name");
       },

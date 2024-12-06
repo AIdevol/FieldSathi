@@ -157,6 +157,29 @@ Widget _buildSearchField(SuperViewScreenController controller) {
     ),
   );
 }
+
+_buildEmptyState() {
+  return Center(
+    child: Column(
+      // mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset(
+          nullVisualImage,
+          width: 300,
+          height: 300,
+        ),
+        Text(
+          'No services found',
+          style: MontserratStyles.montserratNormalTextStyle(
+            // size: 18,
+            color: blackColor,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 Widget _mainData(SuperViewScreenController controller){
   return SingleChildScrollView(
     scrollDirection: Axis.horizontal,

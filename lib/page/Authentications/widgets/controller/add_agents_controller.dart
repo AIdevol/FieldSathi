@@ -21,7 +21,7 @@ class AgentsListController extends GetxController {
   late FocusNode joiningDateFocusNode;
   late FocusNode emailFocusNode;
   late FocusNode phoneFocusNode;
-
+  var phoneCountryCode = ''.obs;
   DateTime? selectedDate;
   RxBool isLoading = false.obs;
   RxList<Result> agentsData = <Result>[].obs;

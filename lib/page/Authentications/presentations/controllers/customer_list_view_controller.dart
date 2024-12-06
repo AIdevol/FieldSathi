@@ -252,11 +252,11 @@ class CustomerListViewController extends GetxController{
     isLoading.value = true;
     FocusManager.instance.primaryFocus!.unfocus();
     Get.find<AuthenticationApiService>().deleteCustomerListApiCall(id: id).then((value){
-      toast("Deleted successfully");
+      toast(value.message.toString());
       hitGetCustomerListApiCall();
       update();
     }).onError((error,stackError){
-      toast(error.toString());
+      hitGetCustomerListApiCall();
       isLoading.value= false;
     });
   }

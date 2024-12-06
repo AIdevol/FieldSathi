@@ -112,6 +112,8 @@ class PrincipalCstomerViewController extends GetxController{
 
   RxString defaultValue  = 'North'.obs;
 
+  var phoneCountryCode = "".obs;
+
   void updateRegion(String newValue){
     defaultValue.value = newValue;
     update();
@@ -128,6 +130,7 @@ class PrincipalCstomerViewController extends GetxController{
 
       isLoading.value = true;
       customLoader.show();
+      FocusManager.instance.primaryFocus!.unfocus();
 
       var primaryData = {
         "email": emailController.text.trim(),
@@ -152,6 +155,7 @@ class PrincipalCstomerViewController extends GetxController{
           .then((value) {
         print("customerdata : $value");
         customLoader.hide();
+        Get.back();
         toast("Customer Added Successfully");
         update();
       }).onError((error, stackTrace) {

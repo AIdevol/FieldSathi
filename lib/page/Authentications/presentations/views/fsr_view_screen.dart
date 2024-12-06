@@ -7,6 +7,7 @@ import 'package:pluto_grid/pluto_grid.dart';
 import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/add_fsr_view_controller.dart';
 import '../../../../constans/color_constants.dart';
+import '../../../../constans/string_const.dart';
 import '../../../../navigations/navigation.dart';
 import '../../../../response_models/fsr_response_model.dart';
 import '../../../../utilities/common_textFields.dart';
@@ -64,6 +65,28 @@ class FsrViewScreen extends GetView<FsrViewController> {
       ),
     );
   }
+  _buildEmptyState() {
+    return Center(
+      child: Column(
+        // mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            nullVisualImage,
+            width: 300,
+            height: 300,
+          ),
+          Text(
+            'No services found',
+            style: MontserratStyles.montserratNormalTextStyle(
+              // size: 18,
+              color: blackColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildDataTable(FsrViewController controller) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
