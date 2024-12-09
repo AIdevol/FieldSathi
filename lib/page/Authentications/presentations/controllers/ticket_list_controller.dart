@@ -23,15 +23,24 @@ class TicketListController extends GetxController {
     Rx<DateTime?> startDate = Rx<DateTime?>(null);
     Rx<DateTime?> endDate = Rx<DateTime?>(null);
   // Filter options
-  RxList<String> filterTypes = [
-    "Select By",
-    "Customer Name",
-    "Sub-Customer Name",
-    "Technician Name",
-    "Status",
-    "Region"
-  ].obs;
+  // RxList<String> filterTypes = [
+  //   "Select By",
+  //   "Customer Name",
+  //   "Sub-Customer Name",
+  //   "Technician Name",
+  //   "Status",
+  //   "Region"
+  // ].obs;
 
+  RxList<String> filterStatusValue = [
+    "Select By",
+    "InActive",
+    "Accepted",
+    "Rejected",
+    "Ongoing",
+    "Completed",
+    "On-Hold"
+  ].obs;
   RxString selectedFilter = "Select By".obs;
   RxList<TicketResult> ticketResult = <TicketResult>[].obs;
   RxList<TicketResult> filteredtickets = <TicketResult>[].obs;
@@ -44,7 +53,6 @@ class TicketListController extends GetxController {
   final int itemsPerPage = 10;
   final RxInt totalPages = 0.obs;
   final RxList<TicketResult> _allTickets = <TicketResult>[].obs;
-  // final RxList<TicketResult> ticketResult = <TicketResult>[].obs;
   TextEditingController dateController = TextEditingController();
   FocusNode focusNode = FocusNode();
   bool isAmcSelected = false;
@@ -55,14 +63,12 @@ class TicketListController extends GetxController {
   final assignTo = TextEditingController();
   final rateController = TextEditingController();
   final purposeController = TextEditingController();
-  // final datesController = TextEditingController();
   final customerNameController = TextEditingController();
   final productNameController = TextEditingController();
   final modelNoController = TextEditingController();
   final fsrController = TextEditingController();
   final servicesDetailsController = TextEditingController();
   final instructionController = TextEditingController();
-  // RxList<TicketHistory> ticketResulData = <TicketHistory>[].obs;
 
   void toggleAmc() {
     isAmcSelected = true;
@@ -98,6 +104,66 @@ void onClose(){
    instructionController.dispose();
     super.onClose();
 }
+  void applyFilters() {
+    if (ticketResult.isEmpty) return;
+
+    var filteredTickets = List<TicketResult>.from(_allTickets);
+
+    // Status Filter
+    if (selectedFilter.value != "Select By") {
+      filteredTickets = filteredTickets.where((ticket) =>
+      ticket.status?.toLowerCase() == selectedFilter.value.toLowerCase()
+      ).toList();
+    }
+
+    // Search Query Filter
+    if (searchQuery.isNotEmpty) {
+      final query = searchQuery.value.toLowerCase().trim();
+
+      filteredTickets = filteredTickets.where((ticket) {
+        // Comprehensive search across multiple fields
+        return
+          // Customer Name
+          (ticket.customerDetails.firstName?.toLowerCase().contains(query) ?? false) ||
+              (ticket.customerDetails.lastName?.toLowerCase().contains(query) ?? false) ||
+
+              // Sub-Customer Name
+              (ticket.subCustomerDetails?.firstName?.toLowerCase().contains(query) ?? false) ||
+              (ticket.subCustomerDetails?.lastName?.toLowerCase().contains(query) ?? false) ||
+
+              // Technician Name
+              (ticket.assignTo.firstName?.toLowerCase().contains(query) ?? false) ||
+              (ticket.assignTo.lastName?.toLowerCase().contains(query) ?? false) ||
+
+              // Task Name
+              (ticket.taskName?.toLowerCase().contains(query) ?? false) ||
+
+              // Ticket ID
+              (ticket.id.toString().toLowerCase().contains(query)) ||
+
+              // Status
+              (ticket.status?.toLowerCase().contains(query) ?? false) ||
+
+              // Purpose
+              (ticket.purpose?.toLowerCase().contains(query) ?? false) ||
+
+              // Address
+              (ticket.ticketAddress?.toLowerCase().contains(query) ?? false);
+      }).toList();
+    }
+
+    // Update the ticket result with filtered data
+    ticketResult.value = filteredTickets;
+    calculateTotalPages();
+    updatePaginatedTechnicians();
+  }
+
+  void updateSelectedStatusFilter(String? newValue) {
+    if (newValue != null) {
+      selectedFilter.value = newValue;
+      applyFilters();
+    }
+  }
 
   void calculateTotalPages() {
     totalPages.value = (filteredtickets.length / itemsPerPage).ceil();
@@ -221,71 +287,37 @@ void onClose(){
     });
   }
 
-  void applyFilters() {
-    if (ticketResult.isEmpty) return;
 
-    var filteredTickets = List<TicketResult>.from(ticketResult);
 
-    if (searchQuery.isNotEmpty) {
-      final query = searchQuery.value.toLowerCase().trim();
-
-      filteredTickets = filteredTickets.where((ticket) {
-        // Default search across multiple fields if no specific filter is selected
-        if (selectedFilter.value == "Select By") {
-          return _performGenericSearch(ticket, query);
-        }
-
-        // Specific filter-based search
-        switch (selectedFilter.value) {
-          case "Customer Name":
-            return _searchCustomerName(ticket, query);
-          case "Sub-Customer Name":
-            return _searchSubCustomerName(ticket, query);
-          case "Technician Name":
-            return _searchTechnicianName(ticket, query);
-          case "Status":
-            return ticket.status.toLowerCase().contains(query);
-          // case "Region":
-          //   return _searchRegion(ticket, query);
-          default:
-            return _performGenericSearch(ticket, query);
-        }
-      }).toList();
-    }
-
-    // Update the ticket result with filtered data
-    ticketResult.value = filteredTickets;
-  }
-
-  bool _searchCustomerName(TicketResult ticket, String query) {
-    return (ticket.customerDetails.firstName?.toLowerCase().contains(query) ?? false) ||
-        (ticket.customerDetails.lastName?.toLowerCase().contains(query) ?? false);
-  }
-
-  bool _searchSubCustomerName(TicketResult ticket, String query) {
-    return (ticket.subCustomerDetails?.firstName?.toLowerCase().contains(query) ?? false) ||
-        (ticket.subCustomerDetails?.lastName?.toLowerCase().contains(query) ?? false);
-  }
-
-  bool _searchTechnicianName(TicketResult ticket, String query) {
-    final techFirstName = ticket.assignTo.firstName?.toLowerCase() ?? '';
-    final techLastName = ticket.assignTo.lastName?.toLowerCase() ?? '';
-    return techFirstName.contains(query) || techLastName.contains(query);
-  }
-
-  // bool _searchRegion(TicketResult ticket, String query) {
-  //   return (ticket.ticketAddress?.city?.toLowerCase().contains(query) ?? false) ||
-  //       (ticket.ticketAddress?.state?.toLowerCase().contains(query) ?? false) ||
-  //       (ticket.ticketAddress?.country?.toLowerCase().contains(query) ?? false);
+  // bool _searchCustomerName(TicketResult ticket, String query) {
+  //   return (ticket.customerDetails.firstName?.toLowerCase().contains(query) ?? false) ||
+  //       (ticket.customerDetails.lastName?.toLowerCase().contains(query) ?? false);
   // }
-
-  bool _performGenericSearch(TicketResult ticket, String query) {
-    return _searchCustomerName(ticket, query) ||
-        _searchSubCustomerName(ticket, query) ||
-        _searchTechnicianName(ticket, query) ||
-        (ticket.status.toLowerCase().contains(query));
-        // _searchRegion(ticket, query);
-  }
+  //
+  // bool _searchSubCustomerName(TicketResult ticket, String query) {
+  //   return (ticket.subCustomerDetails?.firstName?.toLowerCase().contains(query) ?? false) ||
+  //       (ticket.subCustomerDetails?.lastName?.toLowerCase().contains(query) ?? false);
+  // }
+  //
+  // bool _searchTechnicianName(TicketResult ticket, String query) {
+  //   final techFirstName = ticket.assignTo.firstName?.toLowerCase() ?? '';
+  //   final techLastName = ticket.assignTo.lastName?.toLowerCase() ?? '';
+  //   return techFirstName.contains(query) || techLastName.contains(query);
+  // }
+  //
+  // // bool _searchRegion(TicketResult ticket, String query) {
+  // //   return (ticket.ticketAddress?.city?.toLowerCase().contains(query) ?? false) ||
+  // //       (ticket.ticketAddress?.state?.toLowerCase().contains(query) ?? false) ||
+  // //       (ticket.ticketAddress?.country?.toLowerCase().contains(query) ?? false);
+  // // }
+  //
+  // bool _performGenericSearch(TicketResult ticket, String query) {
+  //   return _searchCustomerName(ticket, query) ||
+  //       _searchSubCustomerName(ticket, query) ||
+  //       _searchTechnicianName(ticket, query) ||
+  //       (ticket.status.toLowerCase().contains(query));
+  //       // _searchRegion(ticket, query);
+  // }
 
   void updateSelectedFilter(String? newValue) {
     if (newValue != null) {
@@ -393,6 +425,46 @@ void onClose(){
       isLoading.value = false;
     });
   }
+
+  Future<bool> requestPermissionHandler()async{
+    if(Platform.isAndroid){
+      final storageStatus = await Permission.storage.request();
+      if (storageStatus.isGranted) {
+        return true;
+      }
+      if (storageStatus.isPermanentlyDenied) {
+        await openAppSettings();
+        return false;
+      }
+
+      return false;
+    }
+    return true;
+  }
+
+  void hitGetTicketHistoryApiCall(String id){
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().getTicketHistoryData(id: id).then((value){
+      ticketHistoryData.addAll(value);
+      // ticketResult.addAll(value)
+      // if(value.isNotEmpty){
+      //   ticketResult.addAll(ticketHistoryData.);
+      // }
+      toast("Ticket History Fetched Succesfully");
+      customLoader.hide();
+      update();
+    }).onError((error, stackError){
+      customLoader.hide();
+      toast(error.toString());
+    });
+  }
+
+  Future<void> hitRefreshAllTicketData()async{
+    fetchTicketsApiCall();
+  }
+}
   //   Future<void> exportToExcel() async {
   //   try {
   //     if (startDate.value == null || endDate.value == null) {
@@ -574,21 +646,7 @@ void onClose(){
   //   });
   // }
 
-  Future<bool> requestPermissionHandler()async{
-    if(Platform.isAndroid){
-      final storageStatus = await Permission.storage.request();
-      if (storageStatus.isGranted) {
-        return true;
-      }
-      if (storageStatus.isPermanentlyDenied) {
-        await openAppSettings();
-        return false;
-      }
 
-      return false;
-    }
-    return true;
-  }
 
 
 // Future<String> getFilePath(String filename) async {
@@ -676,29 +734,7 @@ void onClose(){
 //   }
 // }
 
-void hitGetTicketHistoryApiCall(String id){
-    isLoading.value = true;
-    customLoader.show();
-    FocusManager.instance.primaryFocus!.unfocus();
-    Get.find<AuthenticationApiService>().getTicketHistoryData(id: id).then((value){
-      ticketHistoryData.addAll(value);
-      // ticketResult.addAll(value)
-      // if(value.isNotEmpty){
-      //   ticketResult.addAll(ticketHistoryData.);
-      // }
-      toast("Ticket History Fetched Succesfully");
-      customLoader.hide();
-      update();
-    }).onError((error, stackError){
-      customLoader.hide();
-      toast(error.toString());
-    });
-}
 
-Future<void> hitRefreshAllTicketData()async{
-   fetchTicketsApiCall();
-}
-}
 // import 'dart:io';
 // import 'package:excel/excel.dart';
 // import 'package:external_path/external_path.dart';

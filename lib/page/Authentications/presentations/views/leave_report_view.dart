@@ -15,12 +15,12 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
   Widget build(BuildContext context) {
     return MyAnnotatedRegion(
       child: GetBuilder<LeaveReportViewScreenController>(
-      builder: (controller)=> Scaffold(
+        builder: (controller) => Scaffold(
           bottomNavigationBar: _buildPaginationControls(controller),
           appBar: AppBar(
             leading: IconButton(
-                onPressed: () => Get.back(),
-                icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)
+              onPressed: () => Get.back(),
+              icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87),
             ),
             backgroundColor: appColor,
             title: Text(
@@ -42,7 +42,7 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
             ],
           ),
           body: RefreshIndicator(
-            onRefresh: ()=>controller.hitRefreshApiCall(),
+            onRefresh: () => controller.hitRefreshApiCall(),
             child: Column(
               children: [
                 _buildTopBar(),
@@ -51,6 +51,8 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
                   child: Obx(
                         () => controller.isLoading.value
                         ? Center(child: CircularProgressIndicator())
+                        : controller.leavesPaginationsData.isEmpty
+                        ? _buildEmptyState()
                         : _buildDataTable(),
                   ),
                 ),
@@ -122,7 +124,7 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
           color: Colors.black,
         ),
         decoration: InputDecoration(
-          labelText: 'Search',
+          labelText: 'Search by Name, Reason, or Leave Type',
           labelStyle: MontserratStyles.montserratSemiBoldTextStyle(
             size: 14,
             color: Colors.grey,
@@ -144,10 +146,11 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
       ),
     );
   }
-  _buildEmptyState() {
+
+  Widget _buildEmptyState() {
     return Center(
       child: Column(
-        // mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
             nullVisualImage,
@@ -155,9 +158,8 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
             height: 300,
           ),
           Text(
-            'No services found',
+            'No leaves found',
             style: MontserratStyles.montserratNormalTextStyle(
-              // size: 18,
               color: blackColor,
             ),
           ),
@@ -165,6 +167,7 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
       ),
     );
   }
+
   Widget _buildDataTable() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,

@@ -12,7 +12,7 @@ class SuperViewScreenController extends GetxController{
   RxList<Result> filteredData = <Result>[].obs;
   RxList<Result> datafilter = <Result>[].obs;
   RxList<Result> filterePaginationsData = <Result>[].obs;
-
+  late TextEditingController searchController;
 
   RxBool isLoading = false.obs;
   RxInt currentPage = 1.obs;
@@ -29,7 +29,9 @@ class SuperViewScreenController extends GetxController{
   @override
   void onInit(){
     hitsuperUserApiCall();
+    searchController = TextEditingController();
     super.onInit();
+    searchController.addListener(applyFilter);
   }
 
   @override
@@ -42,6 +44,23 @@ class SuperViewScreenController extends GetxController{
     joiningDateController.dispose();
     super.onClose();
   }
+
+  void applyFilter() {
+    final query = searchController.text.trim().toLowerCase();
+    if(query.isEmpty){
+      filteredData.assignAll(datafilter);
+    }else{
+      filteredData.assignAll(datafilter.where((userData){
+        return userData.firstName.toLowerCase().contains(query)||
+        userData.lastName.toLowerCase().contains(query)||
+        userData.empId.toLowerCase().contains(query)||
+        userData.email.toLowerCase().contains(query)||
+        userData.phoneNumber.toLowerCase().contains(query);
+      }).toList());
+    }
+    update();
+  }
+
   void calculateTotalPages() {
     totalPages.value = (datafilter.length / itemsPerPage).ceil();
     if (currentPage.value > totalPages.value) {
@@ -129,4 +148,6 @@ class SuperViewScreenController extends GetxController{
   Future<void> refreshSupperData()async{
     hitsuperUserApiCall();
   }
+
+
 }

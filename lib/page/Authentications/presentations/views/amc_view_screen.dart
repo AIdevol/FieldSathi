@@ -30,6 +30,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
     return MyAnnotatedRegion(
         child: GetBuilder<AMCScreenController>(builder: (controller) =>
             Scaffold(
+              backgroundColor: CupertinoColors.white,
               bottomNavigationBar: _buildPaginationControls(controller),
               appBar: AppBar(
                 leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
@@ -118,6 +119,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
         ),
       ),
       child: TextField(
+        controller: controller.searchController,
         decoration: InputDecoration(
           hintText: "Search",
           hintStyle: MontserratStyles.montserratSemiBoldTextStyle(
@@ -130,8 +132,8 @@ class AMCViewScreen extends GetView<AMCScreenController> {
         style: MontserratStyles.montserratSemiBoldTextStyle(
           color: Colors.black,
         ),
-        onChanged: (value) {
-          // controller.updateSearch(value); // Implement this method in your controller
+        onChanged: (_) {
+          controller.onSearchChanged();
         },
       ),
     );
@@ -532,6 +534,9 @@ class AMCViewScreen extends GetView<AMCScreenController> {
     );
   }
   _dataTableViewScreen(amcIds) {
+    if(controller.amcPaginationData.isEmpty){
+      return _buildEmptyState();
+    }
     return SingleChildScrollView(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,

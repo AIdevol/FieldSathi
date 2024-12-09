@@ -29,6 +29,7 @@ class CustomerListViewController extends GetxController{
     late TextEditingController zipController;
     late TextEditingController countryController;
     late TextEditingController selectedRegionController;
+    late TextEditingController searchController;
 
     late FocusNode customerFocusNode;
     late FocusNode phoneFocusNode;
@@ -132,6 +133,7 @@ class CustomerListViewController extends GetxController{
       zipController = TextEditingController();
       countryController = TextEditingController();
       selectedRegionController = TextEditingController();
+      searchController = TextEditingController();
 
       customerFocusNode = FocusNode();
       phoneFocusNode = FocusNode();
@@ -149,6 +151,7 @@ class CustomerListViewController extends GetxController{
       selectedRegionFocusNode = FocusNode();
       super.onInit();
       hitGetCustomerListApiCall();
+      searchController.addListener(searchCustomers as VoidCallback );
 
     }
 
@@ -184,6 +187,33 @@ class CustomerListViewController extends GetxController{
       super.onClose();
     }
 
+    // searching filteration
+  void searchCustomers() {
+    final query = searchController.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      filteredCustomerListData.assignAll(customerListData);
+    } else {
+      // Filter the customer list based on multiple attributes
+      filteredCustomerListData.value = customerListData.where((customer) {
+        return
+          // Search across multiple fields
+          (customer.customerName?.toLowerCase().contains(query) ?? false) ||
+              (customer.companyName?.toLowerCase().contains(query) ?? false) ||
+              (customer.email?.toLowerCase().contains(query) ?? false) ||
+              (customer.phoneNumber?.toLowerCase().contains(query) ?? false) ||
+              (customer.primaryAddress?.toLowerCase().contains(query) ?? false) ||
+              (customer.modelNo?.toLowerCase().contains(query) ?? false) ||
+              (customer.region?.toLowerCase().contains(query) ?? false);
+      }).toList();
+    }
+
+    // Reset pagination to first page after filtering
+    currentPage.value = 1;
+
+    // Recalculate total pages and update pagination
+    calculateTotalPages();
+    updatePaginatedTechnicians();
+  }
   void hitGetCustomerListApiCall(){
     isLoading.value = true;
     customLoader.show();

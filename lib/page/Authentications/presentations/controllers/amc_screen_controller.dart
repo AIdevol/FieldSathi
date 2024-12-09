@@ -114,7 +114,7 @@ class AMCScreenController extends GetxController {
     focusNode.addListener(() {
       isFocused.value = focusNode.hasFocus;
     });
-    searchController.addListener(_onSearchChanged);
+    searchController.addListener(onSearchChanged);
   }
 
   @override
@@ -211,20 +211,22 @@ class AMCScreenController extends GetxController {
     updatePaginatedTechnicians();
   }
 
-  void _onSearchChanged() {
+  void onSearchChanged() {
     final query = searchController.text.toLowerCase();
     if (query.isEmpty) {
       filteredAmcData.assignAll(amcResultData);
     } else {
       filteredAmcData.assignAll(amcResultData.where((amc) =>
-      amc.amcName?.toLowerCase().contains(query) == true ||
-          amc.customer.customerName?.toLowerCase().contains(query) == true ||
-          amc.id.toString().contains(query)
+      (amc.amcName?.toLowerCase().contains(query) == true) ||
+          (amc.customer.customerName?.toLowerCase().contains(query) == true) ||
+          (amc.id.toString().contains(query))
       ));
     }
+    currentPage.value = 1;
+    calculateTotalPages();
+    updatePaginatedTechnicians();
     update();
   }
-
   void hitGetAmcDetailsApiCall() async {
     var amcParameter={
       "page_size":"all"
@@ -253,34 +255,6 @@ class AMCScreenController extends GetxController {
     }
   }
 
-  // void _calculateAmcCounts() {
-  //   if (amcResultData.isEmpty) return;
-  //
-  //   int upcoming = 0;
-  //   int renewal = 0;
-  //   int completed = 0;
-  //
-  //   for (var amc in amcResultData) {
-  //     String status = amc.status?.toLowerCase() ?? '';
-  //
-  //     switch (status) {
-  //       case 'upcoming':
-  //         upcoming++;
-  //         break;
-  //       case 'renewal':
-  //         renewal++;
-  //         break;
-  //       case 'completed':
-  //         completed++;
-  //         break;
-  //     }
-  //   }
-  //
-  //   upcomingCount.value = upcoming;
-  //   renewalCount.value = renewal;
-  //   completedCount.value = completed;
-  // }
-
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -298,8 +272,6 @@ class AMCScreenController extends GetxController {
   Future<void> deleteAMC(String amcId) async {
     try {
       customLoader.show();
-      // Implement your delete API call here
-      // await Get.find<AuthenticationApiService>().deleteAmcApiCall(amcId);
       hitGetAmcDetailsApiCall(); // Refresh data after deletion
       toast("AMC deleted successfully");
     } catch (error) {

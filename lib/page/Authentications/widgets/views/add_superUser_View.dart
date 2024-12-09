@@ -1,5 +1,7 @@
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/add_super_user_view_Controller.dart';
@@ -72,6 +74,18 @@ _joiningDateField(AddSuperUserViewController controller, BuildContext context) {
       }
       return null;
     },
+    onTap: ()async {
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100),
+      );
+      if (picked != null) {
+        String formattedDate = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";  /*YYYY-MM-D*/
+        controller.joiningDateController.text = formattedDate;
+      }
+    },
     suffix: IconButton(
       onPressed: () async {
         final DateTime? picked = await showDatePicker(
@@ -126,9 +140,27 @@ _phoneNumberField(AddSuperUserViewController controller, BuildContext context){
     hintText: 'Phone Number',
     labletext: 'Phone Number',
     textInputType: TextInputType.phone,
-    prefix: Icon(Icons.phone
-    ),
-  );
+    inputFormatters: [
+      FilteringTextInputFormatter.digitsOnly,
+      LengthLimitingTextInputFormatter(10),
+    ],
+    prefix: Container(  margin: const EdgeInsets.only(right: 10),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(30),
+            topLeft: Radius.circular(30)),
+        // color: Colors.white,
+        border: Border.all(color: Colors.grey.shade300, width: 0.5),
+      ),child: CountryCodePicker(
+          flagWidth: 15.0,
+          initialSelection: 'IN',
+          boxDecoration: const BoxDecoration(color: Colors.transparent),
+          showCountryOnly: true,
+          onChanged: (value) {
+            controller.phoneCountryCode.value = value.dialCode.toString();
+            // controller.update();
+          }),) ,
+    );
 }
 
 _buildOptionButtons(AddSuperUserViewController controller, BuildContext context) {

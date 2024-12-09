@@ -14,6 +14,8 @@ class AddSuperUserViewController extends GetxController{
   final TextEditingController joiningDateController = TextEditingController();
   RxBool isLoading = true.obs;
 
+  var phoneCountryCode = "".obs;
+
 
 
   @override

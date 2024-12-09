@@ -115,7 +115,7 @@ class TicketListScreen extends GetView<TicketListController> {
        margin: const EdgeInsets.all(6),
        child: Row(
          children: [
-           Expanded(child: _buildFilterDropdown()),
+           Expanded(child: _buildStatusFilterDropdown()),
            const SizedBox(width: 16),
            _buildActionButton(
              context,
@@ -137,37 +137,38 @@ class TicketListScreen extends GetView<TicketListController> {
 
 
 
-  Widget _buildFilterDropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Obx(
-            () => DropdownButton<String>(
-          value: controller.selectedFilter.value,
-          isExpanded: true,
-          underline: Container(),
-          items: controller.filterTypes.map((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(
-                value,
-                style: MontserratStyles.montserratSemiBoldTextStyle(
-                  size: 13,
-                  color: Colors.black87,
-                ),
-              ),
-            );
-          }).toList(),
-          onChanged: controller.updateSelectedFilter,
-        ),
-      ),
-    );
-  }
+   Widget _buildStatusFilterDropdown() {
+     return Container(
+       padding: const EdgeInsets.symmetric(horizontal: 12),
+       decoration: BoxDecoration(
+         border: Border.all(color: Colors.grey.shade300),
+         borderRadius: BorderRadius.circular(8),
+       ),
+       child: Obx(
+             () => DropdownButton<String>(
+           value: controller.selectedFilter.value,
+           isExpanded: true,
+           underline: Container(),
+           items: controller.filterStatusValue.map((String value) {
+             return DropdownMenuItem<String>(
+               value: value,
+               child: Text(
+                 value,
+                 style: MontserratStyles.montserratSemiBoldTextStyle(
+                   size: 13,
+                   color: Colors.black87,
+                 ),
+               ),
+             );
+           }).toList(),
+           onChanged: controller.updateSelectedStatusFilter,
+         ),
+       ),
+     );
+   }
 
-  Widget _buildSearchBar() {
+
+   Widget _buildSearchBar() {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: TextField(
@@ -249,10 +250,6 @@ class TicketListScreen extends GetView<TicketListController> {
 
    Widget _buildContent(BuildContext context, TicketListController controller) {
      return Obx(() {
-       if (controller.ticketResult.isEmpty) {
-         return _buildEmptyState();
-       }
-
        return Column(
          children: [
            Expanded(child: _buildTicketTable(context, controller)),
@@ -286,6 +283,7 @@ class TicketListScreen extends GetView<TicketListController> {
 
   Widget _buildTicketTable(BuildContext context, TicketListController controller) {
     final resultData = controller.ticketResult.map((Ids)=> Ids.id);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -397,6 +395,9 @@ class TicketListScreen extends GetView<TicketListController> {
 
 
   List<DataRow> _buildTableRows(BuildContext context, TicketListController controller) {
+    if (controller.ticketPaginationsData.isEmpty) {
+      return _buildEmptyState();
+    }
     return controller.ticketPaginationsData.map((ticket) {
       return DataRow(
         onSelectChanged:(selected) {

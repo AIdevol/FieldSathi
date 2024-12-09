@@ -21,6 +21,7 @@ class LeadListViewController extends GetxController{
   RxList<LeadResult> leadListData = <LeadResult>[].obs;
   RxList<LeadResult> leadFilters = <LeadResult>[].obs;
   RxList<LeadResult> leadPaginationsData = <LeadResult>[].obs;
+  late TextEditingController searchController;
 
   RxInt currentPage = 1.obs;
   RxInt totalPages = 0.obs;
@@ -44,10 +45,33 @@ class LeadListViewController extends GetxController{
   final TextEditingController sourceController = TextEditingController();
 @override
   void onInit(){
+  searchController = TextEditingController();
   super.onInit();
+  searchController.addListener(applyFilter);
   fetchedLeadListApiCall();
 
 }
+
+  void applyFilter() {
+    final query = searchController.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      // If the search field is empty, reset the filter
+      leadFilters.assignAll(leadListData);
+    } else {
+      // Apply filter logic
+      leadFilters.assignAll(leadListData.where((lead) {
+        return lead.firstName.toLowerCase().contains(query) ||
+            lead.lastName.toLowerCase().contains(query) ||
+            lead.companyName.toLowerCase().contains(query) ||
+            lead.mobile.contains(query);
+      }).toList());
+    }
+
+    // Update pagination based on the filtered results
+    currentPage.value = 1;
+    updatePaginatedTechnicians();
+  }
+
 
 @override
   void onClose(){

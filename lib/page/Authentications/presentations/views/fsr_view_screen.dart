@@ -47,16 +47,14 @@ class FsrViewScreen extends GetView<FsrViewController> {
             ),
             body: ListView(
               children: [
-                _buildSearchBar(controller),
-                Expanded(
-                  child: Obx(() =>
-                  controller.isLoading.value
-                      ? Center(child: Container())
-                      : Padding(
-                        padding: const EdgeInsets.all(18.0),
-                        child: _buildDataTable(controller),
-                      ),
-                  ),
+                _buildSearchBar(context,controller),
+                Obx(() =>
+                controller.isLoading.value
+                    ? Center(child: Container())
+                    : Padding(
+                      padding: const EdgeInsets.all(18.0),
+                      child: _buildDataTable(controller),
+                    ),
                 ),
               ],
             ),
@@ -148,115 +146,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
     );
   }
 
-
-/*
-  Widget _buildPlutoGrid(FsrViewcontroller controller) {
-    List<PlutoColumn> columns = [
-      PlutoColumn(
-        title: 'Sr. No.',
-        field: 'srNo',
-        type: PlutoColumnType.number(),
-      ),
-      PlutoColumn(
-        title: 'FSR Name',
-        field: 'fsrName',
-        type: PlutoColumnType.text(),
-      ),
-      PlutoColumn(
-        title: 'FSR Categories',
-        field: 'fsrCategories',
-        type: PlutoColumnType.text(),
-      ),
-      PlutoColumn(
-        title: 'Actions',
-        field: 'actions',
-        type: PlutoColumnType.number(),
-        renderer: (rendererContext) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: PopupMenuButton<String>(
-                  color: CupertinoColors.white,
-                  offset: Offset(0, 56),
-                  itemBuilder: (BuildContext context)=><PopupMenuEntry<String>>[
-                    PopupMenuItem<String>(
-                      value: 'Edit',
-                      onTap: (){
-                        // Get.toNamed(AppRoutes.editProfile);
-                      },
-                      child: const ListTile(
-                        leading: Icon(Icons.edit_calendar_outlined, size: 20, color: Colors.black,),
-                        title: Text('Edit'),
-                      ),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'Delete',
-                      onTap: (){
-                        // Get.toNamed(AppRoutes.editProfile);
-                      },
-                      child: const ListTile(
-                        leading: Icon(Icons.delete, size: 20,color: Colors.red,),
-                        title: Text('Delete'),
-                      ),
-                    ),
-                  ],
-                  child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Icon(Icons.more_vert, size: 20,))
-              ),
-            ),
-          );
-        },
-      ),
-    ];
-
-    List<PlutoRow> rows = controller.filteredTickets.asMap().entries.map((entry) {
-      final index = entry.key;
-      final FsrResponseModel fsrData = entry.value;
-
-      String categoryNames = fsrData.categories
-          .map((category) => category.name)
-          .where((name) => name.isNotEmpty)
-          .join(', ') ?? '';
-
-      return PlutoRow(
-        cells: {
-          'srNo': PlutoCell(value: index + 1),
-          'fsrName': PlutoCell(value: fsrData.fsrName),
-          'fsrCategories': PlutoCell(value: categoryNames),
-          'actions':PlutoCell(value: '')
-        },
-      );
-    }).toList();
-
-    return PlutoGrid(
-      columns: columns,
-      rows: rows,
-      onLoaded: (PlutoGridOnLoadedEvent event) {
-        // You can perform actions when the grid is loaded
-      },
-      onChanged: (PlutoGridOnChangedEvent event) {
-        // Handle changes in the grid
-      },
-      configuration: PlutoGridConfiguration(
-        columnFilter: PlutoGridColumnFilterConfig(
-          filters: const [
-            ...FilterHelper.defaultFilters,
-          ],
-          resolveDefaultColumnFilter: (column, resolver) {
-            if (column.field == 'number') {
-              return resolver<PlutoFilterTypeContains>() as PlutoFilterType;
-            }
-
-            return resolver<PlutoFilterTypeContains>() as PlutoFilterType;
-          },
-        ),
-      ),
-    );
-  }
-*/
-
-  Widget _buildSearchBar(FsrViewController controller) {
+  Widget _buildSearchBar(BuildContext context,FsrViewController controller) {
     return Container(
       height: Get.height * 0.07,
       width: Get.width,
@@ -276,9 +166,9 @@ class FsrViewScreen extends GetView<FsrViewController> {
           Expanded(
             child: _buildSearchField(controller),
           ),
-          /// hGap(10),
-          /// _buildCheckpointStatusButton(),
-          /// hGap(10),
+           // hGap(10),
+           // // _buildCheckpointStatusButton(context,controller,),
+           // hGap(10),
         ],
       ),
     );
@@ -424,7 +314,7 @@ Widget _fsrCategoriesData(Result entry) {
   );
 }
 
-  Widget _buildCheckpointStatusButton(BuildContext context, Result fsr, Category category) {
+  Widget _buildCheckpointStatusButton(BuildContext context,FsrViewController controller, Result fsr, Category category) {
     return ElevatedButton(
       onPressed: () => _showCheckpointDialog(context, fsr, category),
       style: ElevatedButton.styleFrom(
@@ -669,6 +559,7 @@ void _showEditModelView(FsrViewController controller, BuildContext context) {
                             return Row(
                               children: [
                                 Expanded(
+                                  flex:1,
                                   child: CustomTextField(
                                     hintText: 'Categories'.tr,
                                     controller: controller.categoryNameControllers[index],

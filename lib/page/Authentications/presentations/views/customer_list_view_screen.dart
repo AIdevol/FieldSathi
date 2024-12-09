@@ -150,6 +150,7 @@ Widget _buildSearchField(CustomerListViewController controller) {
       ),
     ),
     child: TextField(
+      controller: controller.searchController,
       decoration: InputDecoration(
         hintText: "Search",
         hintStyle: MontserratStyles.montserratSemiBoldTextStyle(
@@ -162,8 +163,8 @@ Widget _buildSearchField(CustomerListViewController controller) {
       style: MontserratStyles.montserratSemiBoldTextStyle(
         color: Colors.black,
       ),
-      onChanged: (value) {
-        // Implement search functionality
+      onChanged: (_) {
+       controller.searchCustomers();
       },
     ),
   );
@@ -226,14 +227,9 @@ Widget _dataTableViewScreen(CustomerListViewController controller, BuildContext 
                     icon: Image.asset(whatsappIcon, width: 24, height: 24),
                   ),
                 )),
-                DataCell( _dropDownValueViews(controller, context, customerData.id.toString(), customerData)/*IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
-                  onPressed: () {
-                    _dropDownValueViews(controller, context, customerData.id.toString(), customerData);
-                  },
-                  icon: Icon(Icons.more_vert, size: 24),
-                )*/),
+                DataCell( _dropDownValueViews(controller, context, customerData.id.toString(), customerData)
+
+                ),
               ]);
             }).toList(),
           )),

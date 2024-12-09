@@ -933,10 +933,10 @@ Future<PostServiceCategoryResponseModel>postServiceCategoriesApiCall({required d
 
 // ===============================================================Get Technician Attendance Api Call ==========================================
   @override
-  Future<TMSResponseModel>getuserDetailsApiCall({Map<String, dynamic>? dataBody, parameter})async{
+  Future<TmsResponseModel>getuserDetailsApiCall({Map<String, dynamic>? dataBody, parameter})async{
     try{
       final response = await dioClient!.get("${ApiEnd.tmsUsersEnd}", data: dataBody,queryParameters: parameter, skipAuth: false);
-      return TMSResponseModel.fromJson(response);
+      return TmsResponseModel.fromJson(response);
     }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }

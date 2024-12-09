@@ -85,7 +85,7 @@ abstract class AuthenticationApi {
   Future<SubServiceBySubServiceIdResponseModel> getSub_ServiceCategoriesByIdApiCall({Map<String, dynamic>? dataBody, parameters});
   Future<PostServiceCategoryResponseModel> PostSub_ServiceCategoriesByIdApiCall({required dioo.FormData dataBody});
   Future<PostSubServiceResponseModel>postSubServiceCategoriesApiCall({required dioo.FormData dataBody});
-  Future<TMSResponseModel>getuserDetailsApiCall({Map<String, dynamic>? dataBody});
+  Future<TmsResponseModel>getuserDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<Uint8List> downloadTicketDataByUsername({Map<String, dynamic>? dataBody, String? id});
   Future<ExcelTicket> exportTicketDataByDate({Map<String, dynamic>? dataBody, parameter});
   Future<TicketResponseModel> putTicketDetailsApiCall({Map<String, dynamic>? dataBody});

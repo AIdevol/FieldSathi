@@ -10,7 +10,7 @@ import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 class AttendanceScreenController extends GetxController {
 
   RxBool isLoading = true.obs;
-  RxSet<TMSResponseModel> attendanceResponses = <TMSResponseModel>{}.obs;
+  RxSet<TmsResponseModel> attendanceResponses = <TmsResponseModel>{}.obs;
   RxList<TMSResult> attendanceData = <TMSResult>[].obs;
 
   // Future<AttendanceUserResponseModel>getCalenderViewUserAttendanceApiCall({Map<String, dynamic>? dataBody, parameter})

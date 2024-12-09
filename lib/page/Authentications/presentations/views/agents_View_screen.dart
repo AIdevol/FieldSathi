@@ -24,8 +24,8 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
         child: GetBuilder<AgentsViewScreenController>(
           builder: (controller) =>
               Scaffold(
-                bottomNavigationBar: _buildPaginationControls(controller),
-                backgroundColor: CupertinoColors.white,
+                  bottomNavigationBar: _buildPaginationControls(controller),
+                  backgroundColor: CupertinoColors.white,
                   appBar: AppBar(
                     leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
                     backgroundColor: appColor,
@@ -139,8 +139,9 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
         ),
       ),
       child: TextField(
+        controller: controller.searchController,
         decoration: InputDecoration(
-          hintText: "Search",
+          hintText: "Search by name, email, or phone",
           hintStyle: MontserratStyles.montserratSemiBoldTextStyle(
             color: Colors.grey,
           ),
@@ -151,12 +152,10 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
         style: MontserratStyles.montserratSemiBoldTextStyle(
           color: Colors.black,
         ),
-        onChanged: (value) {
-          // Implement search functionality
-        },
       ),
     );
   }
+
   _buildEmptyState() {
     return Center(
       child: Column(
@@ -179,6 +178,9 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
     );
   }
   Widget _dataTableViewScreen(AgentsViewScreenController controller) {
+    if(controller.agentsPaginationsData.isEmpty){
+      return _buildEmptyState();
+    }
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Obx(() =>

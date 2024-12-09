@@ -27,7 +27,7 @@ class ServiceCategoriesController extends GetxController {
   final TextEditingController contactNumberController = TextEditingController();
   final TextEditingController serviceDescriptionController = TextEditingController();
   final isSearching = false.obs;
-  final searchController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
   String? selectedSubcategory;
   final RxList<ServiceCategory> allServices = <ServiceCategory>[].obs;
   final RxList<ServiceCategory> filteredServices = <ServiceCategory>[].obs;
@@ -55,29 +55,46 @@ class ServiceCategoriesController extends GetxController {
       FocusScope.of(Get.context!).requestFocus(FocusNode());
     });
     hitServiceCategoriesApiCall();
+    searchController.addListener(applyFilter);
+    // toggleSearch();
   }
 
   void toggleSearch() {
     isSearching.value = !isSearching.value;
     if (!isSearching.value) {
       searchController.clear();
-      // filteredServices.clear();
-      // filteredServices.addAll(allServices);
     }
   }
 
-  // void filterServices(String query) {
-  //   if (query.isEmpty) {
-  //     filteredServices.clear();
-  //     filteredServices.addAll(allServices);
-  //   } else {
-  //     filteredServices.value = allServices
-  //         .where((service) =>
-  //     service?.serviceCategoryName.toLowerCase().contains(query.toLowerCase()) ||
-  //         service.id.toString().contains(query.toLowerCase()))
-  //         .toList();
-  //   }
-  // }
+  void applyFilter() {
+    final query = searchController.text.trim().toLowerCase();
+
+    if (query.isEmpty) {
+      // Reset to all services when query is empty
+      filteredServices.clear();
+      filteredServices.addAll(allServices);
+    } else {
+      // More comprehensive filtering with multiple search criteria
+      filteredServices.value = allServices.where((service) {
+        // Check if any of the following conditions match
+        return
+          // Search by category name (case-insensitive)
+          (service.serviceCategoryName?.toLowerCase().contains(query) ?? false) ||
+
+              // Search by category ID (exact match)
+              (service.id.toString().contains(query)) ||
+
+              // Search by category description (case-insensitive)
+              (service.serviceCatDescriptions?.toLowerCase().contains(query) ?? false);
+      }).toList();
+    }
+
+    // Provide user feedback if no results found
+    if (filteredServices.isEmpty) {
+      toast('No services found matching your search');
+    }
+  }
+
   Future<void> pickImage(ImageSource source) async {
     try {
       final XFile? image = await _picker.pickImage(

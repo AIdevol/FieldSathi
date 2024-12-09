@@ -139,6 +139,7 @@ Widget _buildSearchField(SuperViewScreenController controller) {
       ),
     ),
     child: TextField(
+      controller: controller.searchController,
       decoration: InputDecoration(
         hintText: "Search",
         hintStyle: MontserratStyles.montserratSemiBoldTextStyle(
@@ -151,8 +152,8 @@ Widget _buildSearchField(SuperViewScreenController controller) {
       style: MontserratStyles.montserratSemiBoldTextStyle(
         color: Colors.black,
       ),
-      onChanged: (value) {
-        // Implement search functionality
+      onChanged: (_) {
+        controller.applyFilter();
       },
     ),
   );
@@ -184,6 +185,7 @@ Widget _mainData(SuperViewScreenController controller){
   return SingleChildScrollView(
     scrollDirection: Axis.horizontal,
     child:  DataTable(columns: const[
+      // DataColumn(label: Text("Employee Id")),
       DataColumn(label: Text('Name')),
       DataColumn(label: Text('Email')),
       DataColumn(label: Text('Phone')),//
@@ -198,6 +200,8 @@ Widget _mainData(SuperViewScreenController controller){
         return DataRow(cells: [
           DataCell(Row(
             children: [
+              _ticketBoxIcons(superData.empId),
+              hGap(8),
               CircleAvatar(
                 backgroundImage: superData.profileImage != null
                     ? NetworkImage(superData.profileImage!)
@@ -301,6 +305,35 @@ Widget _buildPaginationControls(SuperViewScreenController controller) {
     ),
   ));
 }
+Widget _ticketBoxIcons(String ticketId) {
+  return Center(
+    child: Column(
+      children: [
+        vGap(12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal:8, vertical: 4),
+          decoration: BoxDecoration(
+            color: normalBlue,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: Colors.blue.shade300,
+              width: 1,
+            ),
+          ),
+          child: Text(
+            '$ticketId',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+        ),
+        // Text(text,style: MontserratStyles.montserratSemiBoldTextStyle(size: 12, color: Colors.black),)
+      ],
+    ),
+  );
+}
 
 Widget _buildStatusIndicator(Result superdata,bool isActive) {
   return Column(
@@ -402,6 +435,7 @@ Widget _dropDownValueViews(SuperViewScreenController controller, String agentId,
   );
 }
 void _editWidgetOfAgentsDialogValue(SuperViewScreenController controller, BuildContext context, String agentId, Result agentData) {
+  controller.employeeIdController.text = agentData.empId??"";
   controller.firstNameController.text = agentData.firstName ?? '';
   controller.lastNameController.text = agentData.lastName ?? '';
   controller.emailController.text = agentData.email ?? '';
@@ -539,7 +573,7 @@ _phoneNumberField(SuperViewScreenController controller, BuildContext context){
 
 _buildOptionButtons(SuperViewScreenController controller, BuildContext context) {
   return Row(
-    mainAxisAlignment: MainAxisAlignment.end,
+    mainAxisAlignment: MainAxisAlignment.center,
     children: [
       ElevatedButton(
         onPressed: () {

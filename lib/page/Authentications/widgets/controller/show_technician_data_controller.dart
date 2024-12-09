@@ -12,7 +12,7 @@ import '../../../../response_models/user_response_model.dart';
 
 class ShowTechnicianDataController extends GetxController {
   RxBool isLoading = true.obs;
-  RxList<TMSResponseModel> attendanceResponses = <TMSResponseModel>[].obs;
+  RxList<TmsResponseModel> attendanceResponses = <TmsResponseModel>[].obs;
   RxList<TMSResult> attendanceResultsData = <TMSResult>[].obs;
   RxList<TMSResult> attendanceFilterdata = <TMSResult>[].obs;
   RxList<TMSResult> attendancePaginationData = <TMSResult>[].obs;

@@ -35,13 +35,46 @@ class LeaveReportViewScreenController extends GetxController {
   RxInt currentPage = 1.obs;
   RxInt totalPages = 0.obs;
   final int itemsPerPage = 10;
-  // LeaveResponseModel resultsData = LeaveResponseModel();
 
   @override
   void onInit() {
     super.onInit();
     hitLeavesApiCall();
   }
+
+  void applyFilters() {
+    // Create a copy of the original leaves data
+    List<LeaveResult> tempLeaves = List.from(leavesData);
+
+    // Filter by status
+    if (selectedFilter.value != "Select Status") {
+      tempLeaves = tempLeaves.where((leave) =>
+      leave.status?.toLowerCase() == selectedFilter.value.toLowerCase()
+      ).toList();
+    }
+
+    // Filter by search query
+    if (searchQuery.value.isNotEmpty) {
+      tempLeaves = tempLeaves.where((leave) {
+        final name = '${leave.userId?.firstName ?? ''} ${leave.userId?.lastName ?? ''}'.toLowerCase();
+        final reason = leave.reason?.toLowerCase() ?? '';
+        final leaveType = leave.leaveType?.toLowerCase() ?? '';
+        final searchTerm = searchQuery.value.toLowerCase();
+
+        return name.contains(searchTerm) ||
+            reason.contains(searchTerm) ||
+            leaveType.contains(searchTerm);
+      }).toList();
+    }
+
+    // Update filtered leaves
+    filteredLeaves.value = tempLeaves;
+
+    // Recalculate pagination
+    calculateTotalPages();
+    updatePaginatedTechnicians();
+  }
+
   void calculateTotalPages() {
     totalPages.value = (filteredLeaves.length / itemsPerPage).ceil();
     if (currentPage.value > totalPages.value) {
@@ -53,21 +86,11 @@ class LeaveReportViewScreenController extends GetxController {
   }
 
   void updatePaginatedTechnicians() {
-    List<LeaveResult> sourceList = filteredLeaves.isEmpty
-        ? leavesData
-        : filteredLeaves;
-    totalPages.value = (sourceList.length / itemsPerPage).ceil();
-    if (currentPage.value > totalPages.value) {
-      currentPage.value = totalPages.value;
-    }
-    if (currentPage.value < 1) {
-      currentPage.value = 1;
-    }
-
     int startIndex = (currentPage.value - 1) * itemsPerPage;
     int endIndex = startIndex + itemsPerPage;
-    endIndex = endIndex > sourceList.length ? sourceList.length : endIndex;
-    leavesPaginationsData.value = sourceList.sublist(
+    endIndex = endIndex > filteredLeaves.length ? filteredLeaves.length : endIndex;
+
+    leavesPaginationsData.value = filteredLeaves.sublist(
         startIndex,
         endIndex
     );
@@ -75,21 +98,18 @@ class LeaveReportViewScreenController extends GetxController {
     update();
   }
 
-
   void nextPage() {
     if (currentPage.value < totalPages.value) {
       currentPage.value++;
       updatePaginatedTechnicians();
-      print("next page tapped value: ${currentPage.value}");
     }
   }
+
 
   void previousPage() {
     if (currentPage.value > 1) {
       currentPage.value--;
       updatePaginatedTechnicians();
-      print("previous page tapped value: ${currentPage.value}");
-
     }
   }
 
@@ -103,37 +123,21 @@ class LeaveReportViewScreenController extends GetxController {
     updatePaginatedTechnicians();
   }
 
-
   void hitLeavesApiCall() {
     customLoader.show();
     isLoading.value = true;
     FocusManager.instance.primaryFocus?.unfocus();
     var leavefilteredPage = {
-      "page":currentPage.value,
-      "page_size":"all"
+      "page": currentPage.value,
+      "page_size": "all"
     };
-    Get.find<AuthenticationApiService>().getLeavesApiCall(parameter:leavefilteredPage).then((value) {
+    Get.find<AuthenticationApiService>().getLeavesApiCall(parameter: leavefilteredPage).then((value) {
       leavesData.assignAll(value.results);
       filteredLeaves.assignAll(value.results);
       leavesPaginationsData.assignAll(value.results);
-
-      // if (value is LeaveResponseModel){
-      //   leaveManagementData.value = value;
-      //   if (leaveManagementData.value.results != null && leaveManagementData.value.results!.isNotEmpty) {
-      //     leaveManagementData.value.results!.forEach((result) async {
-      //       print('Leave ID: ${result.id}');
-      //       await storage.write(leavesId, result.id??"");
-      //     });
-      //   } else {
-      //     print('No leave results found');
-      //   }
-      //
-      // } else {
-      //   throw Exception('Unexpected response format: ${value.runtimeType}');
-      // }
-      // applyFilters();
       customLoader.hide();
       calculateTotalPages();
+      updatePaginatedTechnicians();
       isLoading.value = false;
       update();
     }).onError((error, stackError) {
@@ -166,7 +170,7 @@ class LeaveReportViewScreenController extends GetxController {
   void updateSelectedFilter(String? newValue) {
     if (newValue != null) {
       selectedFilter.value = newValue;
-      // applyFilters();
+      applyFilters();
     }
   }
 
@@ -178,7 +182,7 @@ void updateSelectedStatus(String? newValue){
 }
   void updateSearchQuery(String query) {
     searchQuery.value = query;
-    // applyFilters();
+    applyFilters();
   }
 
   // void applyFilters() {

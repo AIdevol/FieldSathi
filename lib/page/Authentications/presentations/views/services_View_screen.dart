@@ -35,33 +35,46 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
             )));
   }
 
-  PreferredSizeWidget _buildSearchAppBar(
-      ServiceCategoriesController controller) {
+  PreferredSizeWidget _buildSearchAppBar(ServiceCategoriesController controller) {
     return AppBar(
       backgroundColor: appColor,
-      leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
+      leading: IconButton(
+          onPressed: () => Get.back(),
+          icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)
+      ),
       title: Obx(() {
-        return controller.isSearching.value
-            ? TextField(
-          controller: controller.searchController,
-          style: MontserratStyles.montserratRegularTextStyle(
-            size: 16,
-            color: Colors.black,
-          ),
-          decoration: InputDecoration(
-            hintText: 'Search Service Categories...',
-            hintStyle: MontserratStyles.montserratNormalTextStyle(
+        return AnimatedContainer(
+          duration: Duration(milliseconds: 300),
+          width: controller.isSearching.value || controller.searchController.text.isNotEmpty
+              ? Get.width * 0.7  // Expanded width when searching
+              : Get.width * 0.5,  // Default width
+          child: controller.isSearching.value
+              ? TextField(
+            controller: controller.searchController,
+            autofocus: true,
+            style: MontserratStyles.montserratRegularTextStyle(
               size: 16,
-              color: Colors.black54,
+              color: Colors.black,
             ),
-            border: InputBorder.none,
-          ),
-        )
-            : Text(
-          "Service Categories",
-          style: MontserratStyles.montserratBoldTextStyle(
-            size: 18,
-            color: Colors.black,
+            decoration: InputDecoration(
+              hintText: 'Search Service Categories...',
+              hintStyle: MontserratStyles.montserratNormalTextStyle(
+                size: 16,
+                color: Colors.black54,
+              ),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(vertical: 10),
+            ),
+            onChanged: (_){
+              controller.applyFilter();
+            },
+          )
+              : Text(
+            "Service Categories",
+            style: MontserratStyles.montserratBoldTextStyle(
+              size: 18,
+              color: Colors.black,
+            ),
           ),
         );
       }),
@@ -69,11 +82,21 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
         Obx(() {
           return IconButton(
             icon: Icon(
-              controller.isSearching.value ? Icons.close : FeatherIcons.search,
+              controller.isSearching.value || controller.searchController.text.isNotEmpty
+                  ? Icons.close
+                  : FeatherIcons.search,
               color: Colors.black,
             ),
             onPressed: () {
-              controller.toggleSearch();
+              if (controller.searchController.text.isNotEmpty) {
+                // Clear search if text exists
+                controller.searchController.clear();
+                controller.filteredServices.clear();
+                controller.filteredServices.addAll(controller.allServices);
+              } else {
+                // Toggle search mode
+                controller.toggleSearch();
+              }
             },
           );
         }),
@@ -280,84 +303,6 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
       shadowColor: Colors.black.withOpacity(0.5),
     );
   }
-
-  // Widget _buildContent(ServiceCategory service) {
-  //   if (services.isEmpty) {
-  //     return _buildEmptyState();
-  //   } else {
-  //     return _buildServicesList(services);
-  //   }
-  // }
-
-
-  // Widget _containerViewScreen(ServiceCategoriesController controller, context) {
-  //
-  //   return Padding(
-  //     padding: const EdgeInsets.all(8.0),
-  //     child: Obx(() {
-  //       if (controller.isLoading.value) {
-  //         return Center(child: CircularProgressIndicator());
-  //       }
-  //       // final List<ServiceCategoryResponseModel> services =
-  //       // controller.isSearching.value ? controller.filteredServices : controller
-  //       //     .allServices;
-  //       return _buildContent(ser);
-  //     }));
-  // }
-
-
-
-  // _buildServicesList(List<ServiceCategoryResponseModel> services){
-  //   return ListView.separated(
-  //     itemCount:  services.length,
-  //     separatorBuilder: (BuildContext context, int index) => SizedBox(height: 10),
-  //     itemBuilder: (context, index) =>
-  //         Container(
-  //           height: Get.height * 0.1,
-  //           width: Get.width * 0.4,
-  //           decoration: BoxDecoration(color: whiteColor,
-  //             borderRadius: BorderRadius.circular(20),
-  //             boxShadow: [
-  //               BoxShadow(
-  //                 color: Colors.grey.withOpacity(0.5),
-  //                 spreadRadius: 1,
-  //                 blurRadius: 5,
-  //                 offset: Offset(0, 5),
-  //               ),
-  //             ],
-  //             border: Border.all(
-  //               width: 0.80,
-  //               color: Colors.black,
-  //             ),),
-  //           child: _listViewContainerElement(services[index],controller, context),
-  //         ),
-  //   );}
-  // }
-
-  // _listViewContainerElement(ServiceCategoryResponseModel service,ServiceCategoriesController controller, BuildContext context, ) {
-  //   return Row(children: [
-  //     Padding(
-  //       padding: const EdgeInsets.only(left: 10, right: 20),
-  //       child: CircleAvatar(radius: 40,
-  //           backgroundImage: AssetImage(userImageIcon,)),
-  //     ),
-  //     hGap(10),
-  //     Padding(
-  //       padding: const EdgeInsets.all(8.0),
-  //       child: Column(children: [
-  //         Text(""/*${service.serviceCategoryName}*/,
-  //           style: MontserratStyles.montserratSemiBoldTextStyle(
-  //               size: 15, color: blackColor),),
-  //         vGap(10),
-  //         Text(""/*${service.serviceCatDescriptions}*/,
-  //           style: MontserratStyles.montserratSemiBoldTextStyle(
-  //               size: 15, color: blackColor),),
-  //       ],),
-  //     ),
-  //     hGap(30),
-  //       _customripValueMenuforEditAndDeletingServices(controller: controller, context: context)
-  //   ]);
-  // }
 
   Widget _customripValueMenuforEditAndDeletingServices(ServiceCategory services,
       ServiceCategoriesController controller,BuildContext context) {

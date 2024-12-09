@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
@@ -21,6 +22,7 @@ class LeadListViewScreen extends GetView<LeadListViewController> {
     return MyAnnotatedRegion(
       child: GetBuilder<LeadListViewController>(
         builder: (controller) => Scaffold(
+          backgroundColor: CupertinoColors.white,
           bottomNavigationBar: _buildPaginationControls(controller),
           appBar: AppBar(
             backgroundColor: appColor,
@@ -144,6 +146,7 @@ class LeadListViewScreen extends GetView<LeadListViewController> {
         ),
       ),
       child: TextField(
+        controller: controller.searchController,
         decoration: InputDecoration(
           hintText: "Search",
           hintStyle: MontserratStyles.montserratSemiBoldTextStyle(
@@ -156,8 +159,8 @@ class LeadListViewScreen extends GetView<LeadListViewController> {
         style: MontserratStyles.montserratSemiBoldTextStyle(
           color: Colors.black,
         ),
-        onChanged: (value) {
-          // Implement search functionality
+        onChanged: (_) {
+          controller.applyFilter();
         },
       ),
     );
@@ -219,6 +222,9 @@ _buildEmptyState() {
   );
 }
 _dataTableViewScreen({required LeadListViewController controller, required BuildContext context}){
+  if(controller.leadPaginationsData.isEmpty){
+    return _buildEmptyState();
+  }
   return Obx((){
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
