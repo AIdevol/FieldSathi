@@ -57,6 +57,25 @@ class AMCScreenController extends GetxController {
   late FocusNode customerNameFocusNode;
   late FocusNode notesFocusNode;
 
+  final List<String> reminderList = [
+    "Normal",
+    'Extreme',
+    "Both"
+  ];
+
+final String reminderListOccurances = 'Normal';
+
+  final List<String>serviceOccurenceList = [
+    "Monthly",
+    "Quarterly",
+    "Yearly",
+    "Half Monthly",
+    "4 Months",
+    "Weekly",
+    "15 Days"
+  ];
+final String defaultsrviceOccuranceList = "Monthly";
+
   RxInt currentPage = 1.obs;
   RxInt totalPages = 0.obs;
   final int itemsPerPage = 10;
@@ -217,8 +236,8 @@ class AMCScreenController extends GetxController {
       filteredAmcData.assignAll(amcResultData);
     } else {
       filteredAmcData.assignAll(amcResultData.where((amc) =>
-      (amc.amcName?.toLowerCase().contains(query) == true) ||
-          (amc.customer.customerName?.toLowerCase().contains(query) == true) ||
+      (amc.amcName.toString().toLowerCase().contains(query) == true) ||
+          (amc.customer?.customerName?.toLowerCase().contains(query) == true) ||
           (amc.id.toString().contains(query))
       ));
     }
@@ -236,7 +255,7 @@ class AMCScreenController extends GetxController {
       customLoader.show();
 
       final amcData = await Get.find<AuthenticationApiService>().getAmcDetailsApiCall(parameter: amcParameter);
-      totalAmcCount.value = amcData.count ?? 0;
+      // totalAmcCount.value = amcData.count ?? 0;
       amcResultData.assignAll(amcData.results);
       amcPaginationData.assignAll(amcData.results);
       List<String> amcIds = amcResultData.map((amcLiveData)=>amcLiveData.id.toString()).toList();
@@ -265,9 +284,11 @@ class AMCScreenController extends GetxController {
 
     if (picked != null && picked != selectedDate.value) {
       selectedDate.value = picked;
-      dateController.text = DateFormat('dd-MMM-yyyy').format(picked);
+      // Explicitly use uppercase YYYY for the year to match the required format
+      dateController.text = DateFormat('yyyy-MM-dd').format(picked);
     }
   }
+
 
   Future<void> deleteAMC(String amcId) async {
     try {
@@ -313,5 +334,53 @@ void hitAmcCountApiCall(){
 Future<void>hitRefreshApiCalls()async{
   hitGetAmcDetailsApiCall();
   hitAmcCountApiCall();
+}
+
+void hitAmcDeleteApiCall(String id){
+    isLoading.value = true;
+    customLoader.show();
+    Get.find<AuthenticationApiService>().deleteAmcDetailsApiCall(id: id).then((value){
+      toast(value.message ??"Deleted Successfully AMC Data");
+      customLoader.hide();
+      hitGetAmcDetailsApiCall();
+      hitAmcCountApiCall();
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
+      customLoader.hide();
+      hitGetAmcDetailsApiCall();
+    });
+}
+
+
+void hitUpdateApiCall(String id){
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+    var updateData = {
+      "amcName":amcNameController.text,
+      "activationTime":activationTimeController.text,
+      "activationDate":datesController.text,
+      "no_of_service":noOfServiceController.text,
+      "remainder":reminderController.text,
+      "productBrand":productBrandController.text,
+      "productName":productNameController.text,
+      "serialModelNo":serialModelNoController.text,
+      "underWarranty":true,
+      "serviceAmount":serviceAmountController.text,
+      "receivedAmount":recievedAmountController.text,
+      // "customer":selectedCustomerId.value,
+      "select_service_occurence":serviceOccurrenceController.text,
+      "note":notesController.text
+    };
+    Get.find<AuthenticationApiService>().updateAmcDetailsApiCall(id: id, dataBody: updateData).then((value){
+      toast("AMC Updated Successfully");
+      customLoader.hide();
+      Get.back();
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
+      customLoader.hide();
+    });
 }
 }

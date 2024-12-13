@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -857,7 +858,11 @@ class SubServiceScreenView extends GetView<ServiceCategoriesController> {
               ),
             ),
           ),
-          body: _buildSubServiceContent(controller, context,serviceCategoryId),
+          body: RefreshIndicator(
+            onRefresh: ()async{
+              await controller.hitRefreshApiCall();
+            },
+              child: _buildSubServiceContent(controller, context,serviceCategoryId)),
         ),
       ),
     );
@@ -1407,7 +1412,7 @@ Widget _buildButton(String text,{required onPressed}) {
 }
 
 Widget _SubserviceBoxIcons(String ticketId,String text) {
-  String truncatedText = text.length > 15 ? '${text.substring(0, 15)}...' : text;
+  String truncatedText = text.length > 12 ? '${text.substring(0, 12)}...' : text;
   return Center(
     child: Row(
       children: [
@@ -1505,7 +1510,7 @@ _form1(BuildContext context, ServiceCategoriesController controller, Results ser
           vGap(10),
           Divider(),
           vGap(10),
-          _selectSubcategores(context, controller),
+          _selectSubcategories(context, controller),
           vGap(10),
           _serviceNameContext(context, controller),
           vGap(10),
@@ -1547,7 +1552,7 @@ _form(BuildContext context, ServiceCategoriesController controller){
           vGap(10),
         Divider(),
         vGap(10),
-        _selectSubcategores(context, controller),
+          _selectSubcategories(context, controller),
         vGap(10),
         _serviceNameContext(context, controller),
         vGap(10),
@@ -1566,8 +1571,9 @@ _form(BuildContext context, ServiceCategoriesController controller){
   );
 }
 
-Widget _selectSubcategores(BuildContext context, ServiceCategoriesController controller) {
+Widget _selectSubcategories(BuildContext context, ServiceCategoriesController controller) {
   return Column(
+    key: UniqueKey(),
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
@@ -1575,36 +1581,42 @@ Widget _selectSubcategores(BuildContext context, ServiceCategoriesController con
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),
       SizedBox(height: 8),
-      DropdownButtonFormField<String>(
-        value: controller.selectedSubcategory,
-        items: controller.SubserviceById.map((subcategory) {
-          return DropdownMenuItem<String>(
-            value: subcategory.id.toString(),
-            child: Text(subcategory.serviceName.toString()),
-          );
-        }).toList(),
-        onChanged: (String? newValue) {
-          if (newValue != null) {
-            var selectedSubcategory = controller.SubserviceById.firstWhere(
-                    (subcategory) => subcategory.id.toString() == newValue
-            );
-            controller.selectedSubcategory = newValue;
-            controller.subcategoryController.text = selectedSubcategory.serviceName!;
-          }
-        },
-        decoration: InputDecoration(
-          hintText: "Select Subcategory",
+      Obx(() => DropdownMenu<SubService>(
+        key: UniqueKey(),
+        width: MediaQuery.of(context).size.width * 0.9,
+        inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
           filled: true,
           fillColor: Colors.grey[100],
         ),
-      ),
+        hintText: "Select Subcategory",
+        dropdownMenuEntries: controller.subServicesAll
+            .map<DropdownMenuEntry<SubService>>((SubService service) {
+          print("adfkadfa: ${service.serviceSubCategoryName}");
+          return DropdownMenuEntry<SubService>(
+            value: service,
+            label: service.serviceSubCategoryName ?? 'Unnamed Subcategory',
+          );
+        })
+            .toList(),
+        onSelected: (SubService? selectedService) {
+          if (selectedService != null) {
+            // Update the selected subcategory
+            controller.subServiceCategoryId.value = selectedService.id!.toInt();
+
+            // Update the subcategory controller text if needed
+            controller.subcategoryController.text = "${selectedService.serviceSubCategoryName}";
+            print("${selectedService.serviceSubCategoryName}");
+            // You can perform any additional actions here
+            controller.update();
+          }
+        },
+      )),
     ],
   );
 }
-
 _serviceNameContext(BuildContext context,ServiceCategoriesController controller){
   return  TextField(
     controller: controller.serviceNameController,
@@ -1622,6 +1634,9 @@ _serviceNameContext(BuildContext context,ServiceCategoriesController controller)
 
 _servicePriceContext(BuildContext context,ServiceCategoriesController controller){
   return TextField(
+    inputFormatters: [
+      LengthLimitingTextInputFormatter(8)
+    ],
     controller: controller.servicePriceController,
     keyboardType: TextInputType.number,
 
@@ -1633,7 +1648,6 @@ _servicePriceContext(BuildContext context,ServiceCategoriesController controller
       filled: true,
       fillColor: Colors.grey[100],
     ),
-
   );
 }
 
@@ -1649,7 +1663,9 @@ _contactNumberContext(BuildContext context,ServiceCategoriesController controlle
       filled: true,
       fillColor: Colors.grey[100],
     ),
-
+inputFormatters: [
+  LengthLimitingTextInputFormatter(10)
+],
   );
 }
 
@@ -1674,7 +1690,8 @@ Widget _selectMultiPleImageContext(BuildContext context, ServiceCategoriesContro
     children: [
       GestureDetector(
         onTap: () {
-          controller.selectMultipleImages();
+          // Now opens a bottom sheet to choose between gallery and camera
+          controller.selectMultipleImages(context: context);
         },
         child: Container(
           decoration: BoxDecoration(
@@ -1689,7 +1706,7 @@ Widget _selectMultiPleImageContext(BuildContext context, ServiceCategoriesContro
                 child: Text(
                   controller.selectedImages.isNotEmpty
                       ? '${controller.selectedImages.length} image(s) selected'
-                      : 'Tap to select images',
+                      : 'Tap to select images (Max 3)',
                   style: TextStyle(
                     color: controller.selectedImages.isNotEmpty
                         ? Colors.black87

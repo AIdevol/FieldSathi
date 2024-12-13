@@ -9,6 +9,7 @@ import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 import '../../../../response_models/add_technician_response_model.dart';
+import '../../presentations/controllers/technician_list_view_screen_controller.dart';
 
 class AddTechnicianListController extends GetxController{
 
@@ -86,7 +87,9 @@ class AddTechnicianListController extends GetxController{
       print("maindata of technician= $mainData");
       customLoader.hide();
       toast('Technician Added Successfully!');
-      Get.offAllNamed(AppRoutes.technicianListsScreen);
+      Get.back();
+      Get.put(TechnicianListViewScreenController()).hitGetTechnicianApiCall();
+      // Get.offAllNamed(AppRoutes.technicianListsScreen);
       update();  // update to the method after data entered
     }).onError((error, stackError){
       customLoader.hide();

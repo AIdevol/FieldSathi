@@ -95,16 +95,16 @@ class SalesResutls {
   });
 
   final int? id;
-  final TodayAttendance? todayAttendance;
+  final List<TodayAttendance> todayAttendance;
   final List<dynamic> brandNames;
   final dynamic lastLogin;
   final String? firstName;
   final String? lastName;
   final String? email;
   final String? phoneNumber;
-  final String? companyName;
+  final dynamic companyName;
   final String? employees;
-  final DateTime? dob;
+  final dynamic dob;
   final String? otp;
   final bool? otpVerified;
   final bool? isStaff;
@@ -118,8 +118,8 @@ class SalesResutls {
   final bool? deactivate;
   final String? role;
   final dynamic customerType;
-  final String? batteryStatus;
-  final dynamic gpsStatus;
+  final dynamic batteryStatus;
+  final bool? gpsStatus;
   final dynamic longitude;
   final dynamic latitude;
   final dynamic companyAddress;
@@ -151,7 +151,7 @@ class SalesResutls {
   final dynamic region;
   final int? allocatedSickLeave;
   final int? allocatedCasualLeave;
-  final dynamic? dateJoined;
+  final DateTime? dateJoined;
   final int? maxEmployeesAllowed;
   final int? employeesCreated;
   final bool? isLeaveAllocated;
@@ -166,7 +166,7 @@ class SalesResutls {
   factory SalesResutls.fromJson(Map<String, dynamic> json){
     return SalesResutls(
       id: json["id"],
-      todayAttendance: json["today_attendance"] == null ? null : TodayAttendance.fromJson(json["today_attendance"]),
+      todayAttendance: json["today_attendance"] == null ? [] : List<TodayAttendance>.from(json["today_attendance"]!.map((x) => TodayAttendance.fromJson(x))),
       brandNames: json["brand_names"] == null ? [] : List<dynamic>.from(json["brand_names"]!.map((x) => x)),
       lastLogin: json["last_login"],
       firstName: json["first_name"],
@@ -175,7 +175,7 @@ class SalesResutls {
       phoneNumber: json["phone_number"],
       companyName: json["company_name"],
       employees: json["employees"],
-      dob: DateTime.tryParse(json["dob"] ?? ""),
+      dob: json["dob"],
       otp: json["otp"],
       otpVerified: json["otp_verified"],
       isStaff: json["is_staff"],

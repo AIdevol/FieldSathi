@@ -1,6 +1,7 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/add_sales_screen_controller.dart';
 
@@ -159,6 +160,9 @@ class AddSalesScreen extends GetView<AddSalesScreenController> {
               controller.phoneCountryCode.value = value.dialCode.toString();
               // controller.update();
             }),) ,
+      inputFormatters: [
+        LengthLimitingTextInputFormatter(10)
+      ],
     );
   }
 

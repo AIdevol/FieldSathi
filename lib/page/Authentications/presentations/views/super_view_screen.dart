@@ -152,7 +152,7 @@ Widget _buildSearchField(SuperViewScreenController controller) {
       style: MontserratStyles.montserratSemiBoldTextStyle(
         color: Colors.black,
       ),
-      onChanged: (_) {
+      onChanged: (value) {
         controller.applyFilter();
       },
     ),
@@ -182,10 +182,14 @@ _buildEmptyState() {
 }
 
 Widget _mainData(SuperViewScreenController controller){
+  // final ticketData = controller.filterePaginationsData.map((value)=>value.todayAttendance)
+  if(controller.filterePaginationsData.isEmpty){
+    return _buildEmptyState();
+  }
   return SingleChildScrollView(
     scrollDirection: Axis.horizontal,
     child:  DataTable(columns: const[
-      // DataColumn(label: Text("Employee Id")),
+      DataColumn(label: Text("Employee Id")),
       DataColumn(label: Text('Name')),
       DataColumn(label: Text('Email')),
       DataColumn(label: Text('Phone')),//
@@ -197,10 +201,12 @@ Widget _mainData(SuperViewScreenController controller){
       DataColumn(label: Text('Status')),
       DataColumn(label: Text(" ")),
     ], rows: controller.filterePaginationsData.map((superData){
-        return DataRow(cells: [
-          DataCell(Row(
+      final ticketAttendance = superData.todayAttendance.map((value)=> value.punchIn.toString()).toList();
+      final ticketAttendance1 = superData.todayAttendance.map((value)=> value.punchOut.toString()).toList();
+      return DataRow(cells: [
+        DataCell(_ticketBoxIcons(superData.empId.toString()),),
+        DataCell(Row(
             children: [
-              _ticketBoxIcons(superData.empId),
               hGap(8),
               CircleAvatar(
                 backgroundImage: superData.profileImage != null
@@ -211,13 +217,13 @@ Widget _mainData(SuperViewScreenController controller){
               Text("${superData.firstName} ${superData.lastName}"),
             ],
           )),
-          DataCell(Text(superData.email)),
-          DataCell(Text(superData.phoneNumber)),//
-          DataCell(Text(superData.dateJoined)),
+          DataCell(Text(superData.email.toString())),
+          DataCell(Text(superData.phoneNumber.toString())),//
+          DataCell(Text(superData.dateJoined.toString())),
           DataCell(Text(superData.allocatedCasualLeave.toString())),
           DataCell(Text(superData.allocatedSickLeave.toString())),
-          DataCell(Text(superData.todayAttendance.punchIn.toString())),
-          DataCell(Text(superData.todayAttendance.punchOut.toString())),
+          DataCell(Text(ticketAttendance.toString())),
+          DataCell(Text(ticketAttendance1.toString())),
           DataCell(_buildStatusIndicator(superData,superData.isActive)),
           DataCell(_dropDownValueViews(controller, SuperUserId, superData))
         ],
@@ -225,43 +231,8 @@ Widget _mainData(SuperViewScreenController controller){
     }).toList()
     ),
   );
-  //   return SingleChildScrollView(
-  //   scrollDirection: Axis.horizontal,
-  //   child: DataTable(
-  //     columns:const [
-  //       DataColumn(label: Text('Name')),
-  //       DataColumn(label: Text('Phone')),
-  //       DataColumn(label: Text('Profile')),
-  //       DataColumn(label: Text('From Date')),
-  //       DataColumn(label: Text('To Date')),
-  //       DataColumn(label: Text('Days')),
-  //       DataColumn(label: Text('Reason')),
-  //       DataColumn(label: Text('Status')),
-  //       DataColumn(label: Text('Actions')),
-  //     ],
-  //     rows: controller.filteredLeaves.map((leave) {
-  //       return DataRow(
-  //         cells: [
-  //           DataCell(Text('${leave.userId.firstName} ${leave.userId.lastName}')),
-  //           DataCell(Text(leave.userId.phoneNumber)),
-  //           DataCell(Text(leave.userId.role)),
-  //           // DataCell(Text(controller.formatDate(leave.startDate))),
-  //           // DataCell(Text(controller.formatDate(leave.endDate))),
-  //           // DataCell(Text(controller.calculateDays(leave.startDate, leave.endDate).toString())),
-  //           DataCell(Text(leave.reason)),
-  //           DataCell(Text(leave.status)),
-  //           DataCell(
-  //             IconButton(
-  //               icon: Icon(Icons.info),
-  //               onPressed: () =>/* controller.showLeaveDetails(leave)*/,
-  //             ),
-  //           ),
-  //         ],
-  //       );
-  //     }).toList(),
-  //   ),
-  // );
 }
+
 Widget _buildPaginationControls(SuperViewScreenController controller) {
   return Obx(() => Padding(
     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -335,17 +306,17 @@ Widget _ticketBoxIcons(String ticketId) {
   );
 }
 
-Widget _buildStatusIndicator(Result superdata,bool isActive) {
+Widget _buildStatusIndicator(Result superdata,bool? isActive) {
   return Column(
     children: [
-      Text("${superdata.todayAttendance.status}",style: MontserratStyles.montserratSemiBoldTextStyle(
+      Text("${superdata.todayAttendance.map((value)=>value.status)}",style: MontserratStyles.montserratSemiBoldTextStyle(
        color: Colors.black54,
       ),),
 
       Container(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+          color: isActive! ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isActive ? Colors.green : Colors.red,width: 1,
@@ -440,7 +411,7 @@ void _editWidgetOfAgentsDialogValue(SuperViewScreenController controller, BuildC
   controller.lastNameController.text = agentData.lastName ?? '';
   controller.emailController.text = agentData.email ?? '';
   controller.phoneController.text = agentData.phoneNumber ?? '';
-  controller.joiningDateController.text = agentData.dateJoined??"";
+  controller.joiningDateController.text = agentData.dateJoined.toString()??"";
 
   Get.dialog(
       Dialog(

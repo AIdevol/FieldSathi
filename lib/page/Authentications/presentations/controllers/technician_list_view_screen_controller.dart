@@ -30,7 +30,7 @@ class TechnicianListViewScreenController extends GetxController {
   void onInit() {
     super.onInit();
     hitGetTechnicianApiCall();
-    searchController.addListener(_onSearchChanged);
+    searchController.addListener(onSearchChanged);
   }
 
   @override
@@ -106,7 +106,7 @@ class TechnicianListViewScreenController extends GetxController {
     updatePaginatedTechnicians();
   }
 
-  void _onSearchChanged() {
+  void onSearchChanged() {
     final query = searchController.text.toLowerCase();
     if (query.isEmpty) {
       filteredTechnicians.assignAll(allTechnicians);
@@ -236,5 +236,9 @@ class TechnicianListViewScreenController extends GetxController {
   void updateSearch(String query) {
     searchController.text = query;
     // _onSearchChanged will be called automatically due to listener
+  }
+
+  Future<void>refreshAllData()async{
+    hitGetTechnicianApiCall();
   }
 }

@@ -5,6 +5,8 @@ import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
+import '../../presentations/controllers/super_view_screen_controller.dart';
+
 class AddSuperUserViewController extends GetxController{
   final TextEditingController employeeIdController = TextEditingController();
   final TextEditingController firstNameController = TextEditingController();
@@ -50,8 +52,9 @@ void hitPostAddSupperApiCallApiCall(){
     Get.find<AuthenticationApiService>().postSuperUserApiCall(dataBody: parametersData).then((value){
         customLoader.hide();
         toast("Manager created successfully");
+        Get.back();
+        Get.put(SuperViewScreenController()).hitsuperUserApiCall();
         update();
-        Get.offNamed(AppRoutes.SuperAgentsScreen);
     }).onError((error, stackError){
       customLoader.hide();
       toast(error.toString());

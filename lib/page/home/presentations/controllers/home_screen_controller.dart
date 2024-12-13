@@ -131,7 +131,7 @@ class HomeScreenController extends GetxController{
     // }
     Get.find<AuthenticationApiService>().getAmcDetailsApiCall().then((value){
       var amcData = value;
-      amcResultData.assignAll(value.results);
+      amcResultData.assignAll(value.results!);
       List<String>amcIds=amcResultData.map((amcValue)=>amcValue.id.toString()).toList();
       print("kya bhai amc ka Id bhi dekh liye: $amcIds");
       update();
@@ -148,7 +148,7 @@ class HomeScreenController extends GetxController{
     try {
       final tickets = await Get.find<AuthenticationApiService>().getticketDetailsApiCall();
       var ticketData=(tickets.results);
-      final List ticket = ticketData.map((ticketData)=>ticketData.id.toString()).toList();
+      final List ticket = ticketData.map((ticketData)=>ticketData..toString()).toList();
       final List ticketStatus = ticketData.map((ticketData)=>ticketData.status.toString()).toList();
       await storage.write(ticketId, ticket);
       print('hello bhai apka ticket data idhr hai: ${storage.read(ticketId)}');

@@ -41,7 +41,7 @@ class AmcStatusMonitorGraphController extends GetxController {
     Get.find<AuthenticationApiService>().getAmcDetailsApiCall().then((value){
       var amcData = value;
       print('amc Data ${amcData}');
-      amcResultData.assignAll(value.results);
+      amcResultData.assignAll(value.results!);
       List<String>amcIds=amcResultData.map((amcValue)=>amcValue.id.toString()).toList();
       print("kya bhai amc ka Id bhi dekh liye: $amcIds");
       customLoader.hide();

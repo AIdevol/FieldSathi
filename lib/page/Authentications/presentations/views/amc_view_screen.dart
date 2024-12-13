@@ -30,6 +30,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
     return MyAnnotatedRegion(
         child: GetBuilder<AMCScreenController>(builder: (controller) =>
             Scaffold(
+              resizeToAvoidBottomInset: false,
               backgroundColor: CupertinoColors.white,
               bottomNavigationBar: _buildPaginationControls(controller),
               appBar: AppBar(
@@ -544,7 +545,6 @@ class AMCViewScreen extends GetView<AMCScreenController> {
             DataTable(columns: [
               DataColumn(label: Text('AMC ID/Name')),
               DataColumn(label: Text('Date')),
-              DataColumn(label: Text('Name')),
               DataColumn(label: Text('Customer Name')),
               DataColumn(label: Text('Services')),
               DataColumn(label: Text('Service Amount')),
@@ -557,13 +557,12 @@ class AMCViewScreen extends GetView<AMCScreenController> {
               DataColumn(label: Text(' ')),
             ], rows: controller.amcPaginationData.map((amc) {
               return DataRow(cells: [
-                DataCell(_ticketBoxIcons(amc.id.toString(), amc.productName.toString())/*Text(amc.id.toString())*/),
-                DataCell(Text(amc.customer.customerName.toString()?? 'N/A')),
-                DataCell(Text(amc.amcName ?? 'N/A')),
-                DataCell(Text(amc.customer.customerName ?? 'N/A')),
-                DataCell(Text('${amc.serviceCompleted ?? 'N/A'}'+'${'/'}'+'${amc.createdBy ?? 'N/A'}')),
+                DataCell(_ticketBoxIcons(amc.id.toString(), amc.amcName.toString())/*Text(amc.id.toString())*/),
+                DataCell(Text(amc.activationDate.toString()?? 'N/A')),
+                DataCell(Text(amc.customer?.customerName ?? 'N/A')),
+                DataCell(Text('${amc.serviceCompleted ?? 'N/A'}'+'${'/'}'+'${amc.noOfService??""}')),
                 DataCell(Text(amc.serviceAmount.toString())),
-                DataCell(Text(amc.selectServiceOccurrence ?? 'N/A')),
+                DataCell(Text(amc.selectServiceOccurence ?? 'N/A')),
                 DataCell(Text(amc.receivedAmount.toString())),
                 DataCell(Text(amc.remainder ?? 'N/A')),
                 DataCell(Text(amc.status ?? 'N/A')),
@@ -658,6 +657,7 @@ _dropDownValueViews(AMCScreenController controller, AmcResult amcData){
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child:  PopupMenuButton<String>(
+        color: CupertinoColors.white,
         icon: Icon(Icons.more_vert),
         onSelected: (String result) {
           switch (result) {
@@ -683,6 +683,7 @@ _dropDownValueViews(AMCScreenController controller, AmcResult amcData){
             ),
           ),
            PopupMenuItem<String>(
+             onTap: ()=>controller.hitAmcDeleteApiCall(amcData.id.toString()),
             value: 'Delete',
             child: ListTile(
               leading: Icon(Icons.delete, size: 20, color: Colors.red),
@@ -730,11 +731,11 @@ Widget _ticketBoxIcons(String ticketId,String text) {
 _amcDetailsEditWidget(BuildContext context, AMCScreenController controller, AmcResult amcData){
   WidgetsBinding.instance.addPostFrameCallback((_){
     controller.amcNameController.text = amcData.amcName ?? '';
-    controller.activationTimeController.text = amcData.activationTime ?? '';
-    controller.datesController.text = amcData.activationDate ?? '';
+    controller.activationTimeController.text = amcData.activationTime.toString() ?? '';
+    controller.datesController.text = amcData.activationDate.toString() ?? '';
     controller.noOfServiceController.text = amcData.noOfService?.toString() ?? '';
     controller.reminderController.text = amcData.remainder ?? '';
-    controller.serviceOccurrenceController.text = amcData.selectServiceOccurrence ?? '';
+    controller.serviceOccurrenceController.text = amcData.selectServiceOccurence ?? '';
     controller.productNameController.text = amcData.productName ?? '';
     controller.productBrandController.text = amcData.productBrand ?? '';
     controller.serialModelNoController.text = amcData.serialModelNo ?? '';
@@ -751,7 +752,7 @@ _amcDetailsEditWidget(BuildContext context, AMCScreenController controller, AmcR
           height: Get.height,
           width: Get.width,
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-          child: _form(context ,controller, amcId),
+          child: _form(context ,controller, amcData.id.toString()),
         ),
       )
   ).toString();
@@ -794,7 +795,7 @@ _form(BuildContext context, AMCScreenController controller, String amcId){
           vGap(20),
           _buildtextContainer(context, controller),
           vGap(20),
-          _buildOptionbutton(context, controller)
+          _buildOptionbutton(context, controller, amcId)
         ],
         ),
       ),
@@ -901,13 +902,13 @@ Widget _addTimeRange(BuildContext context,AMCScreenController controller) {
   );
 }
 
-Widget _buildOptionbutton(BuildContext context,AMCScreenController controller) {
+Widget _buildOptionbutton(BuildContext context,AMCScreenController controller, amcId) {
   return Row(
-    mainAxisAlignment: MainAxisAlignment.end,
+    mainAxisAlignment: MainAxisAlignment.center,
     children: [
       _buildButton('Cancel',onPressed: ()=>Get.back()),
       hGap(10),
-      _buildButton('Add', onPressed: (){}),
+      _buildButton('Update', onPressed: (){controller.hitUpdateApiCall(amcId);}),
       hGap(10),
       // _buildRateTextField(),
     ],
@@ -935,6 +936,7 @@ Widget _buildButton(String text,{required onPressed}) {
 Widget _dobView(BuildContext context,AMCScreenController controller) {
   final controller = Get.find<AMCScreenController>();
   return CustomTextField(
+    onTap: ()=>controller.selectDate(context),
     hintText: "dd-month-yyyy".tr,
     controller: controller.dateController,
     textInputType: TextInputType.datetime,
@@ -950,6 +952,7 @@ Widget _dobView(BuildContext context,AMCScreenController controller) {
 
 Widget buildNumberOfChoiceField(BuildContext context, AMCScreenController controller) {
   return DropdownButtonFormField<int>(
+    focusColor: CupertinoColors.white,
     value: controller.selectedNumberOfService,
     decoration: InputDecoration(
       hintText: 'No. of Service'.tr,
@@ -985,24 +988,26 @@ Widget _buildselectedView(BuildContext context,AMCScreenController controller) {
     hintText: 'Reminder'.tr,
     labletext: 'Reminder'.tr,
     textInputType: TextInputType.text,
-    onFieldSubmitted: (String? value) {},
-    prefix: IconButton(
-      onPressed: () {},
-      icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30),
-    ),
+    onTap: () {
+      FocusScope.of(context).unfocus();
+      showReminderDropdown(context,controller);
+    } , // Avoid keyboard popping up
+      suffix:Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30)
   );
 }
+
 Widget _buildServiceOccurances(BuildContext context,AMCScreenController controller) {
   return CustomTextField(
+    onTap: (){
+      FocusScope.of(context).unfocus();
+      showServiceOccurancesDropdown(context,controller);
+    },
     controller: controller.serviceOccurrenceController,
     hintText: 'Service Occurrence'.tr,
     labletext: 'Service Occurrence'.tr,
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
-    prefix: IconButton(
-      onPressed: () {},
-      icon: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30),
-    ),
+    suffix: Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30)
   );
 }
 
@@ -1084,28 +1089,28 @@ _detailsViewsWidget(AMCScreenController controller, AmcResult amcData) {
                 ),
               ),
               Text(
-                "Customer Number: ${amcData.customer.phoneNumber ?? 'N/A'}",
+                "Customer Number: ${amcData.customer?.phoneNumber ?? 'N/A'}",
                 style: MontserratStyles.montserratSemiBoldTextStyle(
                   size: 15,
                   color: Colors.black,
                 ),
               ),
               Text(
-                "Customer Email: ${amcData.customer.email ?? 'N/A'}",
+                "Customer Email: ${amcData.customer!.email ?? 'N/A'}",
                 style: MontserratStyles.montserratSemiBoldTextStyle(
                   size: 15,
                   color: Colors.black,
                 ),
               ),
               Text(
-                "Landmark: ${amcData.customer.landmarkPaci ?? 'N/A'}",
+                "Landmark: ${amcData.customer!.landmarkPaci ?? 'N/A'}",
                 style: MontserratStyles.montserratSemiBoldTextStyle(
                   size: 15,
                   color: Colors.black,
                 ),
               ),
               Text(
-                "Address: ${amcData.customer.primaryAddress ?? 'N/A'}",
+                "Address: ${amcData.customer!.primaryAddress ?? 'N/A'}",
                 style: MontserratStyles.montserratSemiBoldTextStyle(
                   size: 15,
                   color: Colors.black,
@@ -1200,7 +1205,7 @@ _detailsViewsWidget(AMCScreenController controller, AmcResult amcData) {
                 ),
               ),
               Text(
-                "Service Occurrence: ${amcData.selectServiceOccurrence ?? 'N/A'}",
+                "Service Occurrence: ${amcData.selectServiceOccurence ?? 'N/A'}",
                 style: MontserratStyles.montserratSemiBoldTextStyle(
                   size: 15,
                   color: Colors.black,
@@ -1409,4 +1414,213 @@ Widget _buildActionButton(
       style: MontserratStyles.montserratSemiBoldTextStyle(size: 13),
     ),
   );
+}
+
+// void _showCustomDropdown(BuildContext context, AMCScreenController controller) {
+//   // Create a dropdown overlay
+//   final RenderBox textFieldRenderBox = context.findRenderObject() as RenderBox;
+//   final size = textFieldRenderBox.size;
+//   final position = textFieldRenderBox.localToGlobal(Offset.zero);
+//
+//   // Calculate screen dimensions to ensure dropdown fits
+//   final screenWidth = MediaQuery.of(context).size.width;
+//   final screenHeight = MediaQuery.of(context).size.height;
+//
+//   showDialog(
+//     context: context,
+//     builder: (BuildContext context) {
+//       return AlertDialog(
+//         contentPadding: EdgeInsets.zero,
+//         shape: RoundedRectangleBorder(
+//           borderRadius: BorderRadius.circular(8),
+//         ),
+//         content: ConstrainedBox(
+//           constraints: BoxConstraints(
+//             maxHeight: 300, // Limit maximum height
+//             maxWidth: size.width, // Match text field width
+//           ),
+//           child: ListView.separated(
+//             shrinkWrap: true,
+//             itemCount: controller.reminderList.length,
+//             separatorBuilder: (context, index) => Divider(height: 1),
+//             itemBuilder: (context, index) {
+//               final value = controller.reminderList[index];
+//               return ListTile(
+//                 title: Text(value),
+//                 onTap: () {
+//                   // Update the text field
+//                   controller.reminderController.text = value;
+//
+//                   // Close the dialog
+//                   Navigator.of(context).pop();
+//                 },
+//               );
+//             },
+//           ),
+//         ),
+//       );
+//     },
+//   );
+// }
+//
+void showServiceOccurancesDropdown(BuildContext context, AMCScreenController controller) {
+  // Get the render box of the context to position the dropdown
+  final RenderBox renderBox = context.findRenderObject() as RenderBox;
+  final Size textFieldSize = renderBox.size;
+  final Offset textFieldPosition = renderBox.localToGlobal(Offset.zero);
+
+  // Calculate maximum height for the dropdown (e.g., 200 pixels or 3 items)
+  final double maxDropdownHeight = 200;
+  final int maxVisibleItems = 3;
+
+  // Show a custom dropdown overlay
+  OverlayEntry? overlayEntry;
+  overlayEntry = OverlayEntry(
+    builder: (context) => Positioned(
+      left: textFieldPosition.dx,
+      top: textFieldPosition.dy + textFieldSize.height,
+      child: Material(
+        elevation: 4,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          height: textFieldSize.height*45,
+          width: textFieldSize.width*3,
+          constraints: BoxConstraints(
+            maxHeight: maxDropdownHeight,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: controller.serviceOccurenceList.length,
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              color: Colors.grey.shade200,
+            ),
+            itemBuilder: (context, index) {
+              final value = controller.serviceOccurenceList[index];
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    // Update the text field with selected value
+                    controller.serviceOccurrenceController.text = value;
+
+                    // Remove the overlay
+                    overlayEntry?.remove();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12
+                    ),
+                    child: Text(
+                      value,
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    ),
+  );
+
+  // Insert the overlay
+  Overlay.of(context).insert(overlayEntry);
+}
+void showReminderDropdown(BuildContext context, AMCScreenController controller) {
+  // Get the render box of the context to position the dropdown
+  final RenderBox renderBox = context.findRenderObject() as RenderBox;
+  final Size textFieldSize = renderBox.size;
+  final Offset textFieldPosition = renderBox.localToGlobal(Offset.zero);
+
+  // Calculate maximum height for the dropdown (e.g., 200 pixels or 3 items)
+  final double maxDropdownHeight = 200;
+  final int maxVisibleItems = 3;
+
+  // Show a custom dropdown overlay
+  OverlayEntry? overlayEntry;
+  overlayEntry = OverlayEntry(
+    builder: (context) => Positioned(
+      left: textFieldPosition.dx,
+      top: textFieldPosition.dy + textFieldSize.height,
+      child: Material(
+        elevation: 4,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: textFieldSize.width*3,
+          constraints: BoxConstraints(
+            maxHeight: maxDropdownHeight,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: controller.reminderList.length,
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              color: Colors.grey.shade200,
+            ),
+            itemBuilder: (context, index) {
+              final value = controller.reminderList[index];
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    // Update the text field with selected value
+                    controller.reminderController.text = value;
+
+                    // Remove the overlay
+                    overlayEntry?.remove();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12
+                    ),
+                    child: Text(
+                      value,
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    ),
+  );
+
+  // Insert the overlay
+  Overlay.of(context).insert(overlayEntry);
 }

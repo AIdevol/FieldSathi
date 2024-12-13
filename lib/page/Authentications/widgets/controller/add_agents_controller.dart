@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/super_view_screen_controller.dart';
 import 'package:tms_sathi/response_models/agents_response_model.dart';
 
 import '../../../../main.dart';
@@ -24,7 +26,7 @@ class AgentsListController extends GetxController {
   var phoneCountryCode = ''.obs;
   DateTime? selectedDate;
   RxBool isLoading = false.obs;
-  RxList<Result> agentsData = <Result>[].obs;
+  RxList<Result> filteredData = <Result>[].obs;
 
   @override
   void onInit() {
@@ -56,33 +58,26 @@ class AgentsListController extends GetxController {
   }
 
   void hitPostAgentsDetailsApiCall() {
-    if (!_validateForm()) return;
-
     isLoading.value = true;
     customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
-
     var agentDetails = {
-      "id": employeeIdController.text,
+      "emp_id": employeeIdController.text,
       "first_name": firstNameController.text,
       "last_name": lastNameController.text,
       "phone_number": phoneController.text,
       "email": emailController.text,
-      "joining_date": selectedDate?.toIso8601String(), // Add joining date to API call
+      "date_joined": selectedDate != null
+    ? DateFormat('yyyy-MM-dd').format(selectedDate!)
+        : "",
+      "role":"agent",// Add joining date to API call
     };
-
-    var parameterData = {
-      "role": "agent"
-    };
-
-    Get.find<AuthenticationApiService>()
-        .postAgentDetailwsApiCall(
-      dataBody: agentDetails,
-      parameters: parameterData,
-    )
-        .then((value) {
+    print("agents enetered data:$agentDetails");
+    Get.find<AuthenticationApiService>().postAgentDetailwsApiCall(dataBody: agentDetails).then((value) {
       customLoader.hide();
       toast('Agent Created successfully');
+      hitsuperUserApiCall();
+      // Get.put(SuperViewScreenController()).hitsuperUserApiCall();
       Get.back(); // Navigate back after successful creation
       update();
     })
@@ -92,6 +87,23 @@ class AgentsListController extends GetxController {
     });
   }
 
+  void hitsuperUserApiCall(){
+    isLoading.value = true;
+    FocusManager.instance.primaryFocus?.unfocus();
+    var dataParameters ={
+      "role": "superuser",
+      "page_size":"all"
+    };
+    Get.find<AuthenticationApiService>().getSuperUserApiCall(parameters: dataParameters).then((value){
+      filteredData.assignAll(value.results);
+      List<String> managerIds= filteredData.map((manager)=>manager.id.toString()).toList();
+      print("sueruser = ${managerIds}");
+      update();
+    }).onError((error ,stackError){
+      toast(error.toString());
+      isLoading.value = false;
+    });
+  }
   bool _validateForm() {
     if (employeeIdController.text.isEmpty ||
         firstNameController.text.isEmpty ||

@@ -445,7 +445,7 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
   Widget _buildOptionbutton(
       {required AgentsViewScreenController controller, required BuildContext context, required String agentId}) {
     return Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ElevatedButton(
             onPressed: () {
@@ -511,11 +511,11 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
     return 'N/A';
   }
 
-  Widget _buildStatusIndicator(bool isActive) {
+  Widget _buildStatusIndicator(bool? isActive) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.withOpacity(0.1) : Colors.red
+        color: isActive! ? Colors.green.withOpacity(0.1) : Colors.red
             .withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(

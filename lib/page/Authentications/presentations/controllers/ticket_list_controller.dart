@@ -124,16 +124,16 @@ void onClose(){
         // Comprehensive search across multiple fields
         return
           // Customer Name
-          (ticket.customerDetails.firstName?.toLowerCase().contains(query) ?? false) ||
-              (ticket.customerDetails.lastName?.toLowerCase().contains(query) ?? false) ||
+          (ticket.customerDetails?.firstName?.toLowerCase().contains(query) ?? false) ||
+              (ticket.customerDetails?.lastName?.toLowerCase().contains(query) ?? false) ||
 
               // Sub-Customer Name
               (ticket.subCustomerDetails?.firstName?.toLowerCase().contains(query) ?? false) ||
               (ticket.subCustomerDetails?.lastName?.toLowerCase().contains(query) ?? false) ||
 
               // Technician Name
-              (ticket.assignTo.firstName?.toLowerCase().contains(query) ?? false) ||
-              (ticket.assignTo.lastName?.toLowerCase().contains(query) ?? false) ||
+              (ticket.assignTo?.firstName?.toLowerCase().contains(query) ?? false) ||
+              (ticket.assignTo?.lastName?.toLowerCase().contains(query) ?? false) ||
 
               // Task Name
               (ticket.taskName?.toLowerCase().contains(query) ?? false) ||
@@ -338,23 +338,23 @@ void onClose(){
   }
 
 
-  String getFullName(UserDetails user) {
-    final firstName = user.firstName ?? '';
-    final lastName = user.lastName ?? '';
-    return '$firstName $lastName'.trim();
-  }
+  // String getFullName(TicketResult user) {
+  //   final firstName = user.firstName ?? '';
+  //   final lastName = user.lastName ?? '';
+  //   return '$firstName $lastName'.trim();
+  // }
 
 
-  String getFormattedAddress(TicketAddress address) {
-    final components = [
-      address.city,
-      address.state,
-      address.country,
-      address.zipcode
-    ].where((component) => component != null && component.isNotEmpty);
-
-    return components.isEmpty ? 'N/A' : components.join(', ');
-  }
+  // String getFormattedAddress(TicketAddress address) {
+  //   final components = [
+  //     address.city,
+  //     address.state,
+  //     address.country,
+  //     address.zipcode
+  //   ].where((component) => component != null && component.isNotEmpty);
+  //
+  //   return components.isEmpty ? 'N/A' : components.join(', ');
+  // }
 
   void handleEditTicket(TicketResult ticket) {
     // Implement edit functionality

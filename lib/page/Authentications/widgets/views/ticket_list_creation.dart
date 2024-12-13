@@ -534,11 +534,11 @@ Widget dropValueToShowCustomerName(BuildContext context, TicketListCreationContr
 Widget dropValueToShowProductName(BuildContext context, TicketListCreationController controller) {
   return Obx(() => DropdownButtonHideUnderline(
     child: DropdownMenu<TicketResult>(
-      leadingIcon: IconButton(
-          onPressed: () {
-            _editWidgetOfAgentsDialogValue(context, controller);
-          },
-          icon: Icon(Icons.add)),
+      // leadingIcon:/* IconButton(
+      //     onPressed: () {
+      //       _editWidgetOfAgentsDialogValue(context, controller);
+      //     },
+      //     icon:*/ Icon(Icons.add),
       inputDecorationTheme: InputDecorationTheme(
         focusColor: appColor,
         border: OutlineInputBorder(

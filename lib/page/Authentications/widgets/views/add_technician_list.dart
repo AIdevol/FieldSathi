@@ -1,6 +1,7 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
@@ -181,6 +182,9 @@ class AddTechnicianList extends GetView<AddTechnicianListController> {
       validator: (value) {
         return value?.isEmptyField(messageTitle: "name");
       },
+      inputFormatters: [
+        LengthLimitingTextInputFormatter(10),
+      ],
     );
   }
 

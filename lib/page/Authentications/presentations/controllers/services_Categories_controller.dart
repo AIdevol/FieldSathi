@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -28,7 +29,7 @@ class ServiceCategoriesController extends GetxController {
   final TextEditingController serviceDescriptionController = TextEditingController();
   final isSearching = false.obs;
   final TextEditingController searchController = TextEditingController();
-  String? selectedSubcategory;
+  RxString selectedSubcategory = ''.obs;
   final RxList<ServiceCategory> allServices = <ServiceCategory>[].obs;
   final RxList<ServiceCategory> filteredServices = <ServiceCategory>[].obs;
   final RxList<SubService> subServicesAll = <SubService>[].obs;
@@ -122,15 +123,30 @@ class ServiceCategoriesController extends GetxController {
     }
   }
 
-  Future<void> selectMultipleImages() async {
+  Future<void> selectMultipleImages({required BuildContext context, ImageSource? source}) async {
     // Limit to 3 images
     if (selectedImages.length >= 3) {
-      toast("You can only select up to 3 images");
+      Get.snackbar(
+        'Image Limit',
+        'You can only select up to 3 images',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return;
     }
 
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    XFile? pickedFile;
+
+    // If source is not specified, show a custom dialog
+    if (source == null) {
+      showImagePickerDialog1();
+      return;
+    }
+
+    // Pick image from specified source
+    pickedFile = await picker.pickImage(source: source);
 
     if (pickedFile != null) {
       XFile selectedFile = XFile(pickedFile.path);
@@ -138,13 +154,91 @@ class ServiceCategoriesController extends GetxController {
       // Check if the image is already selected
       if (!selectedImages.any((image) => image.path == selectedFile.path)) {
         selectedImages.add(selectedFile);
+        // notifyListeners(); // If using ChangeNotifier
       } else {
-        toast("This image is already selected");
+        Get.snackbar(
+          'Duplicate Image',
+          'This image is already selected',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
       }
     }
   }
 
-  // Show image picker dialog
+  void showImagePickerDialog1() {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Choose Image Source',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildImageSourceButton(
+                    icon: Icons.camera_alt,
+                    label: 'Camera',
+                    color: Colors.blue,
+                    onTap: () {
+                      Get.back();
+                      selectMultipleImages(source: ImageSource.camera, context: Get.context!);
+                    },
+                  ),
+                  _buildImageSourceButton(
+                    icon: Icons.photo_library,
+                    label: 'Gallery',
+                    color: Colors.green,
+                    onTap: () {
+                      Get.back();
+                      selectMultipleImages(source: ImageSource.gallery, context: Get.context!);
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              TextButton(
+                onPressed: () => Get.back(),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
+  }
 
 
   void _clearControllers() {
@@ -212,6 +306,10 @@ class ServiceCategoriesController extends GetxController {
     // } finally {
     //   isLoading.value = false;
     // }
+  }
+
+  Future<void> hitRefreshApiCall()async{
+    hitServiceCategoriesApiCall();
   }
 
   void hitPostServiceCategoriesApiCall() {
@@ -322,7 +420,7 @@ class ServiceCategoriesController extends GetxController {
     customLoader.show();
     FocusManager.instance.primaryFocus!.unfocus();
     var serviceData = {
-      "service_sub_category_name": subcategoryController.text,
+      "service_sub_category_name": SubCategoryController.text,
       "service_sub_cat_description": SubCategoryDescriptionController.text,
       "service_category":selectedServiceCategory.value?.id,
     };
@@ -369,7 +467,7 @@ class ServiceCategoriesController extends GetxController {
       "service_price": servicePriceController.text,
       "service_contact_number": contactNumberController.text,
       "service_description": serviceDescriptionController.text,
-      "service_sub_category": subcategoryController.text,
+      "service_sub_category": subServiceCategoryId.value,
     };
 
     // Create FormData with multiple images
@@ -399,6 +497,8 @@ class ServiceCategoriesController extends GetxController {
       toast("Service added Successfully");
       selectedImages.clear();
       _clearControllers();// Clear selected images after successful upload
+      Get.back();
+      hitServiceCategoriesApiCall();
       update();
     }).onError((error, stackError) {
       toast(error.toString());

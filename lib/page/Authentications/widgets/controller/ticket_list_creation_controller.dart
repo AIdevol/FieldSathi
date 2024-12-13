@@ -377,8 +377,8 @@ class TicketListCreationController extends GetxController {
       "role":"customer",
     };
     Get.find<AuthenticationApiService>().getCustomerListApiCall(parameters: parameterdata).then((value)async{
-      customerListData.assignAll(value.results);
-      customerdefineData.assignAll(value.results);
+      customerListData.assignAll(value.results!);
+      customerdefineData.assignAll(value.results!);
       List<String> customerIds = customerListData.map((agent) => agent.id.toString()).toList();
       await storage.write(customerId, customerIds.join(','));
       print('customer id : ${await storage.read(customerId)}');

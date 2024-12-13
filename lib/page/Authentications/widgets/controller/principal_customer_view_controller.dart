@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/main.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/customer_list_view_controller.dart';
 import 'package:tms_sathi/response_models/customer_list_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
@@ -156,6 +157,7 @@ class PrincipalCstomerViewController extends GetxController{
         print("customerdata : $value");
         customLoader.hide();
         Get.back();
+        Get.put(CustomerListViewController()).hitGetCustomerListApiCall();
         toast("Customer Added Successfully");
         update();
       }).onError((error, stackTrace) {

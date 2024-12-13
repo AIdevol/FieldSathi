@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/sales_view_screen_controller.dart';
 
 import '../../../../main.dart';
 import '../../../../services/APIs/auth_services/auth_api_services.dart';
@@ -89,7 +90,8 @@ class AddSalesScreenController extends GetxController{
       print("maindata of sales= $mainData");
       customLoader.hide();
       toast('Sales Added Successfully!');
-      Get.offAllNamed(AppRoutes.salesListScreen);
+      Get.back();
+      Get.put(SalesViewScreenController()).hitGetSalesApiCall();
       update();  // update to the method after data entered
     }).onError((error, stackError){
       customLoader.hide();

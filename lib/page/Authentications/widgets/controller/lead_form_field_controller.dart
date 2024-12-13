@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
+import 'package:tms_sathi/page/Authentications/presentations/controllers/lead_list_view_controller.dart';
 import 'package:tms_sathi/response_models/lead_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
@@ -102,6 +103,7 @@ class LeadFormFieldController extends GetxController{
       toast("Lead Created successfully");
       // Get.toNamed(AppRoutes.leadListScreen);
       Get.back();
+      Get.put(LeadListViewController()).fetchedLeadListApiCall();
       update();
     }).onError((error, stackError){
       toast(error.toString());

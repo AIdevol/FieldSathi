@@ -1,6 +1,7 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -28,7 +29,7 @@ class AgentsListCreation extends GetView<AgentsListController> {
                   Get.back();
                 },),
               backgroundColor: appColor,
-              middle: Text('Add Agent'),
+              middle: Text('Add Executive'),
             ),
             child: _form(controller, context)
         )));
@@ -77,9 +78,6 @@ _buildEmpId({required AgentsListController controller, required BuildContext con
     // validator: (value) {
     //   return value?.isEmptyField(messageTitle: "Email");
     // },
-    inputFormatters:[
-      // LengthLimitingTextInputFormatter(10),
-    ],
   );
 
 }
@@ -94,8 +92,7 @@ _buildJoiningDate({required AgentsListController controller, required BuildConte
         _showDatePicker(context, controller);
         print("Gesture detection0");
     },
-    prefix: Icon(Icons.calendar_today, color: Colors.black),
-    suffix: Icon(Icons.arrow_drop_down, color: Colors.black),
+    suffix:  Icon(Icons.calendar_today, color: appColor),
     readOnly: true,
   );
 }
@@ -122,7 +119,7 @@ void _showDatePicker(BuildContext context, AgentsListController controller) asyn
   );
 
   if (picked != null) {
-    final formattedDate = DateFormat('dd-MM-yyyy').format(picked);
+    final formattedDate = DateFormat('yyyy-MM-dd').format(picked);
     controller.joiningDateController.text = formattedDate;
     controller.selectedDate = picked; // Store the date object
     controller.update();
@@ -144,11 +141,8 @@ _buildTaskName({required AgentsListController controller, required BuildContext 
     // validator: (value) {
     //   return value?.isEmptyField(messageTitle: "Email");
     // },
-    inputFormatters:[
-      // LengthLimitingTextInputFormatter(10),
-    ],
-  );
 
+  );
 }
 _buildLastName({required AgentsListController controller,required BuildContext context}){
   return CustomTextField(
@@ -223,7 +217,7 @@ _phoneNumber({required AgentsListController controller,required BuildContext con
             // controller.update();
           }),) ,
     inputFormatters:[
-      // LengthLimitingTextInputFormatter(10),
+      LengthLimitingTextInputFormatter(10),
     ],
   );
 

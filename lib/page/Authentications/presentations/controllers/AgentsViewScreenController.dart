@@ -173,12 +173,12 @@ class AgentsViewScreenController extends GetxController {
       "phone_number": phoneController.text,
       "email": emailController.text,
     };
-    var parameterdata = {
-      "role": "agent"
-    };
+    // var parameterdata = {
+    //   "role": "agent"
+    // };
 
     Get.find<AuthenticationApiService>().putAgentDetailwsApiCall(
-        dataBody: agentDetails, parameters: parameterdata, id: agentId).then((value) {
+        dataBody: agentDetails, id: agentId).then((value) {
       var agentdetails = value;
       print('agent posted data = $agentdetails');
       customLoader.hide();

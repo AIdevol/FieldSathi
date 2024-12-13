@@ -60,10 +60,10 @@ class LeadListViewController extends GetxController{
     } else {
       // Apply filter logic
       leadFilters.assignAll(leadListData.where((lead) {
-        return lead.firstName.toLowerCase().contains(query) ||
-            lead.lastName.toLowerCase().contains(query) ||
-            lead.companyName.toLowerCase().contains(query) ||
-            lead.mobile.contains(query);
+        return lead.firstName!.toLowerCase().contains(query) ||
+            lead.lastName!.toLowerCase().contains(query) ||
+            lead.companyName!.toLowerCase().contains(query) ||
+            lead.mobile!.contains(query);
       }).toList());
     }
 

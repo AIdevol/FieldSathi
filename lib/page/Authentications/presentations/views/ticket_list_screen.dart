@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/constans/const_local_keys.dart';
+import 'package:tms_sathi/constans/role_based_keys.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/response_models/ticket_history_response_model.dart';
 import 'package:tms_sathi/response_models/ticket_response_model.dart';
@@ -13,6 +14,7 @@ import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
 import '../../../../constans/string_const.dart';
+import '../../../../main.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../widgets/views/principal_customer_view.dart';
 import '../controllers/ticket_list_controller.dart';
@@ -72,6 +74,8 @@ class TicketListScreen extends GetView<TicketListController> {
   }
 
   PreferredSizeWidget _buildAppBar() {
+    final userrole = storage.read(userRole);
+    print("userrole:$userrole");
     return AppBar(
       leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
       backgroundColor: appColor,
@@ -87,6 +91,7 @@ class TicketListScreen extends GetView<TicketListController> {
           icon: const Icon(Icons.refresh),
           onPressed: controller.fetchTicketsApiCall,
         ),
+        if(userrole != 'technician'&&userrole !='sale')
         IconButton(
           onPressed: () {
             Get.toNamed(AppRoutes.ticketListCreationScreen);
@@ -98,6 +103,8 @@ class TicketListScreen extends GetView<TicketListController> {
   }
 
    Widget _buildTopBar(BuildContext context, TicketListController controller) {
+     final userrole = storage.read(userRole);
+
      return Container(
        padding: const EdgeInsets.all(16.0),
        decoration: BoxDecoration(
@@ -117,14 +124,16 @@ class TicketListScreen extends GetView<TicketListController> {
          children: [
            Expanded(child: _buildStatusFilterDropdown()),
            const SizedBox(width: 16),
-           _buildActionButton(
+           if(userrole != 'technician'&&userrole !='sale')
+             _buildActionButton(
              context,
              'Import',
              Icons.file_download_outlined,
              onTap: () => _showImportModelView(context, controller),
            ),
            const SizedBox(width: 12),
-           _buildActionButton(
+           if(userrole != 'technician'&&userrole !='sale')
+             _buildActionButton(
              context,
              'Export',
              Icons.file_upload_outlined,
@@ -260,24 +269,22 @@ class TicketListScreen extends GetView<TicketListController> {
    }
 
    _buildEmptyState() {
-     return Center(
-       child: Column(
-         // mainAxisAlignment: MainAxisAlignment.center,
-         children: [
-           Image.asset(
-             nullVisualImage,
-             width: 300,
-             height: 300,
+     return Column(
+       // mainAxisAlignment: MainAxisAlignment.center,
+       children: [
+         Image.asset(
+           nullVisualImage,
+           width: 300,
+           height: 300,
+         ),
+         Text(
+           'No services found',
+           style: MontserratStyles.montserratNormalTextStyle(
+             // size: 18,
+             color: blackColor,
            ),
-           Text(
-             'No services found',
-             style: MontserratStyles.montserratNormalTextStyle(
-               // size: 18,
-               color: blackColor,
-             ),
-           ),
-         ],
-       ),
+         ),
+       ],
      );
    }
 
@@ -408,11 +415,11 @@ class TicketListScreen extends GetView<TicketListController> {
           DataCell(_ticketBoxIcons(ticket.id.toString() ?? 'NA')),
           DataCell(_buildDataCell(ticket.taskName?.toString() ?? 'NA')),
           DataCell(_buildDataCell(
-            "${ticket.customerDetails.firstName}${ticket.customerDetails.lastName}" ?? 'NA',
+            "${ticket.customerDetails?.customerName}" ?? 'NA',
             maxWidth: columnWidths['Customer Name'],
           )),
           DataCell(_buildDataCell(
-           "${ticket.subCustomerDetails?.firstName}${ticket.subCustomerDetails?.lastName}"?? 'NA',
+           "${ticket.subCustomerDetails?.customerName}"?? 'NA',
             maxWidth: columnWidths['Sub-Customer'],
           )),
           DataCell(_buildDataCell(
@@ -445,7 +452,7 @@ class TicketListScreen extends GetView<TicketListController> {
           )),
           DataCell(_buildStatusCell(ticket.status ?? 'NA')),
           DataCell(_buildDataCell(
-            ticket.date ?? 'NA',
+            ticket.date.toString() ?? 'NA',
             maxWidth: columnWidths['Ticket Date'],
           )),
           DataCell(_buildAgingCell(ticket.aging?.toString() ?? 'NA')),
@@ -574,12 +581,12 @@ class TicketListScreen extends GetView<TicketListController> {
 
    List<PopupMenuEntry<String>> _buildMenuItems(BuildContext context, TicketListController controller, String? tickId, TicketResult ticket, ) {
      // Find the ticket by ID to get its status
-     final ticket = controller.ticketResult.firstWhere(
+     final tickets = controller.ticketResult.map(
            (ticket) => ticket.id.toString() == tickId,
        // orElse: () => null, // Handle case where ticket is not found
      );
 
-     final status = ticket?.status?.toLowerCase() ?? '';
+     final status = ticket.status ?? '';
 
      List<PopupMenuEntry<String>> menuItems = [
        _buildPopupMenuItem('Download', Icons.download, Colors.blue.shade700, context, controller, tickId),
@@ -1002,7 +1009,7 @@ Widget _buildGroupForm(BuildContext context,TicketListController controller, Tic
 }
 
 Widget _buildFSRDetails(BuildContext context,TicketListController controller, TicketResult? ticket) {
-  controller.fsrController.text = ticket!.fsrDetails.fsrName.toString();
+  controller.fsrController.text = ticket!.fsrDetails!.fsrName.toString();
 
   return CustomTextField(
     controller: controller.fsrController,
@@ -1063,7 +1070,7 @@ Widget _buildInstructionsField(BuildContext context,TicketListController control
 }
 
 Widget _buildListCustomerDetails(BuildContext context,TicketListController controller, TicketResult? ticket) {
-  controller.customerNameController.text = "${ticket!.customerDetails.firstName}${ticket!.customerDetails.lastName}";
+  controller.customerNameController.text = "${ticket!.customerDetails?.firstName}${ticket!.customerDetails?.lastName}";
   controller.productNameController.text = ticket!.brand.toString();
   controller.modelNoController.text = ticket!.model.toString();
 
@@ -1625,10 +1632,10 @@ Future<void> showDialogWidgetContext(BuildContext context, TicketListController 
                       ),
                       Divider(),
                       ...[
-                        "Customer Name: ${ticket.customerDetails.firstName} ${ticket.customerDetails.lastName}",
+                        "Customer Name: ${ticket.customerDetails?.firstName} ${ticket.customerDetails?.lastName}",
                         "Subcustomer Name: ${ticket.subCustomerDetails?.firstName} ${ticket.subCustomerDetails?.lastName}",
-                        "FSR: ${ticket.fsrDetails.fsrName}",
-                        "Phone Number: ${ticket.customerDetails.phoneNumber}",
+                        "FSR: ${ticket.fsrDetails?.fsrName}",
+                        "Phone Number: ${ticket.customerDetails?.phoneNumber}",
                         "Service: ${ticket.serviceDetails}",
                         "Address: ${ticket.ticketAddress}",
                         "Purpose: ${ticket.purpose??"N/A"}",

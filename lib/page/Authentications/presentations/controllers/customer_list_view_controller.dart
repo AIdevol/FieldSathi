@@ -197,11 +197,12 @@ class CustomerListViewController extends GetxController{
       filteredCustomerListData.value = customerListData.where((customer) {
         return
           // Search across multiple fields
-          (customer.customerName?.toLowerCase().contains(query) ?? false) ||
-              (customer.companyName?.toLowerCase().contains(query) ?? false) ||
+          (customer.firstName?.toLowerCase().contains(query) ?? false) ||
+              (customer.lastName?.toLowerCase().contains(query) ?? false)||
+              (customer.customerName.toLowerCase().contains(query) ?? false) ||
               (customer.email?.toLowerCase().contains(query) ?? false) ||
-              (customer.phoneNumber?.toLowerCase().contains(query) ?? false) ||
-              (customer.primaryAddress?.toLowerCase().contains(query) ?? false) ||
+              (customer.phoneNumber.toLowerCase().contains(query) ?? false) ||
+              (customer.primaryAddress.toLowerCase().contains(query) ?? false) ||
               (customer.modelNo?.toLowerCase().contains(query) ?? false) ||
               (customer.region?.toLowerCase().contains(query) ?? false);
       }).toList();
@@ -224,9 +225,9 @@ class CustomerListViewController extends GetxController{
       "page_size":"all"
     };
     Get.find<AuthenticationApiService>().getCustomerListApiCall(parameters: parameterdata).then((value)async{
-    customerListData.assignAll(value.results);
-    filteredCustomerListData.assignAll(value.results);
-    customerPaginationData.assignAll(value.results);
+    customerListData.assignAll(value.results!);
+    filteredCustomerListData.assignAll(value.results!);
+    customerPaginationData.assignAll(value.results!);
     List<String> customerIds = customerListData.map((agent) => agent.id.toString()).toList();
     await storage.write(customerId, customerIds.join(','));
     print('customer id : ${await storage.read(customerId)}');

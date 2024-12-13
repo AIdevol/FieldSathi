@@ -7,6 +7,8 @@ import 'package:tms_sathi/response_models/leaves_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../response_models/user_response_model.dart';
+
 class LeaveReportViewScreenController extends GetxController {
   final TextEditingController statusController = TextEditingController();
   RxList<String> filterTypes = [
@@ -23,6 +25,13 @@ class LeaveReportViewScreenController extends GetxController {
     "Rejected",
   ].obs;
 
+  RxString selectedLeaveType = "Select Leave Type".obs;
+  RxList<String> leaveTypeOptions = [
+    "Select Leave Type",
+    "Sick",
+    "Casual"
+  ].obs;
+
   RxString defaultSelectedStatus = 'Submitted'.obs;
   RxString selectedFilter = "Select Status".obs;
   // Rx<LeaveResponseModel> leaveManagementData = LeaveResponseModel().obs;
@@ -30,16 +39,32 @@ class LeaveReportViewScreenController extends GetxController {
   RxList<LeaveResult> filteredLeaves = <LeaveResult>[].obs;
   RxList<LeaveResult> leavesPaginationsData = <LeaveResult>[].obs;
 
+  RxString remainingCasualLeaves = ''.obs;
+  RxString remainingSickLeaves = ''.obs;
+
   RxBool isLoading = false.obs;
   RxString searchQuery = ''.obs;
   RxInt currentPage = 1.obs;
   RxInt totalPages = 0.obs;
   final int itemsPerPage = 10;
 
+  final TextEditingController startDateController = TextEditingController();
+  final TextEditingController endDateController = TextEditingController();
+  final TextEditingController reasonController = TextEditingController();
+
   @override
   void onInit() {
     super.onInit();
+    hituserDetailsApiCall();
     hitLeavesApiCall();
+  }
+
+  @override
+  void onClose(){
+    startDateController.dispose();
+    endDateController.dispose();
+    reasonController.dispose();
+    super.onClose();
   }
 
   void applyFilters() {
@@ -209,13 +234,13 @@ void updateSelectedStatus(String? newValue){
               Text('Name: ${leave.userId?.firstName ?? ''} ${leave.userId?.lastName ?? ''}'),
               Text('Phone: ${leave.userId?.phoneNumber ?? ''}'),
               Text('Role: ${leave.userId?.role ?? ''}'),
-              Text('From Date: ${formatDate(DateTime.parse(leave.startDate ?? ''))}'),
-              Text('To Date: ${formatDate(DateTime.parse(leave.endDate ?? ''))}'),
-              Text('Days: ${calculateDays(DateTime.parse(leave.startDate ?? ''), DateTime.parse(leave.endDate ?? ''))}'),
+              Text('From Date: ${formatDate(DateTime.parse(leave.startDate.toString() ?? ''))}'),
+              Text('To Date: ${formatDate(DateTime.parse(leave.endDate.toString() ?? ''))}'),
+              Text('Days: ${calculateDays(DateTime.parse(leave.startDate.toString()?? ''), DateTime.parse(leave.endDate.toString() ?? ''))}'),
               Text('Reason: ${leave.reason ?? ''}'),
               Text('Status: ${leave.status ?? ''}'),
               Text('Leave Type: ${leave.leaveType ?? ''}'),
-              Text('Company: ${leave.userId.firstName ?? ''}'),
+              Text('Company: ${leave.userId?.firstName ?? ''}'),
               Text('Email: ${leave.userId?.email ?? ''}'),
             ],
           ),
@@ -229,6 +254,61 @@ void updateSelectedStatus(String? newValue){
       ),
     );
   }
+
+  void hituserDetailsApiCall() {
+    final id = storage.read(userId);
+    isLoading.value = true;
+    Get.find<AuthenticationApiService>().userDetailsApiCall(id: id).then((value) {
+      final userData = value;
+      remainingCasualLeaves.value = userData.allocatedCasualLeave.toString();
+      remainingSickLeaves.value = userData.allocatedSickLeave.toString();
+      isLoading.value = false;
+      update();
+    }).onError((error, stackError) {
+      isLoading.value = false;
+      toast(error.toString());
+    });
+  }
+
+  void hitPostLeavesApiCall(){
+    final userid = storage.read(userId);
+
+    // Validate inputs before making the API call
+    if (selectedLeaveType.value == "Select Leave Type") {
+      toast("Please select a leave type");
+      return;
+    }
+
+    if (startDateController.text.isEmpty || endDateController.text.isEmpty) {
+      toast("Please select start and end dates");
+      return;
+    }
+
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+
+    var applicationData = {
+      "start_date": startDateController.text,
+      "end_date": endDateController.text,
+      "reason": reasonController.text,
+      "leave_type": selectedLeaveType.value,
+      "userId": userid
+    };
+    Get.find<AuthenticationApiService>().
+    postLeavesApiCall(dataBody: applicationData).then((value){
+      toast(value.message.toString());
+      customLoader.hide();
+      Get.back();
+      hitLeavesApiCall();
+      update();
+    }).onError((error, stackError){
+      customLoader.hide();
+      toast(error.toString());
+      isLoading.value = false;
+    });
+  }
+
 
   String formatDate(DateTime date) {
     return DateFormat('yyyy-MM-dd').format(date);

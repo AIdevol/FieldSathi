@@ -347,6 +347,16 @@ implements AuthenticationApi {
   }
 
   @override
+  Future<LeavePostResponseModel>postLeavesApiCall({Map<String, dynamic>?dataBody})async{
+    try{
+      final response = await dioClient!.post(ApiEnd.leavesReportEnd,data: dataBody,skipAuth: false);
+      return LeavePostResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
+  @override
   Future<LeaveResponseModel> putLeavesApiCall(
       {Map<String, dynamic>? dataBody, id}) async {
     try {
@@ -596,12 +606,33 @@ implements AuthenticationApi {
       return Future.error(NetworkExceptions.getDioException(error));
     }
   }
+
+  @override
+  Future<AmcDeleteResponseModel>deleteAmcDetailsApiCall({Map<String, dynamic>?dataBody,String? id})async{
+    try{
+      final response = await dioClient!.delete("${ApiEnd.amcEnd}$id/",data: dataBody,skipAuth: false);
+      return AmcDeleteResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
   @override
   Future<AmcCountResponseModel>getAmcCountsApiCall({Map<String, dynamic>?dataBody, parameter})async{
     try{
       final response = await dioClient!.get('${ApiEnd.amcStatusCounts}', data: dataBody,queryParameters: parameter, skipAuth: false);
       return AmcCountResponseModel.fromJson(response);
     }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+  @override
+  Future<PostAmcResponseModel>updateAmcDetailsApiCall({Map<String, dynamic>?dataBody, String? id})async {
+    try {
+      final response = await dioClient!.put(
+          '${ApiEnd.amcEnd}$id/', data: dataBody, skipAuth: false);
+      return PostAmcResponseModel.fromJson(response);
+    } catch (error) {
       return Future.error(NetworkExceptions.getDioException(error));
     }
   }
@@ -643,7 +674,7 @@ implements AuthenticationApi {
       {Map<String, dynamic>? dataBody, parameters}) async {
     try {
       final response = await dioClient!.post(
-          "${ApiEnd.tmsUsersEnd}", queryParameters: parameters,
+          "${ApiEnd.tmsUsersEnd}", data: dataBody,queryParameters: parameters,
           skipAuth: false);
       return AgentsPostResponseModel.fromJson(response);
     } catch (error) {

@@ -47,18 +47,27 @@ class SuperViewScreenController extends GetxController{
 
   void applyFilter() {
     final query = searchController.text.trim().toLowerCase();
+    print("searched element: $query");
     if(query.isEmpty){
-      filteredData.assignAll(datafilter);
-    }else{
-      filteredData.assignAll(datafilter.where((userData){
-        return userData.firstName.toLowerCase().contains(query)||
-        userData.lastName.toLowerCase().contains(query)||
-        userData.empId.toLowerCase().contains(query)||
-        userData.email.toLowerCase().contains(query)||
-        userData.phoneNumber.toLowerCase().contains(query);
+      // If search query is empty, reset to original data
+      filterePaginationsData.assignAll(datafilter);
+    } else {
+      // Perform case-insensitive, comprehensive search across multiple fields
+      filterePaginationsData.assignAll(datafilter.where((userData) {
+        return (userData.firstName?.toLowerCase().contains(query) ?? false) ||
+            (userData.lastName?.toLowerCase().contains(query) ?? false) ||
+            (userData.empId?.toLowerCase().contains(query) ?? false) ||
+            (userData.email?.toLowerCase().contains(query) ?? false) ||
+            (userData.phoneNumber?.toLowerCase().contains(query) ?? false) ||
+            // Combine first and last name for full name search
+            "${userData.firstName ?? ''} ${userData.lastName ?? ''}".toLowerCase().contains(query);
       }).toList());
     }
-    update();
+
+    // Reset pagination after filtering
+    currentPage.value = 1;
+    calculateTotalPages();
+    updatePaginatedTechnicians();
   }
 
   void calculateTotalPages() {
@@ -124,6 +133,7 @@ class SuperViewScreenController extends GetxController{
 
 
   void hitsuperUserApiCall(){
+    isLoading.value = true;
     customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
     var dataParameters ={
@@ -142,6 +152,7 @@ class SuperViewScreenController extends GetxController{
     }).onError((error ,stackError){
       customLoader.hide();
       toast(error.toString());
+      isLoading.value = false;
     });
   }
 

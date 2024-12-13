@@ -551,13 +551,13 @@ Widget _buildDataTableView(SalesViewScreenController controller, BuildContext co
                   DataCell(Text(f.allocatedCasualLeave.toString())),
                   DataCell(Text(f.allocatedSickLeave.toString())),
                   DataCell(Text(_formatDateTime(
-                      f.todayAttendance?.punchIn.toString()?? 'N/A'))),
+                     "${ f.todayAttendance.map((value)=>value.punchIn.toString())}"?? 'N/A'))),
                   DataCell(Text(_formatDateTime(
-                      f.todayAttendance?.punchOut ?? 'N/A'))),
+                      "${ f.todayAttendance.map((value)=>value.punchOut.toString())}"?? 'N/A'))),
                   DataCell(_buildAttendanceStatusBadge(
-                      f.todayAttendance?.status ?? '')),
+                      "${ f.todayAttendance.map((value)=>value.status.toString())}"?? 'N/A')),
                   DataCell(Text(f.batteryStatus  ?? 'N/A')),
-                  DataCell(Text(f.gpsStatus ? 'On' : 'Off')),
+                  DataCell(Text(f.gpsStatus?.toString() != null ? 'On' : 'Off')),
                   DataCell(_dropDownValueViews( controller, context,f,f.id.toString()))
                 ],
                 );

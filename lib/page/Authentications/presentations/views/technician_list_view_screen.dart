@@ -23,18 +23,24 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
     return MyAnnotatedRegion(
       child: GetBuilder<TechnicianListViewScreenController>(
         builder: (controller) => Scaffold(
+          resizeToAvoidBottomInset: false,
           backgroundColor: CupertinoColors.white,
           appBar: _buildAppBar(controller),
-          body: SafeArea(
-            child: Column(
-              children: [
-                _buildTopBar(context,controller),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: _buildDataTableView(controller, context),
-                  ))
-              ],
+          body: RefreshIndicator(
+            onRefresh: ()async{
+              await controller.refreshAllData();
+            },
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildTopBar(context,controller),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(18.0),
+                      child: _buildDataTableView(controller, context),
+                    ))
+                ],
+              ),
             ),
           ),
         ),
@@ -145,6 +151,7 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
         ),
       ),
       child: TextField(
+        controller: controller.searchController,
         decoration: InputDecoration(
           hintText: "Search",
           hintStyle: MontserratStyles.montserratSemiBoldTextStyle(
@@ -158,7 +165,7 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
           color: Colors.black,
         ),
         onChanged: (value) {
-          // controller.updateSearch(value); // Implement this method in your controller
+          controller.onSearchChanged();// Implement this method in your controller
         },
       ),
     );
@@ -215,6 +222,8 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
                 _buildTableHeader('Actions'),
               ],
               rows: controller.paginatedTechnicians.map((technician) {
+                final todayAttendance = technician.todayAttendance.map((value)=> value.punchIn).toList();
+                final todayAttendance1 = technician.todayAttendance.map((value)=> value.punchOut).toList();
                 return DataRow(
                   cells: [
                     DataCell(_ticketBoxIcons(technician.id.toString(), technician)),
@@ -225,13 +234,13 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
                     DataCell(Text(technician.allocatedCasualLeave.toString())),
                     DataCell(Text(technician.allocatedSickLeave.toString())),
                     DataCell(Text(_formatDateTime(
-                        technician.todayAttendance!.punchIn.toString()?? 'N/A'))),
+                        todayAttendance.toString()?? 'N/A'))),
                     DataCell(Text(_formatDateTime(
-                        technician.todayAttendance!.punchOut.toString()?? 'N/A'))),
+                        todayAttendance1.toString()?? 'N/A'))),
                     DataCell(_buildAttendanceStatusBadge(
-                        technician.todayAttendance!.status?? '')),
+                        technician.todayAttendance.map((value)=> value.status).toString()?? '')),
                     DataCell(Text(technician.batteryStatus ?? 'N/A')),
-                    DataCell(Text(technician!.gpsStatus ? 'On' : 'Off')),
+                    DataCell(Text(technician.gpsStatus! ? 'On' : 'Off')),
                     DataCell(_dropDownValueViews(controller, context, technician.id.toString(), technician)),
                   ],
                 );
@@ -303,9 +312,9 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
   }
 }
 
-  Widget _buildAttendanceStatusBadge(String status) {
+  Widget _buildAttendanceStatusBadge(String? status) {
     Color color;
-    String displayText = status;
+    String displayText = status!;
 
     switch (status.toLowerCase()) {
       case 'present':
@@ -812,7 +821,7 @@ void _editWidgetOfAgentsDialogValue(TechnicianListViewScreenController controlle
   controller.lastNameController.text = agentData.lastName ?? '';
   controller.emailController.text = agentData.email ?? '';
   controller.phoneController.text = agentData.phoneNumber ?? '';
-  controller.joiningDateController.text = agentData.dateJoined??"";
+  controller.joiningDateController.text = agentData.dateJoined.toString()??"";
   controller.employeeIdController.text = agentData.empId??"";
 
   Get.dialog(

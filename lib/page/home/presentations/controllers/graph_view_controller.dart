@@ -95,7 +95,7 @@ class GraphViewController extends GetxController {
 
         // Log all statuses to debug
         ticketData.value!.results.forEach((ticket) {
-          print('Ticket ID: ${ticket.id}, Status: ${ticket.status}');
+          // print('Ticket ID: ${ticket?.id}, Status: ${ticket?.status}');
         });
       }
 
