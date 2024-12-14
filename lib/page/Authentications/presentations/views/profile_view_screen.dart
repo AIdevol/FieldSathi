@@ -204,7 +204,7 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
   }
 
   Widget _buildForm(BuildContext context) {
-    // final currentUser =  storage.read(userRole);
+    final currentUser =  storage.read(userRole);
     // final isAdmin = currentUser.role == 'admin';
     return Form(
       key: _formKey,
@@ -243,7 +243,9 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
             enabled: controller.isAdmin,
             // icon: FeatherIcons.phone,
           ),
+          if(currentUser != 'technician' && currentUser != 'sales')
           vGap(16),
+          if(currentUser != 'technician' && currentUser != 'sales')
           _buildTextField(
             onIconPressed: (){},
             hintText: "Company Name".tr,
@@ -252,7 +254,9 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
             nextFocusNode: controller.addressFocusNode,
             icon: FeatherIcons.briefcase,
           ),
+          if(currentUser != 'technician' && currentUser != 'sales')
           vGap(16),
+          if(currentUser != 'technician' && currentUser != 'sales')
           _buildTextField(
             onIconPressed: (){},
             hintText: "Address".tr,
@@ -261,7 +265,9 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
             nextFocusNode: controller.employeesFocusNode,
             icon: FeatherIcons.mapPin,
           ),
+          if(currentUser != 'technician' && currentUser != 'sales')
           vGap(16),
+          if(currentUser != 'technician' && currentUser != 'sales')
           _buildTextField(
             onIconPressed: (){},
             hintText: "Employees".tr,

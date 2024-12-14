@@ -102,7 +102,7 @@ class Result {
   final String? lastName;
   final String? email;
   final String? phoneNumber;
-  final String? companyName;
+  final dynamic companyName;
   final String? employees;
   final dynamic dob;
   final String? otp;
@@ -110,7 +110,7 @@ class Result {
   final bool? isStaff;
   final bool? isSuperuser;
   final bool? isActive;
-  final String? profileImage;
+  final dynamic profileImage;
   final dynamic customerName;
   final dynamic customerTag;
   final dynamic modelNo;
@@ -120,8 +120,8 @@ class Result {
   final dynamic customerType;
   final String? batteryStatus;
   final bool? gpsStatus;
-  final String? longitude;
-  final String? latitude;
+  final dynamic longitude;
+  final dynamic latitude;
   final dynamic companyAddress;
   final dynamic companyCity;
   final dynamic companyState;

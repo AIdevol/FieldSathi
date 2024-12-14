@@ -37,9 +37,8 @@ class SuperViewScreen extends GetView<SuperViewScreenController>{
         children: [
           _viewTopBar(context,controller),
           Expanded(
-            child: Obx(() => controller.isLoading.value
-                ? Center(child: Container())
-                : _mainData(controller)),
+            child: Obx(() =>
+                _mainData(controller)),
           ),
         ],
       ),

@@ -17,11 +17,12 @@ class ForTechcnicianandsalesAttendanceScreeenController extends GetxController {
   Rx<DateTime?> currentPunchInTime = Rx<DateTime?>(null);
   Rx<DateTime?> currentPunchOutTime = Rx<DateTime?>(null);
   RxString currentStatus = "idle".obs;
-
+  RxString userName = ''.obs;
   @override
   void onInit() {
     super.onInit();
     getCurrentStatus();
+    hituserDetailsApiCall();
     hitAttendanceHistoryApiCall();
   }
 
@@ -37,7 +38,22 @@ class ForTechcnicianandsalesAttendanceScreeenController extends GetxController {
   void togglePunchInOut(bool isPunchIn) {
     isPunchInSelected.value = isPunchIn;
   }
+  void hituserDetailsApiCall() {
+    print("user data :${userName.value}");
+    final id = storage.read(userId);
+    isLoading.value = true;
 
+    Get.find<AuthenticationApiService>().userDetailsApiCall(id: id).then((value) {
+      var userData = value;
+     userName.value = userData.firstName ?? '';
+     print("user data :${userName.value}");
+      isLoading.value = false;
+      update();
+    }).onError((error, stackError) {
+      isLoading.value = false;
+      toast(error.toString());
+    });
+  }
   Future<void> punchInOrOut() async {
     DateTime now = DateTime.now();
     String currentDate = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";

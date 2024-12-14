@@ -43,7 +43,6 @@ class ExpenditureScreenController extends GetxController{
   void onInit(){
     super.onInit();
     initializeData();
-    // hitGetExpenseResponseModel();
   }
   @override
   void onClose() {
@@ -56,6 +55,7 @@ class ExpenditureScreenController extends GetxController{
     hasError.value = false;
     try {
       await hitGetTechnicianApiCall();
+      hitGetExpenseApiCallDetails(storage.read(userId));
       isLoading.value = false;
     } catch (e) {
       hasError.value = true;
@@ -114,7 +114,7 @@ class ExpenditureScreenController extends GetxController{
 
   void hitGetExpenseApiCallDetails(String technicianId)async{
     isLoading.value = true;
-    customLoader.show();
+    // customLoader.show();
     FocusManager.instance.primaryFocus!.unfocus();
     var expencesData = {
       'technician': technicianId,
@@ -142,6 +142,12 @@ Future<void>refreshApiCall()async {
     expenseResult.clear();
     update();
     hitGetTechnicianApiCall();
+  }
+
+  void hitDeleteApiCall(String id){
+    isLoading.value = true;
+    FocusManager.instance.primaryFocus!.unfocus();
+    
   }
 }
 

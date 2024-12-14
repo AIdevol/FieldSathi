@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:tms_sathi/constans/role_based_keys.dart';
+import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/expenditure_screen_controller.dart';
 import 'package:tms_sathi/response_models/technician_response_model.dart';
 import 'package:tms_sathi/utilities/hex_color.dart';
@@ -20,6 +22,7 @@ class ExpenditureScreen extends GetView<ExpenditureScreenController>{
       child: SafeArea(
         child: GetBuilder<ExpenditureScreenController>(
           builder: (controller) => Scaffold(
+            backgroundColor: CupertinoColors.white,
             appBar: AppBar(
               leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
               backgroundColor: appColor,
@@ -38,12 +41,15 @@ class ExpenditureScreen extends GetView<ExpenditureScreenController>{
   }
 
   Widget _mainScreen(ExpenditureScreenController controller) {
+    final currentUser = storage.read(userRole);
     return Column(
       children: [
         _buildTopBar(controller),
-        Expanded(
+        (currentUser != 'technician'&&currentUser != 'sales')?
+         Expanded(
           child: _containerViewScreen(controller),
-        ),
+        )
+        : Expanded(child: _buildExpenseContent(controller))
       ],
     );
   }
@@ -245,104 +251,108 @@ class ExpenseTableView extends GetView<ExpenditureScreenController> {
       controller.hitGetExpenseApiCallDetails(technicianId!);
     }
     return MyAnnotatedRegion(
-      child: Scaffold(
-        backgroundColor: CupertinoColors.white,
-        appBar: AppBar(
-          title: Text(
-            'Expenditure Details',
-            style: MontserratStyles.montserratBoldTextStyle(
-                color: blackColor,
-                size: 15
+      child: GetBuilder<ExpenditureScreenController>(
+        init: ExpenditureScreenController(),
+        builder: (controller)=>
+         Scaffold(
+          resizeToAvoidBottomInset: false,
+          backgroundColor: CupertinoColors.white,
+          appBar: AppBar(
+            title: Text(
+              'Expenditure Details',
+              style: MontserratStyles.montserratBoldTextStyle(
+                  color: blackColor,
+                  size: 15
+              ),
             ),
-          ),
-          leading: IconButton(onPressed: (){Get.back();},icon: Icon(Icons.arrow_back_ios, color: Colors.black,)),
-          backgroundColor: appColor,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  _showExportDialog(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CupertinoColors.white,
-                  minimumSize: Size(100, 40),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            leading: IconButton(onPressed: (){Get.back();},icon: Icon(Icons.arrow_back_ios, color: Colors.black,)),
+            backgroundColor: appColor,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    _showExportDialog(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CupertinoColors.white,
+                    minimumSize: Size(100, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text("Export",style: MontserratStyles.montserratSemiBoldTextStyle(
+                          color: appColor,
+                          size: 13
+                      )),
+                      Icon(Icons.download,size: 18,color: appColor,)
+                    ],
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Text("Export",style: MontserratStyles.montserratSemiBoldTextStyle(
-                        color: appColor,
-                        size: 13
-                    )),
-                    Icon(Icons.download,size: 18,color: appColor,)
-                  ],
-                ),
-              ),
-            )
-          ],
-        ),
-        body: RefreshIndicator(onRefresh: ()async {
-          controller.refreshExpenseApiCall(technicianId!);
-        },
-        child: Obx(() => _buildExpenseContent())),
-      ),
-    );
-  }
-
-  Widget _buildExpenseContent() {
-    // if (controller.isLoading.value) {
-    //   return Center(child: CircularProgressIndicator());
-    // }
-
-    if (controller.hasError.value) {
-      return Center(child: Text('Error loading expenses'));
-    }
-
-    if (controller.expenseResult.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    return _buildExpenseTable();
-  }
-
-  Widget _buildExpenseTable() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columnSpacing: 20,
-          headingRowColor: MaterialStateColor.resolveWith(
-                  (states) => appColor.withOpacity(0.1)
+              )
+            ],
           ),
-          columns: [
-            DataColumn(label: Text('Expense ID', style: _headerTextStyle())),
-            DataColumn(label: Text('Date', style: _headerTextStyle())),
-            DataColumn(label: Text('Expense Type', style: _headerTextStyle())),
-            DataColumn(label: Text('From', style: _headerTextStyle())),
-            DataColumn(label: Text('To', style: _headerTextStyle())),
-            DataColumn(label: Text('Amount', style: _headerTextStyle())),
-            DataColumn(label: Text('Approved Amount', style: _headerTextStyle())),
-            DataColumn(label: Text('Description', style: _headerTextStyle())),
-            DataColumn(label: Text('Status', style: _headerTextStyle())),
-            DataColumn(label: Text('Remark', style: _headerTextStyle())),
-            DataColumn(label: Text('Image', style: _headerTextStyle())),
-            DataColumn(label: Text('Action', style: _headerTextStyle())),
-
-          ],
-          rows: _buildExpenseRows(),
+          body: RefreshIndicator(onRefresh: ()async {
+            controller.refreshExpenseApiCall(technicianId!);
+          },
+          child: Obx(() => _buildExpenseContent(controller))),
         ),
       ),
     );
   }
 
-  List<DataRow> _buildExpenseRows() {
-    return controller.expenseResult.map((expense) {
-      return _createExpenseRow(
+}
+
+Widget _buildExpenseContent(ExpenditureScreenController controller) {
+
+  if (controller.hasError.value) {
+    return Center(child: Text('Error loading expenses'));
+  }
+
+  if (controller.expenseResult.isEmpty) {
+    return _buildEmptyState();
+  }
+
+  return _buildExpenseTable(controller);
+}
+
+Widget _buildExpenseTable(ExpenditureScreenController controller) {
+  return SingleChildScrollView(
+    scrollDirection: Axis.vertical,
+    child: SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        columnSpacing: 20,
+        headingRowColor: MaterialStateColor.resolveWith(
+                (states) => appColor.withOpacity(0.1)
+        ),
+        columns: [
+          DataColumn(label: Text('Expense ID', style: _headerTextStyle())),
+          DataColumn(label: Text('Date', style: _headerTextStyle())),
+          DataColumn(label: Text('Expense Type', style: _headerTextStyle())),
+          DataColumn(label: Text('From', style: _headerTextStyle())),
+          DataColumn(label: Text('To', style: _headerTextStyle())),
+          DataColumn(label: Text('Amount', style: _headerTextStyle())),
+          DataColumn(label: Text('Approved Amount', style: _headerTextStyle())),
+          DataColumn(label: Text('Description', style: _headerTextStyle())),
+          DataColumn(label: Text('Status', style: _headerTextStyle())),
+          DataColumn(label: Text('Remark', style: _headerTextStyle())),
+          DataColumn(label: Text('Image', style: _headerTextStyle())),
+          DataColumn(label: Text('Action', style: _headerTextStyle())),
+
+        ],
+        rows: _buildExpenseRows(controller),
+      ),
+    ),
+  );
+}
+
+List<DataRow> _buildExpenseRows(ExpenditureScreenController controller) {
+  return controller.expenseResult.map((expense) {
+    return _createExpenseRow(
         expenseId: expense.id.toString(),
         date: expense.date.toString(),
         expenseType: expense.expenseType.toString(),
@@ -353,201 +363,202 @@ class ExpenseTableView extends GetView<ExpenditureScreenController> {
         description: expense.description.toString(),
         status: expense.status.toString(),
         remark: expense.approvedRemark.toString(),
-        image: expense.image.toString()
-      );
-    }).toList();
-  }
+        image: expense.image.toString(),
+        controller: ExpenditureScreenController()
+    );
+  }).toList();
+}
 
-  DataRow _createExpenseRow({
-    required String expenseId,
-    required String date,
-    required String expenseType,
-    required String from,
-    required String to,
-    required String amount,
-    required String approvedAmount,
-    required String description,
-    required String status,
-    required String remark,
-    required String image,
-  }) {
-    return DataRow(cells: [
-      DataCell(Text(expenseId, style: _cellTextStyle())),
-      DataCell(Text(date, style: _cellTextStyle())),
-      DataCell(Text(expenseType, style: _cellTextStyle())),
-      DataCell(Text(from, style: _cellTextStyle())),
-      DataCell(Text(to, style: _cellTextStyle())),
-      DataCell(Text('₹$amount', style: _cellTextStyle())),
-      DataCell(Text('₹$approvedAmount', style: _cellTextStyle())),
-      DataCell(Text(description, style: _cellTextStyle())),
-      DataCell(_buildStatusChip(status)),
-      DataCell(Text(remark, style: _cellTextStyle())),
-      DataCell(Row(
-        children: [
-          Text(image, style: _cellTextStyle()),
-          if (image.isNotEmpty)
-            IconButton(
-              icon: Icon(Icons.download, color: appColor, size: 20),
-              onPressed: () {},
-            ),
-        ],
-      )),
-      DataCell(
-          _addTicketViewButton(expenseId)
-        // IconButton(
-        //   icon: Icon(Icons.remove_red_eye, color: appColor),
-        //   onPressed: () {
-        //     _showExpenseDetailsDialog(expenseId);
-        //   },
-        // ),
+DataRow _createExpenseRow({
+  required String expenseId,
+  required String date,
+  required String expenseType,
+  required String from,
+  required String to,
+  required String amount,
+  required String approvedAmount,
+  required String description,
+  required String status,
+  required String remark,
+  required String image,
+  required ExpenditureScreenController controller,
+}) {
+  return DataRow(cells: [
+    DataCell(Text(expenseId, style: _cellTextStyle())),
+    DataCell(Text(date, style: _cellTextStyle())),
+    DataCell(Text(expenseType, style: _cellTextStyle())),
+    DataCell(Text(from, style: _cellTextStyle())),
+    DataCell(Text(to, style: _cellTextStyle())),
+    DataCell(Text('₹$amount', style: _cellTextStyle())),
+    DataCell(Text('₹$approvedAmount', style: _cellTextStyle())),
+    DataCell(Text(description, style: _cellTextStyle())),
+    DataCell(_buildStatusChip(status)),
+    DataCell(Text(remark, style: _cellTextStyle())),
+    DataCell(Row(
+      children: [
+        Text(image, style: _cellTextStyle()),
+        if (image.isNotEmpty)
+          IconButton(
+            icon: Icon(Icons.download, color: appColor, size: 20),
+            onPressed: () {},
+          ),
+      ],
+    )),
+    DataCell(
+        _addTicketViewButton(controller,expenseId)
+      // IconButton(
+      //   icon: Icon(Icons.remove_red_eye, color: appColor),
+      //   onPressed: () {
+      //     _showExpenseDetailsDialog(expenseId);
+      //   },
+      // ),
+    ),
+  ]);
+}
+
+_addTicketViewButton(ExpenditureScreenController controller,String expenseId) {
+  return ElevatedButton(onPressed: () {
+    _showExpenseDetailsDialog(controller, expenseId);
+  },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: appColor,
+        minimumSize: Size(130, 40),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
-    ]);
+      child: Text("Update Status",style: MontserratStyles.montserratBoldTextStyle(
+        color: whiteColor,
+        size: 13,)));
+}
+
+Widget _buildStatusChip(String status) {
+  Color chipColor;
+  switch (status.toLowerCase()) {
+    case 'approved':
+      chipColor = Colors.green;
+      break;
+    case 'pending':
+      chipColor = Colors.orange;
+      break;
+    case 'rejected':
+      chipColor = Colors.red;
+      break;
+    default:
+      chipColor = Colors.grey;
   }
 
-  _addTicketViewButton(String expenseId) {
-    return ElevatedButton(onPressed: () {
-      _showExpenseDetailsDialog(expenseId);
-    },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: appColor,
-          minimumSize: Size(130, 40),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+  return Chip(
+    label: Text(
+      status,
+      style: TextStyle(color: Colors.white, fontSize: 12),
+    ),
+    backgroundColor: chipColor,
+  );
+}
+
+void _showExpenseDetailsDialog(ExpenditureScreenController controller,String expenseId) {
+  final expense = controller.expenseResult.firstWhere(
+          (exp) => exp.id == expenseId,
+      orElse: () => throw Exception('Expense not found')
+  );
+
+  Get.dialog(
+    AlertDialog(
+      title: Text('Expense Details - $expenseId'),
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildDetailRow('Expense Type', expense.expenseType.toString()),
+            _buildDetailRow('Date', expense.date.toString()),
+            _buildDetailRow('From', expense.fromField.toString()),
+            _buildDetailRow('To', expense.to.toString()),
+            _buildDetailRow('Total Amount', '₹${expense.amount}'),
+            _buildDetailRow('Approved Amount', '₹${expense.approvedAmount}'),
+            _buildDetailRow('Description', expense.description.toString()),
+            _buildDetailRow('Status', expense.status.toString()),
+            _buildDetailRow('Remark', expense.approvedRemark.toString()),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: Text('Close'),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildDetailRow(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4.0),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$label: ',
+          style: MontserratStyles.montserratBoldTextStyle(
+              color: Colors.black87,
+              size: 14
           ),
         ),
-        child: Text("Update Status",style: MontserratStyles.montserratBoldTextStyle(
-          color: whiteColor,
-          size: 13,)));
-  }
-
-  Widget _buildStatusChip(String status) {
-    Color chipColor;
-    switch (status.toLowerCase()) {
-      case 'approved':
-        chipColor = Colors.green;
-        break;
-      case 'pending':
-        chipColor = Colors.orange;
-        break;
-      case 'rejected':
-        chipColor = Colors.red;
-        break;
-      default:
-        chipColor = Colors.grey;
-    }
-
-    return Chip(
-      label: Text(
-        status,
-        style: TextStyle(color: Colors.white, fontSize: 12),
-      ),
-      backgroundColor: chipColor,
-    );
-  }
-
-  void _showExpenseDetailsDialog(String expenseId) {
-    final expense = controller.expenseResult.firstWhere(
-            (exp) => exp.id == expenseId,
-        orElse: () => throw Exception('Expense not found')
-    );
-
-    Get.dialog(
-      AlertDialog(
-        title: Text('Expense Details - $expenseId'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDetailRow('Expense Type', expense.expenseType.toString()),
-              _buildDetailRow('Date', expense.date.toString()),
-              _buildDetailRow('From', expense.fromField.toString()),
-              _buildDetailRow('To', expense.to.toString()),
-              _buildDetailRow('Total Amount', '₹${expense.amount}'),
-              _buildDetailRow('Approved Amount', '₹${expense.approvedAmount}'),
-              _buildDetailRow('Description', expense.description.toString()),
-              _buildDetailRow('Status', expense.status.toString()),
-              _buildDetailRow('Remark', expense.approvedRemark.toString()),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '$label: ',
-            style: MontserratStyles.montserratBoldTextStyle(
-                color: Colors.black87,
+        Expanded(
+          child: Text(
+            value,
+            style: MontserratStyles.montserratSemiBoldTextStyle(
+                color: Colors.black,
                 size: 14
             ),
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: MontserratStyles.montserratSemiBoldTextStyle(
-                  color: Colors.black,
-                  size: 14
-              ),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showExportDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Export Expenses'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text('Export as CSV'),
+              onTap: () {
+                // controller.exportExpenses('CSV');
+                Navigator.of(context).pop();
+              },
             ),
-          ),
-        ],
-      ),
-    );
-  }
+            ListTile(
+              title: Text('Export as PDF'),
+              onTap: () {
+                // controller.exportExpenses('PDF');
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
-  void _showExportDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Export Expenses'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text('Export as CSV'),
-                onTap: () {
-                  // controller.exportExpenses('CSV');
-                  Navigator.of(context).pop();
-                },
-              ),
-              ListTile(
-                title: Text('Export as PDF'),
-                onTap: () {
-                  // controller.exportExpenses('PDF');
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+TextStyle _headerTextStyle() {
+  return MontserratStyles.montserratBoldTextStyle(
+      color: Colors.black87,
+      size: 14
+  );
+}
 
-  TextStyle _headerTextStyle() {
-    return MontserratStyles.montserratBoldTextStyle(
-        color: Colors.black87,
-        size: 14
-    );
-  }
-
-  TextStyle _cellTextStyle() {
-    return MontserratStyles.montserratSemiBoldTextStyle(
-        color: Colors.black54,
-        size: 13
-    );
-  }
+TextStyle _cellTextStyle() {
+  return MontserratStyles.montserratSemiBoldTextStyle(
+      color: Colors.black54,
+      size: 13
+  );
 }

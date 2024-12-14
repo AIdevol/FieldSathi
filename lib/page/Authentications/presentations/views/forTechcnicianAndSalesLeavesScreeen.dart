@@ -12,7 +12,10 @@ class FortechcnicianandsalesAttendancescreeen extends GetView<ForTechcnicianands
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MyAnnotatedRegion(child: GetBuilder<ForTechcnicianandsalesAttendanceScreeenController>(
+        init: ForTechcnicianandsalesAttendanceScreeenController(),
+        builder: (controller)=>
+    Scaffold(
       appBar: AppBar(
         backgroundColor: appColor,
         title: Text(
@@ -37,7 +40,7 @@ class FortechcnicianandsalesAttendancescreeen extends GetView<ForTechcnicianands
                 ),
                 child: Center(
                   child: Text(
-                    "Welcome, User!",
+                    "Welcome, ${controller.userName.value}",
                     style: MontserratStyles.montserratBoldTextStyle(size: 15),
                   ),
                 ),
@@ -223,6 +226,8 @@ class FortechcnicianandsalesAttendancescreeen extends GetView<ForTechcnicianands
           ),
         ),
       ),
+    )
+    )
     );
   }
 }
