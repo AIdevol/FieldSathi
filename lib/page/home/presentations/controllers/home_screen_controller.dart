@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/constans/const_local_keys.dart';
 import 'package:tms_sathi/main.dart';
+import 'package:tms_sathi/response_models/today_ticket_response_model.dart';
 import 'package:tms_sathi/response_models/user_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 import 'package:tms_sathi/utilities/custom_dialogue.dart';
@@ -26,7 +27,7 @@ class HomeScreenController extends GetxController{
   RxList<TicketResult>ticketResultData = <TicketResult>[].obs;
   final RxList<ServiceCategoryResponseModel> allServices = <ServiceCategoryResponseModel>[].obs;
   final RxList<ServiceCategoryResponseModel> filteredServices = <ServiceCategoryResponseModel>[].obs;
-
+  RxList<TodaysTicket> todayResponseData = <TodaysTicket>[].obs;
   @override
   void onInit(){
     super.onInit();
@@ -36,7 +37,8 @@ class HomeScreenController extends GetxController{
     fetchTicketsApiCall();
     hitGetAmcDetailsApiCall();
     hitServiceCategoriesApiCall();
-    checkFirstTimeUser();
+    hitTodayTicketDataApiCall();
+    // checkFirstTimeUser();
   }
 
   @override
@@ -186,6 +188,20 @@ class HomeScreenController extends GetxController{
     }
   }
 
+void hitTodayTicketDataApiCall(){
+  isLoading.value = true;
+  FocusManager.instance.primaryFocus?.unfocus();
+  Get.find<AuthenticationApiService>().getTodayTicketDetailsApiCall().then((value){
+    todayResponseData.assignAll(value.todaysTickets);
+    print("ticket today:${value.todaysTickets}");
+    update();
+  }).onError((error,stackError){
+    customLoader.hide();
+    toast(error.toString());
+    isLoading.value = false;
+  });
+
+}
 
   Future<void> refereshAllTicket()async{
     customLoader.show();

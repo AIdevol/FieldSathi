@@ -27,11 +27,45 @@ class FsrViewController extends GetxController {
   final RxInt totalPages = 0.obs;
   final RxInt totalCount = 0.obs;
 
+  void changePage(int page) {
+    if (page > 0 && page <= _calculateTotalPages()) {
+      currentPage.value = page;
+      update();
+    }
+  }
+
+  // Calculate total pages based on filtered data
+  int _calculateTotalPages() {
+    const pageSize = 10;
+    return (filteredFsr.length / pageSize).ceil();
+  }
+
+  // Override onInit to set initial page
   @override
   void onInit() {
     super.onInit();
     searchController.addListener(_onSearchChanged);
+    currentPage.value = 1; // Start on first page
     hitGetFsrDetailsApiCall();
+  }
+
+  // Modify search and filter methods to reset pagination
+  void updateSearch(String query) {
+    searchQuery.value = query;
+    _filterFsr();
+    currentPage.value = 1; // Reset to first page on search
+  }
+
+  void _filterFsr() {
+    if (searchQuery.isEmpty) {
+      filteredFsr.assignAll(allFsr);
+    } else {
+      filteredFsr.assignAll(allFsr.where((fsr) =>
+      fsr.fsrName?.toLowerCase().contains(searchQuery.toLowerCase()) ?? false ||
+          _searchInCategories(fsr.categories ?? [], searchQuery.toLowerCase())
+      ));
+    }
+    update();
   }
 
   @override
@@ -73,23 +107,6 @@ class FsrViewController extends GetxController {
     updateSearch(searchController.text);
   }
 
-  void updateSearch(String query) {
-    searchQuery.value = query;
-    _filterFsr();
-  }
-
-
-  void _filterFsr() {
-    if (searchQuery.isEmpty) {
-      filteredFsr.assignAll(allFsr);
-    } else {
-      filteredFsr.assignAll(allFsr.where((fsr) =>
-      fsr.fsrName?.toLowerCase().contains(searchQuery.toLowerCase()) ?? false ||
-          _searchInCategories(fsr.categories ?? [], searchQuery.toLowerCase())
-      ));
-    }
-    update();
-  }
 
   bool _searchInCategories(List<Category> categories, String query) {
     return categories.any((category) =>

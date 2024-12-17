@@ -24,15 +24,19 @@ import 'package:tms_sathi/response_models/sub_service_response_model.dart';
 import 'package:tms_sathi/response_models/technician_response_model.dart';
 import 'package:tms_sathi/response_models/ticket_history_response_model.dart';
 import 'package:tms_sathi/response_models/ticket_response_model.dart';
+import 'package:tms_sathi/response_models/today_ticket_response_model.dart';
 import 'package:tms_sathi/response_models/user_response_model.dart';
 import 'package:tms_sathi/services/APIs/dio_client.dart';
 
 import '../../../response_models/add_sales_response_model.dart';
+import '../../../response_models/amcData_customerWise_response_model.dart';
 import '../../../response_models/check_points_response_model.dart';
 import '../../../response_models/export_import_directory/expense_export_response_model.dart';
 import '../../../response_models/export_ticket_models.dart';
 import '../../../response_models/holidays_calender_response_model.dart';
 import '../../../response_models/leave_allocation_response_model.dart';
+import '../../../response_models/leave_response_model.dart';
+import '../../../response_models/leaves_history_response_model.dart';
 import '../../../response_models/register_response_model.dart';
 import '../../../response_models/resend_otp_api_call.dart';
 import '../../../response_models/sales_response_model.dart';
@@ -232,6 +236,15 @@ implements AuthenticationApi {
     }
   }
   @override
+  Future<deleteTicketDataResponseModel>deleteticketDetailsApiCall({Map<String, dynamic>? dataBody,String? id})async{
+    try{
+      final response = await dioClient!.delete('${ApiEnd.get_ticketEnd}$id/', data: dataBody, skipAuth: false);
+      return deleteTicketDataResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+  @override
   Future<TicketCountsResponseModel>getTicketCountsApiCall({Map<String, dynamic>? dataBody, parameter})async{
     try{
       final response = await dioClient!.get('${ApiEnd.ticketCountsEnd}', data: dataBody,queryParameters: parameter, skipAuth: false);
@@ -367,7 +380,22 @@ implements AuthenticationApi {
       return Future.error(NetworkExceptions.getDioException(e));
     }
   }
-
+  @override
+  Future<List<LeavesHistoryViewResponseModel>>getLeaveHistoryData({Map<String, dynamic>?dataBody,required String id })async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.leaveHistoryViewEnd}$id/", data: dataBody, skipAuth: false, );
+      if (response is List) {
+        return response.map((item) => LeavesHistoryViewResponseModel.fromJson(item)).toList();
+      } else
+      if (response is Map<String, dynamic> && response.containsKey('data')) {
+        final List<dynamic> data = response['data'];
+        return data.map((item) => LeavesHistoryViewResponseModel.fromJson(item)).toList();
+      }
+      return [];
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
   // ====================================================================================Super Api Call ======================================
   @override
   Future<SuperUsersResponseModel> getSuperUserApiCall(
@@ -1202,14 +1230,54 @@ Future<TechnicianAttendanceResponseModel>getAttendanceApiCall({Map<String, dynam
  }
 //   =============================
 @override
-Future<ServicesResponseModel> getAllservicesPricesAndDetails({Map<String, dynamic>?dataBody})async{
+Future<ServicesResponseModel> getAllservicesPricesAndDetails({Map<String, dynamic>?dataBody,parameter})async{
     try{
-      final response = await dioClient!.get(ApiEnd.serviceEnd, data: dataBody, skipAuth: false);
+      final response = await dioClient!.get(ApiEnd.serviceEnd, data: dataBody,queryParameters: parameter, skipAuth: false);
       return ServicesResponseModel.fromJson(response);
     }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
     }
 }
+
+// =============================================================================Customer Wise Data for ticket creation ============================
+
+@override
+  Future<AmcDataCustomerWiseResponseModel>getAMCCustomerWiseDataApiCall({Map<String, dynamic>?dataBody,parameter})async{
+  try{
+    final response = await dioClient!.get(ApiEnd.amcEnd, data: dataBody,queryParameters: parameter, skipAuth: false);
+    return AmcDataCustomerWiseResponseModel.fromJson(response);
+  }catch(error){
+    return Future.error(NetworkExceptions.getDioException(error));
+  }
+  }
+
+  @override
+  Future<List<AmcHistoryViewResponseModel>>getAmcHistoryData({Map<String, dynamic>?dataBody,required String id })async{
+    try{
+      final response = await dioClient!.get("${ApiEnd.amcHistoryViewEnd}$id/", data: dataBody, skipAuth: false, );
+      if (response is List) {
+        return response.map((item) => AmcHistoryViewResponseModel.fromJson(item)).toList();
+      } else
+      if (response is Map<String, dynamic> && response.containsKey('data')) {
+        final List<dynamic> data = response['data'];
+        return data.map((item) => AmcHistoryViewResponseModel.fromJson(item)).toList();
+      }
+      return [];
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
+  @override
+  Future<TodayTicketDataResponseModel>getTodayTicketDetailsApiCall({Map<String, dynamic>?dataBody})async{
+    try{
+      final response = await dioClient!.get(ApiEnd.getTodayDataEnd,data: dataBody,skipAuth: false);
+      return TodayTicketDataResponseModel.fromJson(response);
+    }catch(error){
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
 }
 
 

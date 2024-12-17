@@ -2,11 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/constans/role_based_keys.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/page/home/presentations/views/technician_dashboard_homepage.dart';
+import 'package:tms_sathi/response_models/today_ticket_response_model.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
 import '../../../../constans/string_const.dart';
@@ -43,7 +45,7 @@ class HomeScreen extends GetView<HomeScreenController> {
           resizeToAvoidBottomInset: true,
           drawer: DrawerScreen(dkey: drawerkey),
           appBar: _buildAppBar(controller),
-          body: RefreshIndicator(child: _getRoleBasedHomePage(context, userrole), onRefresh:()async{
+          body: RefreshIndicator(child: _getRoleBasedHomePage(context,controller,userrole), onRefresh:()async{
             await controller.refereshAllTicket();
           } ),
         ),
@@ -51,20 +53,20 @@ class HomeScreen extends GetView<HomeScreenController> {
     );
   }
 
-  Widget _getRoleBasedHomePage(BuildContext context, String userRole) {
+  Widget _getRoleBasedHomePage(BuildContext context,HomeScreenController controller ,String userRole) {
     return Material(
       child: SafeArea(
-        child: _buildPageContent(context, userRole),
+        child: _buildPageContent(context,controller,userRole),
       ),
     );
   }
 
-  Widget _buildPageContent(BuildContext context, String userRole) {
+  Widget _buildPageContent(BuildContext context,HomeScreenController controller ,String userRole) {
     switch (userRole) {
       case adminRole:
       case superUserRole:
       case agentRole:
-        return _buildDashboardView(context);
+        return _buildDashboardView(context,controller);
       case technicianRole:
         return TechnicianDashboardHomepage();
       case salesRole:
@@ -76,7 +78,7 @@ class HomeScreen extends GetView<HomeScreenController> {
     }
   }
 
-  Widget _buildDashboardView(BuildContext context) {
+  Widget _buildDashboardView(BuildContext context, HomeScreenController controller) {
     return CustomScrollView(
       slivers: [
         SliverFillRemaining(
@@ -87,6 +89,10 @@ class HomeScreen extends GetView<HomeScreenController> {
               children: [
                 _buildTicketSection(context),
                 SizedBox(height: 20),
+                _customerRatingView(context),
+                SizedBox(height: 20,),
+                _todayTicketView(context,controller),
+                SizedBox(height: 20,),
                 _buildAttendanceSection(context),
                 SizedBox(height: 20),
                 _buildAmcSection(context),
@@ -101,10 +107,10 @@ class HomeScreen extends GetView<HomeScreenController> {
 
   Widget _buildTicketSection(BuildContext context) {
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 1,
+      height: MediaQuery.of(context).size.height * 1.4,
       child: _buildDashboardCard(
         context: context,
-        title: 'Ticket Details',
+        title: 'Ticket Distribution',
         onTap: () => Get.toNamed(AppRoutes.ticketListScreen),
         actionButton: _buildActionButton(
           text: "Create Ticket",
@@ -504,4 +510,227 @@ _loginShowPopUpView(HomeScreenController controller,BuildContext context){
       )
     ],
   ));
+}
+
+Widget _customerRatingView(BuildContext context) {
+  return Material(
+    elevation: 2,
+    borderRadius: BorderRadius.circular(20),
+    child: Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Overall Rating Section
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Customer Ratings',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              Row(
+                children: [
+                  Icon(Icons.star, color: Colors.amber, size: 24),
+                  SizedBox(width: 4),
+                  Text(
+                    '4.5',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+
+          // Detailed Ratings
+          _buildStarRow('5 Stars', 4.8),
+          _buildStarRow('4 Stars', 3.5),
+          _buildStarRow('3 Stars', 2.3),
+          _buildStarRow('2 Stars', 1.2),
+          _buildStarRow('1 Star', 0.8),
+
+          SizedBox(height: 16),
+
+          // Total Reviews
+          Text(
+            'Based on 1,234 Reviews',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+// Helper method to create star rows
+Widget _buildStarRow(String label, double stars) {
+  int fullStars = stars.floor();
+  bool hasHalfStar = (stars - fullStars) >= 0.5;
+
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4.0),
+    child: Row(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.black54,
+          ),
+        ),
+        SizedBox(width: 8),
+        Row(
+          children: List.generate(5, (index) {
+            if (index < fullStars) {
+              return Icon(Icons.star, color: Colors.amber, size: 16);
+            } else if (index == fullStars && hasHalfStar) {
+              return Icon(Icons.star_half, color: Colors.amber, size: 16);
+            } else {
+              return Icon(Icons.star_border, color: Colors.amber, size: 16);
+            }
+          }),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _todayTicketView(BuildContext context, HomeScreenController controller) {
+  return Material(
+    elevation: 2,
+    borderRadius: BorderRadius.circular(20),
+    child: Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "Today's Ticket",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          vGap(20),
+          // Replace Expanded with SizedBox or fixed height
+          SizedBox(
+            height: 300, // Adjust as needed
+            child: Obx(() => controller.todayResponseData.isNotEmpty
+                ?ListView.builder(
+              itemCount: controller.todayResponseData.length,
+              itemBuilder: (context, index) {
+                final todayData = controller.todayResponseData[index];
+                return _todayTicketViewbyResponse(context, todayData);
+              },
+            )
+            :_buildEmptyState()
+            )
+            ,
+          )
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _todayTicketViewbyResponse(BuildContext context, TodaysTicket todayData) {
+  return Card(
+    elevation: 3,
+    color: whiteColor,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(FontAwesomeIcons.ticket,size: 30,color: appColor),
+          Text(
+            todayData.customerDetails?.customerName ?? 'Unknown Customer',
+            style: MontserratStyles.montserratBoldTextStyle(
+              size: 15,
+              color: Colors.black,
+            ),
+          ),
+          vGap(20),
+          Row(
+            children: [
+              Icon(Icons.person),
+              Text(
+                '${todayData.assignTo?.firstName ?? ''} ${todayData.assignTo?.lastName ?? ''}',
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              )
+            ],
+          ),
+          vGap(10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${todayData.assignTo!.phoneNumber}',
+                style: MontserratStyles.montserratBoldTextStyle(
+                  size: 15,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                todayData.status ?? 'No Status',
+                style: MontserratStyles.montserratBoldTextStyle(
+                  size: 15,
+                  color: Colors.green,
+                ),
+              )
+            ],
+          )
+        ],
+      ),
+    ),
+  );
+}
+_buildEmptyState() {
+  return Center(
+    child: Column(
+      // mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset(
+          nullVisualImage,
+          width: 300,
+          height: 300,
+        ),
+        Text(
+          'No services found',
+          style: MontserratStyles.montserratNormalTextStyle(
+            // size: 18,
+            color: blackColor,
+          ),
+        ),
+      ],
+    ),
+  );
 }

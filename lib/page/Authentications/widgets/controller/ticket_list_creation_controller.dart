@@ -7,10 +7,12 @@ import 'package:tms_sathi/response_models/services_all_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 import '../../../../constans/const_local_keys.dart';
+import '../../../../response_models/amcData_customerWise_response_model.dart';
 import '../../../../response_models/customer_list_response_model.dart';
 import '../../../../response_models/fsr_response_model.dart';
 import '../../../../response_models/technician_response_model.dart';
 import '../../../../response_models/ticket_response_model.dart';
+import '../../../../response_models/user_response_model.dart';
 
 class TicketListCreationController extends GetxController {
   late TextEditingController taskNameController;
@@ -45,6 +47,7 @@ class TicketListCreationController extends GetxController {
   final joiningDateController = TextEditingController();
 
   late TextEditingController customersNameController;
+  late TextEditingController amcController;
   late TextEditingController phonesController;
   late TextEditingController emailsController;
   late TextEditingController companyNameController;
@@ -59,6 +62,7 @@ class TicketListCreationController extends GetxController {
   late TextEditingController selectedRegionController;
 
   late FocusNode customersFocusNode;
+  late FocusNode amcFocusNode;
   late FocusNode phonesFocusNode;
   late FocusNode emailsFocusNode;
   late FocusNode companyNameFocusNode;
@@ -82,6 +86,7 @@ class TicketListCreationController extends GetxController {
   RxList<TicketResult> ticketAll = <TicketResult>[].obs;
   RxList<TechnicianData> allTechnicians = <TechnicianData>[].obs;
   RxList<TechnicianData> filteredTechnicians = <TechnicianData>[].obs;
+  RxList<TMSResult> allWorkerData = <TMSResult>[].obs;
   // CustomerListResponseModel CustomerDataStr = CustomerListResponseModel();
   final RxList<Result> allFsr = <Result>[].obs;
   final RxList<Result> filteredFsr = <Result>[].obs;
@@ -89,6 +94,7 @@ class TicketListCreationController extends GetxController {
   RxList<CustomerData> customerdefineData = <CustomerData>[].obs;
   RxList<Service>servicesAll=<Service>[].obs;
   RxList<Service>servicesAllResponse=<Service>[].obs;
+  RxList<AmcDataCustomerWiseResult>AmcDataCustomerWiseList=<AmcDataCustomerWiseResult>[].obs;
 
 
   Rx<TechnicianData?> selectedTechnician = Rx<TechnicianData?>(null);
@@ -97,6 +103,7 @@ class TicketListCreationController extends GetxController {
   RxInt selectedfsrId = RxInt(0);
   RxInt selectedProductId = RxInt(0);
   RxInt selectedServiceId = RxInt(0);
+  RxInt selectedAmcId = RxInt(0);
 
   List<String> regionValues = [
     // 'Select Region'
@@ -107,6 +114,9 @@ class TicketListCreationController extends GetxController {
   ];
 
   String defaultValue  = 'North';
+
+  late TextEditingController timeController;
+  late FocusNode timeFocusNode;
 
   void updateRegion(String newValue){
     defaultValue = newValue;
@@ -126,6 +136,7 @@ class TicketListCreationController extends GetxController {
 
   @override
   void onInit() {
+    timeController=TextEditingController();
     taskNameController = TextEditingController();
     rateController = TextEditingController();
     assignToController = TextEditingController();
@@ -140,6 +151,7 @@ class TicketListCreationController extends GetxController {
 
 
     taskNameFocusNode = FocusNode();
+    timeFocusNode = FocusNode();
     assignToFocusNode = FocusNode();
     purposeFocusNode = FocusNode();
     dateFocusNode = FocusNode();
@@ -152,6 +164,7 @@ class TicketListCreationController extends GetxController {
     instructionFocusNode = FocusNode();
 
     companyNameController = TextEditingController();
+    amcController = TextEditingController();
     customerNameController = TextEditingController();
     phonesController = TextEditingController();
     emailsController = TextEditingController();
@@ -167,6 +180,7 @@ class TicketListCreationController extends GetxController {
     selectedRegionController = TextEditingController();
 
     customersFocusNode = FocusNode();
+    amcFocusNode = FocusNode();
     phonesFocusNode = FocusNode();
     emailsFocusNode = FocusNode();
     customersFocusNode = FocusNode();
@@ -188,10 +202,12 @@ class TicketListCreationController extends GetxController {
     hitGetCustomerListApiCall();
     hitGetFsrDetailsApiCall();
     hitServicesAllGetApiCall();
+
   }
 
   @override
   void dispose() {
+    timeController.dispose();
     taskNameController.dispose();
     assignToController.dispose();
     purposeController.dispose();
@@ -205,6 +221,7 @@ class TicketListCreationController extends GetxController {
     instructionController.dispose();
 
     taskNameFocusNode.dispose();
+    timeFocusNode.dispose();
     assignToFocusNode.dispose();
     purposeFocusNode.dispose();
     dateFocusNode.dispose();
@@ -228,6 +245,7 @@ class TicketListCreationController extends GetxController {
 
     companyNameController.dispose();
     customersNameController.dispose();
+    amcController.dispose();
     phonesController.dispose();
     emailsController.dispose();
     customerNameController.dispose();
@@ -242,6 +260,7 @@ class TicketListCreationController extends GetxController {
     selectedRegionController.dispose();
 
     customersFocusNode.dispose();
+    amcFocusNode.dispose();
     phonesFocusNode.dispose();
     emailsFocusNode.dispose();
     customersFocusNode.dispose();
@@ -280,13 +299,16 @@ class TicketListCreationController extends GetxController {
       "israte":isRateSelected.value,
       "purpose":purposeController.text,
       "date_joined":dateController.text,
-      "customer_name":customerNameController.text,
-      "brand": productNameController.text,
+      "time":timeController.text,
+      "customer_name":selectedCustomerId.value,
+      "brand": selectedProductId.value,
       "model":modelNoController.text,
-      "fsrName":fsrDetailsController.text,
-      "service_name":serviceNamesController.text,
+      "selected_amc":selectedAmcId.value,
+      "fsrName":selectedfsrId.value,
+      "service_name":selectedServiceId.value,
       "instructions":instructionController.text,
     };
+    print("customer id selections: ${selectedCustomerId.value}");
     Get.find<AuthenticationApiService>().postTicketDetailsApiCall(dataBody:ticketData).then((value){
       customLoader.hide();
       toast("Ticket have been added");
@@ -303,10 +325,12 @@ class TicketListCreationController extends GetxController {
     isLoading.value = true;
     customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
-
+    var parameterData ={
+      "page_size":"all"
+    };
     try {
       final response = await Get.find<AuthenticationApiService>()
-          .getticketDetailsApiCall();
+          .getticketDetailsApiCall(parameter: parameterData);
       if (response != null) {
         ticketResult.assignAll(response.results);
         // applyFilters(); // Apply initial filters
@@ -334,14 +358,12 @@ class TicketListCreationController extends GetxController {
       isLoading.value = true;
       FocusManager.instance.primaryFocus?.unfocus();
 
-      final roleWiseData = {'role': 'technician'};
+      final roleWiseData = {'role': ['technician','customer','agent']};
 
       final response = await Get.find<AuthenticationApiService>()
-          .getTechnicianApiCall(parameters: roleWiseData);
+          .getuserDetailsApiCall(parameter: roleWiseData);
 
-      // Update both lists
-      allTechnicians.assignAll(response.results!);
-      filteredTechnicians.assignAll(response.results!); // Initialize filtered list
+      allWorkerData.assignAll(response.results);// Initialize filtered list
 
       // Store technician IDs
       final technicianIds = response.results!.map((e) => e.id.toString()).toList();
@@ -375,6 +397,7 @@ class TicketListCreationController extends GetxController {
     FocusManager.instance.primaryFocus!.context;
     var parameterdata = {
       "role":"customer",
+      "page_size":"all"
     };
     Get.find<AuthenticationApiService>().getCustomerListApiCall(parameters: parameterdata).then((value)async{
       customerListData.assignAll(value.results!);
@@ -440,7 +463,10 @@ class TicketListCreationController extends GetxController {
   void hitServicesAllGetApiCall(){
     isLoading.value = true;
     FocusManager.instance.primaryFocus!.unfocus();
-    Get.find<AuthenticationApiService>().getAllservicesPricesAndDetails().then((value){
+    var allServiceData ={
+      "page_size":"all"
+    };
+    Get.find<AuthenticationApiService>().getAllservicesPricesAndDetails(parameter: allServiceData).then((value){
       servicesAll.assignAll(value.results);
       servicesAllResponse.assignAll(servicesAll);
       toast("Services fetch SuccessFully");
@@ -456,5 +482,21 @@ class TicketListCreationController extends GetxController {
     }else{
       servicesAllResponse.value = servicesAll.where((service)=>"${service.serviceName}".toLowerCase().contains(query.toLowerCase())).toList();
     }
+  }
+
+  void hitGetAmcDataAccordingtoCustomerData({required String SelectedCustomerId}){
+
+    isLoading.value = true;
+    FocusManager.instance.primaryFocus!.unfocus();
+    var listCustomData = {
+      'customer':SelectedCustomerId
+    };
+    print("parameter: $listCustomData");
+    Get.find<AuthenticationApiService>().getAMCCustomerWiseDataApiCall(parameter: listCustomData).then((value){
+    AmcDataCustomerWiseList.assignAll(value.results!);
+    }).onError((error,stackError){
+      toast(error.toString());
+      customLoader.hide();
+    });
   }
 }

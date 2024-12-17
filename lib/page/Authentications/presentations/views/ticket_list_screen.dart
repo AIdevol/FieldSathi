@@ -28,11 +28,12 @@ class TicketListScreen extends GetView<TicketListController> {
     'Task Name': 150,
     'Customer Name': 150,
     'Sub-Customer': 150,
-    'Technician': 150,
+    'Technician Name': 150,
     'Start Date/Time': 160,
     'End Date/Time': 160,
-    'Total Time': 100,
+    'Time': 100,
     'Address': 200,
+    "Phone No":150,
     'Region': 120,
     'Purpose': 150,
     'Status': 120,
@@ -357,6 +358,36 @@ class TicketListScreen extends GetView<TicketListController> {
     );
   }
 
+   Widget _ticketDateAndFsr(String ticketId,String? text,{double? maxWidth}) {
+     return Center(
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+           Text(ticketId,style: MontserratStyles.montserratSemiBoldTextStyle(size: 12, color: Colors.black),),
+           Container(
+             width: maxWidth,
+             padding: const EdgeInsets.symmetric(horizontal:8, vertical: 4),
+             decoration: BoxDecoration(
+               color: normalBlue,
+               borderRadius: BorderRadius.circular(6),
+               border: Border.all(
+                 color: Colors.blue.shade300,
+                 width: 1,
+               ),
+             ),
+             child: Text(
+               'FSR: ${text??"NA"}',
+               style: const TextStyle(
+                 color: Colors.white,
+                 fontWeight: FontWeight.w600,
+                 fontSize: 13,
+               ),
+             ),
+           ),
+         ],
+       ),
+     );
+   }
   Widget _buildDataCell(String text, {double? maxWidth}) {
     return Tooltip(
       message: text,
@@ -424,7 +455,7 @@ class TicketListScreen extends GetView<TicketListController> {
           )),
           DataCell(_buildDataCell(
             '${ticket.assignTo?.firstName ?? ''} ${ticket.assignTo?.lastName ?? ''}'.trim(),
-            maxWidth: columnWidths['Technician'],
+            maxWidth: columnWidths['Technician Name'],
           )),
           DataCell(_buildDataCell(
             "${ticket.startDateTime}" ?? 'NA',
@@ -436,14 +467,18 @@ class TicketListScreen extends GetView<TicketListController> {
           )),
           DataCell(_buildDataCell(
             ticket.totalTime ?? 'NA',
-            maxWidth: columnWidths['Total Time'],
+            maxWidth: columnWidths['Time'],
           )),
           DataCell(_buildDataCell(
             '${ticket.ticketAddress}'.trim(),
             maxWidth: columnWidths['Address'],
           )),
           DataCell(_buildDataCell(
-            ticket.ticketAddress ?? 'NA',
+            '${ticket.phoneNumber}'.trim(),
+            maxWidth: columnWidths['Phone No'],
+          )),
+          DataCell(_buildDataCell(
+            ticket.region ?? 'NA',
             maxWidth: columnWidths['Region'],
           )),
           DataCell(_buildDataCell(
@@ -451,10 +486,11 @@ class TicketListScreen extends GetView<TicketListController> {
             maxWidth: columnWidths['Purpose'],
           )),
           DataCell(_buildStatusCell(ticket.status ?? 'NA')),
-          DataCell(_buildDataCell(
+          DataCell(_ticketDateAndFsr(ticket.date.toString(),ticket.fsrDetails!.fsrName.toString()??'N/A',maxWidth: columnWidths['Ticket Date'])
+            /*_buildDataCell(
             ticket.date.toString() ?? 'NA',
             maxWidth: columnWidths['Ticket Date'],
-          )),
+          )*/),
           DataCell(_buildAgingCell(ticket.aging?.toString() ?? 'NA')),
           DataCell(_buildActionCell(controller, ticket.id.toString(), ticket),),
         ],
@@ -587,13 +623,15 @@ class TicketListScreen extends GetView<TicketListController> {
      );
 
      final status = ticket.status ?? '';
+     print('ticket status: $status');
 
-     List<PopupMenuEntry<String>> menuItems = [
-       _buildPopupMenuItem('Download', Icons.download, Colors.blue.shade700, context, controller, tickId),
-     ];
+     List<PopupMenuEntry<String>> menuItems = [];
 
      // Add either Reassign or Edit based on status
-     if (status == 'completed') {
+     if(status == "Completed")
+       menuItems.add(_buildPopupMenuItem('Download', Icons.download, Colors.blue.shade700, context, controller, tickId));
+
+     if (status == 'Completed') {
        menuItems.add(
          _buildPopupEditMenuItem('Reassign', Icons.edit_outlined, Colors.blue.shade700, context, controller, ticket),
        );
@@ -605,7 +643,7 @@ class TicketListScreen extends GetView<TicketListController> {
 
      // Add Delete option
      menuItems.add(
-       _buildPopupDeleteMenuItem('Delete', Icons.delete_outline, Colors.red, context, controller),
+       _buildPopupDeleteMenuItem('Delete', Icons.delete_outline, Colors.red, context, controller,ticket),
      );
 
      return menuItems;
@@ -654,9 +692,11 @@ class TicketListScreen extends GetView<TicketListController> {
      );
    }
    PopupMenuItem<String> _buildPopupDeleteMenuItem(
-       String text, IconData icon, Color iconColor, BuildContext context, TicketListController controller) {
+       String text, IconData icon, Color iconColor, BuildContext context, TicketListController controller,TicketResult ticket) {
      return PopupMenuItem<String>(
-       onTap: (){},
+       onTap: (){
+         controller.hitDeleteTicketApiCall(ticket.id.toString());
+       },
        value: text,
        child: Row(
          mainAxisSize: MainAxisSize.min,
@@ -1529,6 +1569,7 @@ Widget _buildActionButton(
 
 Future<void> showDialogWidgetContext(BuildContext context, TicketListController controller, String ticketid, TicketResult ticket, ){
    controller.hitGetTicketHistoryApiCall(ticketid);
+   controller.fetchTicketsApiCall();
    final progressResult = controller.ticketHistoryData;
   return showDialog(context: context, builder: (context){
     return Dialog(
@@ -1541,144 +1582,201 @@ Future<void> showDialogWidgetContext(BuildContext context, TicketListController 
             topRight: Radius.circular(16),
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            // Header
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.blueAccent,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "${ticket.taskName}",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
                     ),
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      "${ticket.status}",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Created & Assigned Section
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Created At: ${ticket.createdAt}",
-                                  style: TextStyle(fontWeight: FontWeight.w600),
-                                ),
-                                Text("Created By: ${ticket.createdBy}"),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Assigned To: ${ticket.assignTo}",
-                                  style: TextStyle(fontWeight: FontWeight.w600),
-                                ),
-                                Text(
-                                  "Technician\nfthhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 16),
-                      // Ticket Details Section
                       Text(
-                        "Ticket Details",
+                        "${ticket.taskName}",
                         style: TextStyle(
-                          fontSize: 16,
+                          color: Colors.white,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue,
                         ),
                       ),
-                      Divider(),
-                      ...[
-                        "Customer Name: ${ticket.customerDetails?.firstName} ${ticket.customerDetails?.lastName}",
-                        "Subcustomer Name: ${ticket.subCustomerDetails?.firstName} ${ticket.subCustomerDetails?.lastName}",
-                        "FSR: ${ticket.fsrDetails?.fsrName}",
-                        "Phone Number: ${ticket.customerDetails?.phoneNumber}",
-                        "Service: ${ticket.serviceDetails}",
-                        "Address: ${ticket.ticketAddress}",
-                        "Purpose: ${ticket.purpose??"N/A"}",
-                        "Instructions: ${ticket.instructions??"N/A"}",
-                        "Brand: ${ticket.brand??"N/A"}",
-                        "Model: ${ticket.model}",
-                      ].map((detail) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Text(detail),
-                      )),
-                      SizedBox(height: 16),
-                      // Progress History Section
-                      Text(
-                        "Progress History",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          "${ticket.status}",
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
-                      Divider(),
-                      ...[
-                        "${progressResult.map((ticket){return ticket.actionMessage;})}",
-                        // "Rohitddfdx\nfthhhhhhhhhhhhhhhhhhhhhhhhhhh",
-                        // "Technician\nhhhhhhhhhhhhhhhhhhhhhhhhhhh",
-                        // "17-11-2024 08:10 AM",
-                        // "Ticket updated by Rohitddfdx",
-                      ].map((history) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Text(history),
-                      )),
-                      vGap(20),
-                      _buildActionButton(
-                        context,
-                        'Okay',
-                        Icons.cancel,
-                        onTap: () => Get.back(),
-                      )
                     ],
                   ),
                 ),
-              ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Created & Assigned Section
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Created At: ${ticket.createdAt}",
+                                      style: TextStyle(fontWeight: FontWeight.w600),
+                                    ),
+                                    Text("Created By: ${ticket.createdBy}"),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Assigned To: ${ticket.assignTo}",
+                                      style: TextStyle(fontWeight: FontWeight.w600),
+                                    ),
+                                    Text(
+                                      "Technician\nfthhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16),
+                          // Ticket Details Section
+                          Text(
+                            "Ticket Details",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                          ),
+                          Divider(),
+                          ...[
+                            "Customer Name: ${ticket.customerDetails?.customerName}",
+                            "Subcustomer Name: ${ticket.subCustomerDetails?.customerName??"N/A"}",
+                            "FSR: ${ticket.fsrDetails?.fsrName}",
+                            "Phone Number: ${ticket.customerDetails?.phoneNumber}",
+                            "Service: ${ticket.serviceDetails}",
+                            "Address: ${ticket.ticketAddress}",
+                            "Purpose: ${ticket.purpose??"N/A"}",
+                            "Instructions: ${ticket.instructions??"N/A"}",
+                            "Brand: ${ticket.brand??"N/A"}",
+                            "Model: ${ticket.model}",
+                          ].map((detail) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Text(detail),
+                          )),
+                          SizedBox(height: 16),
+                          // Progress History Section
+                          // Inside the showDialogWidgetContext function, replace the Progress History section with:
+                          Text(
+                            "Progress History",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                          ),
+                          Divider(),
+                          Obx(() => controller.ticketHistoryData.isNotEmpty
+                              ? ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: controller.ticketHistoryData.length,
+                                  itemBuilder: (context, index) {
+                              final historyItem = controller.ticketHistoryData[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      historyItem.actionMessage ?? 'No action message',
+                                      style: TextStyle(fontWeight: FontWeight.w600),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            'By: ${historyItem.actionBy ?? 'Unknown'}',
+                                            style: TextStyle(color: Colors.grey),
+                                          ),
+                                        ),
+                                        Text(
+                                          historyItem.changeTimestamp ?? '',
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
+                                      ],
+                                    ),
+                                    if (historyItem.fieldChanges.isNotEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Text(
+                                          'Changes: ${historyItem.fieldChanges.join(", ")}',
+                                          style: TextStyle(
+                                            color: Colors.blue,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              );
+                                                      },
+                                                    )
+                              : Center(
+                            child: Text(
+                              'No history data available',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                          ),
+                          vGap(20),
+
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
+            Positioned(
+              bottom: 10,
+              right: 10,
+              child: _buildActionButton(
+                context,
+                'Okay',
+                Icons.cancel,
+                onTap: (){
+                  controller.fetchTicketsApiCall();
+                  Get.back();
+                },
+              ),
+            )
           ],
         ),
       ),);

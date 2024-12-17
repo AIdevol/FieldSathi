@@ -10,6 +10,7 @@ class ApiEnd{
   static const String get_ticketEnd ='api/tickets/';
   static const String get_ticketHistoryEnd = 'api/ticket_history_view/';
   static const String get_fsrEnd = 'api/tickets/';
+  static const String getTodayDataEnd = 'api/tickets/todays_tickets/';
   static const String leavesReportEnd = 'users/leaves/';
   static const String checkpointsCategoriesEnd = 'api/add-checkpoints/';
   static const String holidaysApiEnd = 'api/holidays/';
@@ -17,7 +18,7 @@ class ApiEnd{
   static const String checkingPointStatusApiEnd = 'api/checkpointstatus/';
   static const String leaveEditPeriodEnd = 'users/leave-allocations/';
   static const String userAttendanceCalendarApiEnd = 'users/attendance/';
-/*=======================================*/
+/*==================================================================================*/
   static const String importTicketDataEnd = 'api/import-tickets/';
   static const String amcEnd = 'api/amcs/';
   static const String leadEnd = 'api/leads/';
@@ -51,7 +52,8 @@ class ApiEnd{
 
 /*============================================================= History Apis ==============================================================*/
   static const String ticketHistoryViewEnd = 'api/ticket_history_view/';
-
+  static const String amcHistoryViewEnd = 'api/amc_history/';
+  static const String leaveHistoryViewEnd = 'users/leave_history/';
   /*=============================================================Status Counts Lead ==========================================================================*/
   static const String statusLeadsCountsEnd= 'api/leads/status_counts/';
   static const String ticketCountsEnd = 'api/tickets/ticket_count/';

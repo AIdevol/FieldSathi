@@ -66,7 +66,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
                     vGap(10),
                     _mainData(controller),
                     vGap(10),
-                    _dataTableViewScreen(amcIds),
+                    _dataTableViewScreen(context,controller,amcIds),
                   ],
                 ),
               )
@@ -534,7 +534,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
       ),
     );
   }
-  _dataTableViewScreen(amcIds) {
+  _dataTableViewScreen(BuildContext context,AMCScreenController controller, amcIds) {
     if(controller.amcPaginationData.isEmpty){
       return _buildEmptyState();
     }
@@ -556,7 +556,13 @@ class AMCViewScreen extends GetView<AMCScreenController> {
               DataColumn(label: Text(' ')),
               DataColumn(label: Text(' ')),
             ], rows: controller.amcPaginationData.map((amc) {
-              return DataRow(cells: [
+              return DataRow(
+                onSelectChanged: (selected){
+                  if(selected != null){
+                    showAmcHistoryData(context, controller,amc);
+                  }
+                },
+                  cells: [
                 DataCell(_ticketBoxIcons(amc.id.toString(), amc.amcName.toString())/*Text(amc.id.toString())*/),
                 DataCell(Text(amc.activationDate.toString()?? 'N/A')),
                 DataCell(Text(amc.customer?.customerName ?? 'N/A')),
@@ -576,47 +582,32 @@ class AMCViewScreen extends GetView<AMCScreenController> {
     );
   }
   Widget _buildPaginationControls(AMCScreenController controller) {
-    return Obx(() => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
+    return Obx(() {
+      final totalPages = controller.totalPages.value;
+      final currentPage = controller.currentPage.value;
+
+      return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // First Page Button
           IconButton(
-            icon: Icon(Icons.first_page),
-            onPressed: controller.currentPage.value > 1
-                ? () => controller.goToFirstPage()
+            icon: Icon(Icons.arrow_back_ios),
+            onPressed: currentPage > 1
+                ? () => controller.changePage(currentPage - 1)
                 : null,
           ),
-          // Previous Page Button
-          IconButton(
-            icon: Icon(Icons.chevron_left),
-            onPressed: controller.currentPage.value > 1
-                ? () => controller.previousPage()
-                : null,
-          ),
-          // Page Number Display
           Text(
-            'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+            'Page $currentPage of $totalPages',
             style: TextStyle(fontSize: 16),
           ),
-          // Next Page Button
           IconButton(
-            icon: Icon(Icons.chevron_right),
-            onPressed: controller.currentPage.value < controller.totalPages.value
-                ? () => controller.nextPage()
-                : null,
-          ),
-          // Last Page Button
-          IconButton(
-            icon: Icon(Icons.last_page),
-            onPressed: controller.currentPage.value < controller.totalPages.value
-                ? () => controller.goToLastPage()
+            icon: Icon(Icons.arrow_forward_ios),
+            onPressed: currentPage < totalPages
+                ? () => controller.changePage(currentPage + 1)
                 : null,
           ),
         ],
-      ),
-    ));
+      );
+    });
   }
 
   _viewDetailsButton(AMCScreenController controller, AmcResult amcData) {
@@ -1544,7 +1535,7 @@ void showServiceOccurancesDropdown(BuildContext context, AMCScreenController con
   // Insert the overlay
   Overlay.of(context).insert(overlayEntry);
 }
-void showReminderDropdown(BuildContext context, AMCScreenController controller) {
+void showReminderDropdown(BuildContext context, AMCScreenController controller, ) {
   // Get the render box of the context to position the dropdown
   final RenderBox renderBox = context.findRenderObject() as RenderBox;
   final Size textFieldSize = renderBox.size;
@@ -1623,4 +1614,168 @@ void showReminderDropdown(BuildContext context, AMCScreenController controller) 
 
   // Insert the overlay
   Overlay.of(context).insert(overlayEntry);
+}
+
+Future<void> showAmcHistoryData(BuildContext context, AMCScreenController controller,AmcResult amcData){
+  return showDialog(context: context, builder: (context){
+    return Dialog(
+      child: Container(
+        height: Get.height * 0.8,
+        width: Get.width*0.8,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+          ),
+        ),
+        child: Stack(
+          children: [
+            Column(children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
+                child:Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                  Text('${amcData.amcName}',style: MontserratStyles.montserratSemiBoldTextStyle(size: 20,color: Colors.black),),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      "${amcData.status}",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],) ,
+              ),
+              vGap(20),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  height: Get.height*0.1,
+                  // width: Get.height*0.4,
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        offset:Offset(0,1),
+                        color: Colors.grey.shade400,
+                        spreadRadius: 1
+                      )
+                    ]
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      vGap(20),
+                    Row(
+                      children: [
+                        Text('Created At:',style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: Colors.black),),
+                        vGap(5),
+                        Text('${amcData.createdAt}',style: MontserratStyles.montserratMediumTextStyle(size: 15, color: Colors.black),),
+                      ],
+                    ),
+                    vGap(5),
+                    Row(
+                      children: [
+                        Text('Created By:',style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: Colors.black),),
+                        vGap(5),
+                        Text('${amcData.createdBy}',style: MontserratStyles.montserratMediumTextStyle(size: 15, color: Colors.black),),
+                      ],
+                    )
+
+                  ],),
+                ),
+              ),
+              vGap(20),
+              Text(' Progress History',style: MontserratStyles.montserratSemiBoldTextStyle(size: 20, color: Colors.black),),
+              Divider(),
+             Obx((){
+               return controller.amcHistoryListData.isNotEmpty
+                   ? ListView.builder(
+                 shrinkWrap: true,
+                 physics: NeverScrollableScrollPhysics(),
+                 itemCount: controller.amcHistoryListData.length,
+                 itemBuilder: (context,index){
+                   final amcHistory = controller.amcHistoryListData[index];
+                   return Column(
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                     children: [
+                       ListTile(
+                         title: Text(
+                           "${amcHistory.actionBy}",
+                           style: MontserratStyles.montserratSemiBoldTextStyle(
+                               size: 16,
+                               color: Colors.black
+                           ),
+                         ),
+                         subtitle: Column(
+                           crossAxisAlignment: CrossAxisAlignment.start,
+                           children: [
+                             Text(
+                               amcHistory.changeTimestamp.toString(),
+                               style: TextStyle(color: Colors.grey),
+                             ),
+                             Text(
+                               amcHistory.actionMessage.toString(),
+                               style: TextStyle(color: Colors.blue),
+                             ),
+                             if (amcHistory.fieldChanges.isNotEmpty)
+                               Column(
+                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                 children: amcHistory.fieldChanges.map((change) =>
+                                     Text(
+                                       change,
+                                       style: TextStyle(color: Colors.green),
+                                     )
+                                 ).toList(),
+                               )
+                           ],
+                         ),
+                       ),
+                       Divider(),
+                     ],
+                   );
+                 },
+
+               ):
+               Center(
+                 child: Text(
+                   'No history data available',
+                   style: TextStyle(color: Colors.grey),
+                 ),
+               );
+             }),
+
+            ],),
+
+            Positioned(
+              bottom: 10,
+              right: 10,
+              child: _buildActionButton(
+                context,
+                'Okay',
+                Icons.cancel,
+                onTap: (){
+                  // controller.fetchTicketsApiCall();
+                  Get.back();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  });
 }

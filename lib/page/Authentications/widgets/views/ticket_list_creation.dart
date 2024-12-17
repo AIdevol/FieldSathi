@@ -14,8 +14,10 @@ import 'package:tms_sathi/response_models/expenses_response_model.dart';
 import 'package:tms_sathi/response_models/fsr_response_model.dart';
 import 'package:tms_sathi/response_models/services_all_response_model.dart';
 import 'package:tms_sathi/response_models/ticket_response_model.dart';
+import 'package:tms_sathi/response_models/user_response_model.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
+import '../../../../response_models/amcData_customerWise_response_model.dart';
 import '../../../../response_models/technician_response_model.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
@@ -108,27 +110,18 @@ class TicketListCreation extends GetView<TicketListCreationController> {
     return Column(
       children: [
         dropValueToShowCustomerName(context,controller),
-        // CustomTextField(
-        //   hintText: "Customer Details".tr,
-        //   textInputType: TextInputType.text,
-        //   labletext: "customer name".tr,
-        //   prefix: IconButton(
-        //     onPressed: () => _buildBottomsheet(context: context),
-        //     icon: const Icon(Icons.add, color: Colors.black),
-        //   ),
-        // ),
         SizedBox(height: 10),
         dropValueToShowProductName(context, controller),
-        // CustomTextField(
-        //   hintText: "product name".tr,
-        //   textInputType: TextInputType.text,
-        //   labletext: "product name".tr,
-        //   prefix: IconButton(
-        //     onPressed: () {},
-        //     icon: const Icon(Icons.arrow_drop_down_sharp, color: Colors.black, size: 30),
-        //   ),
-        // ),
+        vGap(10),
+        amcValueToShowProductName(context,controller),
+         SizedBox(height: 10),
+        CustomTextField(
+          controller: controller.modelNoController,
+          hintText: "Model no".tr,
+          textInputType: TextInputType.text,
+          labletext: "Model no".tr,
 
+        ),
       ],
     );
   }
@@ -164,14 +157,7 @@ class TicketListCreation extends GetView<TicketListCreationController> {
         ),
         const SizedBox(height: 10),
         dropValueToShowSelectServiceName(context, controller),
-        const SizedBox(height: 10),
-        CustomTextField(
-          controller: controller.modelNoController,
-          hintText: "model no".tr,
-          textInputType: TextInputType.text,
-          labletext: "model no".tr,
 
-        ),
         const SizedBox(height: 20),
 
       ],
@@ -228,7 +214,7 @@ class TicketListCreation extends GetView<TicketListCreationController> {
   }
 
   Widget _addTechnician({required BuildContext context, required TicketListCreationController controller}) {
-    return dropValuetoshowtechnicianName(context, controller);
+    return dropValueToShowTechnicianName(context, controller);
   }
 
   // Now let's update the button section in the main widget
@@ -392,16 +378,74 @@ class TicketListCreation extends GetView<TicketListCreationController> {
 
   Widget _dobView({required BuildContext context}) {
     final controller = Get.put(TicketListCreationController());
-    return CustomTextField(
-      hintText: "dd-month-yyyy".tr,
-      controller: controller.dateController,
-      textInputType: TextInputType.datetime,
-      focusNode: controller.focusNode,
-      labletext: "Date".tr,
-      onTap: (){controller.selectDate(context);},
-      prefix:Icon(Icons.calendar_month, color: Colors.black)
+    return Row(
+      children: [
+        Expanded(
+          child: CustomTextField(
+              hintText: "dd-month-yyyy".tr,
+              controller: controller.dateController,
+              textInputType: TextInputType.datetime,
+              focusNode: controller.focusNode,
+              labletext: "Date".tr,
+              onTap: () {
+                controller.selectDate(context);
+              },
+              prefix: const Icon(Icons.calendar_month, color: Colors.black)
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: CustomTextField(
+              hintText: "hh:mm".tr,
+              controller: controller.timeController, // You'll need to add this controller
+              textInputType: TextInputType.datetime,
+              labletext: "Time".tr,
+              onTap: () {
+                _selectTime(context, controller);
+              },
+              prefix: const Icon(Icons.access_time, color: Colors.black)
+          ),
+        ),
+      ],
     );
   }
+
+
+  Future<void> _selectTime(BuildContext context, TicketListCreationController controller) async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedTime != null) {
+      // Format the time as hh:mm:ss.uuuuuu
+      final now = DateTime.now();
+      final DateTime fullDateTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+
+      // Format as hh:mm:ss.uuuuuu
+      final formattedTime = "${fullDateTime.hour.toString().padLeft(2, '0')}:"
+          "${fullDateTime.minute.toString().padLeft(2, '0')}:"
+          "${fullDateTime.second.toString().padLeft(2, '0')}"
+          ".${fullDateTime.microsecond.toString().padLeft(6, '0')}";
+
+      controller.timeController.text = formattedTime;
+    }
+  }
+
+
+
 
   Widget _buildButtonView(BuildContext context) {
     return Row(
@@ -459,35 +503,59 @@ class TicketListCreation extends GetView<TicketListCreationController> {
   }
 }
 
-Widget dropValuetoshowtechnicianName(BuildContext context, TicketListCreationController controller) {
+Widget dropValueToShowTechnicianName(BuildContext context, TicketListCreationController controller) {
   return Obx(() => DropdownButtonHideUnderline(
-    child: DropdownMenu<TechnicianData>(
-      leadingIcon: IconButton(onPressed: (){_editWidgetOfAgentsDialogValue(context, controller);}, icon: Icon(Icons.add)),
+    child: DropdownMenu<TMSResult>(
+      leadingIcon: IconButton(
+          onPressed: () => _editWidgetOfAgentsDialogValue(context, controller),
+          icon: Icon(Icons.add)
+      ),
       inputDecorationTheme: InputDecorationTheme(
         focusColor: appColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
           borderSide: BorderSide(color: Colors.grey, width: 1),
-        ),),
-      width: MediaQuery.of(context).size.width - 40, // Adjust width as needed
+        ),
+      ),
+      width: MediaQuery.of(context).size.width - 40,
       initialSelection: null,
       requestFocusOnTap: true,
-      label: Text('Assign To'.tr, style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color:Colors.grey),),
-      onSelected: (TechnicianData? selectedTechnician) {
+      label: Text(
+        'Assign To'.tr,
+        style: MontserratStyles.montserratSemiBoldTextStyle(
+            size: 15,
+            color: Colors.grey
+        ),
+      ),
+      onSelected: (TMSResult? selectedTechnician) {
         if (selectedTechnician != null) {
           controller.assignToController.text =
-          selectedTechnician.firstName! + selectedTechnician.lastName.toString();
+              "${selectedTechnician.firstName} ${selectedTechnician.lastName ?? ''}".trim();
           controller.selectedTechnicianId.value = selectedTechnician.id ?? 0;
         }
       },
-      dropdownMenuEntries: controller.filteredTechnicians
-          .map<DropdownMenuEntry<TechnicianData>>(
-              (TechnicianData technician) {
-            return DropdownMenuEntry<TechnicianData>(
+      dropdownMenuEntries: controller.allWorkerData
+          .map<DropdownMenuEntry<TMSResult>>(
+              (TMSResult technician) {
+            return DropdownMenuEntry<TMSResult>(
               value: technician,
-              label: "${technician.firstName! + technician.lastName.toString()}" ?? 'Unknown Technician',
+              label: "${technician.firstName} ${technician.lastName ?? ''}".trim() ?? 'Unknown Technician',
             );
           }).toList(),
+      // Add these properties to improve scrollability and visibility
+      menuHeight: 300, // Set a maximum height for the dropdown
+      menuStyle: MenuStyle(
+        maximumSize: MaterialStatePropertyAll(Size(
+            MediaQuery.of(context).size.width - 40,
+            300 // Maximum height of 300 pixels
+        )),
+        backgroundColor: MaterialStatePropertyAll(Colors.white),
+        shape: MaterialStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            )
+        ),
+      ),
     ),
   ));
 }
@@ -515,11 +583,13 @@ Widget dropValueToShowCustomerName(BuildContext context, TicketListCreationContr
       onSelected: (CustomerData? customerData) {
         if (customerData != null) {
           controller.customerNameController.text =
-          "${customerData.firstName ?? ''} ${customerData.lastName ?? ''}";
+          "${customerData.customerName?? ''}";
           controller.selectedCustomerId.value = customerData.id ?? 0;
+          controller.hitGetAmcDataAccordingtoCustomerData(SelectedCustomerId:"${customerData.id}");
+          print('Selected Customer ID: ${controller.selectedCustomerId.value}');
         }
       },
-      dropdownMenuEntries: controller.customerdefineData
+      dropdownMenuEntries: controller.customerListData
           .map<DropdownMenuEntry<CustomerData>>(
               (CustomerData customer) {
             return DropdownMenuEntry<CustomerData>(
@@ -527,13 +597,26 @@ Widget dropValueToShowCustomerName(BuildContext context, TicketListCreationContr
               label: "${customer.customerName ?? ''}" ?? 'Unknown Customer',
             );
           }).toList(),
+      menuHeight: 300, // Set a maximum height for the dropdown
+      menuStyle: MenuStyle(
+        maximumSize: MaterialStatePropertyAll(Size(
+            MediaQuery.of(context).size.width - 40,
+            300 // Maximum height of 300 pixels
+        )),
+        backgroundColor: MaterialStatePropertyAll(Colors.white),
+        shape: MaterialStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            )
+        ),
+      ),
     ),
   ));
 }
 
 Widget dropValueToShowProductName(BuildContext context, TicketListCreationController controller) {
   return Obx(() => DropdownButtonHideUnderline(
-    child: DropdownMenu<TicketResult>(
+    child: DropdownMenu<CustomerData>(
       // leadingIcon:/* IconButton(
       //     onPressed: () {
       //       _editWidgetOfAgentsDialogValue(context, controller);
@@ -554,18 +637,57 @@ Widget dropValueToShowProductName(BuildContext context, TicketListCreationContro
         style: MontserratStyles.montserratSemiBoldTextStyle(
             size: 15, color: Colors.grey),
       ),
-      onSelected: (TicketResult? ticket) {
+      onSelected: (CustomerData? ticket) {
         if (ticket != null) {
-          controller.productNameController.text = ticket.brand ?? 'Unknown Brand';
-          controller.selectedProductId.value = ticket.id ?? 0;
+          String allBrands = ticket.brandNames.join(',');
+          controller.productNameController.text = allBrands/*.isNotEmpty?"All Brands" :'Unknown Brand'*/;
+          print("all brands: $allBrands");
         }
       },
-      dropdownMenuEntries: controller.ticketResult
-          .map<DropdownMenuEntry<TicketResult>>(
-              (TicketResult ticket) {
-            return DropdownMenuEntry<TicketResult>(
+      dropdownMenuEntries: controller.customerListData
+          .map<DropdownMenuEntry<CustomerData>>(
+              (CustomerData ticket) {
+                String allBrands = ticket.brandNames.join(',');
+            return DropdownMenuEntry<CustomerData>(
               value: ticket,
-              label: ticket.brand ?? 'Unknown Brand',
+              label: allBrands/*.isNotEmpty?"All Brands" :'Unknown Brand'*/,
+            );
+          }).toList(),
+    ),
+  ));
+}
+
+Widget amcValueToShowProductName(BuildContext context, TicketListCreationController controller) {
+  return Obx(() => DropdownButtonHideUnderline(
+    child: DropdownMenu<AmcDataCustomerWiseResult>(
+      inputDecorationTheme: InputDecorationTheme(
+        focusColor: appColor,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide(color: Colors.grey, width: 1),
+        ),
+      ),
+      width: MediaQuery.of(context).size.width - 40,
+      initialSelection: null,
+      requestFocusOnTap: true,
+      label: Text(
+        'AMC Name'.tr,
+        style: MontserratStyles.montserratSemiBoldTextStyle(
+            size: 15, color: Colors.grey),
+      ),
+      onSelected: (AmcDataCustomerWiseResult? ticket) {
+        if (ticket != null) {
+          controller.amcController.text = ticket.amcName ?? 'Unknown Brand';
+          controller.selectedAmcId.value = ticket.id ?? 0;
+        }
+      },
+      // Make sure to use the correct list name
+      dropdownMenuEntries: controller.AmcDataCustomerWiseList
+          .map<DropdownMenuEntry<AmcDataCustomerWiseResult>>(
+              (AmcDataCustomerWiseResult ticket) {
+            return DropdownMenuEntry<AmcDataCustomerWiseResult>(
+              value: ticket,
+              label: ticket.amcName ?? 'Unknown Brand',
             );
           }).toList(),
     ),

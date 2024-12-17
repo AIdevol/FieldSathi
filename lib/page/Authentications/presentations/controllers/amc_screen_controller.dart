@@ -7,7 +7,7 @@ import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/response_models/amc_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
-class AMCScreenController extends GetxController {
+class   AMCScreenController extends GetxController {
   int? selectedNumberOfService;
   final List<String> excelcoloumndata = [
     "AMC Name",
@@ -89,6 +89,7 @@ final String defaultsrviceOccuranceList = "Monthly";
   RxList<AmcResult> amcResultData = <AmcResult>[].obs;
   RxList<AmcResult> filteredAmcData = <AmcResult>[].obs;
   RxList<AmcResult> amcPaginationData =<AmcResult>[].obs;
+  RxList<AmcHistoryViewResponseModel> amcHistoryListData =<AmcHistoryViewResponseModel>[].obs;
 
   void initializeNumberOfService() {
     selectedNumberOfService = 1;
@@ -130,10 +131,12 @@ final String defaultsrviceOccuranceList = "Monthly";
     super.onInit();
     hitGetAmcDetailsApiCall();
     hitAmcCountApiCall();
+    updatePaginatedTechnicians();
     focusNode.addListener(() {
       isFocused.value = focusNode.hasFocus;
     });
     searchController.addListener(onSearchChanged);
+    hitGetAmcHistoryResponseModel(id: '167');
   }
 
   @override
@@ -170,21 +173,24 @@ final String defaultsrviceOccuranceList = "Monthly";
     super.onClose();
   }
 
-  void calculateTotalPages() {
-    totalPages.value = (filteredAmcData.length / itemsPerPage).ceil();
-    if (currentPage.value > totalPages.value) {
-      currentPage.value = totalPages.value;
-    }
-    if (currentPage.value < 1) {
-      currentPage.value = 1;
+// Method to calculate total pages
+  void changePage(int page) {
+    if (page >= 1 && page <= totalPages.value) {
+      currentPage.value = page;
+      updatePaginatedTechnicians();
     }
   }
 
+  // Update the pagination method to handle edge cases
   void updatePaginatedTechnicians() {
     List<AmcResult> sourceList = filteredAmcData.isEmpty
         ? amcResultData
         : filteredAmcData;
+
+    // Recalculate total pages
     totalPages.value = (sourceList.length / itemsPerPage).ceil();
+
+    // Ensure current page is within valid range
     if (currentPage.value > totalPages.value) {
       currentPage.value = totalPages.value;
     }
@@ -192,9 +198,14 @@ final String defaultsrviceOccuranceList = "Monthly";
       currentPage.value = 1;
     }
 
+    // Calculate start and end indices for the current page
     int startIndex = (currentPage.value - 1) * itemsPerPage;
     int endIndex = startIndex + itemsPerPage;
+
+    // Ensure end index doesn't exceed list length
     endIndex = endIndex > sourceList.length ? sourceList.length : endIndex;
+
+    // Update pagination data
     amcPaginationData.value = sourceList.sublist(
         startIndex,
         endIndex
@@ -203,33 +214,7 @@ final String defaultsrviceOccuranceList = "Monthly";
     update();
   }
 
-  void nextPage() {
-    if (currentPage.value < totalPages.value) {
-      currentPage.value++;
-      updatePaginatedTechnicians();
-      print("next page tapped value: ${currentPage.value}");
-    }
-  }
-
-  void previousPage() {
-    if (currentPage.value > 1) {
-      currentPage.value--;
-      updatePaginatedTechnicians();
-      print("previous page tapped value: ${currentPage.value}");
-
-    }
-  }
-
-  void goToFirstPage() {
-    currentPage.value = 1;
-    updatePaginatedTechnicians();
-  }
-
-  void goToLastPage() {
-    currentPage.value = totalPages.value;
-    updatePaginatedTechnicians();
-  }
-
+  // Modify onSearchChanged to reset pagination
   void onSearchChanged() {
     final query = searchController.text.toLowerCase();
     if (query.isEmpty) {
@@ -241,11 +226,13 @@ final String defaultsrviceOccuranceList = "Monthly";
           (amc.id.toString().contains(query))
       ));
     }
+
+    // Reset to first page when search is performed
     currentPage.value = 1;
-    calculateTotalPages();
     updatePaginatedTechnicians();
     update();
   }
+
   void hitGetAmcDetailsApiCall() async {
     var amcParameter={
       "page_size":"all"
@@ -263,7 +250,8 @@ final String defaultsrviceOccuranceList = "Monthly";
       print("amc id dekh le bhai= ${storage.read(amcId)}");
       filteredAmcData.assignAll(amcData.results);
       // _calculateAmcCounts();
-      calculateTotalPages();
+      currentPage.value = 1;
+      updatePaginatedTechnicians();
       toast("AMC successfully Fetched");
       update();
     } catch (error) {
@@ -377,6 +365,21 @@ void hitUpdateApiCall(String id){
       toast("AMC Updated Successfully");
       customLoader.hide();
       Get.back();
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
+      customLoader.hide();
+    });
+}
+
+void hitGetAmcHistoryResponseModel({required String id}){
+    isLoading.value = true;
+    // customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().getAmcHistoryData(id: id).then((value){
+      amcHistoryListData.assignAll(value);
+      toast('AMC History Response Data');
+      customLoader.hide();
       update();
     }).onError((error,stackError){
       toast(error.toString());

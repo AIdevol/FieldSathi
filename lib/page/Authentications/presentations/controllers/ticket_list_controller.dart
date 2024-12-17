@@ -33,7 +33,7 @@ class TicketListController extends GetxController {
   // ].obs;
 
   RxList<String> filterStatusValue = [
-    "Select By",
+    "All Status",
     "InActive",
     "Accepted",
     "Rejected",
@@ -41,7 +41,7 @@ class TicketListController extends GetxController {
     "Completed",
     "On-Hold"
   ].obs;
-  RxString selectedFilter = "Select By".obs;
+  RxString selectedFilter = "All Status".obs;
   RxList<TicketResult> ticketResult = <TicketResult>[].obs;
   RxList<TicketResult> filteredtickets = <TicketResult>[].obs;
   RxList<TicketResult> ticketPaginationsData = <TicketResult>[].obs;
@@ -444,7 +444,7 @@ void onClose(){
 
   void hitGetTicketHistoryApiCall(String id){
     isLoading.value = true;
-    customLoader.show();
+    // customLoader.show();
     FocusManager.instance.primaryFocus!.unfocus();
     Get.find<AuthenticationApiService>().getTicketHistoryData(id: id).then((value){
       ticketHistoryData.addAll(value);
@@ -463,6 +463,21 @@ void onClose(){
 
   Future<void> hitRefreshAllTicketData()async{
     fetchTicketsApiCall();
+  }
+
+  void hitDeleteTicketApiCall(String id){
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().deleteticketDetailsApiCall(id: id).then((value){
+      toast(value.message.toString());
+      customLoader.hide();
+      fetchTicketsApiCall();
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
+      customLoader.hide();
+    });
   }
 }
   //   Future<void> exportToExcel() async {

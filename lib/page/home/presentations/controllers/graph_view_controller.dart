@@ -21,6 +21,7 @@ class GraphViewController extends GetxController {
   final RxInt rejectedTicketsCount = 0.obs;
   final RxInt inactiveTicketsCount = 0.obs;
   final RxInt onHoldTicketsCount = 0.obs;
+  final RxInt acceptedTicketsCount = 0.obs;
 
   @override
   void onInit() {
@@ -119,6 +120,7 @@ class GraphViewController extends GetxController {
       inactiveTicketsCount.value = value.inactive!;
       onHoldTicketsCount.value = value.onHold!;
       rejectedTicketsCount.value = value.rejected!;
+      acceptedTicketsCount.value =value.accepted!;
     }).onError((error, stackError){
       toast(error.toString());
       customLoader.hide();

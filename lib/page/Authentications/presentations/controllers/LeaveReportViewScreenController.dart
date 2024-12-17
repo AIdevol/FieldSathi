@@ -7,6 +7,7 @@ import 'package:tms_sathi/response_models/leaves_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../response_models/leaves_history_response_model.dart';
 import '../../../../response_models/user_response_model.dart';
 
 class LeaveReportViewScreenController extends GetxController {
@@ -38,6 +39,7 @@ class LeaveReportViewScreenController extends GetxController {
   RxList<LeaveResult> leavesData = <LeaveResult>[].obs;
   RxList<LeaveResult> filteredLeaves = <LeaveResult>[].obs;
   RxList<LeaveResult> leavesPaginationsData = <LeaveResult>[].obs;
+  RxList<LeavesHistoryViewResponseModel>leaveHistoryData =<LeavesHistoryViewResponseModel>[].obs;
 
   RxString remainingCasualLeaves = ''.obs;
   RxString remainingSickLeaves = ''.obs;
@@ -57,6 +59,7 @@ class LeaveReportViewScreenController extends GetxController {
     super.onInit();
     hituserDetailsApiCall();
     hitLeavesApiCall();
+    hitLeaveReportHistoryApiCall(id: '29');
   }
 
   @override
@@ -320,5 +323,20 @@ void updateSelectedStatus(String? newValue){
 
  Future<void> hitRefreshApiCall()async{
    hitLeavesApiCall();
+ }
+
+ void hitLeaveReportHistoryApiCall({required String id}){
+    isLoading.value = true;
+    // customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().getLeaveHistoryData(id: id).then((value){
+      leaveHistoryData.assignAll(value);
+      toast("Leave history fetched successfully");
+      customLoader.hide();
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
+      customLoader.hide();
+    });
  }
 }
