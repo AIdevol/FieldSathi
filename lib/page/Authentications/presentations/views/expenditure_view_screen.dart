@@ -227,11 +227,22 @@ Widget _listViewContainerElement(ExpenditureScreenController controller, index) 
                   ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                color: appColor,
-                size: 24,
-              ),
+              Material(
+                color: appColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+                // elevation: 2,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10,vertical: 2),
+                  decoration: BoxDecoration(
+                    color: appColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(technicianData.id.toString()),
+                  ),
+                ),
+              )
             ],
           ),
         ),
@@ -259,7 +270,7 @@ class ExpenseTableView extends GetView<ExpenditureScreenController> {
           backgroundColor: CupertinoColors.white,
           appBar: AppBar(
             title: Text(
-              'Expenditure Details',
+              'Expenditure',
               style: MontserratStyles.montserratBoldTextStyle(
                   color: blackColor,
                   size: 15
@@ -331,10 +342,12 @@ Widget _buildExpenseTable(ExpenditureScreenController controller) {
         ),
         columns: [
           DataColumn(label: Text('Expense ID', style: _headerTextStyle())),
+          DataColumn(label: Text('Ticket ID',style: _headerTextStyle(),)),
           DataColumn(label: Text('Date', style: _headerTextStyle())),
           DataColumn(label: Text('Expense Type', style: _headerTextStyle())),
           DataColumn(label: Text('From', style: _headerTextStyle())),
           DataColumn(label: Text('To', style: _headerTextStyle())),
+          DataColumn(label: Text('Expense Date', style: _headerTextStyle())),
           DataColumn(label: Text('Amount', style: _headerTextStyle())),
           DataColumn(label: Text('Approved Amount', style: _headerTextStyle())),
           DataColumn(label: Text('Description', style: _headerTextStyle())),
@@ -354,10 +367,12 @@ List<DataRow> _buildExpenseRows(ExpenditureScreenController controller) {
   return controller.expenseResult.map((expense) {
     return _createExpenseRow(
         expenseId: expense.id.toString(),
+        ticketId:expense.ticket!.id.toString(),
         date: expense.date.toString(),
         expenseType: expense.expenseType.toString(),
-        from: expense.fromField.toString(),
+        from: expense!.fromField.toString(),
         to: expense.to.toString(),
+        expenseDate: expense.expenseDate.toString(),
         amount: expense.amount.toString(),
         approvedAmount: expense.approvedAmount.toString(),
         description: expense.description.toString(),
@@ -371,10 +386,12 @@ List<DataRow> _buildExpenseRows(ExpenditureScreenController controller) {
 
 DataRow _createExpenseRow({
   required String expenseId,
+  required String ticketId,
   required String date,
   required String expenseType,
   required String from,
   required String to,
+  required String expenseDate,
   required String amount,
   required String approvedAmount,
   required String description,
@@ -385,10 +402,12 @@ DataRow _createExpenseRow({
 }) {
   return DataRow(cells: [
     DataCell(Text(expenseId, style: _cellTextStyle())),
+    DataCell(Text(ticketId, style: _cellTextStyle(),)),
     DataCell(Text(date, style: _cellTextStyle())),
     DataCell(Text(expenseType, style: _cellTextStyle())),
     DataCell(Text(from, style: _cellTextStyle())),
     DataCell(Text(to, style: _cellTextStyle())),
+    DataCell(Text(expenseDate, style: _cellTextStyle())),
     DataCell(Text('₹$amount', style: _cellTextStyle())),
     DataCell(Text('₹$approvedAmount', style: _cellTextStyle())),
     DataCell(Text(description, style: _cellTextStyle())),

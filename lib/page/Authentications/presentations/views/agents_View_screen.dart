@@ -8,541 +8,845 @@ import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/constans/string_const.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/AgentsViewScreenController.dart';
-import 'package:tms_sathi/page/Authentications/presentations/controllers/amc_screen_controller.dart';
-import 'package:tms_sathi/page/Authentications/widgets/views/agents_list_creation.dart';
 import 'package:tms_sathi/utilities/common_textFields.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
 import '../../../../response_models/super_user_response_model.dart';
+import 'package:shimmer/shimmer.dart';
+
+import '../../widgets/views/agents_list_creation.dart';
+
 
 class AgentsViewScreen extends GetView<AgentsViewScreenController> {
   @override
   Widget build(BuildContext context) {
-    return MyAnnotatedRegion(
-      child: SafeArea(
-        child: GetBuilder<AgentsViewScreenController>(
-          builder: (controller) =>
-              Scaffold(
-                  bottomNavigationBar: _buildPaginationControls(controller),
-                  backgroundColor: CupertinoColors.white,
-                  appBar: AppBar(
-                    leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
-                    backgroundColor: appColor,
-                    title: Text(
-                      'Executives',
-                      style: MontserratStyles.montserratBoldTextStyle(
-                          color: blackColor, size: 15),
-                    ),
-                    actions: [
-                      IconButton(
-                        onPressed: () {
-                          Get.to(() => AgentsListCreation());
-                        },
-                        icon: Icon(FeatherIcons.plus),
-                      ).paddingOnly(left: 20.0)
-                    ],
-                  ),
-                  body: RefreshIndicator(
-                    onRefresh: ()=>controller.hitRefreshApiData(),
-                    child: ListView(
-                      children: [
-                        _viewTopBar(context,controller),
-                        SizedBox(height: 20),
-                        _dataTableViewScreen(controller),
-                      ],
-                    ),
-                  )
-              ),
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      appBar: _buildAppBar(),
+      body: GetBuilder<AgentsViewScreenController>(
+        builder: (controller) => RefreshIndicator(
+          onRefresh: () => controller.hitRefreshApiData(),
+          child: _buildBody(context,controller),
         ),
       ),
+      bottomNavigationBar: GetBuilder<AgentsViewScreenController>(
+        builder: (controller) => _buildPaginationBar(controller),
+      ),
+      floatingActionButton: _buildFloatingActionButton(),
     );
   }
 
-  Widget _viewTopBar(BuildContext context, AgentsViewScreenController controller) {
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      elevation: 0,
+      backgroundColor: appColor,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back_ios, color: Colors.black87),
+        onPressed: () => Get.back(),
+      ),
+      title: Text(
+        'Executive',
+        style: MontserratStyles.montserratBoldTextStyle(
+          color: Colors.black87,
+          size: 20
+        ),
+      ),
+      actions: [
+        // _buildAddButton(),
+      ],
+    );
+  }
+
+  Widget _buildBody(BuildContext context,AgentsViewScreenController controller) {
+    return Column(
+      children: [
+        _buildSearchBar(controller),
+        _buildActionButtons(context,controller),
+        Expanded(
+          child: controller.isLoading.value
+              ? _buildDataTable(controller)
+              : _buildLoadingShimmer(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchBar(AgentsViewScreenController controller) {
     return Container(
-      height: Get.height * 0.07,
-      width: Get.width,
+      margin: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: whiteColor,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 5),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, 4),
           ),
         ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Expanded(child: _buildSearchField(controller)),
-          hGap(10),
-          ElevatedButton(
-            onPressed: () => _showImportModelView(context, controller),
-            child: Text('Import',
-                style: MontserratStyles.montserratBoldTextStyle(
-                    color: whiteColor, size: 13)),
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(appColor),
-              foregroundColor: MaterialStateProperty.all(Colors.white),
-              padding: MaterialStateProperty.all(
-                  EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
-              elevation: MaterialStateProperty.all(5),
-              shape: MaterialStateProperty.all(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              shadowColor: MaterialStateProperty.all(
-                  Colors.black.withOpacity(0.5)),
-            ),
-          ),
-          hGap(10),
-          ElevatedButton(
-            onPressed: ()=>_downLoadExportModelView(context, controller),
-            child: Text('Export',
-                style: MontserratStyles.montserratBoldTextStyle(
-                    color: whiteColor, size: 13)),
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(appColor),
-              foregroundColor: MaterialStateProperty.all(Colors.white),
-              padding: MaterialStateProperty.all(
-                  EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
-              elevation: MaterialStateProperty.all(5),
-              shape: MaterialStateProperty.all(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              shadowColor: MaterialStateProperty.all(
-                  Colors.black.withOpacity(0.5)),
-            ),
-          ),
-          hGap(10),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchField(AgentsViewScreenController controller) {
-    return Container(
-      height: Get.height * 0.05,
-      margin: EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: whiteColor,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          width: 1,
-          color: Colors.grey,
-        ),
       ),
       child: TextField(
         controller: controller.searchController,
         decoration: InputDecoration(
-          hintText: "Search by name, email, or phone",
-          hintStyle: MontserratStyles.montserratSemiBoldTextStyle(
-            color: Colors.grey,
-          ),
+          hintText: "Search executives...",
           prefixIcon: Icon(FeatherIcons.search, color: Colors.grey),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 10),
+          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         ),
-        style: MontserratStyles.montserratSemiBoldTextStyle(
-          color: Colors.black,
-        ),
+        // onChanged: (value) => controller.filterData(value),
       ),
     );
   }
 
-  _buildEmptyState() {
-    return Center(
-      child: Column(
-        // mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildActionButtons(BuildContext context, AgentsViewScreenController controller) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
         children: [
-          Image.asset(
-            nullVisualImage,
-            width: 300,
-            height: 300,
+          Expanded(
+            child: _buildActionButton(
+              icon: FeatherIcons.upload,
+              label: 'Import',
+              onPressed: ()=> _showImportModelView(context,controller),
+              color: Colors.blue,
+            ),
           ),
-          Text(
-            'No services found',
-            style: MontserratStyles.montserratNormalTextStyle(
-              // size: 18,
-              color: blackColor,
+          SizedBox(width: 12),
+          Expanded(
+            child: _buildActionButton(
+              icon: FeatherIcons.download,
+              label: 'Export',
+              onPressed: () => _downLoadExportModelView(context,controller),
+              color: Colors.green,
             ),
           ),
         ],
       ),
     );
   }
-  Widget _dataTableViewScreen(AgentsViewScreenController controller) {
-    if(controller.agentsPaginationsData.isEmpty){
-      return _buildEmptyState();
-    }
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Obx(() =>
-          DataTable(
-            columns: [
-              DataColumn(label: Text('ID')),
-              DataColumn(label: Text('Profile')),
-              DataColumn(label: Text('Name')),
-              DataColumn(label: Text('Email')),
-              DataColumn(label: Text('Contact Number')),
-              DataColumn(label: Text('Date of joining')),
-              DataColumn(label: Text('Status')),
-              DataColumn(label: Text('')),
-            ],
-            rows: controller.agentsPaginationsData.map((resultsData) {
-              return DataRow(
-                  cells: [
-                    DataCell(
-                        _ticketBoxIcons(resultsData.id.toString() ?? 'N/A')),
-                    DataCell(CircleAvatar(
-                      backgroundImage: resultsData.profileImage != null
-                          ? NetworkImage(resultsData.profileImage!)
-                          : AssetImage(userImageIcon) as ImageProvider,
-                    )),
-                    DataCell(Text('${resultsData.firstName ?? ''} ${resultsData
-                        .lastName ?? ''}'.trim())),
-                    DataCell(Text(resultsData.email ?? 'N/A')),
-                    DataCell(Text(resultsData.phoneNumber ?? 'N/A')),
-                    DataCell(Text(_formatDate(resultsData.dateJoined))),
-                    DataCell(_buildStatusIndicator(resultsData.isActive)),
-                    DataCell(_dropDownValueViews(
-                        controller, resultsData.id.toString() ?? '',
-                        resultsData)),
-                  ],
-                  // onSelectChanged: (selected) {
-                  //   if (selected == true) {
-                  //     _editWidgetOfAgentsDialogValue(
-                  //         controller, Get.context!,
-                  //         resultsData.id.toString() ?? '',
-                  //         resultsData);
-                  //   }
-                  // }
-              );
-            }).toList(),
-          )),
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    required Color color,
+  }) {
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 200),
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon, color: Colors.white),
+        label: Text(
+          label,
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          padding: EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
     );
   }
-  Widget _buildPaginationControls(AgentsViewScreenController controller) {
-    return Obx(() => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+
+  Widget _buildDataTable(AgentsViewScreenController controller) {
+    if (controller.agentsPaginationsData.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return Card(
+      margin: EdgeInsets.all(16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          headingRowColor: MaterialStateProperty.all(Colors.grey[50]),
+          columnSpacing: 24,
+          horizontalMargin: 24,
+          columns: _buildDataColumns(),
+          rows: _buildDataRows(controller),
+        ),
+      ),
+    );
+  }
+
+  List<DataColumn> _buildDataColumns() {
+    final columns = [
+      'ID',
+      'Profile',
+      'Name',
+      'Email',
+      'Phone No',
+      'Joining Date',
+      'Leaves',
+      'Check-In Time',
+      'Check-Out Time',
+      'Status',
+      'Actions'
+    ];
+
+    return columns.map((column) => DataColumn(
+      label: Text(
+        column,
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+    )).toList();
+  }
+
+  List<DataRow> _buildDataRows(AgentsViewScreenController controller) {
+    return controller.agentsPaginationsData.map((agent) {
+      return DataRow(
+        cells: [
+          DataCell(_buildIdBadge(agent.empId.toString())),
+          DataCell(_buildProfileAvatar(agent.profileImage)),
+          DataCell(_buildNameCell(agent)),
+          DataCell(_buildEmailCell(agent.email)),
+          DataCell(_buildContactCell(agent.phoneNumber)),
+          DataCell(_buildDateCell(agent.dateJoined)),
+          DataCell(_buildLeavesCell(agent)),
+          DataCell(_buildcCheckInAndCheckOutCell(agent)),
+          DataCell(_buildcCheckOutAndCheckOutCell(agent)),
+          DataCell(_buildStatusCell(agent,agent.isActive)),
+          DataCell(_buildActionsCell(controller, agent)),
+        ],
+      );
+    }).toList();
+  }
+
+  Widget _buildIdBadge(String id) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        '$id',
+        style: TextStyle(
+          color: Colors.blue,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileAvatar(String? imageUrl) {
+    return CircleAvatar(
+      radius: 20,
+      backgroundImage: imageUrl != null
+          ? NetworkImage(imageUrl)
+          : AssetImage(userImageIcon) as ImageProvider,
+    );
+  }
+
+  Widget _buildNameCell(dynamic agent) {
+    return Text(
+      '${agent.firstName} ${agent.lastName}',
+      style: TextStyle(fontWeight: FontWeight.w500),
+    );
+  }
+
+  Widget _buildEmailCell(String? email) {
+    return Text(email ?? 'N/A');
+  }
+
+  Widget _buildContactCell(String? phone) {
+    return Text(phone ?? 'N/A');
+  }
+
+  Widget _buildDateCell(dynamic date) {
+    return Text(_formatDate(date));
+  }
+
+  Widget _buildLeavesCell(dynamic agent) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'Casual: ${agent.allocatedCasualLeave ?? 0}',
+          style: TextStyle(fontSize: 12),
+        ),
+        Text(
+          'Sick: ${agent.allocatedSickLeave ?? 0}',
+          style: TextStyle(fontSize: 12),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildcCheckInAndCheckOutCell(Result agent) {
+    return  Text(
+      '${agent.todayAttendance.map((f)=>f.punchIn)?? 0}',
+      style: TextStyle(fontSize: 12),
+    );
+  }
+  Widget _buildcCheckOutAndCheckOutCell(Result agent) {
+    return  Text(
+      '${agent.todayAttendance.map((f)=>f.punchOut)?? 0}',
+      style: TextStyle(fontSize: 12),
+    );
+  }
+
+  Widget _buildStatusCell(Result agent,bool? isActive) {
+    return Column(
+      children: [
+        Text(agent.todayAttendance.map((f)=>f.status).toString()),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: isActive == true
+                ? Colors.green.withOpacity(0.1)
+                : Colors.red.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isActive == true ? Colors.green : Colors.red,
+                ),
+              ),
+              SizedBox(width: 8),
+              Text(
+                isActive == true ? 'Active' : 'Inactive',
+                style: TextStyle(
+                  color: isActive == true ? Colors.green : Colors.red,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionsCell(AgentsViewScreenController controller, dynamic agent) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(FeatherIcons.edit2, size: 20),
+          onPressed: () => _showEditDialog(controller, agent),
+          color: Colors.blue,
+        ),
+        IconButton(
+          icon: Icon(FeatherIcons.trash2, size: 20),
+          onPressed: ()=>_showDeleteConfirmation(controller, agent),
+          color: Colors.red,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaginationBar(AgentsViewScreenController controller) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, -4),
+          ),
+        ],
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // First Page Button
-          IconButton(
-            icon: Icon(Icons.first_page),
+          _buildPaginationButton(
+            icon: Icons.first_page,
             onPressed: controller.currentPage.value > 1
                 ? () => controller.goToFirstPage()
                 : null,
           ),
-          // Previous Page Button
-          IconButton(
-            icon: Icon(Icons.chevron_left),
+          _buildPaginationButton(
+            icon: Icons.chevron_left,
             onPressed: controller.currentPage.value > 1
                 ? () => controller.previousPage()
                 : null,
           ),
-          // Page Number Display
           Text(
             'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
           ),
-          // Next Page Button
-          IconButton(
-            icon: Icon(Icons.chevron_right),
+          _buildPaginationButton(
+            icon: Icons.chevron_right,
             onPressed: controller.currentPage.value < controller.totalPages.value
                 ? () => controller.nextPage()
                 : null,
           ),
-          // Last Page Button
-          IconButton(
-            icon: Icon(Icons.last_page),
+          _buildPaginationButton(
+            icon: Icons.last_page,
             onPressed: controller.currentPage.value < controller.totalPages.value
                 ? () => controller.goToLastPage()
                 : null,
           ),
         ],
       ),
-    ));
-  }
-  Widget _dropDownValueViews(AgentsViewScreenController controller,
-      String agentId, Result agentData) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: PopupMenuButton<String>(
-          color: CupertinoColors.white,
-          icon: Icon(Icons.more_vert),
-          onSelected: (String result) {
-            switch (result) {
-              case 'Edit':
-                _editWidgetOfAgentsDialogValue(
-                    controller, Get.context!, agentId, agentData);
-                break;
-              case 'Delete':
-                controller.hitDeleteStatuApiValue(agentId);
-                break;
-              case 'Deactivate':
-                controller.hitUpdateStatusValue(agentId);
-                break;
-            }
-          },
-          itemBuilder: (BuildContext context) =>
-          <PopupMenuEntry<String>>[
-            PopupMenuItem<String>(
-              value: 'Edit',
-              child: ListTile(
-                leading: Icon(Icons.edit_calendar_outlined, size: 20,
-                    color: Colors.black),
-                title: Text(
-                    'Edit', style: MontserratStyles.montserratBoldTextStyle(
-                  color: blackColor,
-                  size: 13,
-                )),
-              ),
-            ),
-            PopupMenuItem<String>(
-              value: 'Delete',
-              child: ListTile(
-                leading: Icon(Icons.delete,color: Colors.red,size: 20),
-                title: Text('Delete',
-                    style: MontserratStyles.montserratBoldTextStyle(
-                      color: blackColor,
-                      size: 13,
-                    )),
-              ),
-            ),
-            PopupMenuItem<String>(
-              value: 'Deactivate',
-              child: ListTile(
-                leading: Image.asset(wrongRoundedImage, color: Colors.black,
-                  height: 25,
-                  width: 25,),
-                title: Text('Deactivate',
-                    style: MontserratStyles.montserratBoldTextStyle(
-                      color: blackColor,
-                      size: 13,
-                    )),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
-  void _editWidgetOfAgentsDialogValue(AgentsViewScreenController controller,
-      BuildContext context, String agentId, Result agentData) {
-    controller.firstNameController.text = agentData.firstName ?? '';
-    controller.lastNameController.text = agentData.lastName ?? '';
-    controller.emailController.text = agentData.email ?? '';
-    controller.phoneController.text = agentData.phoneNumber ?? '';
-
-    Get.dialog(
-        Dialog(
-          insetAnimationDuration: Duration(milliseconds: 3),
-          child: Container(
-            height: Get.height,
-            width: Get.width,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-            child: _form(controller, context, agentId),
-          ),
-        )
-    );
-  }
-
-  Widget _form(AgentsViewScreenController controller, BuildContext context,
-      String agentId) {
+  Widget _buildPaginationButton({
+    required IconData icon,
+    required VoidCallback? onPressed,
+  }) {
     return Container(
-      height: Get.height,
-      width: Get.width,
-      color: whiteColor,
-      child: Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: ListView(
-          children: [
-            vGap(20),
-            _buildTopBarView(controller: controller, context: context),
-            Divider(thickness: 2, color: Colors.black),
-            vGap(20),
-            _buildTaskName(context: context, controller: controller),
-            vGap(20),
-            _buildLastName(context: context, controller: controller),
-            vGap(20),
-            _addTechnician(context: context, controller: controller),
-            vGap(20),
-            _phoneNumber(context: context, controller: controller),
-            vGap(40),
-            _buildOptionbutton(
-                context: context, controller: controller, agentId: agentId),
-          ],
-        ),
+      margin: EdgeInsets.symmetric(horizontal: 4),
+      child: IconButton(
+        icon: Icon(icon),
+        onPressed: onPressed,
+        color: onPressed != null ? Colors.blue : Colors.grey,
       ),
     );
   }
 
-  Widget _buildTopBarView(
-      {required AgentsViewScreenController controller, required BuildContext context}) {
-    return Center(child: Text('Edit Agent',
-        style: MontserratStyles.montserratBoldTextStyle(
-            size: 18, color: blackColor)));
-  }
-
-  Widget _buildTaskName(
-      {required AgentsViewScreenController controller, required BuildContext context}) {
-    return CustomTextField(
-      hintText: "First Name".tr,
-      controller: controller.firstNameController,
-      textInputType: TextInputType.text,
-      focusNode: controller.lastNameFocusNode,
-      labletext: "First Name".tr,
-      prefix: Icon(Icons.person, color: Colors.black),
+  Widget _buildLoadingShimmer() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: ListView.builder(
+        itemCount: 5,
+        padding: EdgeInsets.all(16),
+        itemBuilder: (context, index) {
+          return Container(
+            height: 80,
+            margin: EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildLastName(
-      {required AgentsViewScreenController controller, required BuildContext context}) {
-    return CustomTextField(
-      hintText: "Last Name".tr,
-      controller: controller.lastNameController,
-      textInputType: TextInputType.text,
-      focusNode: controller.emailFocusnode,
-      labletext: "Last Name".tr,
-      prefix: Icon(Icons.person, color: Colors.black),
-    );
-  }
-
-  Widget _addTechnician(
-      {required AgentsViewScreenController controller, required BuildContext context}) {
-    return CustomTextField(
-      hintText: "Email".tr,
-      controller: controller.emailController,
-      textInputType: TextInputType.emailAddress,
-      focusNode: controller.phoneFocusNode,
-      labletext: "Email".tr,
-      prefix: Icon(Icons.mail, color: Colors.black),
-    );
-  }
-
-  Widget _phoneNumber(
-      {required AgentsViewScreenController controller, required BuildContext context}) {
-    return CustomTextField(
-      hintText: "Phone Number".tr,
-      controller: controller.phoneController,
-      textInputType: TextInputType.phone,
-      focusNode: controller.firstNameFocusNode,
-      labletext: "Phone Number".tr,
-      prefix: Icon(Icons.phone_android_rounded, color: Colors.black),
-    );
-  }
-
-  Widget _buildOptionbutton(
-      {required AgentsViewScreenController controller, required BuildContext context, required String agentId}) {
-    return Row(
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: Text('Cancel',
-                style: MontserratStyles.montserratBoldTextStyle(
-                    color: Colors.white, size: 13)),
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(appColor),
-              foregroundColor: MaterialStateProperty.all(Colors.white),
-              padding: MaterialStateProperty.all(
-                  EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
-              elevation: MaterialStateProperty.all(5),
-              shape: MaterialStateProperty.all(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              shadowColor: MaterialStateProperty.all(
-                  Colors.black.withOpacity(0.5)),
-            ),
+          Icon(
+            FeatherIcons.users,
+            size: 64,
+            color: Colors.grey,
           ),
-          hGap(20),
-          ElevatedButton(
-            onPressed: () => controller.hitPutAgentsDetailsApiCall(agentId),
-            child: Text('Update',
-                style: MontserratStyles.montserratBoldTextStyle(
-                    color: whiteColor, size: 13)),
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(appColor),
-              foregroundColor: MaterialStateProperty.all(Colors.white),
-              padding: MaterialStateProperty.all(
-                  EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
-              elevation: MaterialStateProperty.all(5),
-              shape: MaterialStateProperty.all(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              shadowColor: MaterialStateProperty.all(
-                  Colors.black.withOpacity(0.5)),
-            ),
-          )
-        ]
-    );
-  }
-
-  String _formatDate(dynamic date) {
-    if (date == null) return 'N/A';
-    if (date is DateTime) {
-      return DateFormat('yyyy-MM-dd').format(date);
-    }
-    if (date is String) {
-      try {
-        final parsedDate = DateTime.parse(date);
-        return DateFormat('yyyy-MM-dd').format(parsedDate);
-      } catch (e) {
-        print('Error parsing date: $e');
-        return date;
-      }
-    }
-    return 'N/A';
-  }
-
-  Widget _buildStatusIndicator(bool? isActive) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isActive! ? Colors.green.withOpacity(0.1) : Colors.red
-            .withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isActive ? Colors.green : Colors.red, width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isActive ? Colors.green : Colors.red,
-            ),
-          ),
-          SizedBox(width: 6),
+          SizedBox(height: 16),
           Text(
-            isActive ? 'Active' : 'Inactive',
-            style: MontserratStyles.montserratSemiBoldTextStyle(
-              color: isActive ? Colors.green : Colors.red,
-              size: 12,
+            'No executives found',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[600],
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Add executives to get started',
+            style: TextStyle(
+              color: Colors.grey[500],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // Helper functions for date formatting and dialogs
+  String _formatDate(dynamic date) {
+    if (date == null) return 'N/A';
+    try {
+      final DateTime parsedDate = date is DateTime
+          ? date
+          : DateTime.parse(date.toString());
+      return DateFormat('MMM dd, yyyy').format(parsedDate);
+    } catch (e) {
+      return 'N/A';
+    }
+  }
+
+// Add other helper methods and dialog implementations here
+}
+Widget _buildFloatingActionButton() {
+  return FloatingActionButton(
+    onPressed: () => Get.to(() => AgentsListCreation()),
+    backgroundColor: appColor,
+    child: Icon(Icons.add, color: Colors.white),
+  );
+}
+
+Widget _buildAddButton() {
+  return IconButton(
+    icon: Icon(Icons.add, color: Colors.black87),
+    onPressed: () => Get.to(() => AgentsListCreation()),
+  );
+}
+
+// void _showImportDialog(AgentsViewScreenController controller) {
+//   Get.dialog(
+//     Dialog(
+//       shape: RoundedRectangleBorder(
+//         borderRadius: BorderRadius.circular(16),
+//       ),
+//       child: Container(
+//         padding: EdgeInsets.all(24),
+//         constraints: BoxConstraints(
+//           maxWidth: Get.width * 0.8,
+//           maxHeight: Get.height * 0.8,
+//         ),
+//         child: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Text(
+//               'Import Executives',
+//               style: TextStyle(
+//                 fontSize: 20,
+//                 fontWeight: FontWeight.bold,
+//               ),
+//             ),
+//             SizedBox(height: 24),
+//             Text(
+//               'Select a CSV or Excel file to import executives',
+//               textAlign: TextAlign.center,
+//             ),
+//             SizedBox(height: 24),
+//             ElevatedButton.icon(
+//               onPressed: () async {
+//                 FilePickerResult? result = await FilePicker.platform.pickFiles(
+//                   type: FileType.custom,
+//                   allowedExtensions: ['csv', 'xlsx'],
+//                 );
+//                 if (result != null) {
+//                   // Handle file import
+//                   Get.back();
+//                   Get.snackbar(
+//                     'Success',
+//                     'File imported successfully',
+//                     backgroundColor: Colors.green[100],
+//                     colorText: Colors.green[800],
+//                   );
+//                 }
+//               },
+//               icon: Icon(Icons.upload_file),
+//               label: Text('Choose File'),
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: appColor,
+//                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     ),
+//   );
+// }
+
+// void _showExportDialog(AgentsViewScreenController controller) {
+//   final startDateController = TextEditingController();
+//   final endDateController = TextEditingController();
+//
+//   Get.dialog(
+//     Dialog(
+//       shape: RoundedRectangleBorder(
+//         borderRadius: BorderRadius.circular(16),
+//       ),
+//       child: Container(
+//         padding: EdgeInsets.all(24),
+//         constraints: BoxConstraints(
+//           maxWidth: Get.width * 0.8,
+//         ),
+//         child: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Text(
+//               'Export Executives Data',
+//               style: TextStyle(
+//                 fontSize: 20,
+//                 fontWeight: FontWeight.bold,
+//               ),
+//             ),
+//             SizedBox(height: 24),
+//             Row(
+//               children: [
+//                 Expanded(
+//                   child: TextField(
+//                     controller: startDateController,
+//                     decoration: InputDecoration(
+//                       labelText: 'Start Date',
+//                       border: OutlineInputBorder(),
+//                     ),
+//                     readOnly: true,
+//                     onTap: () async {
+//                       final date = await showDatePicker(
+//                         context: Get.context!,
+//                         initialDate: DateTime.now(),
+//                         firstDate: DateTime(2000),
+//                         lastDate: DateTime.now(),
+//                       );
+//                       if (date != null) {
+//                         startDateController.text = DateFormat('yyyy-MM-dd').format(date);
+//                       }
+//                     },
+//                   ),
+//                 ),
+//                 SizedBox(width: 16),
+//                 Expanded(
+//                   child: TextField(
+//                     controller: endDateController,
+//                     decoration: InputDecoration(
+//                       labelText: 'End Date',
+//                       border: OutlineInputBorder(),
+//                     ),
+//                     readOnly: true,
+//                     onTap: () async {
+//                       final date = await showDatePicker(
+//                         context: Get.context!,
+//                         initialDate: DateTime.now(),
+//                         firstDate: DateTime(2000),
+//                         lastDate: DateTime.now(),
+//                       );
+//                       if (date != null) {
+//                         endDateController.text = DateFormat('yyyy-MM-dd').format(date);
+//                       }
+//                     },
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             SizedBox(height: 24),
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.end,
+//               children: [
+//                 TextButton(
+//                   onPressed: () => Get.back(),
+//                   child: Text('Cancel'),
+//                 ),
+//                 SizedBox(width: 16),
+//                 ElevatedButton.icon(
+//                   onPressed: () {
+//                     // Handle export
+//                     Get.back();
+//                     Get.snackbar(
+//                       'Success',
+//                       'Data exported successfully',
+//                       backgroundColor: Colors.green[100],
+//                       colorText: Colors.green[800],
+//                     );
+//                   },
+//                   icon: Icon(Icons.download),
+//                   label: Text('Export'),
+//                   style: ElevatedButton.styleFrom(
+//                     backgroundColor: appColor,
+//                     padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//     ),
+//   );
+// }
+
+void _showEditDialog(AgentsViewScreenController controller, dynamic agent) {
+  final firstNameController = TextEditingController(text: agent.firstName);
+  final lastNameController = TextEditingController(text: agent.lastName);
+  final emailController = TextEditingController(text: agent.email);
+  final phoneController = TextEditingController(text: agent.phoneNumber);
+
+  Get.dialog(
+    Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Container(
+        padding: EdgeInsets.all(24),
+        constraints: BoxConstraints(
+          maxWidth: Get.width * 0.8,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Edit Executive',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 24),
+            TextField(
+              controller: firstNameController,
+              decoration: InputDecoration(
+                labelText: 'First Name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: lastNameController,
+              decoration: InputDecoration(
+                labelText: 'Last Name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: phoneController,
+              decoration: InputDecoration(
+                labelText: 'Phone Number',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Get.back(),
+                  child: Text('Cancel'),
+                ),
+                SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    // Handle update
+                    controller.hitPutAgentsDetailsApiCall(agent.id.toString());
+                    Get.back();
+                  },
+                  child: Text('Update'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: appColor,
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+void _showDeleteConfirmation(AgentsViewScreenController controller, dynamic agent) {
+  Get.dialog(
+    Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Container(
+        padding: EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.warning,
+              color: Colors.red,
+              size: 48,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Delete Executive',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Are you sure you want to delete this executive? This action cannot be undone.',
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: () => Get.back(),
+                  child: Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    controller.hitDeleteStatuApiValue(agent.id.toString());
+                    Get.back();
+                  },
+                  child: Text('Delete'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+  Widget _buildStatusIndicator(Result result,bool? isActive) {
+    return Column(
+      children: [
+        Text("${result.todayAttendance.map((m)=>m.status)}"),
+        vGap(3),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+          decoration: BoxDecoration(
+            color: isActive! ? Colors.green.withOpacity(0.1) : Colors.red
+                .withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isActive ? Colors.green : Colors.red, width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isActive ? Colors.green : Colors.red,
+                ),
+              ),
+              SizedBox(width: 6),
+              Text(
+                isActive ? 'Active' : 'Inactive',
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  color: isActive ? Colors.green : Colors.red,
+                  size: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -773,7 +1077,7 @@ class AgentsViewScreen extends GetView<AgentsViewScreenController> {
       ),
     );
   }
-}
+
 
 void _downLoadExportModelView(BuildContext context, AgentsViewScreenController controller) {
   final startDateController = TextEditingController();

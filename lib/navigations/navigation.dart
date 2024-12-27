@@ -40,6 +40,7 @@ abstract class AppRoutes {
   static const pricingScreenView = '/pricingScreenView';
   static const addSuperuserViewScreen = '/addSuperuserViewScreen';
   static const showViewAllDataAttendanceScreen = '/showViewAllDataAttendanceScreen';
+  static const userLeavesDataScreen = '/userLeavesDataScreen';
 }
 
 class RoutesArgument {

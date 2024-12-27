@@ -1,14 +1,11 @@
-import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/constans/string_const.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
-import '../../../../response_models/user_response_model.dart';
 import '../controller/show_technician_data_controller.dart';
 
 class TechniciansFullViewDetailsDescriptionScreen extends GetView<ShowTechnicianDataController> {
@@ -32,15 +29,15 @@ class TechniciansFullViewDetailsDescriptionScreen extends GetView<ShowTechnician
               ),
             ),
           ),
-          body: _mainScreen(controller),
+          body: _mainScreen(context, controller),
         ),
       ),
     );
   }
 
   Widget _searchBar(ShowTechnicianDataController controller) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return Container(
+      width: Get.width * 0.6,
       child: TextField(
         onChanged: controller.filterMembers,
         decoration: InputDecoration(
@@ -65,22 +62,45 @@ class TechniciansFullViewDetailsDescriptionScreen extends GetView<ShowTechnician
     );
   }
 
-  Widget _mainScreen(ShowTechnicianDataController controller) {
+  Widget _mainScreen(BuildContext context, ShowTechnicianDataController controller) {
     return Obx(() {
       if (controller.isLoading.value) {
-        return  Center(child: CircularProgressIndicator());
+        return Center(child: CircularProgressIndicator());
       }
 
       final members = controller.filteredMembers;
 
       return Column(
         children: [
-          _searchBar(controller),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(child: _buildStatusFilterDropdown(context, controller)),
+                hGap(10),
+                _searchBar(controller),
+              ],
+            ),
+          ),
           Expanded(
             child: members.isEmpty
                 ? const Center(child: Text('No matching team members found'))
-                : SingleChildScrollView(
-              child: _buildDataTable(controller, members),
+                : Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 1.1,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemCount: controller.attendancePaginationData.length,
+                itemBuilder: (context, index) {
+                  final member = controller.attendancePaginationData[index];
+                  return _buildMemberCard(controller, member);
+                },
+              ),
             ),
           ),
         ],
@@ -88,47 +108,115 @@ class TechniciansFullViewDetailsDescriptionScreen extends GetView<ShowTechnician
     });
   }
 
-  String _getRoleDisplay(String? role) {
-    if (role == null) return 'N/A';
+  Widget _buildMemberCard(ShowTechnicianDataController controller, dynamic member) {
+    return Material(
+      borderRadius: BorderRadius.circular(15),
+      elevation: 4,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min, // Changed to min
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      CircleAvatar(
+                        radius: 35, // Slightly reduced size
+                        backgroundImage: member.profileImage != null && member.profileImage!.isNotEmpty
+                            ? NetworkImage(member.profileImage!) as ImageProvider
+                            : AssetImage(userImageIcon),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(4), // Slightly reduced padding
+                        decoration: BoxDecoration(
+                          color: member.isActive == true ? Colors.red : Colors.green,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          member.isActive == true ? Icons.close:Icons.check ,
+                          color: Colors.white,
+                          size: 10,
+                        ),
+                      ),
 
-    switch (role.toLowerCase()) {
-      case 'agent':
-        return 'Executive';
-      case 'superuser':
-        return 'Manager';
-      default:
-        return role;
-    }
-  }
+                    ],
+                  ),
+                  SizedBox(height: 18), // Reduced spacing
 
-  Widget _buildDataTable(ShowTechnicianDataController controller, List<dynamic> members) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        columns: const [
-          DataColumn(label: Text("  ")),
-          DataColumn(label: Text("Employee Id")),
-          DataColumn(label: Text("Name")),
-          DataColumn(label: Text("Role")),
-          DataColumn(label: Text("Status")),
-          DataColumn(label: Text(" ")),
-        ],
-        rows: controller.attendancePaginationData.map((member) => DataRow(
-          cells: [
-            DataCell(
-              CircleAvatar(
-                backgroundImage: member.profileImage != null && member.profileImage!.isNotEmpty
-                    ? NetworkImage(member.profileImage!) as ImageProvider
-                    : AssetImage(userImageIcon),
+                  // SizedBox(height: 4), // Reduced spacing
+                  // Container(
+                  //   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2), // Reduced padding
+                  //   decoration: BoxDecoration(
+                  //     color: normalBlue.withOpacity(0.1),
+                  //     borderRadius: BorderRadius.circular(12),
+                  //   ),
+                  //   child: Text(
+                  //     "${member.empId}",
+                  //     style: TextStyle(
+                  //       color: normalBlue,
+                  //       fontWeight: FontWeight.w600,
+                  //       fontSize: 11, // Reduced font size
+                  //     ),
+                  //   ),
+                  // ),
+                  // SizedBox(height: 4), // Reduced spacing
+
+                  // SizedBox(height: 4), // Reduced spacing
+
+                ],
               ),
             ),
-            DataCell(_ticketBoxIcons("${member.empId}")),
-            DataCell(Text("${member.firstName} ${member.lastName}")),
-            DataCell(Text(_getRoleDisplay(member.role))),
-            DataCell(Text(member.isActive == true ? 'Active' : 'Inactive')),
-            DataCell(_buildCalenderButton(controller, member.id.toString())),
+            Positioned(
+              top: 85,
+              left: 5,
+              child: Text(
+              "${member.firstName} ${member.lastName}",
+              style: MontserratStyles.montserratBoldTextStyle(size: 17,color: Colors.black),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),),
+            Positioned(
+              top: 110,
+              left: 5,
+              child: Text(
+                "Role: ${_getRoleDisplay(member.role)}",
+                style: MontserratStyles.montserratSemiBoldTextStyle(color: Colors.grey,size: 15)
+              ),
+            ),
+            Positioned(
+              top: 10,
+              right: 0,
+              child: IconButton(
+                onPressed: () {
+                  Get.dialog(
+                    _CalendarViews(controller, member.id.toString()),
+                    barrierDismissible: true,
+                  );
+                  controller.hitGetUserAttendanceApiCall(member.id.toString());
+                },
+                icon: Icon(Icons.calendar_month, color: appColor, size: 30), // Reduced icon size
+                padding: EdgeInsets.zero, // Removed padding from IconButton
+                constraints: BoxConstraints(), // Minimal constraints
+              ),)
           ],
-        )).toList(),
+        ),
       ),
     );
   }
@@ -172,45 +260,49 @@ class TechniciansFullViewDetailsDescriptionScreen extends GetView<ShowTechnician
     ));
   }
 
-  Widget _ticketBoxIcons(String empId) {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: normalBlue,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: Colors.blue.shade300,
-            width: 1,
-          ),
-        ),
-        child: Text(
-          empId,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-          ),
+  Widget _buildStatusFilterDropdown(BuildContext context, ShowTechnicianDataController controller) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Obx(
+            () => DropdownButton<String>(
+          value: controller.selectedValue.value,
+          isExpanded: true,
+          underline: Container(),
+          items: controller.filterStatusValue.map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value,
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 13,
+                  color: Colors.black87,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: controller.updateSelectedStatusFilter,
         ),
       ),
     );
   }
 
-  // Calendar button build method
-  Widget _buildCalenderButton(ShowTechnicianDataController controller, String attendanceid) {
-    return IconButton(
-      onPressed: () {
-        Get.dialog(
-          _CalendarViews(controller, attendanceid),
-          barrierDismissible: true,
-        );
-        controller.hitGetUserAttendanceApiCall(attendanceid);
-      },
-      icon: Icon(Icons.calendar_month),
-    );
+  String _getRoleDisplay(String? role) {
+    if (role == null) return 'N/A';
+
+    switch (role.toLowerCase()) {
+      case 'agent':
+        return 'Executive';
+      case 'superuser':
+        return 'Manager';
+      default:
+        return role;
+    }
   }
 
-  // Calendar Views Dialog
   Widget _CalendarViews(ShowTechnicianDataController controller, String attendanceid) {
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -244,7 +336,6 @@ class TechniciansFullViewDetailsDescriptionScreen extends GetView<ShowTechnician
               ],
             ),
             const SizedBox(height: 20),
-            // Calendar
             TableCalendar(
               firstDay: DateTime.utc(2024, 1, 1),
               lastDay: DateTime.utc(2024, 12, 31),
@@ -271,9 +362,7 @@ class TechniciansFullViewDetailsDescriptionScreen extends GetView<ShowTechnician
                 ),
               ),
               calendarBuilders: CalendarBuilders(
-                // Custom day builder to show attendance status
                 defaultBuilder: (context, date, _) {
-                  // Null-safe approach to find attendance record
                   var attendanceRecord = controller.userAttendanceData.firstWhereOrNull(
                           (record) => record.date != null &&
                           isSameDay(DateTime.parse(record.date!), date)
@@ -322,7 +411,6 @@ class TechniciansFullViewDetailsDescriptionScreen extends GetView<ShowTechnician
               ),
             ),
             const SizedBox(height: 20),
-            // Legend
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -339,7 +427,6 @@ class TechniciansFullViewDetailsDescriptionScreen extends GetView<ShowTechnician
     );
   }
 
-  // Legend item build method
   Widget _buildLegendItem(String label, Color color) {
     return Row(
       children: [

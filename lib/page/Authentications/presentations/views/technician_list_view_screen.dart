@@ -13,7 +13,9 @@ import 'package:tms_sathi/utilities/common_textFields.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
+import '../../../../constans/role_based_keys.dart';
 import '../../../../constans/string_const.dart';
+import '../../../../main.dart';
 
 
 class TechnicianListViewScreen extends GetView<TechnicianListViewScreenController> {
@@ -24,6 +26,8 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
       child: GetBuilder<TechnicianListViewScreenController>(
         builder: (controller) => Scaffold(
           resizeToAvoidBottomInset: false,
+          bottomNavigationBar:  _buildPaginationControls(controller),
+          floatingActionButton: _buildFloatingActionButton(),
           backgroundColor: CupertinoColors.white,
           appBar: _buildAppBar(controller),
           body: RefreshIndicator(
@@ -48,6 +52,16 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
     );
   }
 
+  FloatingActionButton? _buildFloatingActionButton() {
+    final userrole = storage.read(userRole);
+    return (userrole != 'technician'&&userrole !='sale')?
+    FloatingActionButton(
+      onPressed: () =>Get.toNamed(AppRoutes.addtechnicianListScreen),
+      backgroundColor: appColor,
+      child: Icon(Icons.add, color: Colors.white),
+    )
+        : null;
+  }
   PreferredSizeWidget _buildAppBar(TechnicianListViewScreenController controller) {
     return AppBar(
       leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
@@ -66,11 +80,11 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
           icon: Icon(FontAwesomeIcons.rotate),
           tooltip: 'Refresh',
         ),
-        IconButton(
-          onPressed: ()=>Get.toNamed(AppRoutes.addtechnicianListScreen),
-          icon: Icon(FontAwesomeIcons.plus),
-          tooltip: 'Filter',
-        ),
+        // IconButton(
+        //   onPressed: ()=>Get.toNamed(AppRoutes.addtechnicianListScreen),
+        //   icon: Icon(FontAwesomeIcons.plus),
+        //   tooltip: 'Filter',
+        // ),
       ],
     );
   }
@@ -207,17 +221,18 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
           child: SingleChildScrollView(
             child: DataTable(
               columns: [
-                _buildTableHeader('Id'),
+                _buildTableHeader('EmployeeId'),
                 _buildTableHeader('Image'),
                 _buildTableHeader('Name'),
                 _buildTableHeader('Email'),
-                _buildTableHeader('Contact'),
+                _buildTableHeader('Phone No'),
+                _buildTableHeader('Date of Joining'),
                 _buildTableHeader('Casual Leaves'),
                 _buildTableHeader('Sick Leaves'),
                 _buildTableHeader('Check In'),
                 _buildTableHeader('Check Out'),
                 _buildTableHeader('Status'),
-                _buildTableHeader('Battery(%)'),
+                _buildTableHeader('Battery Status'),
                 _buildTableHeader('GPS'),
                 _buildTableHeader('Actions'),
               ],
@@ -231,6 +246,7 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
                     DataCell(Text("${technician.firstName} ${technician.lastName}")),
                     DataCell(Text(technician.email.toString())),
                     DataCell(Text(technician.phoneNumber.toString())),
+                    DataCell(Text(technician.dateJoined.toString())),
                     DataCell(Text(technician.allocatedCasualLeave.toString())),
                     DataCell(Text(technician.allocatedSickLeave.toString())),
                     DataCell(Text(_formatDateTime(
@@ -238,7 +254,7 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
                     DataCell(Text(_formatDateTime(
                         todayAttendance1.toString()?? 'N/A'))),
                     DataCell(_buildAttendanceStatusBadge(
-                        technician.todayAttendance.map((value)=> value.status).toString()?? '')),
+                        technician.todayAttendance.map((value)=> value.status).toString()?? '', technician.isActive)),
                     DataCell(Text(technician.batteryStatus ?? 'N/A')),
                     DataCell(Text(technician.gpsStatus! ? 'On' : 'Off')),
                     DataCell(_dropDownValueViews(controller, context, technician.id.toString(), technician)),
@@ -249,7 +265,7 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
           ),
         ),
         // Pagination Controls
-        _buildPaginationControls(controller),
+
       ],
     );
   }
@@ -312,7 +328,8 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
   }
 }
 
-  Widget _buildAttendanceStatusBadge(String? status) {
+
+  Widget _buildAttendanceStatusBadge(String? status,bool? isActive) {
     Color color;
     String displayText = status!;
 
@@ -334,20 +351,47 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
         color = Colors.grey;
     }
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        displayText,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            displayText,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
-      ),
+        vGap(2),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color:(isActive != false)? Colors.green:Colors.red,
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: (isActive != false)
+              ?Text('Active',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          )
+              :Text('Inactive',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          )
+        ),
+      ],
     );
   }
   String _formatDateTime(String dateTimeStr) {

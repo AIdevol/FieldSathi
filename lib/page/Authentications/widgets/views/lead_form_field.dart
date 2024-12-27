@@ -11,6 +11,7 @@ import 'package:tms_sathi/utilities/helper_widget.dart';
 
 import '../../../../navigations/navigation.dart';
 import '../../../../utilities/common_textFields.dart';
+import '../../../../utilities/customerSourceContainer_selectedSourceType.dart';
 
 class LeadFormFieldScreen extends GetView<LeadFormFieldController>{
 
@@ -36,7 +37,7 @@ _mainScreen(LeadFormFieldController controller, BuildContext context){
   return Padding(
     padding: const EdgeInsets.all(18.0),
     child: ListView(children: [
-      Text("Basics Informations",style: MontserratStyles.montserratBoldTextStyle(size: 20, color: Colors.black),),
+      Text("Basic Information",style: MontserratStyles.montserratBoldTextStyle(size: 20, color: Colors.black),),
       vGap(20),
       _customerCompanyContainer(controller),
       vGap(20),
@@ -71,10 +72,10 @@ _mainScreen(LeadFormFieldController controller, BuildContext context){
 _customerCompanyContainer(LeadFormFieldController controller){
     return CustomTextField(
       controller: controller.companyController,
-      hintText: "Enter Company Name".tr,
+      hintText: "Company name".tr,
       textInputType: TextInputType.text,
       onFieldSubmitted: (String? value) {},
-      labletext: "Enter Company Name".tr,
+      labletext: "Company name".tr,
       // suffix: IconButton(onPressed: (){
       //   Get.toNamed(AppRoutes.principleCustomerScreen);
       // }, icon: Icon(Icons.keyboard_arrow_down, color: Colors.black)),
@@ -214,25 +215,38 @@ _customerAdditionalContainer(LeadFormFieldController controller){
 }
 
 _customerSourceContainer(LeadFormFieldController controller){
-  return CustomTextField(
+  return CustomerSourceContainer();
+  /*CustomTextField(
     controller: controller.sourceController,
     hintText: "Source".tr,
     textInputType: TextInputType.text,
     onFieldSubmitted: (String? value) {},
     labletext: "Source".tr,
-    // suffix: IconButton(onPressed: (){
-    //   Get.toNamed(AppRoutes.principleCustomerScreen);
-    // }, icon: Icon(Icons.keyboard_arrow_down, color: Colors.black)),
-  );
+    suffix: Container(
+        margin: const EdgeInsets.only(left: 10),
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(10),
+              topLeft: Radius.circular(10),
+              bottomRight: Radius.circular(30),
+              topRight: Radius.circular(30)),
+          // color: Colors.white,
+          border: Border.all(color: Colors.grey.shade400, width: 0.5),
+        ),
+      child: IconButton(onPressed: (){
+        Get.toNamed(AppRoutes.principleCustomerScreen);
+      }, icon: Icon(Icons.add, color: Colors.black)),
+    ),
+  );*/
 }
 
 Widget _customButtonViewWidget({required LeadFormFieldController controller,required BuildContext context}) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-      _buildButton('Cancel',onPressed: ()=>Get.back(), controller: controller),
+      _buildButton('Close',onPressed: ()=>Get.back(), controller: controller),
       hGap(10),
-      _buildButton('Add', onPressed: ()=>controller.hitPostLeadListAPiCall(), controller:  controller),
+      _buildButton('Save Changes', onPressed: ()=>controller.hitPostLeadListAPiCall(), controller:  controller),
       hGap(10),
       // _buildRateTextField(),
     ],

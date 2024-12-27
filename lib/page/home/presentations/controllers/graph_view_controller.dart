@@ -91,11 +91,11 @@ class GraphViewController extends GetxController {
       ticketData.value = response;
 
       if (ticketData.value != null) {
-        print('Received ${ticketData.value!.results.length} tickets');
+        print('Received ${ticketData.value!.results?.length} tickets');
         print('Total count from API: ${ticketData.value!.count}');
 
         // Log all statuses to debug
-        ticketData.value!.results.forEach((ticket) {
+        ticketData.value!.results?.forEach((ticket) {
           // print('Ticket ID: ${ticket?.id}, Status: ${ticket?.status}');
         });
       }

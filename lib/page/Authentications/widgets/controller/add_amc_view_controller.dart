@@ -22,8 +22,23 @@ class AddAmcViewController extends GetxController {
   // Observable values for amounts
   RxInt serviceAmount = 0.obs;
   RxInt receivedAmount = 0.obs;
+  CalendarView currentView = CalendarView.month;
 
-  // Observable for selected time
+  void updateCalendarView(CalendarView view) {
+    currentView = view;
+    update();
+  }
+
+  void addEvent(Appointment appointment) {
+    events.add(appointment);
+    update();
+  }
+
+  void removeEvent(Appointment appointment) {
+    events.remove(appointment);
+    update();
+  }
+
   Rx<TimeOfDay?> selectedTime = Rx<TimeOfDay?>(null);
 
   final List<String> timeSlots = [
@@ -39,10 +54,11 @@ class AddAmcViewController extends GetxController {
   ];
 
   // Display format for UI (12-hour format)
-  List<String> get displayTimeSlots => timeSlots.map((timeSlot) {
-    final parsedTime = DateFormat('HH:mm').parse(timeSlot);
-    return DateFormat('hh:mm a').format(parsedTime);
-  }).toList();
+  List<String> get displayTimeSlots =>
+      timeSlots.map((timeSlot) {
+        final parsedTime = DateFormat('HH:mm').parse(timeSlot);
+        return DateFormat('hh:mm a').format(parsedTime);
+      }).toList();
 
   final List<String> noOfServiceSelection = [
     "1",
@@ -195,62 +211,66 @@ class AddAmcViewController extends GetxController {
 
     if (picked != null) {
       selectedDate.value = picked;
-      datesController.text = DateFormat('yyyy-MM-dd').format(picked); // Correct format
+      datesController.text =
+          DateFormat('yyyy-MM-dd').format(picked); // Correct format
       update();
     }
   }
 
-  void hitGetCustomerListApiCall(){
+  void hitGetCustomerListApiCall() {
     isLoading.value = true;
     // customLoader.show();
     FocusManager.instance.primaryFocus!.context;
     var parameterdata = {
-      "role":"customer",
+      "role": "customer",
     };
-    Get.find<AuthenticationApiService>().getCustomerListApiCall(parameters: parameterdata).then((value)async{
+    Get.find<AuthenticationApiService>().getCustomerListApiCall(
+        parameters: parameterdata).then((value) async {
       customerListData.assignAll(value.results!);
       customerdefineData.assignAll(value.results!);
-      List<String> customerIds = customerListData.map((agent) => agent.id.toString()).toList();
+      List<String> customerIds = customerListData.map((agent) =>
+          agent.id.toString()).toList();
       await storage.write(customerId, customerIds.join(','));
       print('customer id : ${await storage.read(customerId)}');
       customLoader.hide();
       toast('Customer List Successfully Fetched');
       update();
-    }).onError((error , stackError){
+    }).onError((error, stackError) {
       customLoader.hide();
       toast(error.toString());
       isLoading.value = false;
     });
   }
 
-  void hitPostCreationAmcView(){
+  void hitPostCreationAmcView() {
     isLoading.value = true;
     customLoader.show();
     FocusManager.instance.primaryFocus!.unfocus();
     String formattedTime = _formatTimeFor24Hour(activationTimeController.text);
     var dataAmcCreation = {
-      "amcName":amcNameController.text,
-        "activationTime":activationTimeController.text,
-        "activationDate":datesController.text,
-        "no_of_service":noOfServiceController.text,
-        "remainder":reminderController.text,
-        "productBrand":productBrandController.text,
-        "productName":productNameController.text,
-        "serialModelNo":serialModelNoController.text,
-        "underWarranty":true,
-        "serviceAmount":serviceAmountController.text,
-        "receivedAmount":receivedAmountController.text,
-        "customer":selectedCustomerId.value,
-        "select_service_occurence":serviceOccurrenceController.text,
-        // "status":sta
-        "note":notesController.text
+      "amcName": amcNameController.text,
+      "activationTime": activationTimeController.text,
+      "activationDate": datesController.text,
+      "no_of_service": noOfServiceController.text,
+      "remainder": reminderController.text,
+      "productBrand": productBrandController.text,
+      "productName": productNameController.text,
+      "serialModelNo": serialModelNoController.text,
+      "underWarranty": true,
+      "serviceAmount": serviceAmountController.text,
+      "receivedAmount": receivedAmountController.text,
+      "customer": selectedCustomerId.value,
+      "select_service_occurence": serviceOccurrenceController.text,
+      // "status":sta
+      "note": notesController.text
     };
-    Get.find<AuthenticationApiService>().postAmcDetailsApiCall(dataBody: dataAmcCreation).then((value){
+    Get.find<AuthenticationApiService>().postAmcDetailsApiCall(
+        dataBody: dataAmcCreation).then((value) {
       customLoader.hide();
       toast("Amc Added Succesffully");
       Get.offAllNamed(AppRoutes.amcScreen);
       update();
-    }).onError((error, stackError){
+    }).onError((error, stackError) {
       toast(error.toString());
       customLoader.hide();
       isLoading.value = false;
@@ -263,7 +283,9 @@ class AddAmcViewController extends GetxController {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Select Time',style: MontserratStyles.montserratBoldTextStyle(size: 25, color: Colors.black),),
+          title: Text('Select Time',
+            style: MontserratStyles.montserratBoldTextStyle(
+                size: 25, color: Colors.black),),
           content: Container(
             width: double.minPositive,
             child: ListView.builder(
@@ -271,7 +293,9 @@ class AddAmcViewController extends GetxController {
               itemCount: timeSlots.length,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
-                  title: Text(timeSlots[index],style: MontserratStyles.montserratBoldTextStyle(size: 15, color: Colors.grey),),
+                  title: Text(timeSlots[index],
+                    style: MontserratStyles.montserratBoldTextStyle(
+                        size: 15, color: Colors.grey),),
                   onTap: () {
                     activationTimeController.text = timeSlots[index];
                     Navigator.pop(context);
@@ -291,7 +315,9 @@ class AddAmcViewController extends GetxController {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Select Services',style: MontserratStyles.montserratBoldTextStyle(size: 25, color: Colors.black),),
+          title: Text('Select Services',
+            style: MontserratStyles.montserratBoldTextStyle(
+                size: 25, color: Colors.black),),
           content: Container(
             width: double.minPositive,
             child: ListView.builder(
@@ -299,7 +325,9 @@ class AddAmcViewController extends GetxController {
               itemCount: noOfServiceSelection.length,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
-                  title: Text(noOfServiceSelection[index],style: MontserratStyles.montserratBoldTextStyle(size: 15, color: Colors.grey),),
+                  title: Text(noOfServiceSelection[index],
+                    style: MontserratStyles.montserratBoldTextStyle(
+                        size: 15, color: Colors.grey),),
                   onTap: () {
                     noOfServiceController.text = noOfServiceSelection[index];
                     Navigator.pop(context);
@@ -319,7 +347,9 @@ class AddAmcViewController extends GetxController {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Select Reminder',style: MontserratStyles.montserratBoldTextStyle(size: 25, color: Colors.black),),
+          title: Text('Select Reminder',
+            style: MontserratStyles.montserratBoldTextStyle(
+                size: 25, color: Colors.black),),
           content: Container(
             width: double.minPositive,
             child: ListView.builder(
@@ -327,7 +357,9 @@ class AddAmcViewController extends GetxController {
               itemCount: reminderList.length,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
-                  title: Text(reminderList[index], style: MontserratStyles.montserratBoldTextStyle(size: 15, color: Colors.grey),),
+                  title: Text(reminderList[index],
+                    style: MontserratStyles.montserratBoldTextStyle(
+                        size: 15, color: Colors.grey),),
                   onTap: () {
                     reminderController.text = reminderList[index];
                     Navigator.pop(context);
@@ -347,7 +379,9 @@ class AddAmcViewController extends GetxController {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Select Reminder',style: MontserratStyles.montserratBoldTextStyle(size: 25, color: Colors.black),),
+          title: Text('Select Reminder',
+            style: MontserratStyles.montserratBoldTextStyle(
+                size: 25, color: Colors.black),),
           content: Container(
             width: double.minPositive,
             child: ListView.builder(
@@ -355,9 +389,12 @@ class AddAmcViewController extends GetxController {
               itemCount: noOfServicesOccurances.length,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
-                  title: Text(noOfServicesOccurances[index], style: MontserratStyles.montserratBoldTextStyle(size: 15, color: Colors.grey),),
+                  title: Text(noOfServicesOccurances[index],
+                    style: MontserratStyles.montserratBoldTextStyle(
+                        size: 15, color: Colors.grey),),
                   onTap: () {
-                    serviceOccurrenceController.text = noOfServicesOccurances[index];
+                    serviceOccurrenceController.text =
+                    noOfServicesOccurances[index];
                     Navigator.pop(context);
                     update();
                   },
@@ -415,26 +452,22 @@ class AddAmcViewController extends GetxController {
     update();
   }
 
-  // Add new event
-  void addEvent(Appointment newEvent) {
-    events.add(newEvent);
-    update();
-  }
-}
-String _formatTimeFor24Hour(String timeString) {
-  try {
-    // If the time is already in 24-hour format
-    if (timeString.contains(':') && !timeString.toLowerCase().contains('am') &&
-        !timeString.toLowerCase().contains('pm')) {
-      return timeString;
-    }
+  String _formatTimeFor24Hour(String timeString) {
+    try {
+      // If the time is already in 24-hour format
+      if (timeString.contains(':') &&
+          !timeString.toLowerCase().contains('am') &&
+          !timeString.toLowerCase().contains('pm')) {
+        return timeString;
+      }
 
-    // Parse the time string and convert to 24-hour format
-    final parsedTime = DateFormat('hh:mm a').parse(timeString);
-    return DateFormat('HH:mm').format(parsedTime);
-  } catch (e) {
-    // Return a default time if parsing fails
-    print('Error formatting time: $e');
-    return '00:00';
+      // Parse the time string and convert to 24-hour format
+      final parsedTime = DateFormat('hh:mm a').parse(timeString);
+      return DateFormat('HH:mm').format(parsedTime);
+    } catch (e) {
+      // Return a default time if parsing fails
+      print('Error formatting time: $e');
+      return '00:00';
+    }
   }
 }

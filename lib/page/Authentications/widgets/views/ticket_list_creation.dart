@@ -1,11 +1,8 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/ticket_list_creation_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/views/principal_customer_view.dart';
@@ -18,13 +15,10 @@ import 'package:tms_sathi/response_models/user_response_model.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
 import '../../../../response_models/amcData_customerWise_response_model.dart';
+import '../../../../response_models/customerBrand_response_model.dart';
 import '../../../../response_models/technician_response_model.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
-
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class TicketListCreation extends GetView<TicketListCreationController> {
   const TicketListCreation({Key? key}) : super(key: key);
@@ -38,7 +32,7 @@ class TicketListCreation extends GetView<TicketListCreationController> {
           builder: (controller) => CupertinoPageScaffold(
             navigationBar: CupertinoNavigationBar(
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, size: 25, color: Colors.black),
+                icon: const Icon(Icons.arrow_back_ios, size: 25, color: Colors.black),
                 onPressed: () => Get.back(),
               ),
               backgroundColor: appColor,
@@ -76,13 +70,13 @@ class TicketListCreation extends GetView<TicketListCreationController> {
       children: [
         _buildTaskName(context: context),
         const SizedBox(height: 20),
+        _dobView(context: context),
+        const SizedBox(height: 20),
         _addTechnician(context: context, controller: controller),
         const SizedBox(height: 20),
         _buildOptionbutton(context: context),
         const SizedBox(height: 20),
         _buildtextContainer(context: context, controller: controller),
-        const SizedBox(height: 20),
-        _dobView(context: context),
         const SizedBox(height: 20),
       ],
     );
@@ -505,7 +499,7 @@ class TicketListCreation extends GetView<TicketListCreationController> {
 
 Widget dropValueToShowTechnicianName(BuildContext context, TicketListCreationController controller) {
   return Obx(() => DropdownButtonHideUnderline(
-    child: DropdownMenu<TMSResult>(
+    child: DropdownMenu<TechnicianData>(
       leadingIcon: IconButton(
           onPressed: () => _editWidgetOfAgentsDialogValue(context, controller),
           icon: Icon(Icons.add)
@@ -527,17 +521,17 @@ Widget dropValueToShowTechnicianName(BuildContext context, TicketListCreationCon
             color: Colors.grey
         ),
       ),
-      onSelected: (TMSResult? selectedTechnician) {
+      onSelected: (TechnicianData? selectedTechnician) {
         if (selectedTechnician != null) {
           controller.assignToController.text =
               "${selectedTechnician.firstName} ${selectedTechnician.lastName ?? ''}".trim();
           controller.selectedTechnicianId.value = selectedTechnician.id ?? 0;
         }
       },
-      dropdownMenuEntries: controller.allWorkerData
-          .map<DropdownMenuEntry<TMSResult>>(
-              (TMSResult technician) {
-            return DropdownMenuEntry<TMSResult>(
+      dropdownMenuEntries: controller.allTechnicians
+          .map<DropdownMenuEntry<TechnicianData>>(
+              (TechnicianData technician) {
+            return DropdownMenuEntry<TechnicianData>(
               value: technician,
               label: "${technician.firstName} ${technician.lastName ?? ''}".trim() ?? 'Unknown Technician',
             );
@@ -615,8 +609,9 @@ Widget dropValueToShowCustomerName(BuildContext context, TicketListCreationContr
 }
 
 Widget dropValueToShowProductName(BuildContext context, TicketListCreationController controller) {
-  return Obx(() => DropdownButtonHideUnderline(
-    child: DropdownMenu<CustomerData>(
+  // final controllers = controller.hitGetCustomerBrandListApiCall(id: controller.selectedCustomerId.value.toString());
+  return /*(controller.selectedCustomerIdvalue.value)?*/Obx(() => DropdownButtonHideUnderline(
+    child: DropdownMenu<CustomerBrandResponseModel>(
       // leadingIcon:/* IconButton(
       //     onPressed: () {
       //       _editWidgetOfAgentsDialogValue(context, controller);
@@ -637,18 +632,18 @@ Widget dropValueToShowProductName(BuildContext context, TicketListCreationContro
         style: MontserratStyles.montserratSemiBoldTextStyle(
             size: 15, color: Colors.grey),
       ),
-      onSelected: (CustomerData? ticket) {
+      onSelected: (CustomerBrandResponseModel? ticket) {
         if (ticket != null) {
-          String allBrands = ticket.brandNames.join(',');
+          String allBrands = ticket.name.toString();
           controller.productNameController.text = allBrands/*.isNotEmpty?"All Brands" :'Unknown Brand'*/;
           print("all brands: $allBrands");
         }
       },
-      dropdownMenuEntries: controller.customerListData
-          .map<DropdownMenuEntry<CustomerData>>(
-              (CustomerData ticket) {
-                String allBrands = ticket.brandNames.join(',');
-            return DropdownMenuEntry<CustomerData>(
+      dropdownMenuEntries: controller.customerBrandResponse
+          .map<DropdownMenuEntry<CustomerBrandResponseModel>>(
+              (CustomerBrandResponseModel ticket) {
+                String allBrands = ticket.name.toString();
+            return DropdownMenuEntry<CustomerBrandResponseModel>(
               value: ticket,
               label: allBrands/*.isNotEmpty?"All Brands" :'Unknown Brand'*/,
             );
@@ -730,7 +725,7 @@ Widget dropValueToShowfsrName(BuildContext context, TicketListCreationController
 
 Widget dropValueToShowSelectServiceName(BuildContext context, TicketListCreationController controller) {
   return Obx(() => DropdownButtonHideUnderline(
-    child: DropdownMenu<Service>(
+    child: DropdownMenu<ServiceData>(
       inputDecorationTheme: InputDecorationTheme(
         focusColor: appColor,
         border: OutlineInputBorder(
@@ -742,7 +737,7 @@ Widget dropValueToShowSelectServiceName(BuildContext context, TicketListCreation
       initialSelection: null,
       requestFocusOnTap: true,
       label: Text('Select a Service'.tr,style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color:Colors.grey),),
-      onSelected: (Service? service) {
+      onSelected: (ServiceData? service) {
         if (service != null) {
           controller.serviceNamesController.text =
           "${service.serviceName ?? ''}";
@@ -750,9 +745,9 @@ Widget dropValueToShowSelectServiceName(BuildContext context, TicketListCreation
         }
       },
       dropdownMenuEntries: controller.servicesAllResponse
-          .map<DropdownMenuEntry<Service>>(
-              (Service service) {
-            return DropdownMenuEntry<Service>(
+          .map<DropdownMenuEntry<ServiceData>>(
+              (ServiceData service) {
+            return DropdownMenuEntry<ServiceData>(
               value: service,
               label: "${service.serviceName}" ?? 'Unknown Customer',
             );

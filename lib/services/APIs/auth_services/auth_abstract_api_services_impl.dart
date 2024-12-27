@@ -9,13 +9,16 @@ import '../../../response_models/amcData_customerWise_response_model.dart';
 import '../../../response_models/amc_response_model.dart';
 import '../../../response_models/attendance_response_model.dart';
 import '../../../response_models/check_points_response_model.dart';
+import '../../../response_models/customerBrand_response_model.dart';
 import '../../../response_models/customer_list_response_model.dart';
+import '../../../response_models/customer_rating_response_model.dart';
 import '../../../response_models/expenses_response_model.dart';
 import '../../../response_models/export_ticket_models.dart';
 import '../../../response_models/fsr_response_model.dart';
 import '../../../response_models/holidays_calender_response_model.dart';
 import '../../../response_models/lead_response_model.dart';
 import '../../../response_models/lead_satus_response_model.dart';
+import '../../../response_models/lead_source_type_response_model.dart';
 import '../../../response_models/leave_allocation_response_model.dart';
 import '../../../response_models/leave_response_model.dart';
 import '../../../response_models/leaves_history_response_model.dart';
@@ -36,6 +39,7 @@ import '../../../response_models/technician_response_model.dart';
 import '../../../response_models/ticket_history_response_model.dart';
 import '../../../response_models/ticket_response_model.dart';
 import '../../../response_models/today_ticket_response_model.dart';
+import '../../../response_models/user_leaves_Data_response_model.dart';
 import '../../../response_models/user_response_model.dart';
 
 abstract class AuthenticationApi {
@@ -58,6 +62,7 @@ abstract class AuthenticationApi {
   Future<deleteTicketDataResponseModel>deleteticketDetailsApiCall({Map<String, dynamic>? dataBody,String? id});
   Future<List<TicketHistoryResponseModel>>getTicketHistoryData({Map<String, dynamic>?dataBody,required String id });
   Future<TicketResponseModel>postTicketDetailsApiCall({Map<String, dynamic>? dataBody});
+  Future<List<CustomerBrandResponseModel>> getCustomerBrandDetailsApiCall({Map<String, dynamic>? dataBody, String? id});
   Future<LeaveResponseModel>getLeavesApiCall({Map<String, dynamic>? dataBody});
   Future<LeavePostResponseModel>postLeavesApiCall({Map<String, dynamic>?dataBody});
   Future<LeaveResponseModel>putLeavesApiCall({Map<String, dynamic>? dataBody,id});
@@ -68,6 +73,7 @@ abstract class AuthenticationApi {
   Future<TechnicianResponseModel>getTechnicianDetailsApiCall({Map<String, dynamic>? dataBody, parameters});
   Future<List<AttendanceUserResponseModel>>getCalenderViewUserAttendanceApiCall({Map<String, dynamic>? dataBody, parameter});
   Future<FsrResponseModel>getfsrDetailsApiCall({Map<String, dynamic>? dataBody});
+  Future<List<CheckAndUpdateCheckingPointForFsrResponseModel>> getFsrCheckingPointDetailsApiCall({Map<String, dynamic>? dataBody,parameter});
   Future<CheckPointsResponseModel>postcheckPointStatusDetailsApiCall({Map<String, dynamic>? dataBody,});
   Future<LeaveAllocationResponseModel>getLeavesALLocationApiCall({Map<String, dynamic>? dataBody});
   Future<LeaveAllocationResponseModel>putLeavesAllocationApiCall({Map<String, dynamic>? dataBody,id});
@@ -79,6 +85,8 @@ abstract class AuthenticationApi {
   Future<DeleteUserResponseModel> deleteCustomerListApiCall({Map<String, dynamic>?dataBody, parameters, String? id});
   Future<PostCustomerListResponseModel> postCustomerListApiCall({Map<String, dynamic>?dataBody, parameters});
   Future<LeadGetResponseModel> getLeadListApiCall({Map<String, dynamic>?dataBody, parameters});
+  Future<List<LeadSourceTypeResponseModel>>getListLeadSourceTypeResponseModel({Map<String, dynamic>?dataBody,});
+  Future<PostLeadSourceTypeResponseModel> postLeadStatusApiCall({Map<String, dynamic>?dataBody});
   Future<PostLeadListResponeModel> putLeadListApiCall({Map<String, dynamic>?dataBody, parameters, String? id});
   Future<LeadGetResponseModel> deleteLeadListApiCall({Map<String, dynamic>?dataBody, parameters, String? id});
   Future<PostLeadListResponeModel> postLeadListApiCall({Map<String, dynamic>?dataBody, parameters});
@@ -123,4 +131,7 @@ abstract class AuthenticationApi {
   Future<List<AttendanceResponseModel>>getAttendanceHistoryApiCall({Map<String, dynamic>?dataBody, parameters});
   Future<AmcDataCustomerWiseResponseModel>getAMCCustomerWiseDataApiCall({Map<String, dynamic>?dataBody,parameter});
   Future<List<AmcHistoryViewResponseModel>>getAmcHistoryData({Map<String, dynamic>?dataBody,required String id });
+  Future<CustomerRatingResponseModel>getCustomerRatingApiCall({Map<String,dynamic>?dataBody});
+  Future<UserLeavesDataResponseModel>getUserLeavesDataApiCall({Map<String,dynamic>?dataBody});
+  Future<TechnicianAttendanceDataResponseModel>getTechnicianStatusCountsDataApiCall({Map<String,dynamic>?dataBody});
 }

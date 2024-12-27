@@ -2,15 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-import 'package:overlay_support/overlay_support.dart';
+import 'package:tms_sathi/constans/color_constants.dart';
+import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 
-import '../../../../constans/color_constants.dart';
+import '../../../../constans/role_based_keys.dart';
 import '../../../../constans/string_const.dart';
+import '../../../../main.dart';
 import '../../../../navigations/navigation.dart';
 import '../../../../response_models/fsr_response_model.dart';
-import '../../../../utilities/common_textFields.dart';
-import '../../../../utilities/google_fonts_textStyles.dart';
-import '../../../../utilities/helper_widget.dart';
 import '../controllers/fsr_screen_controller.dart';
 
 class FsrViewScreen extends GetView<FsrViewController> {
@@ -18,163 +17,127 @@ class FsrViewScreen extends GetView<FsrViewController> {
 
   @override
   Widget build(BuildContext context) {
-    return MyAnnotatedRegion(
-      child: SafeArea(
-        child: GetBuilder<FsrViewController>(
-          builder: (controller) =>
-              Scaffold(
-                resizeToAvoidBottomInset: false,
-                bottomNavigationBar: _buildPaginationControls(controller),
-                appBar: _buildAppBar(controller),
-                body: _buildBody(controller),
-              ),
-        ),
-      ),
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      appBar: _buildModernAppBar(),
+      body: _buildModernBody(),
+      floatingActionButton: _buildModernFAB(),
+      bottomNavigationBar: _buildModernPagination(),
     );
   }
 
-  // App Bar Construction
-  PreferredSizeWidget _buildAppBar(FsrViewController controller) {
+  PreferredSizeWidget _buildModernAppBar() {
     return AppBar(
-      leading: _buildBackButton(),
       backgroundColor: appColor,
-      title: _buildAppBarTitle(),
-      actions: _buildAppBarActions(controller),
-      elevation: 2,
-    );
-  }
-
-  // Back Button
-  Widget _buildBackButton() {
-    return IconButton(
-      onPressed: () => Get.back(),
-      icon: const Icon(
-        Icons.arrow_back_ios,
-        size: 22,
-        color: Colors.black87,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios, color: Colors.black87, size: 20),
+        onPressed: () => Get.back(),
       ),
-    );
-  }
-
-  // App Bar Title
-  Widget _buildAppBarTitle() {
-    return Text(
-      'FSRs',
-      style: MontserratStyles.montserratBoldTextStyle(
-        color: blackColor,
-        size: 15,
-      ),
-    );
-  }
-
-  // App Bar Action Buttons
-  List<Widget> _buildAppBarActions(FsrViewController controller) {
-    return [
-      IconButton(
-        onPressed: controller.hitGetFsrDetailsApiCall,
-        icon: const Icon(Icons.refresh_outlined),
-      ),
-      IconButton(
-        onPressed: () {
-          Get.toNamed(AppRoutes.addfsrScreen);
-          toast("Add your New FSR");
-        },
-        icon: const Icon(FeatherIcons.plus),
-      ).paddingOnly(right: 10),
-    ];
-  }
-
-  // Body Content
-  Widget _buildBody(FsrViewController controller) {
-    return Column(
-      children: [
-        _buildSearchBar(controller),
-        Expanded(
-          child: Obx(() =>
-          controller.isLoading.value
-              ? const Center(child: CircularProgressIndicator())
-              : _buildDataContent(controller)),
+      title: Text(
+        'FSRs',
+        style: TextStyle(
+          color: Colors.black87,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
         ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh_outlined, color: Colors.black87),
+          onPressed: controller.hitGetFsrDetailsApiCall,
+        ),
+        const SizedBox(width: 8),
       ],
     );
   }
 
-  // Search Bar
-  Widget _buildSearchBar(FsrViewController controller) {
-    return Container(
-      height: Get.height * 0.07,
-      decoration: BoxDecoration(
-        color: whiteColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 5),
+  Widget _buildModernBody() {
+    return GetBuilder<FsrViewController>(
+      builder: (controller) => Column(
+        children: [
+          _buildModernSearchBar(),
+          Expanded(
+            child: Obx(() => controller.isLoading.value
+                ? const Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+              ),
+            )
+                : _buildModernContent()),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: _buildSearchField(controller),
-      ),
     );
   }
 
-  // Search Input Field
-  Widget _buildSearchField(FsrViewController controller) {
+  Widget _buildModernSearchBar() {
     return Container(
-      height: Get.height * 0.07,
-      margin: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: whiteColor,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(width: 1, color: Colors.grey),
-      ),
-      child: TextField(
-        controller: controller.searchController,
-        decoration: InputDecoration(
-          hintText: "Search",
-          hintStyle: MontserratStyles.montserratSemiBoldTextStyle(
-            color: Colors.grey,
+        color: appColor,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 1),
           ),
-          prefixIcon: const Icon(FeatherIcons.search, color: Colors.grey),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 10),
-        ),
-        style: MontserratStyles.montserratSemiBoldTextStyle(
-          color: Colors.black,
-        ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller.searchController,
         onChanged: controller.updateSearch,
+        decoration: InputDecoration(
+          hintText: "Search FSRs...",
+          hintStyle: TextStyle(color: Colors.grey[400]),
+          prefixIcon: Icon(FeatherIcons.search, color: Colors.grey[400], size: 20),
+          filled: true,
+          fillColor: Colors.grey[50],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        ),
       ),
     );
   }
 
-  // Content Display
-  Widget _buildDataContent(FsrViewController controller) {
+  Widget _buildModernContent() {
     return controller.allFsr.isEmpty
-        ? _buildEmptyState()
-        : Padding(
-      padding: const EdgeInsets.all(18.0),
-      child: _buildDataTable(controller),
-    );
+        ? _buildModernEmptyState()
+        : _buildModernDataTable();
   }
 
-  // Empty State Widget
-  Widget _buildEmptyState() {
+  Widget _buildModernEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
             nullVisualImage,
-            width: 300,
-            height: 300,
+            width: 200,
+            height: 200,
+            fit: BoxFit.contain,
           ),
+          const SizedBox(height: 24),
           Text(
             'No services found',
-            style: MontserratStyles.montserratNormalTextStyle(
-              color: blackColor,
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try adjusting your search or add a new FSR',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[400],
             ),
           ),
         ],
@@ -182,566 +145,1059 @@ class FsrViewScreen extends GetView<FsrViewController> {
     );
   }
 
-  // Data Table Construction
-  Widget _buildDataTable(FsrViewController controller) {
-    // Calculate paginated data
+  Widget _buildModernDataTable() {
     final paginatedData = _getPaginatedData(controller);
 
-    return Column(
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            columnSpacing: 16,
-            headingRowColor: MaterialStateColor.resolveWith(
-                  (states) => appColor.withOpacity(0.1),
-            ),
-            columns: _buildDataColumns(),
-            rows: paginatedData.map((entry) => _buildDataRow(entry,controller)).toList(),
-          ),
-        ),
-        // _buildPaginationControls(controller),
-      ],
-    );
-  }
-
-  // Data Columns
-  List<DataColumn> _buildDataColumns() {
-    return [
-      const DataColumn(label: Text(
-          'FSR Name', style: TextStyle(fontWeight: FontWeight.bold))),
-      const DataColumn(label: Text(
-          'FSR Categories', style: TextStyle(fontWeight: FontWeight.bold))),
-      const DataColumn(label: Text(
-          'Actions', style: TextStyle(fontWeight: FontWeight.bold))),
-    ];
-  }
-
-  // Data Row
-  DataRow _buildDataRow(Result entry,FsrViewController controller) {
-    return DataRow(
-      cells: [
-        DataCell(Text(entry.fsrName ?? '')),
-        DataCell(_fsrCategoriesData(entry)),
-        DataCell(_buildActionMenu(entry, controller)),
-      ],
-    );
-  }
-  Widget _buildPaginationControls(FsrViewController controller) {
-    return Obx(() {
-      final totalPages = (controller.allFsr.length / 10).ceil();
-      final currentPage = controller.currentPage.value;
-
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: Icon(Icons.arrow_back_ios),
-            onPressed: currentPage > 1
-                ? () => controller.changePage(currentPage - 1)
-                : null,
-          ),
-          Text(
-            'Page $currentPage of $totalPages',
-            style: TextStyle(fontSize: 16),
-          ),
-          IconButton(
-            icon: Icon(Icons.arrow_forward_ios),
-            onPressed: currentPage < totalPages
-                ? () => controller.changePage(currentPage + 1)
-                : null,
+    return Container(
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 1),
           ),
         ],
-      );
-    });
-  }
-
-  // Get Paginated Data
-  List<Result> _getPaginatedData(FsrViewController controller) {
-    final start = (controller.currentPage.value - 1) * 10;
-    final end = start + 10;
-    return controller.allFsr.sublist(
-        start,
-        end > controller.allFsr.length ? controller.allFsr.length : end
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            headingRowColor: MaterialStateColor.resolveWith(
+                  (states) => Colors.grey[50]!,
+            ),
+            columnSpacing: 24,
+            horizontalMargin: 24,
+            columns: [
+              DataColumn(
+                label: Text(
+                  'FSR Name',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'FSR Categories',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Actions',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
+                ),
+              ),
+            ],
+            rows: paginatedData.map((entry) => _buildModernDataRow(entry)).toList(),
+          ),
+        ),
+      ),
     );
   }
-}
-  // FSR Categories Popup
-  Widget _fsrCategoriesData(Result entry) {
-    return PopupMenuButton<String>(
+
+  DataRow _buildModernDataRow(Result entry) {
+    return DataRow(
+      cells: [
+        DataCell(
+          Text(
+            entry.fsrName ?? '',
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        DataCell(_buildModernCategoriesButton(entry)),
+        DataCell(_buildModernActionButton(entry)),
+      ],
+    );
+  }
+
+  Widget _buildModernCategoriesButton(Result entry) {
+    return TextButton(
+      onPressed: () => _showModernCategoriesDialog(entry),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: Colors.blue[100]!),
+        ),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            entry.categories?.length.toString() ?? '0',
-            style: const TextStyle(
-              color: Colors.blue,
-              fontWeight: FontWeight.bold,
+            '${entry.categories?.length ?? 0} Categories',
+            style: TextStyle(
+              color: Colors.blue[700],
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(width: 4),
-          const Text('FSRs '),
-          const Icon(Icons.arrow_drop_down),
+          Icon(
+            Icons.arrow_drop_down,
+            color: Colors.blue[700],
+          ),
         ],
       ),
-      itemBuilder: (BuildContext context) {
-        return entry.categories?.map((category) {
-          return PopupMenuItem<String>(
-            value: category.name,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              _showCheckpointDialog(context, entry, category);
-                            },
-                            icon: const Icon(
-                              Icons.menu,
-                              size: 16,
-                              color: Colors.blue,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              category.name ?? '',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (category.checkpoints?.isNotEmpty ?? false)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 24, top: 4),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: category.checkpoints!.map((checkpoint) {
-                              return Row(
-                                children: [
-                                  const Icon(
-                                    Icons.check_circle_outline,
-                                    size: 14,
-                                    color: Colors.green,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      checkpoint.checkpointName ?? '',
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.arrow_right,
-                  color: Colors.grey,
-                ),
-              ],
-            ),
-          );
-        }).toList() ?? [
-          const PopupMenuItem<String>(
-            value: 'none',
-            child: Text('No categories available'),
-          ),
-        ];
-      },
-      onSelected: (String value) {
-        print('Selected category: $value');
-      },
     );
   }
 
-  // Action Menu
-  Widget _buildActionMenu(Result entry, FsrViewController controller) {
+  Widget _buildModernActionButton(Result entry) {
     return PopupMenuButton<String>(
-      color: Colors.white,
-      offset: const Offset(0, 56),
-      itemBuilder: (BuildContext context) =>
-      [
-        _buildPopupMenuItem(
-          value: 'Edit',
-          icon: Icons.edit_calendar_outlined,
-          text: 'Edit',
-          onTap: () => _showEditModelView(controller, context),
+      offset: const Offset(0, 40),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'edit',
+          child: Row(
+            children: [
+              Icon(Icons.edit_outlined, size: 20, color: Colors.blue[700]),
+              const SizedBox(width: 12),
+              const Text('Edit'),
+            ],
+          ),
         ),
-        _buildPopupMenuItem(
-          value: 'Delete',
-          icon: Icons.delete,
-          text: 'Delete',
-          color: Colors.red,
-          onTap: () {
-            // Implement delete logic
-          },
+        PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: [
+              const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+              const SizedBox(width: 12),
+              const Text('Delete'),
+            ],
+          ),
         ),
       ],
-      child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Icon(Icons.more_vert, size: 20),
+      onSelected: (value) {
+        if (value == 'edit') {
+          _showModernEditDialog(entry);
+        } else if (value == 'delete') {
+          _showModernDeleteDialog(entry);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Icon(
+          Icons.more_vert,
+          size: 20,
+          color: Colors.black87,
+        ),
       ),
     );
   }
 
-  // Popup Menu Item
-  PopupMenuItem<String> _buildPopupMenuItem({
-    required String value,
+  Widget _buildModernFAB() {
+    final userrole = storage.read(userRole);
+    if (userrole == 'technician' || userrole == 'sale') return const SizedBox();
+
+    return FloatingActionButton.extended(
+      onPressed: () => Get.toNamed(AppRoutes.addfsrScreen),
+      backgroundColor: appColor,
+      label: Row(
+        children: const [
+          Icon(Icons.add, color: Colors.white),
+          SizedBox(width: 8),
+          Text(
+            'Add',
+            style: TextStyle(color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernPagination() {
+    return GetX<FsrViewController>(
+      builder: (controller) {
+        final totalPages = (controller.allFsr.length / 10).ceil();
+        final currentPage = controller.currentPage.value;
+
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 10,
+                offset: const Offset(0, -1),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildPaginationButton(
+                icon: Icons.arrow_back_ios,
+                onPressed: currentPage > 1
+                    ? () => controller.changePage(currentPage - 1)
+                    : null,
+              ),
+              const SizedBox(width: 24),
+              Text(
+                'Page $currentPage of $totalPages',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 24),
+              _buildPaginationButton(
+                icon: Icons.arrow_forward_ios,
+                onPressed: currentPage < totalPages
+                    ? () => controller.changePage(currentPage + 1)
+                    : null,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPaginationButton({
     required IconData icon,
-    required String text,
-    VoidCallback? onTap,
-    Color? color,
+    VoidCallback? onPressed,
   }) {
-    return PopupMenuItem<String>(
-      value: value,
-      onTap: onTap,
-      child: ListTile(
-        leading: Icon(icon, size: 20, color: color ?? Colors.black),
-        title: Text(text),
+    return Material(
+      color: onPressed == null ? Colors.grey[100] : Colors.blue[50],
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            icon,
+            size: 18,
+            color: onPressed == null ? Colors.grey : Colors.blue[700],
+          ),
+        ),
       ),
     );
   }
 
-  // Checkpoint Dialog
-  void _showCheckpointDialog(BuildContext context,
-      Result fsr,
-      Category category,) {
-    final checkpointControllers = category.checkpoints?.map(
-          (checkpoint) =>
-          TextEditingController(text: checkpoint.id.toString() ?? " "),
-    ).toList() ??
-        [];
+  List<Result> _getPaginatedData(FsrViewController controller) {
+    final start = (controller.currentPage.value - 1) * 10;
+    final end = start + 10;
+    return controller.allFsr.sublist(
+      start,
+      end > controller.allFsr.length ? controller.allFsr.length : end,
+    );
+  }
 
-    if (checkpointControllers.isEmpty) {
-      checkpointControllers.add(TextEditingController());
+  void _showModernCategoriesDialog(Result entry) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          width: Get.width * 0.9,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Categories',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: entry.categories?.length ?? 0,
+                  separatorBuilder: (_, __) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final category = entry.categories![index];
+                    return _buildModernCategoryItem(category,entry);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernCategoryItem(Category category,Result entry) {
+    return InkWell(
+      onTap: ()=>_showModernCheckpointsDialog(category,entry),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+        Row(
+        children: [
+        Icon(Icons.menu_rounded, color: Colors.blue[700], size: 20),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            category.name ?? '',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        IconButton(
+          onPressed: () => _showModernCheckpointsDialog(category,entry),
+          icon: const Icon(Icons.arrow_forward_ios, size: 16),
+        ),
+        ],
+      ),
+      if (category.checkpoints?.isNotEmpty ?? false) ...[
+      const SizedBox(height: 8),
+      Padding(
+      padding: const EdgeInsets.only(left: 32),
+      child: Column(
+      children: category.checkpoints!.map((checkpoint) {
+      return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+      children: [
+      Icon(
+      Icons.check_circle_outline,
+      size: 16,
+      color: Colors.green[700],
+      ),
+      const SizedBox(width: 8),
+      Expanded(
+      child: Text(
+      checkpoint.checkpointName ?? '',
+      style: TextStyle(
+      fontSize: 14,
+      color: Colors.grey[600],
+      ),
+      ),
+      ),
+      ],
+      ),
+      );
+      }).toList(),
+      ),
+      ),
+      ],
+            ],
+        ),
+      ),
+    );
+  }
+
+  void _showModernCheckpointsDialog(Category category, Result entry) {
+    final checkpointControllers = category.checkpoints?.map(
+          (checkpoint) => TextEditingController(text: checkpoint.checkpointName),
+    ).toList() ?? [TextEditingController()];
+
+    final statusControllers = <List<TextEditingController>>[];
+    final selectedTypes = <String>[];
+    final isExpandedList = <bool>[];
+
+    // Initialize controllers and states
+    for (int i = 0; i < checkpointControllers.length; i++) {
+      statusControllers.add([TextEditingController()]);
+      selectedTypes.add('text'); // Default type
+      isExpandedList.add(false);
     }
 
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return StatefulBuilder(
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          width: Get.width * 0.9,
+          constraints: BoxConstraints(
+            maxHeight: Get.height * 0.8,
+          ),
+          padding: const EdgeInsets.all(24),
+          child: StatefulBuilder(
             builder: (context, setState) {
-              return AlertDialog(
-                title: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "FSR: ${fsr.fsrName ?? ''}",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Dialog Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Checkpoints',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[800],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Category: ${category.name ?? ''}",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        color: Colors.grey[600],
+                      IconButton(
+                        onPressed: () {
+                          Get.back();
+                          controller.hitGetFsrDetailsApiCall();
+                        },
+                        icon: const Icon(Icons.close),
                       ),
-                    ),
-                  ],
-                ),
-                content: Container(
-                  width: double.maxFinite,
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.7,
+                    ],
                   ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ...List.generate(
-                          category.checkpoints?.length ?? 0,
-                              (index) =>
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: Row(
-                                  children: [
-                                    Expanded(
+                  const SizedBox(height: 24),
+
+                  // Checkpoints List
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: checkpointControllers.length,
+                            itemBuilder: (context, index) {
+                              return Column(
+                                children: [
+                                  // Checkpoint Name Field
+                                  _buildModernCheckpointField(
+                                    controller: checkpointControllers[index],
+                                    onDelete: index >= (category.checkpoints?.length ?? 0)
+                                        ? () {
+                                      setState(() {
+                                        checkpointControllers[index].dispose();
+                                        checkpointControllers.removeAt(index);
+                                        statusControllers.removeAt(index);
+                                        selectedTypes.removeAt(index);
+                                        isExpandedList.removeAt(index);
+                                      });
+                                    }
+                                        : null,
+                                    onExpand: () {
+                                      setState(() {
+                                        isExpandedList[index] = !isExpandedList[index];
+                                      });
+                                    },
+                                    isExpanded: isExpandedList[index],
+                                  ),
+
+                                  // Checkpoint Type Selection and Status Fields
+                                  if (isExpandedList[index])
+                                    Container(
+                                      margin: const EdgeInsets.only(left: 16, bottom: 16),
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[50],
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: Colors.grey[200]!),
+                                      ),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment
-                                            .start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            category.checkpoints?[index]
-                                                .checkpointName ?? '',
-                                            style: const TextStyle(
+                                            'Checkpoint Status Type',
+                                            style: TextStyle(
                                               fontWeight: FontWeight.w500,
-                                              fontSize: 13,
+                                              color: Colors.grey[700],
                                             ),
                                           ),
-                                          const SizedBox(height: 4),
-                                          TextField(
-                                            controller: checkpointControllers[index],
-                                            decoration: const InputDecoration(
-                                              hintText: 'Enter status',
-                                              border: OutlineInputBorder(),
-                                              contentPadding: EdgeInsets
-                                                  .symmetric(
-                                                horizontal: 10,
-                                                vertical: 15,
+                                          const SizedBox(height: 12),
+
+                                          // Type Selection Radio Buttons
+                                          SingleChildScrollView(
+                                            scrollDirection: Axis.horizontal,
+                                            child: Row(
+                                              children: [
+                                                _buildTypeRadio(
+                                                  'Text',
+                                                  'text',
+                                                  selectedTypes[index],
+                                                      (value) {
+                                                    setState(() {
+                                                      selectedTypes[index] = value!;
+                                                      statusControllers[index] = [TextEditingController()];
+                                                    });
+                                                  },
+                                                ),
+                                                const SizedBox(width: 16),
+                                                _buildTypeRadio(
+                                                  'Dropdown',
+                                                  'dropdown',
+                                                  selectedTypes[index],
+                                                      (value) {
+                                                    setState(() {
+                                                      selectedTypes[index] = value!;
+                                                      statusControllers[index] = [TextEditingController()];
+                                                    });
+                                                  },
+                                                ),
+                                                const SizedBox(width: 16),
+                                                _buildTypeRadio(
+                                                  'Calendar',
+                                                  'calendar',
+                                                  selectedTypes[index],
+                                                      (value) {
+                                                    setState(() {
+                                                      selectedTypes[index] = value!;
+                                                      statusControllers[index] = [TextEditingController()];
+                                                    });
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 16),
+
+                                          // Status Fields based on selected type
+                                          if (selectedTypes[index] == 'dropdown') ...[
+                                            Text(
+                                              'Dropdown Options',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.grey[700],
                                               ),
                                             ),
-                                          ),
+                                            const SizedBox(height: 8),
+                                            ...statusControllers[index].map((controller) =>
+                                                Padding(
+                                                  padding: const EdgeInsets.only(bottom: 8),
+                                                  child: Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child: TextFormField(
+                                                          controller: controller,
+                                                          decoration: InputDecoration(
+                                                            hintText: 'Enter option',
+                                                            border: OutlineInputBorder(
+                                                              borderRadius: BorderRadius.circular(8),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      IconButton(
+                                                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            if (statusControllers[index].length > 1) {
+                                                              controller.dispose();
+                                                              statusControllers[index].remove(controller);
+                                                            }
+                                                          });
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                            ).toList(),
+                                            TextButton.icon(
+                                              onPressed: () {
+                                                setState(() {
+                                                  statusControllers[index].add(TextEditingController());
+                                                });
+                                              },
+                                              icon: const Icon(Icons.add,color: Colors.blue,size: 15,),
+                                              label:  Text('Add Option',style: MontserratStyles.montserratSemiBoldTextStyle(color: Colors.blue,size: 15),),
+                                            ),
+                                          ] else if (selectedTypes[index] == 'text') ...[
+                                            Text(
+                                              'Text Input Type',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.grey[700],
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              'Users will be able to enter free text for this checkpoint.',
+                                              style: TextStyle(
+                                                color: Colors.grey[600],
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ] else if (selectedTypes[index] == 'calendar') ...[
+                                            Text(
+                                              'Calendar Input Type',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.grey[700],
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              'Users will be able to select a date for this checkpoint.',
+                                              style: TextStyle(
+                                                color: Colors.grey[600],
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
                                         ],
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
+                                ],
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildModernAddButton(
+                            onPressed: () {
+                              setState(() {
+                                checkpointControllers.add(TextEditingController());
+                                statusControllers.add([TextEditingController()]);
+                                selectedTypes.add('text');
+                                isExpandedList.add(false);
+                              });
+                            },
+                            label: 'Add Checkpoint',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Action Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          for (var controller in checkpointControllers) {
+                            controller.dispose();
+                          }
+                          for (var controllerList in statusControllers) {
+                            for (var controller in controllerList) {
+                              controller.dispose();
+                            }
+                          }
+                          Get.back();
+                        },
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.grey[600]),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      for (var controller in checkpointControllers) {
-                        controller.dispose();
-                      }
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final checkpointStatuses = <String, String>{};
-                      for (int i = 0; i <
-                          (category.checkpoints?.length ?? 0); i++) {
-                        checkpointStatuses[
-                        category.checkpoints?[i].id.toString() ?? ''] =
-                            checkpointControllers[i].text;
-                      }
-
-                      // Uncomment and implement API call if needed
-                      // await Get.find<FsrViewController>().hitGetFsrDetailsApiCall(
-                      //   Result.id.toString() ?? '',
-                      //   category.id.toString() ?? '',
-                      //   checkpointStatuses,
-                      // );
-
-                      for (var controller in checkpointControllers) {
-                        controller.dispose();
-                      }
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: appColor,
-                    ),
-                    child: const Text(
-                      'Update Status',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                      ),
+                      const SizedBox(width: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                         /* controller.hitUpdateCheckPointStatuses(
+                              fsrId: entry.id.toString(), // Get the FSR ID
+                              categoryId: category.id.toString(), // Get the category ID
+                              checkpointName:  checkpointControllers[index].text,
+                              checkpointStatuses: selectedTypes[index] == 'dropdown'
+                                  ? statusControllers[index].map((c) => c.text).toList()
+                                  : [statusControllers[index].first.text],
+                              isDropdown: selectedTypes[index] == 'dropdown'
+                          );   */                       Get.back();
+                          controller.hitGetFsrDetailsApiCall();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: appColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                        ),
+                        child:  Text(
+                          'Update',
+                          style: MontserratStyles.montserratSemiBoldTextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               );
             },
-          );
-        });
-  }
-
-  ButtonStyle _buttonStyle() {
-    return ButtonStyle(
-      backgroundColor: MaterialStateProperty.all(appColor),
-      foregroundColor: MaterialStateProperty.all(Colors.white),
-      padding: MaterialStateProperty.all(
-        EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-      ),
-      elevation: MaterialStateProperty.all(3),
-      shape: MaterialStateProperty.all(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          ),
         ),
       ),
-      shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.3)),
     );
   }
 
+  Widget _buildTypeRadio(String label, String value, String groupValue, Function(String?) onChanged) {
+    return Row(
+      children: [
+        Radio<String>(
+          value: value,
+          groupValue: groupValue,
+          onChanged: onChanged,
+          activeColor: Colors.blue[700],
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey[700],
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
 
-  void _showEditModelView(FsrViewController controller, BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false, // Prevent dismissal by tapping outside
-      builder: (context) =>
-          Dialog(
-            // Set maximum size constraints for better layout
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery
-                    .of(context)
-                    .size
-                    .width * 0.9,
-                maxHeight: MediaQuery
-                    .of(context)
-                    .size
-                    .height * 0.8,
-              ),
-              child: GetBuilder<
-                  FsrViewController>( // Add GetBuilder to update UI when controller state changes
-                builder: (controller) =>
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      // Make dialog size fit content
-                      children: [
-                        // Header with close button
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Edit FSR",
-                                style: MontserratStyles.montserratBoldTextStyle(
-                                  size: 15,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.close),
-                                onPressed: () => Navigator.pop(context),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Divider(color: Colors.grey),
-
-                        // Scrollable content
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CustomTextField(
-                                    hintText: "Name".tr,
-                                    controller: controller.firstNameController,
-                                    textInputType: TextInputType.text,
-                                    labletext: 'Name'.tr,
-                                  ),
-                                  vGap(20),
-
-                                  // Categories list
-                                  ListView.separated(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemCount: controller
-                                        .categoryNameControllers
-                                        .length,
-                                    separatorBuilder: (context, index) =>
-                                        vGap(10),
-                                    itemBuilder: (context, index) {
-                                      return Row(
-                                        children: [
-                                          Expanded(
-                                            flex: 1,
-                                            child: CustomTextField(
-                                              hintText: 'Categories'.tr,
-                                              controller: controller
-                                                  .categoryNameControllers[index],
-                                              maxLines: 2,
-                                              textInputType: TextInputType.text,
-                                              labletext: 'Categories'.tr,
-                                            ),
-                                          ),
-                                          IconButton(
-                                            icon: Icon(Icons.remove_circle,
-                                                color: Colors.red),
-                                            onPressed: () {
-                                              controller.removeCategoryField(
-                                                  index);
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                  vGap(20),
-
-                                  // Add Category button
-                                  Center(
-                                    child: SizedBox(
-                                      width: 230,
-                                      height: 50,
-                                      child: CupertinoButton(
-                                        color: appColor,
-                                        onPressed: () =>
-                                            controller.addNewCategoryField(),
-                                        padding: EdgeInsets.zero,
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment
-                                              .center,
-                                          children: [
-                                            Icon(Icons.add, size: 18),
-                                            SizedBox(width: 5),
-                                            Text(
-                                              'Add Category',
-                                              style: MontserratStyles
-                                                  .montserratBoldTextStyle(
-                                                color: blackColor,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  vGap(20),
-
-                                  // Submit button
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: CupertinoButton(
-                                      color: appColor,
-                                      onPressed: () {
-                                        // controller.hitPostFsrDetailsApiCall();
-                                        Navigator.pop(context);
-                                      },
-                                      child: Text(
-                                        'Update FSR',
-                                        style: MontserratStyles
-                                            .montserratBoldTextStyle(
-                                          color: blackColor,
-                                          size: 15,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+  Widget _buildModernCheckpointField({
+    required TextEditingController controller,
+    required bool isExpanded,
+    VoidCallback? onDelete,
+    VoidCallback? onExpand,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: 'Enter checkpoint name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.blue[700]!),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
           ),
+          IconButton(
+            onPressed: onExpand,
+            icon: Icon(
+              isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+              color: Colors.blue[700],
+            ),
+          ),
+          if (onDelete != null)
+            IconButton(
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+            ),
+        ],
+      ),
     );
   }
+
+  Widget _buildModernCheckpointField1({
+    required TextEditingController controller,
+    VoidCallback? onDelete,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: 'Enter checkpoint name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.blue[700]!),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+            ),
+          ),
+          if (onDelete != null) ...[
+            const SizedBox(width: 8),
+            IconButton(
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernAddButton({
+    required VoidCallback onPressed,
+    required String label,
+  }) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: const Icon(Icons.add, size: 20),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue[50],
+        foregroundColor: Colors.blue[700],
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 12,
+        ),
+      ),
+    );
+  }
+
+  void _showModernEditDialog(Result entry) {
+    controller.firstNameController.text = entry.fsrName ?? "";
+    controller.categoryNameControllers.clear();
+    for (var category in entry.categories!) {
+      controller.categoryNameControllers.add(TextEditingController(text: category.name));
+    }
+
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          width: Get.width * 0.9,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Edit FSR',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _buildModernEditForm(entry),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernEditForm(Result entry) {
+    return GetBuilder<FsrViewController>(
+      builder: (controller) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextFormField(
+            controller: controller.firstNameController,
+            decoration: InputDecoration(
+              labelText: 'FSR Name',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.blue[700]!),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Categories',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 16),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: controller.categoryNameControllers.length,
+            itemBuilder: (context, index) {
+              return _buildModernCategoryField(
+                controller: controller.categoryNameControllers[index],
+                onDelete: () => controller.removeCategoryField(index),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: _buildModernAddButton(
+              onPressed: controller.addNewCategoryField,
+              label: 'Add Category',
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                // Update logic here
+                Get.back();
+                controller.hitGetFsrDetailsApiCall();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: appColor,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Update',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernCategoryField({
+    required TextEditingController controller,
+    required VoidCallback onDelete,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              decoration: InputDecoration(
+                labelText: 'Category Name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.blue[700]!),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            onPressed: onDelete,
+            icon: const Icon(Icons.delete_outline, color: Colors.red),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showModernDeleteDialog(Result entry) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.orange,
+                size: 48,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Delete FSR',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Are you sure you want to delete this FSR? This action cannot be undone.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () => Get.back(),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Delete logic here
+                      Get.back();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Delete',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

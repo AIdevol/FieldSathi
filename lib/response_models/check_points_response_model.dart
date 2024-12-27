@@ -26,3 +26,19 @@ class CheckPointsResponseModel {
     return data;
   }
 }
+
+//=========================================================================update status==========================================
+class UpdateCheckPointStatusApiCall {
+  UpdateCheckPointStatusApiCall({
+    required this.message,
+  });
+
+  final String? message;
+
+  factory UpdateCheckPointStatusApiCall.fromJson(Map<String, dynamic> json){
+    return UpdateCheckPointStatusApiCall(
+      message: json["message"],
+    );
+  }
+
+}

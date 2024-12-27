@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/constans/const_local_keys.dart';
 import 'package:tms_sathi/main.dart';
+import 'package:tms_sathi/response_models/customer_rating_response_model.dart';
 import 'package:tms_sathi/response_models/today_ticket_response_model.dart';
 import 'package:tms_sathi/response_models/user_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
@@ -28,6 +29,8 @@ class HomeScreenController extends GetxController{
   final RxList<ServiceCategoryResponseModel> allServices = <ServiceCategoryResponseModel>[].obs;
   final RxList<ServiceCategoryResponseModel> filteredServices = <ServiceCategoryResponseModel>[].obs;
   RxList<TodaysTicket> todayResponseData = <TodaysTicket>[].obs;
+ final RxInt customerRatingData = 0.obs;
+ final RxDouble customerAverageRatingData = 0.0.obs;
   @override
   void onInit(){
     super.onInit();
@@ -38,6 +41,7 @@ class HomeScreenController extends GetxController{
     hitGetAmcDetailsApiCall();
     hitServiceCategoriesApiCall();
     hitTodayTicketDataApiCall();
+    hitGetCustomerRatingApiCall();
     // checkFirstTimeUser();
   }
 
@@ -150,8 +154,8 @@ class HomeScreenController extends GetxController{
     try {
       final tickets = await Get.find<AuthenticationApiService>().getticketDetailsApiCall();
       var ticketData=(tickets.results);
-      final List ticket = ticketData.map((ticketData)=>ticketData..toString()).toList();
-      final List ticketStatus = ticketData.map((ticketData)=>ticketData.status.toString()).toList();
+      final List ticket = ticketData!.map((ticketData)=>ticketData..toString()).toList();
+      final List ticketStatus = ticketData!.map((ticketData)=>ticketData.status.toString()).toList();
       await storage.write(ticketId, ticket);
       print('hello bhai apka ticket data idhr hai: ${storage.read(ticketId)}');
       print('hello bhai apks ticket status idhr hai: $ticketStatus');
@@ -203,6 +207,24 @@ void hitTodayTicketDataApiCall(){
 
 }
 
+void hitGetCustomerRatingApiCall(){
+    isLoading.value = true;
+    // customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().getCustomerRatingApiCall().then((value){
+        customerRatingData.value = value.ratedCustomersCount!;
+        customerAverageRatingData.value = value.averageRating!;
+       print("Customer Rated : ${customerRatingData.value}");
+      toast("Customer Ratings Fetched Successfully");
+      customLoader.hide();
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
+      customLoader.hide();
+    });
+}
+
+
   Future<void> refereshAllTicket()async{
     customLoader.show();
     hitGetuserDetailsApiCall();
@@ -211,6 +233,8 @@ void hitTodayTicketDataApiCall(){
     fetchTicketsApiCall();
     hitGetAmcDetailsApiCall();
     hitServiceCategoriesApiCall();
+    hitTodayTicketDataApiCall();
+    hitGetCustomerRatingApiCall();
     customLoader.hide();
     // checkFirstTimeUser();
   }

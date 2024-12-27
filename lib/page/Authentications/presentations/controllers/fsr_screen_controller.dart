@@ -5,6 +5,8 @@ import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/response_models/fsr_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
+import '../../../../constans/enum.dart';
+
 class FsrViewController extends GetxController {
 
   final TextEditingController firstNameController = TextEditingController();
@@ -20,7 +22,13 @@ class FsrViewController extends GetxController {
   final RxList<Result> filteredFsr = <Result>[].obs;
   final RxList<Category> categoryData = <Category>[].obs;
   final RxList<Checkpoint>checkPointData = <Checkpoint>[].obs;
+  final RxList<CheckAndUpdateCheckingPointForFsrResponseModel>checkPointsDetails=<CheckAndUpdateCheckingPointForFsrResponseModel>[].obs;
   final RxBool isLoading = false.obs;
+  StatusType selectedType = StatusType.dropdown;
+  RxList<String> statusItems =<String>[].obs;
+  final RxList<String> mockResponse =<String>[].obs;
+
+  TextEditingController _statusController = TextEditingController();
 
   // Pagination related variables
   final RxInt currentPage = 0.obs;
@@ -40,16 +48,23 @@ class FsrViewController extends GetxController {
     return (filteredFsr.length / pageSize).ceil();
   }
 
-  // Override onInit to set initial page
+
+
   @override
   void onInit() {
     super.onInit();
     searchController.addListener(_onSearchChanged);
     currentPage.value = 1; // Start on first page
     hitGetFsrDetailsApiCall();
+
   }
 
-  // Modify search and filter methods to reset pagination
+  @override
+  void dispose() {
+    _statusController.dispose();
+    super.dispose();
+  }
+
   void updateSearch(String query) {
     searchQuery.value = query;
     _filterFsr();
@@ -153,6 +168,27 @@ class FsrViewController extends GetxController {
     }
   }
 
+  void GetFsrCheckingPointDetailsApiCall({required String fsr_id,required String Category_id}){
+    isLoading.value=true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+    var checkingpointparameter = {
+      "fsr_id":fsr_id,
+      "category_id":Category_id
+    };
+    Get.find<AuthenticationApiService>().getFsrCheckingPointDetailsApiCall(parameter: checkingpointparameter).then((value){
+      checkPointsDetails.assignAll(value);
+      print("ajfjadf: ${value}");
+      toast('CheckPoint data Fetched Successfully');
+      customLoader.hide();
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
+      customLoader.hide();
+    });
+  }
+
+
   Future<void> hitPostCheckingStatusApiCall() async {
     if (checkPointStatusCheckingController.text.isEmpty) {
       toast('Please enter checkpoint status');
@@ -192,7 +228,43 @@ class FsrViewController extends GetxController {
         .join(', ') ?? '';
   }
 
+  void hitUpdateCheckPointStatuses({
+    required String fsrId,
+    required String categoryId,
+    required String checkpointName,
+    required List<String> checkpointStatuses,
+    required bool isDropdown
+  }) {
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus?.unfocus();
 
+    var requestData = {
+      "fsr_id": fsrId,
+      "category_id": categoryId,
+      "checkpoints": [
+        {
+          "checkpoint_name": checkpointName,
+          "checkpointStatuses": checkpointStatuses,
+          "displayType": isDropdown ? "dropdown" : "text"
+        }
+      ]
+    };
+
+    Get.find<AuthenticationApiService>()
+        .UpdatecheckPointStatusApiCall(dataBody: requestData)
+        .then((response) {
+      toast(response.message.toString());
+      Get.back();
+      hitGetFsrDetailsApiCall(); // Refresh the data
+      update();
+    }).onError((error, stackTrace) {
+      toast(error.toString());
+    }).whenComplete(() {
+      isLoading.value = false;
+      customLoader.hide();
+    });
+  }
   // Future<void> updateCheckpointStatuses(
   //     String fsrId,
   //     String categoryId,

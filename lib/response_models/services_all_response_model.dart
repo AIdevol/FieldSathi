@@ -9,21 +9,21 @@ class ServicesResponseModel {
   final int? count;
   final int? totalPages;
   final int? currentPage;
-  final List<Service> results;
+  final List<ServiceData> results;
 
   factory ServicesResponseModel.fromJson(Map<String, dynamic> json){
     return ServicesResponseModel(
       count: json["count"],
       totalPages: json["total_pages"],
       currentPage: json["current_page"],
-      results: json["results"] == null ? [] : List<Service>.from(json["results"]!.map((x) => Service.fromJson(x))),
+      results: json["results"] == null ? [] : List<ServiceData>.from(json["results"]!.map((x) => ServiceData.fromJson(x))),
     );
   }
 
 }
 
-class Service {
-  Service({
+class ServiceData {
+  ServiceData({
     required this.id,
     required this.serviceName,
     required this.servicePrice,
@@ -49,8 +49,8 @@ class Service {
   final int? createdBy;
   final int? admin;
 
-  factory Service.fromJson(Map<String, dynamic> json){
-    return Service(
+  factory ServiceData.fromJson(Map<String, dynamic> json){
+    return ServiceData(
       id: json["id"],
       serviceName: json["service_name"],
       servicePrice: json["service_price"],

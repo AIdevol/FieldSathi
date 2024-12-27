@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:tms_sathi/constans/const_local_keys.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/lead_list_view_controller.dart';
 import 'package:tms_sathi/response_models/lead_response_model.dart';
+import 'package:tms_sathi/response_models/lead_source_type_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 import '../../../../main.dart';
@@ -21,6 +23,7 @@ class LeadFormFieldController extends GetxController{
   final TextEditingController additionalNotesController = TextEditingController();
   final TextEditingController sourceController = TextEditingController();
 
+  RxList<LeadSourceTypeResponseModel> leadSourceTypeData = <LeadSourceTypeResponseModel>[].obs;
   // LeadPostResponseModel leadlistData = LeadPostResponseModel().obs;
   RxBool isLoading = true.obs;
   List<String> regionValues = [
@@ -31,13 +34,23 @@ class LeadFormFieldController extends GetxController{
     'South'
   ];
 
+  var isDropdown = true.obs;
+  var selectedSource = ''.obs;
+  final isAddMode = true.obs;
   String defaultValue  = 'Select Region';
 
   var phoneCountryCode ="".obs;
 
+  final isDropdownVisible = false.obs;
   void updateRegion(String newValue){
     defaultValue = newValue;
     update();
+  }
+
+  @override
+  void onInit(){
+    super.onInit();
+    hitGetLeadSourcehitApiEnd();
   }
 
   bool validateForm() {
@@ -111,31 +124,35 @@ class LeadFormFieldController extends GetxController{
     });
   }
 
-  // void hitPostLeadlistApiCall(){
-  //   isLoading.value = true;
-  //   customLoader.show();
-  //   FocusManager.instance.primaryFocus!.context;
-  //   Map<String ,dynamic> leadData = {
-  //     "companyName":companyController.text,
-  //     "firstName":firstNameController.text,
-  //     "lastName":lastNameController.text,
-  //     "email": emailController.text,
-  //     "mobile":phoneController.text,
-  //     "address":addressController.text,
-  //     "country":countryController.text,
-  //     "state":stateController.text,
-  //     "city": cityController.text,
-  //     "source": sourceController,
-  //     "notes": additionalNotesController.text,
-  //     "status": 'In-Discussion',
-  //   };
-  //   Get.find<AuthenticationApiService>().postLeadListApiCall(dataBody: leadData).then((value){
-  //     customLoader.hide();
-  //     toast('Successfully added Lead list');
-  //     update();
-  //   }).onError((error, stackError){
-  //     customLoader.hide();
-  //     toast(error.toString());
-  //   });
-  // }
+  void hitGetLeadSourcehitApiEnd(){
+    isLoading.value = true;
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().getListLeadSourceTypeResponseModel().then((value){
+      leadSourceTypeData.assignAll(value);
+      List<String> sourceTypeIds = leadSourceTypeData.map((f)=>f.id.toString()).toList();
+      storage.write(sourceTypeId, sourceTypeIds);
+      toast("Fetched Successfully");
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
+    });
+  }
+  void hitPostLeadSourcehitApiEnd(){
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+    var data={
+      'name':sourceController.text
+    };
+    print("raj: $data");
+    Get.find<AuthenticationApiService>().postLeadStatusApiCall(dataBody: data).then((value){
+      toast(value.message.toString());
+      customLoader.hide();
+      hitGetLeadSourcehitApiEnd();
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
+      customLoader.hide();
+    });
+  }
 }

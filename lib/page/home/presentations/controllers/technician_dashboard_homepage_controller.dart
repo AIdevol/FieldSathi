@@ -52,7 +52,7 @@ class TechnicianDashboardHomepageController extends GetxController {
     rejectedTickets.value = 0;
 
     // Count tickets based on status
-    for (var ticket in ticketData.value!.results) {
+    for (var ticket in ticketData.value!.results!) {
       switch (ticket.status?.toLowerCase()) {
         case 'completed':
           completedTickets.value++;
@@ -165,9 +165,8 @@ class TechnicianDashboardHomepageController extends GetxController {
       final response = await Get.find<AuthenticationApiService>()
           .getticketDetailsApiCall();
       ticketData.value = response;
-
       if (ticketData.value != null) {
-        print('Received ${ticketData.value!.results.length} tickets');
+        print('Received ${ticketData.value!.results!.length} tickets');
         print('Total count from API: ${ticketData.value!.count}');
 
         // Update ticket statistics

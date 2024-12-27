@@ -10,6 +10,7 @@ import 'package:tms_sathi/page/Authentications/widgets/controller/lead_form_fiel
 import 'package:tms_sathi/page/Authentications/widgets/controller/principal_customer_view_controller.dart';
 import 'package:tms_sathi/page/Authentications/widgets/controller/show_technician_data_controller.dart';
 
+import '../controller/show_user_leave_screen_data_controller.dart';
 import '../controller/ticket_list_creation_controller.dart';
 
 class WidgetBindings extends Bindings{
@@ -26,6 +27,6 @@ class WidgetBindings extends Bindings{
     Get.lazyPut<AddSuperUserViewController>(() => AddSuperUserViewController());
     Get.lazyPut<ShowTechnicianDataController>(() => ShowTechnicianDataController());
     Get.lazyPut<AddSalesScreenController>(() => AddSalesScreenController());
-
+    Get.lazyPut<ShowUserLeaveScreenDataController>(() => ShowUserLeaveScreenDataController());
   }
 }

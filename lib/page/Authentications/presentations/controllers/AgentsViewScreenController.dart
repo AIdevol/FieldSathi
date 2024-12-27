@@ -22,7 +22,7 @@ class AgentsViewScreenController extends GetxController {
   RxInt currentPage = 1.obs;
   RxInt totalPages = 0.obs;
   final int itemsPerPage = 10;
-  RxBool isLoading = false.obs;
+  RxBool isLoading = true.obs;
   RxList<Result> agentsData = <Result>[].obs;
   RxList<Result> filteredAgentsData = <Result>[].obs;
   RxList<Result> agentsPaginationsData = <Result>[].obs;

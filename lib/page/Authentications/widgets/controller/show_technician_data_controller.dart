@@ -17,7 +17,6 @@ class ShowTechnicianDataController extends GetxController {
   RxList<TMSResult> attendanceFilterdata = <TMSResult>[].obs;
   RxList<TMSResult> attendancePaginationData = <TMSResult>[].obs;
   RxList<AttendanceUserResponseModel> userAttendanceData = <AttendanceUserResponseModel>[].obs;
-  // RxList<UserAttendanceResults> userAttendance = <UserAttendanceResults>[].obs;
   RxString searchQuery = ''.obs;
   final color = '#1976D2'.obs;
   final selectedDate = DateTime.now().obs;
@@ -29,6 +28,14 @@ class ShowTechnicianDataController extends GetxController {
     attendanceDatas[date] = isPresent;
     update();
   }
+  RxList<String>filterStatusValue = [
+    "All Status",
+    "Present",
+    "Absent",
+    "Idle"
+  ].obs;
+
+  RxString selectedValue = 'All Status'.obs;
   // Computed list of filtered members
   List<TMSResult> get filteredMembers {
     if (searchQuery.value.isEmpty) {
@@ -54,6 +61,14 @@ class ShowTechnicianDataController extends GetxController {
     }).toList();
   }
 
+
+
+  void updateSelectedStatusFilter(String? newValue) {
+    if (newValue != null) {
+      selectedValue.value = newValue;
+      // applyFilters();
+    }
+  }
   void filterMembers(String query) {
     searchQuery.value = query;
     update(); // Trigger UI update
@@ -75,7 +90,6 @@ class ShowTechnicianDataController extends GetxController {
   void onInit() {
     super.onInit();
     hitGetAttendanceApiCall();
-    // hitGetUserAttendanceApiCall();
   }
   void calculateTotalPages() {
     totalPages.value = (attendanceFilterdata.length / itemsPerPage).ceil();
@@ -143,9 +157,6 @@ class ShowTechnicianDataController extends GetxController {
     FocusManager.instance.primaryFocus?.unfocus();
     var rolesParameters = {
       "role": ["technician", "agent", "superuser", "sales"],
-      // "page":1,
-      // "status":"",
-      // "search":"",
       "page_size":"all"
     };
     Get.find<AuthenticationApiService>().getuserDetailsApiCall(parameter: rolesParameters).then((value) async {

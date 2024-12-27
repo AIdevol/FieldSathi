@@ -44,12 +44,6 @@ class LoginScreen extends GetView<LoginScreenController> {
         Positioned( left: MediaQuery.of(context).size.height * 0.0,
             right: MediaQuery.of(context).size.height * 0.0,
             top: MediaQuery.of(context).size.height * 0.35,child: _loginTextfields(context) )
-        // Container(
-        //   alignment: Alignment.bottomCenter,
-        //   height: Get.height*0.4,
-        //   width: Get.width,
-        //   decoration: BoxDecoration(color: whiteColor, borderRadius: BorderRadius.circular(25)),
-        // )
       ],
     );
   }
@@ -57,9 +51,20 @@ Widget _loginTextfields(BuildContext context){
     return Container(
       height: Get.height* 0.8,
       width: Get.width* 0.5,
-      decoration: const BoxDecoration(color: whiteColor,borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+      decoration:  BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: appColor.withOpacity(0.4),
+            blurRadius: 15,
+            spreadRadius: 5,
+          ),
+        ],
+        color: whiteColor,
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(25), topRight: Radius.circular(25)),
       ),
-      child: ListView(children: [ Padding(
+      child: ListView(
+        children: [ Padding(
         padding: const EdgeInsets.only(top: 16.0),
         child: SingleChildScrollView(
           child: Column(
@@ -82,23 +87,35 @@ Widget _loginTextfields(BuildContext context){
           child: Column(
             children: [
               vGap(15),
-              CustomTextField(
-                hintText: "Email".tr,
-                controller: controller.emailcontroller,
-                textInputType: TextInputType.emailAddress,
-                // focusNode: controller.phoneFocusNode,
-                onFieldSubmitted: (String? value) {
-                  // FocusScope.of(Get.context!)
-                  //     .requestFocus(controller.passwordFocusNode);
-                },
-                labletext: "Email".tr,
-                prefix: Icon(FeatherIcons.mail, color: Colors.black,),
-                // validator: (value) {
-                //   return value?.isEmptyField(messageTitle: "Email");
-                // },
-                inputFormatters:[
-                  // LengthLimitingTextInputFormatter(10),
-                ],
+              Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: appColor.withOpacity(0.1),
+                      blurRadius: 15,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                  borderRadius: BorderRadius.circular(25)
+                ),
+                child: CustomTextField(
+                  hintText: "Email".tr,
+                  controller: controller.emailcontroller,
+                  textInputType: TextInputType.emailAddress,
+                  // focusNode: controller.phoneFocusNode,
+                  onFieldSubmitted: (String? value) {
+                    // FocusScope.of(Get.context!)
+                    //     .requestFocus(controller.passwordFocusNode);
+                  },
+                  labletext: "Email".tr,
+                  prefix: Icon(FeatherIcons.mail, color: Colors.black,),
+                  // validator: (value) {
+                  //   return value?.isEmptyField(messageTitle: "Email");
+                  // },
+                  inputFormatters:[
+                    // LengthLimitingTextInputFormatter(10),
+                  ],
+                ),
               ),
               vGap(30),
               // CustomTextField(
@@ -152,7 +169,15 @@ Widget _loginTextfields(BuildContext context){
               }},
                 child: Container( height: Get.height*0.06,
                 width: Get.width,
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(25), color: appColor),
+                decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: appColor.withOpacity(0.4),
+                        blurRadius: 15,
+                        spreadRadius: 5,
+                      ),
+                    ],
+                    borderRadius: BorderRadius.circular(25), color: appColor),
               child: Center(child: Text('Login'.tr,style: MontserratStyles.montserratSemiBoldTextStyle(color: blackColor, size: 18),textAlign: TextAlign.center,)),),),
               vGap(20),
               goToRegisterView(),

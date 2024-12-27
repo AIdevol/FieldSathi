@@ -43,6 +43,7 @@ import 'package:tms_sathi/page/plans/view/pricing_view_screen.dart';
 
 import '../page/Authentications/presentations/views/account_view_screen.dart';
 import '../page/Authentications/widgets/views/show_technician_data.dart';
+import '../page/Authentications/widgets/views/show_user_leave_screen_data.dart';
 import '../page/splash/bindings/splash_bindings.dart';
 import '../page/splash/presentations/views/splash.dart';
 import 'navigation.dart';
@@ -351,6 +352,14 @@ class AppPages {
         middlewares: [
           RoutePermissionMiddleware()
         ]
+    ),
+    GetPage(
+        name: AppRoutes.userLeavesDataScreen,
+        binding: AuthenticationBinding(),
+        page: () => ShowUserLeaveScreenData(),
+        // middlewares: [
+        //   RoutePermissionMiddleware()
+        // ]
     ),
   ];
 }

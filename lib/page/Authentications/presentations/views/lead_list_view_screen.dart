@@ -14,6 +14,8 @@ import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../constans/role_based_keys.dart';
+import '../../../../main.dart';
 import '../../../../utilities/common_textFields.dart';
 
 class LeadListViewScreen extends GetView<LeadListViewController> {
@@ -23,6 +25,7 @@ class LeadListViewScreen extends GetView<LeadListViewController> {
       child: GetBuilder<LeadListViewController>(
         builder: (controller) => Scaffold(
           backgroundColor: CupertinoColors.white,
+          floatingActionButton: _buildFloatingActionButton(),
           bottomNavigationBar: _buildPaginationControls(controller),
           appBar: AppBar(
             backgroundColor: appColor,
@@ -31,14 +34,14 @@ class LeadListViewScreen extends GetView<LeadListViewController> {
               'Lead List',
               style: MontserratStyles.montserratBoldTextStyle(size: 18, color: Colors.black),
             ),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  Get.toNamed(AppRoutes.leadFormFieldScreen);
-                },
-                icon: Icon(FeatherIcons.plus, size: 24, color: Colors.black),
-              ).paddingSymmetric(horizontal: 20.0)
-            ],
+            // actions: [
+            //   IconButton(
+            //     onPressed: () {
+            //       Get.toNamed(AppRoutes.leadFormFieldScreen);
+            //     },
+            //     icon: Icon(FeatherIcons.plus, size: 24, color: Colors.black),
+            //   ).paddingSymmetric(horizontal: 20.0)
+            // ],
           ),
           body: Column(
             children: [
@@ -53,10 +56,19 @@ class LeadListViewScreen extends GetView<LeadListViewController> {
       ),
     );
   }
-
+  FloatingActionButton? _buildFloatingActionButton() {
+    final userrole = storage.read(userRole);
+    return (userrole != 'technician'&&userrole !='sale')?
+    FloatingActionButton(
+      onPressed: () =>Get.toNamed(AppRoutes.leadFormFieldScreen),
+      backgroundColor: appColor,
+      child: Icon(Icons.add, color: Colors.white),
+    )
+        : null;
+  }
   Widget _buildTopBar(BuildContext context, LeadListViewController controller) {
     return Container(
-      height: Get.height * 0.08,
+      height: Get.height * 0.15,
       width: Get.width,
       decoration: BoxDecoration(
         color: whiteColor,
@@ -69,15 +81,95 @@ class LeadListViewScreen extends GetView<LeadListViewController> {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+      child: Column(
         children: [
-          Expanded(child: _buildSearchField(controller)),
-          _buildButton('Import', () => _showImportModelView(context, controller)),
-          hGap(10),
-          _buildButton('Export', () => _downLoadExportModelView(context, controller)),
-          hGap(10),
+          vGap(10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Expanded(child: _buildSearchField(controller)),
+              _buildButton('Import', () => _showImportModelView(context, controller)),
+              hGap(10),
+              _buildButton('Export', () => _downLoadExportModelView(context, controller)),
+              hGap(10),
+            ],
+          ),
+          // vGap(10),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Expanded(child: _buildSelectStatusWidget(),
+                ),
+                hGap(10),
+                Expanded(child: _buildSelectDateWidget()
+                ),
+            ],),
+          )
+
         ],
+      ),
+    );
+  }
+
+  _buildSelectStatusWidget(){
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Obx(
+            () => DropdownButton<String>(
+              dropdownColor: Colors.white,
+              value: controller.dropdownValue.value,
+          // isExpanded: true,
+          underline: Container(),
+          items: controller.leadStatusValue.map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value,
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 13,
+                  color: Colors.black87,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: controller.updateSelectedStatusFilter,
+        ),
+      ),
+    );
+  }
+  _buildSelectDateWidget(){
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Obx(
+            () => DropdownButton<String>(
+              dropdownColor: Colors.white,
+          value: controller.dropdownDateValue.value,
+          isExpanded: true,
+          underline: Container(),
+          items: controller.leadDateWiseValue.map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value,
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 13,
+                  color: Colors.black87,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: controller.updateSelectedDateFilter,
+        ),
       ),
     );
   }
@@ -432,7 +524,7 @@ void _downLoadExportModelView(BuildContext context,  LeadListViewController cont
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "Download Lead Report",
+                "Download Report",
                 style: MontserratStyles.montserratBoldTextStyle(
                   size: 15,
                   color: Colors.black,
@@ -479,7 +571,7 @@ void _downLoadExportModelView(BuildContext context,  LeadListViewController cont
                 children: [
                   _buildActionButton(
                     context,
-                    'Cancel',
+                    'Close',
                     Icons.cancel,
                     onTap: () {
                       Get.back();
@@ -620,7 +712,7 @@ void _showImportModelView(BuildContext context,LeadListViewController controller
                                   Icon(Icons.info_outline, size: 20),
                                   SizedBox(width: 8),
                                   Text(
-                                    'Import Rules',
+                                    'Rule',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -638,10 +730,10 @@ void _showImportModelView(BuildContext context,LeadListViewController controller
                                   ),
                                   children: const [
                                     TextSpan(
-                                      text: 'Required Fields:\n',
+                                      text: 'Compulsory Field:\n',
                                       style: TextStyle(fontWeight: FontWeight.bold),
                                     ),
-                                    TextSpan(text: '• Customer\'s Name\n'),
+                                    TextSpan(text: '• Customer Name\n'),
                                     TextSpan(text: '• Address\n'),
                                     // TextSpan(text: '• Phone Number\n\n'),
                                     TextSpan(
@@ -735,7 +827,7 @@ void _showImportModelView(BuildContext context,LeadListViewController controller
                               Icon(Icons.folder_open, color: Colors.white),
                               SizedBox(width: 12),
                               Text(
-                                'Choose File to Import',
+                                'Choose File',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,

@@ -141,7 +141,7 @@ class TechnicianListViewScreenController extends GetxController {
   Future<void> hitGetTechnicianApiCall() async {
     try {
       isLoading.value = true;
-      customLoader.show();
+      // customLoader.show();
       FocusManager.instance.primaryFocus?.unfocus();
 
       final roleWiseData = {

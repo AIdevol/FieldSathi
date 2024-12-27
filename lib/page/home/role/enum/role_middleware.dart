@@ -5,6 +5,7 @@ import 'package:tms_sathi/page/home/role/enum/role_controller.dart';
 import '../../../../navigations/navigation.dart';
 
 class RoutePermissionMiddleware extends GetMiddleware {
+
   @override
   RouteSettings? redirect(String? route) {
     final roleManager = Get.find<RoleBasedRouteManager>();

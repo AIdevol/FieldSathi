@@ -161,14 +161,27 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
               onTap: () => _showImagePickerOptions(Get.context!),
               child: Stack(
                 children: [
-                  CircleAvatar(
-                    radius: 60,
-                    backgroundColor: Colors.grey[200],
-                    child: ClipOval(
-                      child: SizedBox(
-                        width: 120,
-                        height: 120,
-                        child: imageWidget,
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: appColor, width: 3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: appColor.withOpacity(0.2),
+                          blurRadius: 15,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 60,
+                      backgroundColor: Colors.grey[200],
+                      child: ClipOval(
+                        child: SizedBox(
+                          width: 120,
+                          height: 120,
+                          child: imageWidget,
+                        ),
                       ),
                     ),
                   ),
@@ -178,12 +191,16 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: CupertinoColors.systemGrey4,
+                        color: Colors.white60,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.transparent,
-                          width: 2,
-                        ),
+                        border: Border.all(color: appColor, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: appColor.withOpacity(0.2),
+                            blurRadius: 15,
+                            spreadRadius: 5,
+                          ),
+                        ],
                       ),
                       child: const Icon(
                         Icons.edit,
@@ -213,11 +230,20 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
           vGap(10),
           _buildTextField(
             onIconPressed: (){},
-            hintText: "Name".tr,
+            hintText: "First Name".tr,
             controller: controller.nameController,
             focusNode: controller.nameFocusNode,
             nextFocusNode: controller.emailFocusNode,
             icon: Icons.person,
+          ),
+          vGap(16),
+          _buildTextField(
+            onIconPressed: (){},
+            hintText: "Last Name (Optional)".tr,
+            controller: controller.lastNameController,
+            focusNode: controller.lastNameFocusNode,
+            nextFocusNode: controller.emailFocusNode,
+            // icon: Icons,
           ),
           vGap(16),
           _buildTextField(
@@ -243,9 +269,9 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
             enabled: controller.isAdmin,
             // icon: FeatherIcons.phone,
           ),
-          if(currentUser != 'technician' && currentUser != 'sales')
+          if(currentUser != 'technician' && currentUser != 'sales' && currentUser != 'superuser' && currentUser != 'agent')
           vGap(16),
-          if(currentUser != 'technician' && currentUser != 'sales')
+          if(currentUser != 'technician' && currentUser != 'sales' && currentUser != 'superuser' && currentUser != 'agent')
           _buildTextField(
             onIconPressed: (){},
             hintText: "Company Name".tr,
@@ -254,9 +280,9 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
             nextFocusNode: controller.addressFocusNode,
             icon: FeatherIcons.briefcase,
           ),
-          if(currentUser != 'technician' && currentUser != 'sales')
+          if(currentUser != 'technician' && currentUser != 'sales' && currentUser != 'superuser' && currentUser != 'agent')
           vGap(16),
-          if(currentUser != 'technician' && currentUser != 'sales')
+          if(currentUser != 'technician' && currentUser != 'sales' && currentUser != 'superuser' && currentUser != 'agent')
           _buildTextField(
             onIconPressed: (){},
             hintText: "Address".tr,
@@ -265,9 +291,9 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
             nextFocusNode: controller.employeesFocusNode,
             icon: FeatherIcons.mapPin,
           ),
-          if(currentUser != 'technician' && currentUser != 'sales')
+          if(currentUser != 'technician' && currentUser != 'sales' && currentUser != 'superuser' && currentUser != 'agent')
           vGap(16),
-          if(currentUser != 'technician' && currentUser != 'sales')
+          if(currentUser != 'technician' && currentUser != 'sales' && currentUser != 'superuser' && currentUser != 'agent')
           _buildTextField(
             onIconPressed: (){},
             hintText: "Employees".tr,
@@ -278,7 +304,8 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
             keyboardType: TextInputType.number,
           ),
           vGap(16),
-          _buildCountryTextField(context),
+          if(currentUser != 'technician' && currentUser != 'sales' && currentUser != 'superuser' && currentUser != 'agent')
+            _buildCountryTextField(context),
           vGap(30),
           _buildUpdateButton(),
           vGap(20),
@@ -293,7 +320,7 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
     required FocusNode? focusNode,  // Make focusNode optional
     FocusNode? nextFocusNode,      // Make nextFocusNode optional
     VoidCallback? onIconPressed,    // Make onIconPressed optional
-    required IconData icon,
+     IconData? icon,
     TextInputType keyboardType = TextInputType.text,
     bool readOnly = false,          // Add readOnly parameter
     bool enabled = true,            // Add enabled parameter
@@ -361,12 +388,14 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
   }) {
     return CustomTextField(
       hintText: hintText,
+      readOnly: true,
       controller: Controller,
       textInputType: TextInputType.number,
       focusNode: focusNode,
       onFieldSubmitted: (_) => FocusScope.of(Get.context!).requestFocus(nextFocusNode),
       labletext: hintText,
-      prefix: Container(  margin: const EdgeInsets.only(right: 10),
+      prefix: Container(
+        margin: const EdgeInsets.only(right: 10),
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(30),
@@ -478,6 +507,13 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(25),
           color: controller.isLoading.value ? Colors.grey : appColor,
+          boxShadow: [
+            BoxShadow(
+              color: appColor.withOpacity(0.4),
+              blurRadius: 15,
+              spreadRadius: 5,
+            ),
+          ],
         ),
         child: Center(
           child: controller.isLoading.value
@@ -513,33 +549,57 @@ class ProfileViewScreen extends GetView<ProfileViewScreenController> {
   }
 
   void _showImagePickerOptions(BuildContext context) {
-    showModalBottomSheet(
-      backgroundColor: whiteColor,
+    showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: Text('Choose from Gallery'.tr),
-                onTap: () {
-                  controller.getImage(ImageSource.gallery);
-                  Navigator.of(context).pop();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: Text('Take a Photo'.tr),
-                onTap: () {
-                  controller.getImage(ImageSource.camera);
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
+      builder: (context)=>
+      Dialog(
+
+        child: SafeArea(
+            child: Wrap(
+              children: <Widget>[
+                Column(
+                  children: [
+                    vGap(30),
+                    Text('Choose Image Source',style: MontserratStyles.montserratSemiBoldTextStyle(color: Colors.black87,size: 20),),
+                    vGap(60),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Container(
+                          height: 100,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade200,
+                            shape: BoxShape.circle
+                          ),
+                            child: IconButton(onPressed: (){
+                              controller.getImage(ImageSource.camera);
+                              Get.back();
+                            }, icon:Icon(Icons.photo_camera,size: 35,color: Colors.blue.shade800,) )),
+                        Container(
+                            height: 100,
+                            width: 100,
+                            decoration: BoxDecoration(
+                                color: Colors.green.shade200,
+                                shape: BoxShape.circle
+                            ),
+                            child: IconButton(onPressed: (){
+                          controller.getImage(ImageSource.gallery);
+                          Get.back();
+                        }, icon:Icon(Icons.photo_library,size: 35,color: Colors.green.shade800,) ))
+                      ],
+                    ),
+                    vGap(20),
+                    TextButton(onPressed: (){
+                      Get.back();
+                    }, child: Text('Cancel',style: MontserratStyles.montserratSemiBoldTextStyle(color: Colors.red),)),
+                    vGap(20)
+                  ],
+                )
+              ],
+            ),
           ),
-        );
-      },
+      )
     );
   }
 }

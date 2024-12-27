@@ -10,10 +10,11 @@ import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 class AttendanceScreenController extends GetxController {
 
   RxBool isLoading = true.obs;
+  final TextEditingController startDateController = TextEditingController();
+  final TextEditingController endDateController = TextEditingController();
+
   RxSet<TmsResponseModel> attendanceResponses = <TmsResponseModel>{}.obs;
   RxList<TMSResult> attendanceData = <TMSResult>[].obs;
-
-  // Future<AttendanceUserResponseModel>getCalenderViewUserAttendanceApiCall({Map<String, dynamic>? dataBody, parameter})
 
   RxInt totalUsers = 0.obs;
   RxInt totalPresent = 0.obs;
@@ -30,45 +31,12 @@ class AttendanceScreenController extends GetxController {
 
   @override
   void onClose() {
+    startDateController.dispose();
+    endDateController.dispose();
     super.onClose();
   }
 
-  // void calculateStatistics() {
-  //   // Set total users from the count in response model
-  //   if (attendanceResponses.isNotEmpty) {
-  //     totalUsers.value = attendanceResponses.first.count!;
-  //   }
-  //
-  //   // Reset counters
-  //   totalPresent.value = 0;
-  //   totalAbsent.value = 0;
-  //   totalIdle.value = 0;
-  //
-  //   for (var user in attendanceData) {
-  //     if (user.todayAttendance != null) {
-  //       // Check the status from todayAttendance
-  //       switch (user.todayAttendance?.status?.toLowerCase()) {
-  //         case 'present':
-  //           totalPresent.value++;
-  //           break;
-  //         case 'absent':
-  //           totalAbsent.value++;
-  //           break;
-  //         case 'idle':
-  //           totalIdle.value++;
-  //           break;
-  //       }
-  //     } else {
-  //       totalAbsent.value++;
-  //     }
-  //   }
-  //
-  //   if (totalUsers.value > 0) {
-  //     attendanceRate.value = ((totalPresent.value + totalIdle.value) / totalUsers.value) * 100;
-  //   }
-  //
-  //   update();
-  // }
+
 
   void hitGetAttendanceApiCall() {
     isLoading.value = true;

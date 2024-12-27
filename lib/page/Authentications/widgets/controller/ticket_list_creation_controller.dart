@@ -8,6 +8,7 @@ import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 import '../../../../constans/const_local_keys.dart';
 import '../../../../response_models/amcData_customerWise_response_model.dart';
+import '../../../../response_models/customerBrand_response_model.dart';
 import '../../../../response_models/customer_list_response_model.dart';
 import '../../../../response_models/fsr_response_model.dart';
 import '../../../../response_models/technician_response_model.dart';
@@ -92,9 +93,11 @@ class TicketListCreationController extends GetxController {
   final RxList<Result> filteredFsr = <Result>[].obs;
   RxList<CustomerData> customerListData = <CustomerData>[].obs;
   RxList<CustomerData> customerdefineData = <CustomerData>[].obs;
-  RxList<Service>servicesAll=<Service>[].obs;
-  RxList<Service>servicesAllResponse=<Service>[].obs;
+  RxList<ServiceData>servicesAll=<ServiceData>[].obs;
+  RxList<ServiceData>servicesAllResponse=<ServiceData>[].obs;
   RxList<AmcDataCustomerWiseResult>AmcDataCustomerWiseList=<AmcDataCustomerWiseResult>[].obs;
+  RxList<CustomerBrandResponseModel> customerBrandResponse= <CustomerBrandResponseModel>[].obs;
+
 
 
   Rx<TechnicianData?> selectedTechnician = Rx<TechnicianData?>(null);
@@ -202,7 +205,7 @@ class TicketListCreationController extends GetxController {
     hitGetCustomerListApiCall();
     hitGetFsrDetailsApiCall();
     hitServicesAllGetApiCall();
-
+    // hitGetCustomerBrandListApiCall(id: "${selectedCustomerId.value}");
   }
 
   @override
@@ -332,7 +335,7 @@ class TicketListCreationController extends GetxController {
       final response = await Get.find<AuthenticationApiService>()
           .getticketDetailsApiCall(parameter: parameterData);
       if (response != null) {
-        ticketResult.assignAll(response.results);
+        ticketResult.assignAll(response.results!);
         // applyFilters(); // Apply initial filters
       }
       List<String> ticketids = ticketResult.map((ids) => ids.id.toString())
@@ -353,7 +356,7 @@ class TicketListCreationController extends GetxController {
     }
   }
 
-  Future<void> hitGetTechnicianApiCall() async {
+  Future<void> hitGetAllUserApiCall() async {
     try {
       isLoading.value = true;
       FocusManager.instance.primaryFocus?.unfocus();
@@ -497,6 +500,55 @@ class TicketListCreationController extends GetxController {
     }).onError((error,stackError){
       toast(error.toString());
       customLoader.hide();
+    });
+  }
+
+  Future<void> hitGetTechnicianApiCall() async {
+    try {
+      isLoading.value = true;
+      // customLoader.show();
+      FocusManager.instance.primaryFocus?.unfocus();
+      final roleWiseData = {
+        'role': 'technician',
+        "page_size": 'all'
+      };
+
+      final response = await Get.find<AuthenticationApiService>()
+          .getTechnicianApiCall(parameters: roleWiseData);
+
+      // Update both lists
+      allTechnicians.assignAll(response.results!);
+      filteredTechnicians.assignAll(response.results!); // Initialize filtered list
+      final technicianIds = response.results?.map((e) => e.id.toString()).toList();
+      await storage.write(attendanceId, technicianIds?.join(','));
+      customLoader.hide();
+      toast('Technicians fetched successfully');
+    } catch (error, stackTrace) {
+      print('Error fetching technicians: $error');
+      print('Stack trace: $stackTrace');
+      customLoader.hide();
+      toast('Error fetching technicians: ${error.toString()}');
+    } finally {
+      isLoading.value = false;
+      update(); // Ensure UI updates
+    }
+  }
+
+  void hitGetCustomerBrandListApiCall({required String id}){
+    isLoading.value = true;
+    FocusManager.instance.primaryFocus!.unfocus();
+    var brandId = {
+      'id': "${selectedCustomerId.value}"
+    };
+    Get.find<AuthenticationApiService>().getCustomerBrandDetailsApiCall(id: brandId.toString()).then((value){
+      customerBrandResponse.assignAll(value);
+      List<String> brandId = customerBrandResponse.map((f)=>f.id.toString()).toList();
+      storage.write(customerBrandId, brandId);
+      print("Brand Id : ${storage.read(customerBrandId)}");
+      toast("Brand Name Successfully fetched");
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
     });
   }
 }

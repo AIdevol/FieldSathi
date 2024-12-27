@@ -20,7 +20,7 @@ class OtpViewController extends GetxController {
   late String email = '';
   final RxInt timeLeft = 30.obs;
   Timer? _timer;
-  OtpResponseModel logInData = OtpResponseModel();
+  OtpResponseModel logInData = OtpResponseModel(message: '', userId: null, accessToken: '', refreshToken: '', userDetails: null);
 
   @override
   void onInit() {
@@ -84,9 +84,9 @@ class OtpViewController extends GetxController {
     Get.find<AuthenticationApiService>().verifyOtpApiCall(dataBody: resendValue).then((value) async {
       customLoader.hide();
       logInData = value;
-      await storage.write(userRole, logInData.userDetails?.role??'');
-      print("data body=${logInData.accessToken}");
-      toast(logInData.message ?? '');
+      await storage.write(userRole, logInData?.userDetails?.role??'');
+      print("data body=${logInData?.accessToken}");
+      toast(logInData?.message ?? '');
       await _saveUserData();
       await Get.offAllNamed(AppRoutes.homeScreen);
       update();
@@ -148,5 +148,6 @@ class OtpViewController extends GetxController {
     await storage.remove('isLoggedIn');
     await storage.remove('isVerified');
     Get.offAllNamed(AppRoutes.login);
+    update();
   }
 }

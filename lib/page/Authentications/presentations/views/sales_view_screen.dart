@@ -10,7 +10,9 @@ import 'package:tms_sathi/response_models/sales_response_model.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
 
 import '../../../../constans/color_constants.dart';
+import '../../../../constans/role_based_keys.dart';
 import '../../../../constans/string_const.dart';
+import '../../../../main.dart';
 import '../../../../navigations/navigation.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
@@ -24,6 +26,7 @@ class SalesViewScreen extends GetView<SalesViewScreenController>{
         builder: (controller)=>
     Scaffold(
       bottomNavigationBar: _buildPaginationControls(controller, context),
+      floatingActionButton: _buildFloatingActionButton(),
       backgroundColor: CupertinoColors.white,
       appBar: _buildAppBar(controller),
       body: RefreshIndicator(
@@ -55,13 +58,24 @@ PreferredSizeWidget _buildAppBar(SalesViewScreenController controller) {
         icon: Icon(FontAwesomeIcons.rotate),
         tooltip: 'Refresh',
       ),
-      IconButton(
-        onPressed: ()=>Get.toNamed(AppRoutes.addSalesListScreen),
-        icon: Icon(FontAwesomeIcons.plus),
-        tooltip: 'Filter',
-      ),
+      // IconButton(
+      //   onPressed: ()=>Get.toNamed(AppRoutes.addSalesListScreen),
+      //   icon: Icon(FontAwesomeIcons.plus),
+      //   tooltip: 'Filter',
+      // ),
     ],
   );
+}
+
+FloatingActionButton? _buildFloatingActionButton() {
+  final userrole = storage.read(userRole);
+  return (userrole != 'technician'&&userrole !='sale')?
+  FloatingActionButton(
+    onPressed: () =>Get.toNamed(AppRoutes.addSalesListScreen),
+    backgroundColor: appColor,
+    child: Icon(Icons.add, color: Colors.white),
+  )
+      : null;
 }
 Widget _buildTopBar(BuildContext context,SalesViewScreenController controller) {
   return Container(
@@ -525,18 +539,18 @@ Widget _buildDataTableView(SalesViewScreenController controller, BuildContext co
         scrollDirection: Axis.horizontal,
         child: SingleChildScrollView(
           child: DataTable(columns: [
-            _buildTableHeader('Id'),
+            _buildTableHeader('EmployeeId'),
             _buildTableHeader('Image'),
             _buildTableHeader('Name'),
             _buildTableHeader('Email'),
-            _buildTableHeader('Contact'),
+            _buildTableHeader('Phone No'),
             _buildTableHeader('Date of Joining'),
             _buildTableHeader('Casual Leaves'),
             _buildTableHeader('Sick Leaves'),
             _buildTableHeader('Check In'),
             _buildTableHeader('Check Out'),
             _buildTableHeader('Status'),
-            _buildTableHeader('Battery(%)'),
+            _buildTableHeader('Battery Status'),
             _buildTableHeader('GPS'),
             _buildTableHeader('Actions'),
           ],
@@ -555,7 +569,7 @@ Widget _buildDataTableView(SalesViewScreenController controller, BuildContext co
                   DataCell(Text(_formatDateTime(
                       "${ f.todayAttendance.map((value)=>value.punchOut.toString())}"?? 'N/A'))),
                   DataCell(_buildAttendanceStatusBadge(
-                      "${ f.todayAttendance.map((value)=>value.status.toString())}"?? 'N/A')),
+                      "${ f.todayAttendance.map((value)=>value.status.toString())}"?? 'N/A', f.isActive)),
                   DataCell(Text(f.batteryStatus  ?? 'N/A')),
                   DataCell(Text(f.gpsStatus?.toString() != null ? 'On' : 'Off')),
                   DataCell(_dropDownValueViews( controller, context,f,f.id.toString()))
@@ -669,9 +683,9 @@ String _formatDateTime(String dateTimeStr) {
     return dateTimeStr;
   }
 }
-Widget _buildAttendanceStatusBadge(String status) {
+Widget _buildAttendanceStatusBadge(String? status, bool? IsActive) {
   Color color;
-  String displayText = status;
+  String displayText = status!;
 
   switch (status.toLowerCase()) {
     case 'present':
@@ -691,20 +705,49 @@ Widget _buildAttendanceStatusBadge(String status) {
       color = Colors.grey;
   }
 
-  return Container(
-    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-    decoration: BoxDecoration(
-      color: color.withOpacity(0.1),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Text(
-      displayText,
-      style: TextStyle(
-        color: color,
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
+  return Column(
+    children: [
+      Container(
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          displayText,
+          style: TextStyle(
+            color: color,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
-    ),
+      vGap(2),
+      Container(
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        decoration: BoxDecoration(
+          color: (IsActive != false)?Colors.green:Colors.red,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: (IsActive != false)?
+        Text(
+          "Active",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ):
+        Text(
+          'Inactive',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        )
+      ),
+    ],
   );
 }
 

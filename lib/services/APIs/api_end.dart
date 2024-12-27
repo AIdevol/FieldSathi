@@ -18,6 +18,7 @@ class ApiEnd{
   static const String checkingPointStatusApiEnd = 'api/checkpointstatus/';
   static const String leaveEditPeriodEnd = 'users/leave-allocations/';
   static const String userAttendanceCalendarApiEnd = 'users/attendance/';
+  static const String customerBrandApiEnd = 'users/customer_brandnames/';
 /*==================================================================================*/
   static const String importTicketDataEnd = 'api/import-tickets/';
   static const String amcEnd = 'api/amcs/';
@@ -61,4 +62,8 @@ class ApiEnd{
   static const String punchInApiEnd = 'users/attendance/punch_in/';
   static const String punchOutApiEnd = 'users/attendance/punch_out/';
   static const String attendanceCounts = 'users/tms_users/attendance_counts/';
+  static const String countRatedCustomers="api/tickets/count_rated_customers/";
+  static const String leadSourceTypeEnd="api/lead-source/";
+  static const String userLeavesDataEnd = 'users/tms_users/user_leave_data/';
+  static const String technicianAttendanceStatusEnd = 'users/tms_users/technician_attendance_counts/';
 }

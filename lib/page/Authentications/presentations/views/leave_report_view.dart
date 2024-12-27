@@ -24,6 +24,7 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
         builder: (controller) => Scaffold(
           resizeToAvoidBottomInset: false,
           backgroundColor:CupertinoColors.white,
+          floatingActionButton: _buildFloatingActionButton(context, controller),
           bottomNavigationBar: _buildPaginationControls(controller),
           appBar: AppBar(
             leading: IconButton(
@@ -43,13 +44,13 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
                 icon: Icon(Icons.refresh),
                 onPressed: controller.hitLeavesApiCall,
               ),
-              if(userrole != 'technician'&&userrole !='sale')
-              IconButton(
-                icon: Icon(Icons.add, size: 30),
-                onPressed: () => Get.toNamed(AppRoutes.leaveUpdateScreen),
-              )
-              else
-                _viewDetailsButton(context, controller),
+              // if(userrole != 'technician'&&userrole !='sale')
+              // IconButton(
+              //   icon: Icon(Icons.add, size: 30),
+              //   onPressed: () => Get.toNamed(AppRoutes.leaveUpdateScreen),
+              // )
+              // else
+              //   _viewDetailsButton(context, controller),
               hGap(10)
             ],
           ),
@@ -59,7 +60,7 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
             onRefresh: () => controller.hitRefreshApiCall(),
             child: Column(
               children: [
-                _buildTopBar(),
+                _buildTopBar(context),
                 _buildSearchBar(),
 
                 Expanded(
@@ -84,17 +85,72 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
       ),
     );
   }
+  Widget _buildFloatingActionButton(BuildContext context, LeaveReportViewScreenController controller) {
+    final userrole = storage.read(userRole);
 
-  Widget _buildTopBar() {
+    if (userrole != 'technician' && userrole != 'sale') {
+      return SizedBox(
+        height: 140,  // Adjust this height as needed
+        child: Stack(
+          children: [
+            // Bottom FAB - Add button
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: FloatingActionButton(
+                heroTag: "Allows Leaves",
+                onPressed: () => Get.toNamed(AppRoutes.leaveUpdateScreen),
+                backgroundColor: appColor,
+                child: Icon(Icons.add, color: Colors.white),
+              ),
+            ),
+            // Top FAB - Eye button
+            Positioned(
+              bottom: 70,  // Adjust this value to change the distance between buttons
+              right: 0,
+              child: FloatingActionButton(
+                heroTag: "User Leave Data",
+                onPressed: () {
+                  Get.toNamed(AppRoutes.userLeavesDataScreen);
+                },
+                backgroundColor: appColor,
+                child: Icon(Icons.remove_red_eye, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return ElevatedButton(
+        onPressed: () {
+          _leavesTypesApplicationViewScreen(context, controller);
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: appColor,
+          minimumSize: Size(120, 40),
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: CupertinoColors.white),
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: Text(
+          "Apply Leave",
+          style: MontserratStyles.montserratBoldTextStyle(
+            color: CupertinoColors.white,
+            size: 13,
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildTopBar(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Expanded(child: _buildFilterDropdown()),
-        ],
-      ),
+      child: _buildFilterDropdown(),
     );
   }
+
 
   Widget _buildFilterDropdown() {
     return Obx(
@@ -194,11 +250,15 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
         child: Container(
+
           padding: EdgeInsets.all(16),
           child: Obx(() {
             final filteredData = controller.leavesPaginationsData;
             return DataTable(
-              headingRowColor: MaterialStateColor.resolveWith((states) => appColor.withOpacity(0.1)),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              headingRowColor: MaterialStateColor.resolveWith((states) => Colors.grey.shade400),
               dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
               columnSpacing: 20,
               horizontalMargin: 12,
@@ -213,17 +273,17 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
                 color: Colors.black,
               ),
               columns: [
-                DataColumn(label: Text('No.')),
-                DataColumn(label: Text('Name')),
+                // DataColumn(label: Text('.')),
+                DataColumn(label: Text('EmpId/Name')),
                 DataColumn(label: Text('Phone')),
-                DataColumn(label: Text('Role')),
+                DataColumn(label: Text('Profile')),
+                DataColumn(label: Text('Leave Type')),
                 DataColumn(label: Text('From Date')),
                 DataColumn(label: Text('To Date')),
                 DataColumn(label: Text('Days')),
                 DataColumn(label: Text('Reason')),
-                DataColumn(label: Text('Leave Type')),
                 DataColumn(label: Text('Status')),
-                DataColumn(label: Text('Actions')),
+                DataColumn(label: Text(' ')),
               ],
               rows: List<DataRow>.generate(
                 filteredData.length,
@@ -236,10 +296,11 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
                       }
                     },
                     cells: [
-                      DataCell(Text('${index + 1}')),
-                      DataCell(Text('${leave.userId?.firstName ?? ''} ${leave.userId?.lastName ?? ''}')),
+                      // DataCell(Text('${index + 1}')),
+                      DataCell(_ticketBoxIcons(leave.id.toString(),leave)),
                       DataCell(Text(leave.userId?.phoneNumber ?? '')),
                       DataCell(Text(leave.userId?.role ?? '')),
+                      DataCell(Text(leave.leaveType ?? '')),
                       DataCell(Text(_formatDate(leave.startDate.toString()))),
                       DataCell(Text(_formatDate(leave.endDate.toString()))),
                       DataCell(Text(controller.calculateDays(
@@ -247,7 +308,6 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
                         DateTime.parse(leave.endDate.toString()?? ''),
                       ).toString())),
                       DataCell(Text(leave.reason ?? '')),
-                      DataCell(Text(leave.leaveType ?? '')),
                       DataCell(_buildStatusCell(leave.status ?? '')),
                       DataCell(_buildActionButton(leave)),
                     ],
@@ -459,23 +519,23 @@ class LeavesResportForTechnicianAndSales extends GetView<LeaveReportViewScreenCo
   }
 }
 
-_viewDetailsButton(BuildContext context, LeaveReportViewScreenController controller) {
-  return ElevatedButton(onPressed: () {
-    _leavesTypesApplicationViewScreen(context,controller);
-
-  },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: appColor,
-        minimumSize: Size(120, 40),
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: CupertinoColors.white),
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      child: Text("Apply Leave",style: MontserratStyles.montserratBoldTextStyle(
-        color: CupertinoColors.white,
-        size: 13,)));
-}
+// _viewDetailsButton(BuildContext context, LeaveReportViewScreenController controller) {
+//   return ElevatedButton(onPressed: () {
+//     _leavesTypesApplicationViewScreen(context,controller);
+//
+//   },
+//       style: ElevatedButton.styleFrom(
+//         backgroundColor: appColor,
+//         minimumSize: Size(120, 40),
+//         shape: RoundedRectangleBorder(
+//           side: BorderSide(color: CupertinoColors.white),
+//           borderRadius: BorderRadius.circular(8),
+//         ),
+//       ),
+//       child: Text("Apply Leave",style: MontserratStyles.montserratBoldTextStyle(
+//         color: CupertinoColors.white,
+//         size: 13,)));
+// }
 
 Widget _buildTopBar(LeaveReportViewScreenController controller) {
   return Container(
@@ -614,7 +674,7 @@ Widget _buildTableData(BuildContext context, LeaveReportViewScreenController con
             columns: [
               DataColumn(label: Text('Name')),
               DataColumn(label: Text('Phone')),
-              DataColumn(label: Text('Role')),
+              DataColumn(label: Text('Profile')),
               DataColumn(label: Text('From Date')),
               DataColumn(label: Text('To Date')),
               DataColumn(label: Text('Days')),
@@ -881,258 +941,261 @@ Future<void> showLeavesHistoryDialog(
     LeaveResult leavesData,
     ) {
   return showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          child: Container(
-            height: Get.height * 0.8,
-            width: Get.width * 0.8,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
-            child: Stack(
-              children: [
-                Column(
-                  children: [
-                    // Header
-                    _buildDialogHeader(leavesData),
-
-                    // Created Information
-                    _buildCreatedInfoSection(controller),
-
-                    // Progress History Title
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Text(
-                        'Progress History',
-                        style: MontserratStyles.montserratSemiBoldTextStyle(
-                            size: 20,
-                            color: Colors.black
-                        ),
-                      ),
-                    ),
-
-                    const Divider(),
-
-                    // History List
-                    _buildHistoryList(controller)
-                  ],
-                ),
-
-                // Close Button
-                Positioned(
-                  bottom: 10,
-                  right: 10,
-                  child: _buildActionButton(
-                    context,
-                    'Okay',
-                    Icons.cancel,
-                    onTap: () => Get.back(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-  );
-}
-
-// Helper method to build dialog header
-Widget _buildDialogHeader(LeaveResult leavesData) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    decoration: BoxDecoration(
-      color: Colors.blueAccent,
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(16),
-        topRight: Radius.circular(16),
-      ),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          '$leavesData',
-          style: MontserratStyles.montserratSemiBoldTextStyle(
-              size: 20,
-              color: Colors.black
-          ),
-        ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: Colors.green,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            "${leavesData.status}",
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ],
+    context: context,
+    builder: (context) => LeaveHistoryDialog(
+      controller: controller,
+      leavesData: leavesData,
     ),
   );
 }
 
-// Helper method to build created info section
-Widget _buildCreatedInfoSection(LeaveReportViewScreenController controller) {
-  return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Container(
-      height: Get.height * 0.1,
-      decoration: BoxDecoration(
+class LeaveHistoryDialog extends StatelessWidget {
+  final LeaveReportViewScreenController controller;
+  final LeaveResult leavesData;
+
+  const LeaveHistoryDialog({
+    Key? key,
+    required this.controller,
+    required this.leavesData,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.8,
+        width: MediaQuery.of(context).size.width * 0.8,
+        decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-                offset: Offset(0, 1),
-                color: Colors.grey.shade400,
-                spreadRadius: 1
-            )
-          ]
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            _buildHeader(),
+            _buildInfoCard(),
+            _buildHistorySection(),
+            const Spacer(),
+            _buildActionButton(),
+          ],
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      decoration: const BoxDecoration(
+        color: Colors.blueAccent,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Check if leaveHistoryData is not empty before accessing
-          if (controller.leaveHistoryData.isNotEmpty) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Created By: ',
-                  style: MontserratStyles.montserratSemiBoldTextStyle(
-                      size: 15,
-                      color: Colors.black
-                  ),
-                ),
-                Text(
-                  controller.leaveHistoryData.first.actionBy ?? 'Unknown',
-                  style: MontserratStyles.montserratMediumTextStyle(
-                      size: 15,
-                      color: Colors.black
-                  ),
-                ),
-              ],
+          Expanded(
+            child: Text(
+              leavesData.createdBy ?? 'Unknown',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
-            SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Action: ',
-                  style: MontserratStyles.montserratSemiBoldTextStyle(
-                      size: 15,
-                      color: Colors.black
-                  ),
-                ),
-                Text(
-                  controller.leaveHistoryData.first.actionMessage ?? 'No action message',
-                  style: MontserratStyles.montserratMediumTextStyle(
-                      size: 15,
-                      color: Colors.black
-                  ),
-                ),
-              ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.green,
+              borderRadius: BorderRadius.circular(12),
             ),
-          ] else ...[
-            Text(
-              'No history data available',
-              style: TextStyle(color: Colors.grey),
+            child: Text(
+              leavesData.status ?? 'Unknown',
+              style: const TextStyle(color: Colors.white),
             ),
-          ]
+          ),
         ],
       ),
-    ),
-  );
-}
+    );
+  }
 
-// Helper method to build history list
-Widget _buildHistoryList(LeaveReportViewScreenController controller) {
-  return Expanded(
-    child: Obx(() {
-      return controller.leaveHistoryData.isNotEmpty
-          ? ListView.builder(
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        itemCount: controller.leaveHistoryData.length,
-        itemBuilder: (context, index) {
-          final amcHistory = controller.leaveHistoryData[index];
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                title: Text(
-                  "${amcHistory.actionBy}",
-                  style: MontserratStyles.montserratSemiBoldTextStyle(
-                      size: 16,
-                      color: Colors.black
+  Widget _buildInfoCard() {
+    return Card(
+      color: Colors.white,
+      margin: const EdgeInsets.all(16),
+      elevation: 5,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            _buildInfoRow('Start Date:', leavesData.startDate?.toString()),
+            _buildInfoRow('End Date:', leavesData.endDate?.toString()),
+            _buildInfoRow('Created By:', leavesData.createdBy),
+            _buildInfoRow('Leave Type:', leavesData.leaveType),
+            _buildInfoRow('Reason:', leavesData.reason),
+            _buildInfoRow('Created At:', leavesData.createdAt?.toString()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value ?? 'Not available',
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHistorySection() {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Icon(Icons.history),
+                SizedBox(width: 8),
+                Text(
+                  'Progress History',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      amcHistory.changeTimestamp.toString(),
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    Text(
-                      amcHistory.actionMessage.toString(),
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                    if (amcHistory.fieldChanges.isNotEmpty)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: amcHistory.fieldChanges.map((change) =>
-                            Text(
-                              change,
-                              style: TextStyle(color: Colors.green),
-                            )
-                        ).toList(),
-                      )
-                  ],
-                ),
-              ),
-              Divider(),
-            ],
-          );
-        },
-      )
-          : Center(
+              ],
+            ),
+          ),
+          const Divider(),
+          Expanded(
+            child: Obx(() => _buildHistoryList()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHistoryList() {
+    if (controller.leaveHistoryData.isEmpty) {
+      return const Center(
         child: Text(
           'No history data available',
           style: TextStyle(color: Colors.grey),
         ),
       );
-    }),
-  );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: controller.leaveHistoryData.length,
+      separatorBuilder: (_, __) => const Divider(),
+      itemBuilder: (context, index) {
+        final history = controller.leaveHistoryData[index];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              history.actionBy ?? 'Unknown',
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              history.changeTimestamp?.toString() ?? '',
+              style: const TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              history.actionMessage ?? '',
+              style: const TextStyle(color: Colors.blue),
+            ),
+            if (history.fieldChanges.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              ...history.fieldChanges.map(
+                    (change) => Text(
+                  change,
+                  style: const TextStyle(color: Colors.green),
+                ),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildActionButton() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: ElevatedButton.icon(
+          onPressed: Get.back,
+          icon: const Icon(Icons.close),
+          label: const Text('Close'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: appColor,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-Widget _buildActionButton(
-    BuildContext context,
-    String label,
-    IconData icon,
-    {required VoidCallback onTap}
-    ) {
-  return ElevatedButton.icon(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: appColor,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-    ),
-    onPressed: onTap,
-    icon: Icon(icon, size: 18),
-    label: Text(
-      label,
-      style: MontserratStyles.montserratSemiBoldTextStyle(size: 13),
+Widget _ticketBoxIcons(String ticketId,LeaveResult leaves) {
+  return Center(
+    child: Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal:8, vertical: 4),
+          decoration: BoxDecoration(
+            color: normalBlue,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: Colors.blue.shade300,
+              width: 1,
+            ),
+          ),
+          child: Text(
+            '$ticketId',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+        ),
+        Text("${leaves.userId!.firstName! + leaves.userId!.lastName!}",style: MontserratStyles.montserratSemiBoldTextStyle(size: 12, color: Colors.black),)
+      ],
     ),
   );
 }

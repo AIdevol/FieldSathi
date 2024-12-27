@@ -123,3 +123,34 @@ class Checkpoint {
     "admin": admin,
   };
 }
+
+//================================================================== FSR Checking response Model =========================================
+class CheckAndUpdateCheckingPointForFsrResponseModel {
+  CheckAndUpdateCheckingPointForFsrResponseModel({
+    required this.id,
+    required this.checkpointName,
+    required this.checkpointStatuses,
+    required this.displayType,
+    required this.createdBy,
+    required this.admin,
+  });
+
+  final int? id;
+  final String? checkpointName;
+  final List<String> checkpointStatuses;
+  final String? displayType;
+  final int? createdBy;
+  final int? admin;
+
+  factory CheckAndUpdateCheckingPointForFsrResponseModel.fromJson(Map<String, dynamic> json){
+    return CheckAndUpdateCheckingPointForFsrResponseModel(
+      id: json["id"],
+      checkpointName: json["checkpoint_name"],
+      checkpointStatuses: json["checkpointStatuses"] == null ? [] : List<String>.from(json["checkpointStatuses"]!.map((x) => x)),
+      displayType: json["displayType"],
+      createdBy: json["created_by"],
+      admin: json["admin"],
+    );
+  }
+
+}

@@ -52,6 +52,7 @@ class TicketListScreen extends GetView<TicketListController> {
           child: Scaffold(
             bottomNavigationBar:  _buildPaginationControls(controller),
             backgroundColor: CupertinoColors.white,
+            floatingActionButton:_buildFloatingActionButton() ,
             resizeToAvoidBottomInset: true,
             appBar: _buildAppBar(),
             body: RefreshIndicator(
@@ -92,17 +93,26 @@ class TicketListScreen extends GetView<TicketListController> {
           icon: const Icon(Icons.refresh),
           onPressed: controller.fetchTicketsApiCall,
         ),
-        if(userrole != 'technician'&&userrole !='sale')
-        IconButton(
-          onPressed: () {
-            Get.toNamed(AppRoutes.ticketListCreationScreen);
-          },
-          icon: const Icon(FeatherIcons.plus),
-        ),
+        // if(userrole != 'technician'&&userrole !='sale')
+        // IconButton(
+        //   onPressed: () {
+        //     Get.toNamed(AppRoutes.ticketListCreationScreen);
+        //   },
+        //   icon: const Icon(FeatherIcons.plus),
+        // ),
       ],
     );
   }
-
+   FloatingActionButton? _buildFloatingActionButton() {
+     final userrole = storage.read(userRole);
+     return (userrole != 'technician'&&userrole !='sale')?
+       FloatingActionButton(
+       onPressed: () =>Get.toNamed(AppRoutes.ticketListCreationScreen),
+       backgroundColor: appColor,
+       child: Icon(Icons.add, color: Colors.white),
+     )
+         : null;
+   }
    Widget _buildTopBar(BuildContext context, TicketListController controller) {
      final userrole = storage.read(userRole);
 
@@ -144,8 +154,6 @@ class TicketListScreen extends GetView<TicketListController> {
        ),
      );
    }
-
-
 
    Widget _buildStatusFilterDropdown() {
      return Container(
@@ -433,10 +441,11 @@ class TicketListScreen extends GetView<TicketListController> {
 
 
   List<DataRow> _buildTableRows(BuildContext context, TicketListController controller) {
-    if (controller.ticketPaginationsData.isEmpty) {
-      return _buildEmptyState();
-    }
-    return controller.ticketPaginationsData.map((ticket) {
+    return (controller.ticketPaginationsData.isNotEmpty)
+        ?
+      // return _buildEmptyState();
+
+     controller.ticketPaginationsData.map((ticket) {
       return DataRow(
         onSelectChanged:(selected) {
           if(selected != null){ showDialogWidgetContext(
@@ -495,7 +504,7 @@ class TicketListScreen extends GetView<TicketListController> {
           DataCell(_buildActionCell(controller, ticket.id.toString(), ticket),),
         ],
       );
-    }).toList();
+    }).toList():[];
   }
 
   Widget _buildStatusCell(String status) {
@@ -1263,12 +1272,20 @@ ButtonStyle _buttonStyle() {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  "Download Tickets Report",
-                  style: MontserratStyles.montserratBoldTextStyle(
-                    size: 15,
-                    color: Colors.black,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Download Report",
+                      style: MontserratStyles.montserratBoldTextStyle(
+                        size: 15,
+                        color: Colors.black,
+                      ),
+                    ),
+                    IconButton(onPressed: (){
+                      Get.back();
+                    }, icon: Icon(Icons.close))
+                  ],
                 ),
                 divider(color: Colors.grey),
                 SizedBox(height: 20),
@@ -1369,7 +1386,7 @@ void _showImportModelView(BuildContext context,TicketListController controller) 
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Import File',
+                        'Import Data',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -1406,7 +1423,7 @@ void _showImportModelView(BuildContext context,TicketListController controller) 
                                   Icon(Icons.info_outline, size: 20),
                                   SizedBox(width: 8),
                                   Text(
-                                    'Import Rules',
+                                    'Rules',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -1424,7 +1441,7 @@ void _showImportModelView(BuildContext context,TicketListController controller) 
                                   ),
                                   children: const [
                                     TextSpan(
-                                      text: 'Required Fields:\n',
+                                      text: 'Compulsory Fields:\n',
                                       style: TextStyle(fontWeight: FontWeight.bold),
                                     ),
                                     TextSpan(text: '• Customer\'s Name\n'),

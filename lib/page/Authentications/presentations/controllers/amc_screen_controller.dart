@@ -29,6 +29,14 @@ class   AMCScreenController extends GetxController {
     "Expiry Date"
   ];
 
+  final RxList<String> statusSelection = [
+    "---Select Status---",
+    "Completed",
+    "Upcoming",
+    "Renewal",
+    "Expired"
+  ].obs;
+  final RxString statusFirstplace = "---Select Status---".obs;
   late TextEditingController amcNameController;
   late TextEditingController activationTimeController;
   late TextEditingController datesController;
@@ -243,12 +251,12 @@ final String defaultsrviceOccuranceList = "Monthly";
 
       final amcData = await Get.find<AuthenticationApiService>().getAmcDetailsApiCall(parameter: amcParameter);
       // totalAmcCount.value = amcData.count ?? 0;
-      amcResultData.assignAll(amcData.results);
-      amcPaginationData.assignAll(amcData.results);
+      amcResultData.assignAll(amcData.results!);
+      amcPaginationData.assignAll(amcData.results!);
       List<String> amcIds = amcResultData.map((amcLiveData)=>amcLiveData.id.toString()).toList();
       await storage.write(amcId, amcIds);
       print("amc id dekh le bhai= ${storage.read(amcId)}");
-      filteredAmcData.assignAll(amcData.results);
+      filteredAmcData.assignAll(amcData.results!);
       // _calculateAmcCounts();
       currentPage.value = 1;
       updatePaginatedTechnicians();
@@ -272,7 +280,6 @@ final String defaultsrviceOccuranceList = "Monthly";
 
     if (picked != null && picked != selectedDate.value) {
       selectedDate.value = picked;
-      // Explicitly use uppercase YYYY for the year to match the required format
       dateController.text = DateFormat('yyyy-MM-dd').format(picked);
     }
   }
@@ -306,10 +313,11 @@ void hitAmcCountApiCall(){
     isLoading.value = true;
     FocusManager.instance.primaryFocus!.unfocus();
     Get.find<AuthenticationApiService>().getAmcCountsApiCall().then((value){
-      totalAmcCount.value = value.total;
-      upcomingCount.value = value.upcoming;
-      renewalCount.value = value.renewal;
-      completedCount.value = value.completed;
+      totalAmcCount.value = value.total!;
+      upcomingCount.value = value.upcoming!;
+      renewalCount.value = value.renewal!;
+      completedCount.value = value.completed!;
+      print("raja ram:${totalAmcCount.value}");
       toast("Amc Counts fetched successfully");
       update();
     }).onError((error,stackError){

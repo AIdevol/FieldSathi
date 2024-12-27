@@ -11,10 +11,6 @@ class AmcStatusBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // if (controller.isLoading.value) {
-      //   return const Center(child: CircularProgressIndicator());
-      // }
-
       return AspectRatio(
         aspectRatio: 1.6,
         child: Padding(
@@ -40,50 +36,37 @@ class AmcStatusBarChart extends StatelessWidget {
       {'color': Colors.blue, 'label': 'Upcoming'},
       {'color': Colors.yellow, 'label': 'Renewal'},
       {'color': Colors.purple, 'label': 'Completed'},
+      {'color': Colors.red, 'label': 'Expired'},
       {'color': Colors.green, 'label': 'Total'}
     ];
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: legends.map((legend) {
-        return _LegendItem(
-          color: legend['color'] as Color,
-          label: legend['label'] as String,
-        );
-      }).toList(),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: legends.map((legend) {
+          return _LegendItem(
+            color: legend['color'] as Color,
+            label: legend['label'] as String,
+          );
+        }).toList(),
+      ),
     );
   }
 
   Widget _buildChart() {
-    final List<double> values = [
-      controller.upcomingPercentage.value,
-      controller.renewalPercentage.value,
-      controller.completedPercentage.value,
-      controller.totalPercentage.value,
-    ];
     final List<int> counts = [
+      controller.totalCount.value,
       controller.upcomingCount.value,
       controller.renewalCount.value,
       controller.completedCount.value,
-      controller.totalCount.value,
+      controller.expiredCount.value,
     ];
 
     return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
-        maxY: 100,
-        barTouchData: BarTouchData(
-          enabled: true,
-          touchTooltipData: BarTouchTooltipData(
-            // tooltipBgColor: Colors.black54,
-            getTooltipItem: (group, groupIndex, rod, rodIndex) {
-              return BarTooltipItem(
-                'Count: ${counts[groupIndex]}\nPercentage: ${rod.toY.toStringAsFixed(1)}%',
-                const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              );
-            },
-          ),
-        ),
+        maxY: controller.totalCount.value.toDouble(),
         titlesData: FlTitlesData(
           show: true,
           rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -92,7 +75,7 @@ class AmcStatusBarChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                const titles = ['Upcoming', 'Renewal', 'Completed', 'Total'];
+                const titles = ['Total', 'Upcoming', 'Renewal', 'Completed', 'Expired']; // Added 'Expired'
                 return Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
@@ -110,11 +93,12 @@ class AmcStatusBarChart extends StatelessWidget {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 45,
-              interval: 20,
+              interval: controller.totalCount.value > 0
+                  ? (controller.totalCount.value / 5).toDouble()
+                  : 1.0,
               getTitlesWidget: (value, meta) {
                 return Text(
-                  '${value.toInt()}%',
+                  value.toInt().toString(),
                   style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
@@ -128,7 +112,9 @@ class AmcStatusBarChart extends StatelessWidget {
         gridData: FlGridData(
           show: true,
           drawVerticalLine: false,
-          horizontalInterval: 20,
+          horizontalInterval: controller.totalCount.value > 0
+              ? (controller.totalCount.value / 5).toDouble()
+              : 1.0,
           getDrawingHorizontalLine: (value) {
             return FlLine(
               color: Colors.grey.shade300,
@@ -140,51 +126,23 @@ class AmcStatusBarChart extends StatelessWidget {
           show: true,
           border: Border.all(color: Colors.grey.shade300),
         ),
-        extraLinesData: ExtraLinesData(
-          horizontalLines: [
-            HorizontalLine(
-              y: controller.upcomingTarget,
-              color: Colors.blue,
-              strokeWidth: 2,
-              dashArray: [5, 5],
-              label: HorizontalLineLabel(
-                show: true,
-                labelResolver: (line) => 'Target: ${controller.upcomingTarget}%',
-                alignment: Alignment.topRight,
-                style: const TextStyle(
-                  color: Colors.blue,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            HorizontalLine(
-              y: controller.completedTarget,
-              color: Colors.purple,
-              strokeWidth: 2,
-              dashArray: [5, 5],
-              label: HorizontalLineLabel(
-                show: true,
-                labelResolver: (line) => 'Target: ${controller.completedTarget}%',
-                alignment: Alignment.topRight,
-                style: const TextStyle(
-                  color: Colors.purple,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        barGroups: values
+        barGroups: counts
             .asMap()
             .map((index, value) {
-          final colors = [Colors.blue, Colors.yellow, Colors.purple, Colors.green];
+          final colors = [
+            Colors.green, // Total
+            Colors.blue,  // Upcoming
+            Colors.yellow, // Renewal
+            Colors.purple, // Completed
+            Colors.red,   // Expired
+          ];
           return MapEntry(
             index,
             BarChartGroupData(
               x: index,
               barRods: [
                 BarChartRodData(
-                  toY: value,
+                  toY: value.toDouble(),
                   color: colors[index],
                   width: 36,
                   borderRadius: const BorderRadius.only(

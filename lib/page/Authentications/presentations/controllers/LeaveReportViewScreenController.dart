@@ -13,14 +13,14 @@ import '../../../../response_models/user_response_model.dart';
 class LeaveReportViewScreenController extends GetxController {
   final TextEditingController statusController = TextEditingController();
   RxList<String> filterTypes = [
-    "Select Status",
+    "All Status",
     "Submitted",
     "Approved",
     "Rejected",
   ].obs;
 
   RxList<String> selectedStatus = [
-    "Select Status",
+    "All Status",
     "Submitted",
     "Approved",
     "Rejected",
@@ -34,7 +34,7 @@ class LeaveReportViewScreenController extends GetxController {
   ].obs;
 
   RxString defaultSelectedStatus = 'Submitted'.obs;
-  RxString selectedFilter = "Select Status".obs;
+  RxString selectedFilter = "All Status".obs;
   // Rx<LeaveResponseModel> leaveManagementData = LeaveResponseModel().obs;
   RxList<LeaveResult> leavesData = <LeaveResult>[].obs;
   RxList<LeaveResult> filteredLeaves = <LeaveResult>[].obs;
@@ -75,7 +75,7 @@ class LeaveReportViewScreenController extends GetxController {
     List<LeaveResult> tempLeaves = List.from(leavesData);
 
     // Filter by status
-    if (selectedFilter.value != "Select Status") {
+    if (selectedFilter.value != "All Status") {
       tempLeaves = tempLeaves.where((leave) =>
       leave.status?.toLowerCase() == selectedFilter.value.toLowerCase()
       ).toList();

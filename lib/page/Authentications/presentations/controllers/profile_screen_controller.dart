@@ -25,6 +25,7 @@ class ProfileViewScreenController extends GetxController {
   // Form controllers
   late TextEditingController emailController;
   late TextEditingController nameController;
+  late TextEditingController lastNameController;
   late TextEditingController companyNameController;
   late TextEditingController employeesController;
   late TextEditingController phoneController;
@@ -33,6 +34,7 @@ class ProfileViewScreenController extends GetxController {
   // Focus nodes
   late FocusNode companyNameFocusNode;
   late FocusNode emailFocusNode;
+  late FocusNode lastNameFocusNode;
   late FocusNode nameFocusNode;
   late FocusNode employeesFocusNode;
   late FocusNode countryFocusNode;
@@ -61,6 +63,7 @@ class ProfileViewScreenController extends GetxController {
 
   void initializeControllers() {
     countryController = TextEditingController();
+    lastNameController = TextEditingController();
     emailController = TextEditingController();
     nameController = TextEditingController();
     companyNameController = TextEditingController();
@@ -70,6 +73,7 @@ class ProfileViewScreenController extends GetxController {
 
     companyNameFocusNode = FocusNode();
     emailFocusNode = FocusNode();
+    lastNameFocusNode = FocusNode();
     nameFocusNode = FocusNode();
     employeesFocusNode = FocusNode();
     countryFocusNode = FocusNode();
@@ -87,6 +91,7 @@ class ProfileViewScreenController extends GetxController {
   void disposeControllers() {
     countryController.dispose();
     emailController.dispose();
+    lastNameController.dispose();
     nameController.dispose();
     companyNameController.dispose();
     employeesController.dispose();
@@ -95,6 +100,7 @@ class ProfileViewScreenController extends GetxController {
 
     companyNameFocusNode.dispose();
     emailFocusNode.dispose();
+    lastNameFocusNode.dispose();
     nameFocusNode.dispose();
     employeesFocusNode.dispose();
     countryFocusNode.dispose();
@@ -137,6 +143,7 @@ class ProfileViewScreenController extends GetxController {
     Get.find<AuthenticationApiService>().userDetailsApiCall(id: id).then((value) {
       var userData = value;
       nameController.text = userData.firstName ?? '';
+      lastNameController.text = userData.lastName??"";
       emailController.text = userData.email ?? '';
       phoneController.text = userData.phoneNumber ?? '';
       companyNameController.text = userData.companyName ?? '';
@@ -161,6 +168,7 @@ class ProfileViewScreenController extends GetxController {
     final id = storage.read(userId);
     var userUpdatedData = {
       "first_name": nameController.text,
+      "last_name":lastNameController.text,
       "email": emailController.text,
       "companyName": companyNameController.text,
       "employees": employeesController.text,

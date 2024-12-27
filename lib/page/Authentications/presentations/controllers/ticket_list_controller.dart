@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tms_sathi/constans/const_local_keys.dart';
 import 'package:tms_sathi/main.dart';
+import 'package:tms_sathi/response_models/customerBrand_response_model.dart';
 import 'package:tms_sathi/response_models/ticket_history_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 import '../../../../response_models/export_ticket_models.dart';
@@ -86,6 +87,7 @@ class TicketListController extends GetxController {
   void onInit() {
     super.onInit();
     fetchTicketsApiCall();
+    // hitGetCustomerBrandListApiCall(id:510.toString());
   }
 @override
 void onClose(){
@@ -231,19 +233,17 @@ void onClose(){
     customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
     var ticketParameterData = {
-      'page':currentPage.value,
+      // 'page':currentPage.value,
       "page_size":"all"
     };
     try {
       final response = await Get.find<AuthenticationApiService>()
           .getticketDetailsApiCall(parameter: ticketParameterData);
-      if (response != null) {
-        ticketResult.assignAll(response.results);
-        ticketPaginationsData.assignAll(response.results);
-        filteredtickets.assignAll(response.results);
-        applyFilters(); // Apply initial filters
-      }
-      List<String> ticketids = ticketResult.map((ids) => ids.id.toString())
+      ticketResult.assignAll(response.results!);
+      ticketPaginationsData.assignAll(response.results!);
+      filteredtickets.assignAll(response.results!);
+      applyFilters(); // Apply initial filters
+          List<String> ticketids = ticketResult.map((ids) => ids.id.toString())
           .toList();
       await storage.write(ticketId, ticketids);
       calculateTotalPages();
@@ -479,6 +479,8 @@ void onClose(){
       customLoader.hide();
     });
   }
+
+
 }
   //   Future<void> exportToExcel() async {
   //   try {

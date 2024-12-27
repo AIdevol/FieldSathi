@@ -71,7 +71,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
             },
           )
               : Text(
-            "Service Categories",
+            "Service Category",
             style: MontserratStyles.montserratBoldTextStyle(
               size: 18,
               color: Colors.black,
@@ -280,7 +280,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
               _popUpScreenDetailsForAddingSubServiceScreen(controller);
             },
             child: Text(
-              'Add Sub-Service',
+              'Add Service Sub-Service',
               style: MontserratStyles.montserratBoldTextStyle(
                   color: whiteColor, size: 13),
             ),
@@ -358,7 +358,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
               children: [
                 Center(
                   child: Text(
-                    "Update Service Category",
+                    "Edit Service Category",
                     style: MontserratStyles.montserratBoldTextStyle(
                         size: 24, color: blackColor),
                   ),
@@ -383,7 +383,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                 ),
                 SizedBox(height: 24),
                 Text(
-                  "Category Description",
+                  "Description",
                   style: MontserratStyles.montserratMediumTextStyle(
                       size: 16, color: Colors.grey),
                 ),
@@ -475,7 +475,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                             horizontal: 24, vertical: 12),
                       ),
                       child: Text(
-                        "Update",
+                        "Submit",
                         style: MontserratStyles.montserratBoldTextStyle(
                             size: 16, color: Colors.white),
                       ),
@@ -511,7 +511,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                 ),
                 SizedBox(height: 24),
                 Text(
-                  "Category Name",
+                  "Service Category Name",
                   style: MontserratStyles.montserratMediumTextStyle(
                       size: 16, color: Colors.grey),
                 ),
@@ -519,7 +519,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                 TextField(
                   controller: controller.CategoryController,
                   decoration: InputDecoration(
-                    hintText: "Enter category name",
+                    hintText: "Service Category Name",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -529,7 +529,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                 ),
                 SizedBox(height: 24),
                 Text(
-                  "Category Description",
+                  "Description",
                   style: MontserratStyles.montserratMediumTextStyle(
                       size: 16, color: Colors.grey),
                 ),
@@ -538,7 +538,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                   controller: controller.CategoryDescriptionController,
                   maxLines: 8,
                   decoration: InputDecoration(
-                    hintText: "Enter category description",
+                    hintText: "Description",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -547,12 +547,12 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                   ),
                 ),
                 SizedBox(height: 24),
-                Text(
-                  "Category Icon",
-                  style: MontserratStyles.montserratMediumTextStyle(
-                      size: 16, color: Colors.grey),
-                ),
-                SizedBox(height: 8),
+                // Text(
+                //   "Upload Image",
+                //   style: MontserratStyles.montserratMediumTextStyle(
+                //       size: 16, color: Colors.grey),
+                // ),
+                // SizedBox(height: 8),
                 // Replace your existing image selection Row with this:
                 Row(
                   children: [
@@ -672,7 +672,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                 TextField(
                   controller: controller.SubCategoryController,
                   decoration: InputDecoration(
-                    hintText: "Enter sub-category name",
+                    hintText: "Sub-Category Name",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -682,7 +682,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                 ),
                 SizedBox(height: 24),
                 Text(
-                  "Sub-Category Description",
+                  "Description",
                   style: MontserratStyles.montserratMediumTextStyle(
                       size: 16, color: Colors.grey),
                 ),
@@ -691,7 +691,7 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                   controller: controller.SubCategoryDescriptionController,
                   maxLines: 8,
                   decoration: InputDecoration(
-                    hintText: "Enter Sub-category description",
+                    hintText: "Description*",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -735,12 +735,12 @@ class ServicesViewScreen extends GetView<ServiceCategoriesController> {
                   ),
                 ),
                 SizedBox(height: 24),
-                Text(
-                  "Category Icon",
-                  style: MontserratStyles.montserratMediumTextStyle(
-                      size: 16, color: Colors.grey),
-                ),
-                SizedBox(height: 8),
+                // Text(
+                //   "Category Icon",
+                //   style: MontserratStyles.montserratMediumTextStyle(
+                //       size: 16, color: Colors.grey),
+                // ),
+                // SizedBox(height: 8),
                 // Replace your existing image selection Row with this:
                 Row(
                   children: [

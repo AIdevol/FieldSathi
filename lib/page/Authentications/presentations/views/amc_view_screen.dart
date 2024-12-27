@@ -2,23 +2,20 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:pluto_grid/pluto_grid.dart';
 import 'package:tms_sathi/navigations/navigation.dart';
 import 'package:tms_sathi/page/Authentications/presentations/controllers/amc_screen_controller.dart';
-import 'package:tms_sathi/page/Authentications/widgets/controller/add_amc_view_screen_controller.dart';
 import 'package:tms_sathi/response_models/amc_response_model.dart';
 
 import '../../../../constans/color_constants.dart';
 import '../../../../constans/const_local_keys.dart';
+import '../../../../constans/role_based_keys.dart';
 import '../../../../constans/string_const.dart';
 import '../../../../main.dart';
 import '../../../../utilities/common_textFields.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../../utilities/helper_widget.dart';
-import '../../widgets/views/add_amc_view_screen.dart';
 
 class AMCViewScreen extends GetView<AMCScreenController> {
   // Ensure the controller is initialized
@@ -32,6 +29,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
             Scaffold(
               resizeToAvoidBottomInset: false,
               backgroundColor: CupertinoColors.white,
+              floatingActionButton: _buildFloatingActionButton(),
               bottomNavigationBar: _buildPaginationControls(controller),
               appBar: AppBar(
                 leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
@@ -50,12 +48,12 @@ class AMCViewScreen extends GetView<AMCScreenController> {
                     },
                     icon: Icon(Icons.calendar_month),
                   ),
-                  IconButton(
+                 /* IconButton(
                     onPressed: () {
                       Get.toNamed(AppRoutes.createamcScreen);
                     },
                     icon: Icon(FeatherIcons.plus),
-                  ).paddingSymmetric(horizontal: 20.0),
+                  ).paddingSymmetric(horizontal: 20.0),*/
                 ],
               ),
               body: RefreshIndicator(
@@ -84,7 +82,16 @@ class AMCViewScreen extends GetView<AMCScreenController> {
             ),)
     );
   }
-
+  FloatingActionButton? _buildFloatingActionButton() {
+    final userrole = storage.read(userRole);
+    return (userrole != 'technician'&&userrole !='sale')?
+    FloatingActionButton(
+      onPressed: () =>Get.toNamed(AppRoutes.createamcScreen),
+      backgroundColor: appColor,
+      child: Icon(Icons.add, color: Colors.white),
+    )
+        : null;
+  }
   Widget _mainData(AMCScreenController controller) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -254,7 +261,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
 
   Widget _buildTopBar(BuildContext context, AMCScreenController controller) {
     return Container(
-      height: Get.height * 0.07,
+      height: Get.height * 0.17,
       width: Get.width,
       decoration: BoxDecoration(
         color: whiteColor,
@@ -267,37 +274,51 @@ class AMCViewScreen extends GetView<AMCScreenController> {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+      child: Column(
         children: [
-          Expanded(child: _buildSearchField()),
-          hGap(10),
-          ElevatedButton(
-            onPressed: () => _showImportModelView(context, controller),
-            style: _buttonStyle(),
-            child: Text(
-              'Import',
-              style: MontserratStyles.montserratBoldTextStyle(
-                color: whiteColor,
-                size: 13,
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Expanded(child: _buildSearchField()),
+                  hGap(10),
+                  ElevatedButton(
+                    onPressed: () => _showImportModelView(context, controller),
+                    style: _buttonStyle(),
+                    child: Text(
+                      'Import',
+                      style: MontserratStyles.montserratBoldTextStyle(
+                        color: whiteColor,
+                        size: 13,
+                      ),
+                    ),
+                  ),
+                  hGap(10),
+                  ElevatedButton(
+                    onPressed: () {
+                      _downLoadExportModelView(context, controller);// Implement this method in your controller
+                    },
+                    child: Text(
+                      'Export',
+                      style: MontserratStyles.montserratBoldTextStyle(
+                        color: whiteColor,
+                        size: 13,
+                      ),
+                    ),
+                    style: _buttonStyle(),
+                  ),
+                  hGap(10),
+                ],
               ),
             ),
           ),
-          hGap(10),
-          ElevatedButton(
-            onPressed: () {
-              _downLoadExportModelView(context, controller);// Implement this method in your controller
-            },
-            child: Text(
-              'Export',
-              style: MontserratStyles.montserratBoldTextStyle(
-                color: whiteColor,
-                size: 13,
-              ),
-            ),
-            style: _buttonStyle(),
+          Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: _selectedValueStatus(context,controller),
           ),
-          hGap(10),
+
         ],
       ),
     );
@@ -315,6 +336,42 @@ class AMCViewScreen extends GetView<AMCScreenController> {
       shadowColor: Colors.black.withOpacity(0.5),
     );
   }
+
+
+  Widget _selectedValueStatus(BuildContext context, AMCScreenController controller) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Obx(
+            () => DropdownButton<String>(
+          value: controller.statusFirstplace.value,
+          isExpanded: true,
+          underline: Container(),
+          items: controller.statusSelection.map((dynamic value) {  // Changed parameter type to dynamic
+            return DropdownMenuItem<String>(
+              value: value as String,  // Added type cast to String
+              child: Text(
+                value.toString(),  // Added type cast to String
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 13,
+                  color: Colors.black87,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: (String? value) {
+            if (value != null) {
+              controller.statusFirstplace.value = value;
+            }
+          },
+        ),
+      ),
+    );
+  }
+
 
   void _showImportModelView(BuildContext context,AMCScreenController controller) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -377,7 +434,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
                                     Icon(Icons.info_outline, size: 20),
                                     SizedBox(width: 8),
                                     Text(
-                                      'Import Rules',
+                                      'Rule',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
@@ -395,10 +452,10 @@ class AMCViewScreen extends GetView<AMCScreenController> {
                                     ),
                                     children: const [
                                       TextSpan(
-                                        text: 'Required Fields:\n',
+                                        text: 'Compulsory  Fields:\n',
                                         style: TextStyle(fontWeight: FontWeight.bold),
                                       ),
-                                      TextSpan(text: '• Customer\'s Name\n'),
+                                      TextSpan(text: '• Customer Name\n'),
                                       TextSpan(text: '• AMC Name\n'),
                                       // TextSpan(
                                       //   text: 'Optional Fields:\n',
@@ -491,7 +548,7 @@ class AMCViewScreen extends GetView<AMCScreenController> {
                                 Icon(Icons.folder_open, color: Colors.white),
                                 SizedBox(width: 12),
                                 Text(
-                                  'Choose File to Import',
+                                  'Choose File',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -544,14 +601,18 @@ class AMCViewScreen extends GetView<AMCScreenController> {
         child: Obx(() =>
             DataTable(columns: [
               DataColumn(label: Text('AMC ID/Name')),
-              DataColumn(label: Text('Date')),
+              DataColumn(label: Text('Activation Date/Time')),
               DataColumn(label: Text('Customer Name')),
               DataColumn(label: Text('Services')),
+              DataColumn(label: Text('Product Name')),// Product Name
+              DataColumn(label: Text('Product Brand')),
+              DataColumn(label: Text('Serial Model No.')),
               DataColumn(label: Text('Service Amount')),
               DataColumn(label: Text('Service Occurrence')),
-              DataColumn(label: Text('Recieved Amount')),
+              DataColumn(label: Text('Received Amount')),
               DataColumn(label: Text('Remainder')),
               DataColumn(label: Text('Status')),
+              DataColumn(label: Text('Note')),
               DataColumn(label: Text(' ')),
               DataColumn(label: Text(' ')),
               DataColumn(label: Text(' ')),
@@ -564,14 +625,18 @@ class AMCViewScreen extends GetView<AMCScreenController> {
                 },
                   cells: [
                 DataCell(_ticketBoxIcons(amc.id.toString(), amc.amcName.toString())/*Text(amc.id.toString())*/),
-                DataCell(Text(amc.activationDate.toString()?? 'N/A')),
+                DataCell(_amcActivationDateTimeBoxIcons(amc.activationDate.toString(),amc.activationTime.toString())),
                 DataCell(Text(amc.customer?.customerName ?? 'N/A')),
-                DataCell(Text('${amc.serviceCompleted ?? 'N/A'}'+'${'/'}'+'${amc.noOfService??""}')),
+                DataCell(Text('${amc.serviceCompleted ?? '---'}'+'${'/'}'+'${amc.noOfService??"---"}')),
+                     DataCell(Text('${amc.productName??"---"}')),
+                     DataCell(Text('${amc.productBrand??'---'}')),
+                     DataCell(Text('${amc.serialModelNo??"---"}')),
                 DataCell(Text(amc.serviceAmount.toString())),
-                DataCell(Text(amc.selectServiceOccurence ?? 'N/A')),
+                DataCell(Text(amc.selectServiceOccurence ?? '---')),
                 DataCell(Text(amc.receivedAmount.toString())),
-                DataCell(Text(amc.remainder ?? 'N/A')),
+                DataCell(Text(amc.remainder ?? '---')),
                 DataCell(Text(amc.status ?? 'N/A')),
+                    DataCell(Text(amc.note ?? '---')),
                 DataCell( _dropDownValueViews(controller,amc)
                     /*IconButton(onPressed: () {_dropDownValueViews(controller);}, icon: Icon(Icons.more_vert))*/),
                 DataCell(_viewDetailsButton(controller, amc)),
@@ -718,7 +783,35 @@ Widget _ticketBoxIcons(String ticketId,String text) {
     ),
   );
 }
+Widget _amcActivationDateTimeBoxIcons(String activation_date,String time) {
+  return Center(
+    child: Column(
+      children: [
+        Text(activation_date,style: MontserratStyles.montserratSemiBoldTextStyle(size: 12, color: Colors.black),),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal:8, vertical: 4),
+          decoration: BoxDecoration(
+            color: normalBlue,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: Colors.blue.shade300,
+              width: 1,
+            ),
+          ),
+          child: Text(
+            '$time',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+        ),
 
+      ],
+    ),
+  );
+}
 _amcDetailsEditWidget(BuildContext context, AMCScreenController controller, AmcResult amcData){
   WidgetsBinding.instance.addPostFrameCallback((_){
     controller.amcNameController.text = amcData.amcName ?? '';
@@ -732,7 +825,7 @@ _amcDetailsEditWidget(BuildContext context, AMCScreenController controller, AmcR
     controller.serialModelNoController.text = amcData.serialModelNo ?? '';
     controller.serviceAmountController.text = amcData.serviceAmount?.toString() ?? '';
     controller.recievedAmountController.text = amcData.receivedAmount?.toString() ?? '';
-    controller.customerNameController.text = amcData.customer.customerName ?? '';
+    controller.customerNameController.text = amcData.customer?.customerName ?? '';
     controller.notesController.text = amcData.note ?? '';
   });
 
@@ -1073,7 +1166,7 @@ _detailsViewsWidget(AMCScreenController controller, AmcResult amcData) {
                 ),
               ),
               Text(
-                "Customer Name: ${amcData.customer.customerName ?? 'N/A'}",
+                "Customer Name: ${amcData.customer?.customerName ?? 'N/A'}",
                 style: MontserratStyles.montserratSemiBoldTextStyle(
                   size: 15,
                   color: Colors.black,
@@ -1124,7 +1217,7 @@ _detailsViewsWidget(AMCScreenController controller, AmcResult amcData) {
                 ),
               ),
               Text(
-                "Product Name: ${amcData.productName ?? 'N/A'}",
+                "Product Name: ${amcData.productName?? 'N/A'}",
                 style: MontserratStyles.montserratSemiBoldTextStyle(
                   size: 15,
                   color: Colors.black,
@@ -1635,7 +1728,7 @@ Future<void> showAmcHistoryData(BuildContext context, AMCScreenController contro
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.blueAccent,
+                  color: Colors.white60,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
@@ -1648,7 +1741,7 @@ Future<void> showAmcHistoryData(BuildContext context, AMCScreenController contro
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.green,
+                      color: Color.fromRGBO(59, 113, 202, 1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -1675,27 +1768,30 @@ Future<void> showAmcHistoryData(BuildContext context, AMCScreenController contro
                       )
                     ]
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      vGap(20),
-                    Row(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text('Created At:',style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: Colors.black),),
-                        vGap(5),
-                        Text('${amcData.createdAt}',style: MontserratStyles.montserratMediumTextStyle(size: 15, color: Colors.black),),
-                      ],
-                    ),
-                    vGap(5),
-                    Row(
-                      children: [
-                        Text('Created By:',style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: Colors.black),),
-                        vGap(5),
-                        Text('${amcData.createdBy}',style: MontserratStyles.montserratMediumTextStyle(size: 15, color: Colors.black),),
-                      ],
-                    )
+                        vGap(20),
+                      Row(
+                        children: [
+                          Text('Created At:',style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: Colors.black),),
+                          vGap(5),
+                          Text('${amcData.createdAt}',style: MontserratStyles.montserratMediumTextStyle(size: 15, color: Colors.black),),
+                        ],
+                      ),
+                      vGap(5),
+                      Row(
+                        children: [
+                          Text('Created By:',style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: Colors.black),),
+                          vGap(5),
+                          Text('${amcData.createdBy}',style: MontserratStyles.montserratMediumTextStyle(size: 15, color: Colors.black),),
+                        ],
+                      )
 
-                  ],),
+                    ],).paddingOnly(left: 12,right: 12),
+                  ),
                 ),
               ),
               vGap(20),

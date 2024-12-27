@@ -37,13 +37,13 @@ class HomeScreen extends GetView<HomeScreenController> {
       child: GetBuilder<HomeScreenController>(
         init: HomeScreenController(),
         builder: (controller) => Scaffold(
-          floatingActionButton: userrole != technicianRole && userrole != salesRole
-              ? _buildSpeedDial(context: context)
-              : null,
+          // floatingActionButton: userrole != technicianRole && userrole != salesRole
+          //     ? _buildSpeedDial(context: context)
+          //     : null,
           extendBodyBehindAppBar: false, // Changed to false to avoid layout issues
           key: drawerkey,
           resizeToAvoidBottomInset: true,
-          drawer: DrawerScreen(dkey: drawerkey),
+          drawer: DrawerScreen(dkey: drawerkey,),
           appBar: _buildAppBar(controller),
           body: RefreshIndicator(child: _getRoleBasedHomePage(context,controller,userrole), onRefresh:()async{
             await controller.refereshAllTicket();
@@ -89,7 +89,7 @@ class HomeScreen extends GetView<HomeScreenController> {
               children: [
                 _buildTicketSection(context),
                 SizedBox(height: 20),
-                _customerRatingView(context),
+                _customerRatingView(context,controller),
                 SizedBox(height: 20,),
                 _todayTicketView(context,controller),
                 SizedBox(height: 20,),
@@ -231,7 +231,7 @@ class HomeScreen extends GetView<HomeScreenController> {
 
   PreferredSizeWidget _buildAppBar(HomeScreenController controller) {
     return AnimatedAppBar(
-    title: 'FieldSathi',
+    title: 'Fieldsathi',
       actions: [
       IconButton(
         onPressed: () async {
@@ -338,7 +338,7 @@ class HomeScreen extends GetView<HomeScreenController> {
       SpeedDialChild(
         child: Icon(Icons.add_home_work),
         backgroundColor: appColor,
-        label: 'Field Worker',
+        label: 'Field Team',
         onTap: () => _showFieldWorkerOptions(context),
       ),
       SpeedDialChild(
@@ -365,9 +365,9 @@ class HomeScreen extends GetView<HomeScreenController> {
   void _showFieldWorkerOptions(BuildContext context) {
     AppBottomSheets.show(
       context: context,
-      title: 'Field Worker',
+      title: 'Field Team',
       actions: [
-        _buildBottomSheetAction('Technician List', () async {
+        _buildBottomSheetAction('Technician', () async {
           Get.back();
           await Get.toNamed(AppRoutes.technicianListsScreen);
         }),
@@ -379,7 +379,7 @@ class HomeScreen extends GetView<HomeScreenController> {
           Get.back();
           Get.toNamed(AppRoutes.expenditureScreen);
         }),
-        _buildBottomSheetAction('Material Requests', () {
+        _buildBottomSheetAction('Material Request', () {
           Get.back();
           Get.toNamed(AppRoutes.serviceReqScreen);
         }),
@@ -461,58 +461,115 @@ class HomeScreen extends GetView<HomeScreenController> {
 }
 
 
-_loginShowPopUpView(HomeScreenController controller,BuildContext context){
+_loginShowPopUpView(HomeScreenController controller, BuildContext context) {
   final GlobalKey<State> alertKey = GlobalKey();
-  final Controller = Get.put(ProfileViewScreenController());
-  // controller.logout();
-  return showDialog(context: context, builder: (controller)=>AlertDialog(
-    key: alertKey,
-    backgroundColor: CupertinoColors.white,
-    title: Text('Logout', style: MontserratStyles.montserratBoldTextStyle(size: 25, color: blackColor),),
-    content: Text("Are you sure want to Logout", style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: Colors.black),),
-    actions: [
-      ElevatedButton(
-        onPressed: () {
-          Get.back();
-        },
-        child: Text('Cancel',style: MontserratStyles.montserratBoldTextStyle(color: Colors.white, size: 13),),
-        style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(appColor),
-          foregroundColor: WidgetStateProperty.all(Colors.white),
-          padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
-          elevation: WidgetStateProperty.all(5),
-          shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(strokeAlign: BorderSide.strokeAlignCenter)
-            ),
+  final profileController = Get.put(ProfileViewScreenController());
+
+  // Get screen size for responsive sizing
+  final screenSize = MediaQuery.of(context).size;
+  final isSmallScreen = screenSize.width < 360;
+
+  return showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => Dialog(
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: screenSize.width * 0.08,
+        vertical: screenSize.height * 0.1,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: 400,  // Maximum width for larger screens
+          minWidth: 280,  // Minimum width to prevent content squishing
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(isSmallScreen ? 16.0 : 24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Logout',
+                style: MontserratStyles.montserratBoldTextStyle(
+                  size: isSmallScreen ? 20 : 25,
+                  color: blackColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16),
+              Text(
+                "Are you sure you want to Logout?",
+                style: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: isSmallScreen ? 13 : 15,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Get.back(),
+                      style: _buttonStyle(context),
+                      child: Text(
+                        'Cancel',
+                        style: MontserratStyles.montserratBoldTextStyle(
+                          color: Colors.white,
+                          size: isSmallScreen ? 11 : 13,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => profileController.logout(),
+                      style: _buttonStyle(context),
+                      child: Text(
+                        'Logout',
+                        style: MontserratStyles.montserratBoldTextStyle(
+                          color: whiteColor,
+                          size: isSmallScreen ? 11 : 13,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.5)), // Shadow color
         ),
       ),
-      hGap(20),
-      ElevatedButton(
-        onPressed: () =>Controller.logout(),
-        child: Text('Logout',style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),),
-        style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(appColor),
-          foregroundColor: WidgetStateProperty.all(Colors.white),
-          padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
-          elevation: WidgetStateProperty.all(5),
-          shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(strokeAlign: BorderSide.strokeAlignCenter)
-            ),
-          ),
-          shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.5)), // Shadow color
-        ),
-      )
-    ],
-  ));
+    ),
+  );
 }
 
-Widget _customerRatingView(BuildContext context) {
+ButtonStyle _buttonStyle(BuildContext context) {
+  return ButtonStyle(
+    backgroundColor: MaterialStateProperty.all(appColor),
+    foregroundColor: MaterialStateProperty.all(Colors.white),
+    padding: MaterialStateProperty.all(
+      EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: MediaQuery.of(context).size.width < 360 ? 10 : 15,
+      ),
+    ),
+    elevation: MaterialStateProperty.all(5),
+    shape: MaterialStateProperty.all(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+    shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
+  );
+}
+
+Widget _customerRatingView(BuildContext context,HomeScreenController controller) {
   return Material(
     elevation: 2,
     borderRadius: BorderRadius.circular(20),
@@ -531,18 +588,15 @@ Widget _customerRatingView(BuildContext context) {
             children: [
               Text(
                 'Customer Ratings',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+                  style:MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: blackColor)
+
               ),
               Row(
                 children: [
                   Icon(Icons.star, color: Colors.amber, size: 24),
                   SizedBox(width: 4),
                   Text(
-                    '4.5',
+                   "${controller.customerAverageRatingData.value}",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -556,17 +610,12 @@ Widget _customerRatingView(BuildContext context) {
           SizedBox(height: 16),
 
           // Detailed Ratings
-          _buildStarRow('5 Stars', 4.8),
-          _buildStarRow('4 Stars', 3.5),
-          _buildStarRow('3 Stars', 2.3),
-          _buildStarRow('2 Stars', 1.2),
-          _buildStarRow('1 Star', 0.8),
-
+          _buildStarRow(controller.customerAverageRatingData.value),
           SizedBox(height: 16),
 
           // Total Reviews
           Text(
-            'Based on 1,234 Reviews',
+            'Based on ${controller.customerRatingData.value} Reviews',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey,
@@ -579,7 +628,7 @@ Widget _customerRatingView(BuildContext context) {
 }
 
 // Helper method to create star rows
-Widget _buildStarRow(String label, double stars) {
+Widget _buildStarRow(/*String label,*/ double stars) {
   int fullStars = stars.floor();
   bool hasHalfStar = (stars - fullStars) >= 0.5;
 
@@ -587,22 +636,22 @@ Widget _buildStarRow(String label, double stars) {
     padding: const EdgeInsets.symmetric(vertical: 4.0),
     child: Row(
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.black54,
-          ),
-        ),
+        // Text(
+        //   label,
+        //   style: TextStyle(
+        //     fontSize: 12,
+        //     color: Colors.black54,
+        //   ),
+        // ),
         SizedBox(width: 8),
         Row(
           children: List.generate(5, (index) {
             if (index < fullStars) {
-              return Icon(Icons.star, color: Colors.amber, size: 16);
+              return Icon(Icons.star, color: Colors.amber, size: 40);
             } else if (index == fullStars && hasHalfStar) {
-              return Icon(Icons.star_half, color: Colors.amber, size: 16);
+              return Icon(Icons.star_half, color: Colors.amber, size: 40);
             } else {
-              return Icon(Icons.star_border, color: Colors.amber, size: 16);
+              return Icon(Icons.star_border, color: Colors.amber, size: 40);
             }
           }),
         ),
@@ -616,6 +665,7 @@ Widget _todayTicketView(BuildContext context, HomeScreenController controller) {
     elevation: 2,
     borderRadius: BorderRadius.circular(20),
     child: Container(
+      // height: Get.height*0.8,
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -627,11 +677,7 @@ Widget _todayTicketView(BuildContext context, HomeScreenController controller) {
         children: [
           Text(
             "Today's Ticket",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+            style:MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: blackColor)
           ),
           vGap(20),
           // Replace Expanded with SizedBox or fixed height
@@ -667,7 +713,19 @@ Widget _todayTicketViewbyResponse(BuildContext context, TodaysTicket todayData) 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(FontAwesomeIcons.ticket,size: 30,color: appColor),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(FontAwesomeIcons.ticket,size: 30,color: appColor),
+              Text(
+                "\u20B9${todayData.rate ?? 'Unknown'}",
+                style: MontserratStyles.montserratBoldTextStyle(
+                  size: 15,
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          ),
           Text(
             todayData.customerDetails?.customerName ?? 'Unknown Customer',
             style: MontserratStyles.montserratBoldTextStyle(
@@ -715,22 +773,24 @@ Widget _todayTicketViewbyResponse(BuildContext context, TodaysTicket todayData) 
 }
 _buildEmptyState() {
   return Center(
-    child: Column(
-      // mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Image.asset(
-          nullVisualImage,
-          width: 300,
-          height: 300,
-        ),
-        Text(
-          'No services found',
-          style: MontserratStyles.montserratNormalTextStyle(
-            // size: 18,
-            color: blackColor,
+    child: SingleChildScrollView(
+      child: Column(
+        // mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            nullVisualImage,
+            width: 300,
+            height: 300,
           ),
-        ),
-      ],
+          Text(
+            'No services found',
+            style: MontserratStyles.montserratNormalTextStyle(
+              // size: 18,
+              color: blackColor,
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }

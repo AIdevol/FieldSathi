@@ -7,7 +7,7 @@ import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 class LeadListViewController extends GetxController{
   RxList<String> leadStatusValue = [
-    "Select Status",
+    "---Select Status---",
     "Inactive",
     "Interact",
     "In-Discussion",
@@ -16,7 +16,16 @@ class LeadListViewController extends GetxController{
     "Not Interested",
   ].obs;
 
-  RxString dropdownValue = "Select Status".obs;
+  RxList<String> leadDateWiseValue = [
+    "---Select Date---",
+    "Today",
+    "Tomorrow",
+    "Yesterday",
+    "This Week",
+    "This Month",
+  ].obs;
+  RxString dropdownValue = "---Select Status---".obs;
+  RxString dropdownDateValue = "---Select Date---".obs;
   RxBool isLoading = true.obs;
   RxList<LeadResult> leadListData = <LeadResult>[].obs;
   RxList<LeadResult> leadFilters = <LeadResult>[].obs;
@@ -51,7 +60,19 @@ class LeadListViewController extends GetxController{
   fetchedLeadListApiCall();
 
 }
+  void updateSelectedStatusFilter(String? newValue) {
+    if (newValue != null) {
+      dropdownValue.value = newValue;
+      applyFilter();
+    }
+  }
 
+  void updateSelectedDateFilter(String? newValue) {
+    if (newValue != null) {
+      dropdownDateValue.value = newValue;
+      applyFilter();
+    }
+  }
   void applyFilter() {
     final query = searchController.text.trim().toLowerCase();
     if (query.isEmpty) {
