@@ -676,7 +676,7 @@ Widget _todayTicketView(BuildContext context, HomeScreenController controller) {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "Today's Ticket",
+            "Today's Tickets",
             style:MontserratStyles.montserratSemiBoldTextStyle(size: 15, color: blackColor)
           ),
           vGap(20),
@@ -782,13 +782,13 @@ _buildEmptyState() {
             width: 300,
             height: 300,
           ),
-          Text(
-            'No services found',
-            style: MontserratStyles.montserratNormalTextStyle(
-              // size: 18,
-              color: blackColor,
-            ),
-          ),
+          // Text(
+          //   'No services found',
+          //   style: MontserratStyles.montserratNormalTextStyle(
+          //     // size: 18,
+          //     color: blackColor,
+          //   ),
+          // ),
         ],
       ),
     ),

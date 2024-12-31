@@ -12,6 +12,7 @@ import '../../../../constans/color_constants.dart';
 import '../../../../constans/string_const.dart';
 import '../../../../navigations/navigation.dart';
 import '../../../../response_models/expenses_response_model.dart';
+import '../../../../utilities/customer_showModel_expense.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../../utilities/helper_widget.dart';
 
@@ -23,11 +24,12 @@ class ExpenditureScreen extends GetView<ExpenditureScreenController>{
         child: GetBuilder<ExpenditureScreenController>(
           builder: (controller) => Scaffold(
             backgroundColor: CupertinoColors.white,
+            floatingActionButton: _buildFloatingActionButton(context,controller),
             appBar: AppBar(
               leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
               backgroundColor: appColor,
               title: Text(
-                'Expenditure',
+                'Expenses',
                 style: MontserratStyles.montserratBoldTextStyle(color: blackColor, size: 15),
               ),
             ),
@@ -581,3 +583,67 @@ TextStyle _cellTextStyle() {
       size: 13
   );
 }
+
+ _buildFloatingActionButton(BuildContext context, ExpenditureScreenController controller) {
+  final userrole = storage.read(userRole);
+
+  if (userrole == 'technician') {
+    return Row(
+       mainAxisAlignment: MainAxisAlignment.end,
+       children: [
+         ElevatedButton(
+          onPressed: () {
+            // _leavesTypesApplicationViewScreen(context, controller);
+            Get.dialog(
+                Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                child: AddExpenseForm(),
+              ),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: appColor,
+            minimumSize: Size(120, 40),
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: CupertinoColors.white),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Text(
+            " Add ",
+            style: MontserratStyles.montserratBoldTextStyle(
+              color: CupertinoColors.white,
+              size: 13,
+            ),
+          ),
+             ),
+          hGap(10),
+         if (userrole == 'technician')
+         ElevatedButton(
+          onPressed: () {
+            // _leavesTypesApplicationViewScreen(context, controller);
+            controller.downLoadExportModelView(context, controller);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: appColor,
+            minimumSize: Size(120, 40),
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: CupertinoColors.white),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Text(
+            "Export",
+            style: MontserratStyles.montserratBoldTextStyle(
+              color: CupertinoColors.white,
+              size: 15,
+            ),
+          ),
+             ),
+       ],
+     );
+  }
+  }

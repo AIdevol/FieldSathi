@@ -275,7 +275,7 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
               columns: [
                 // DataColumn(label: Text('.')),
                 DataColumn(label: Text('EmpId/Name')),
-                DataColumn(label: Text('Phone')),
+                DataColumn(label: Text('Phone No')),
                 DataColumn(label: Text('Profile')),
                 DataColumn(label: Text('Leave Type')),
                 DataColumn(label: Text('From Date')),
@@ -673,8 +673,9 @@ Widget _buildTableData(BuildContext context, LeaveReportViewScreenController con
             ),
             columns: [
               DataColumn(label: Text('Name')),
-              DataColumn(label: Text('Phone')),
+              DataColumn(label: Text('Phone No')),
               DataColumn(label: Text('Profile')),
+              DataColumn(label: Text('Leave Type')),
               DataColumn(label: Text('From Date')),
               DataColumn(label: Text('To Date')),
               DataColumn(label: Text('Days')),
@@ -686,6 +687,7 @@ Widget _buildTableData(BuildContext context, LeaveReportViewScreenController con
               filteredData.length,
                   (index) {
                 final leave = filteredData[index];
+                final leavesType = controller.leavesData;
                 return DataRow(
                   onSelectChanged: (selected){
                     if(selected != null){
@@ -696,6 +698,7 @@ Widget _buildTableData(BuildContext context, LeaveReportViewScreenController con
                     DataCell(Text('${leave.userId?.firstName ?? ''} ${leave.userId?.lastName ?? ''}')),
                     DataCell(Text(leave.userId?.phoneNumber ?? '')),
                     DataCell(Text(leave.userId?.role ?? '')),
+                    DataCell(Text(leavesType[index].leaveType ?? '')),
                     DataCell(Text(leave.startDate.toString())),
                     DataCell(Text(leave.endDate.toString())),
                     DataCell(Text(controller.calculateDays(
@@ -703,7 +706,7 @@ Widget _buildTableData(BuildContext context, LeaveReportViewScreenController con
                       DateTime.parse(leave.endDate.toString()?? ''),
                     ).toString())),
                     DataCell(Text(leave.reason ?? 'N/A')),
-                    DataCell(Text(leave.status ?? 'N/A')),
+                    DataCell(_buildStatusView(leave)),
                     DataCell(
                       (leave.status == 'Submitted')
                           ? Row(children: [
@@ -732,6 +735,47 @@ _buildViewActionsButton(Widget icon, VoidCallback? onPressed){
   ],);
 }
 
+_buildStatusView(LeaveResult element) {
+  Color getStatusColor() {
+    switch (element.status?.toLowerCase()) {
+      case 'ongoing':
+        return Colors.amber;
+      case 'completed':
+        return Colors.blue;
+      case 'on hold':
+        return Colors.orange;
+      case 'rejected':
+        return Colors.red;
+      case 'inactive':
+        return Colors.grey;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  return Container(
+    height: 24,
+    width: 80,
+    decoration: BoxDecoration(
+      color: getStatusColor().withOpacity(0.2),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(
+        color: getStatusColor(),
+        width: 1,
+      ),
+    ),
+    child: Center(
+      child: Text(
+        element.status ?? 'N/A',
+        style: TextStyle(
+          color: getStatusColor(),
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+  );
+}
 _leavesTypesApplicationViewScreen(BuildContext context, LeaveReportViewScreenController controller) {
   showDialog(
     context: context,
@@ -780,12 +824,28 @@ _leavesTypesApplicationViewScreen(BuildContext context, LeaveReportViewScreenCon
                     onPressed: () {
                       Navigator.pop(context);
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: appColor,
+                      minimumSize: Size(120, 40),
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: CupertinoColors.white),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                     child: Text("Close"),
                   ),
                   ElevatedButton(
                     onPressed: () {
                       controller.hitPostLeavesApiCall();
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: appColor,
+                      minimumSize: Size(120, 40),
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: CupertinoColors.white),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                     child: Text("Apply Leave"),
                   ),
                 ],

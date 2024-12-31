@@ -7,6 +7,8 @@ import 'package:tms_sathi/page/Authentications/widgets/controller/calender_view_
 import 'package:tms_sathi/response_models/holidays_calender_response_model.dart';
 import 'package:tms_sathi/utilities/common_textFields.dart';
 import 'package:tms_sathi/utilities/helper_widget.dart';
+import '../../../../constans/role_based_keys.dart';
+import '../../../../main.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../controllers/calender_screen_controller.dart';
 
@@ -537,6 +539,7 @@ Future<void> _buildShowDetailsOfTheCard(BuildContext context, CalendarController
                     ),
                   ),
                   const SizedBox(width: 12),
+                  if(storage.read(userRole) != 'technician')
                   ElevatedButton(
                     onPressed: () {
                       controller.hitDeleteHolidayApiCall(event.id.toString());

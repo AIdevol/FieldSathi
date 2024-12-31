@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:tms_sathi/response_models/expenses_response_model.dart';
 
+import '../../../../constans/color_constants.dart';
 import '../../../../constans/const_local_keys.dart';
 import '../../../../main.dart';
 import '../../../../response_models/attendance_response_model.dart';
 import '../../../../response_models/technician_response_model.dart';
 import '../../../../response_models/ticket_response_model.dart';
 import '../../../../services/APIs/auth_services/auth_api_services.dart';
+import '../../../../utilities/common_textFields.dart';
+import '../../../../utilities/google_fonts_textStyles.dart';
+import '../../../../utilities/helper_widget.dart';
 
 class ExpenditureScreenController extends GetxController{
   final isSearching = false.obs;
@@ -21,6 +26,10 @@ class ExpenditureScreenController extends GetxController{
   final searchResults = <String>[].obs;
   RxList<ExpensesResponseModel> expensesData = <ExpensesResponseModel>[].obs;
   RxList<ExpenseResult> expenseResult =<ExpenseResult>[].obs;
+
+  final TextEditingController startDateController = TextEditingController();
+  final TextEditingController endDateController = TextEditingController();
+
   void toggleSearch() {
     isSearching.value = !isSearching.value;
     if (!isSearching.value) {
@@ -47,6 +56,8 @@ class ExpenditureScreenController extends GetxController{
   @override
   void onClose() {
     searchController.dispose();
+    startDateController.dispose();
+    endDateController.dispose();
     super.onClose();
   }
 
@@ -148,6 +159,175 @@ Future<void>refreshApiCall()async {
     isLoading.value = true;
     FocusManager.instance.primaryFocus!.unfocus();
     
+  }
+
+
+
+  void downLoadExportModelView(BuildContext context, ExpenditureScreenController controller) {
+    DateTime? startDate;
+    DateTime? endDate;
+
+    Future<DateTime?> _selectDate(BuildContext context, {DateTime? initialDate, DateTime? firstDate, DateTime? lastDate}) async {
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: initialDate ?? DateTime.now(),
+        firstDate: firstDate ?? DateTime(2000),
+        lastDate: lastDate ?? DateTime.now(),
+      );
+      return picked;
+    }
+
+    void _handleStartDateSelection() async {
+      final picked = await _selectDate(
+        context,
+        initialDate: startDate ?? DateTime.now(),
+        lastDate: endDate ?? DateTime.now(),
+      );
+      if (picked != null) {
+        startDate = picked;
+        controller.startDateController.text = DateFormat('dd-MM-yyyy').format(picked);
+      }
+    }
+
+    void _handleEndDateSelection() async {
+      final picked = await _selectDate(
+        context,
+        initialDate: endDate ?? DateTime.now(),
+        firstDate: startDate ?? DateTime(2000),
+        lastDate: DateTime.now(),
+      );
+      if (picked != null) {
+        endDate = picked;
+        controller.endDateController.text = DateFormat('dd-MM-yyyy').format(picked);
+      }
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.dialog(
+        Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: Get.height * 0.8,
+              maxWidth: Get.width * 0.8,
+            ),
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Download Report",
+                      style: MontserratStyles.montserratBoldTextStyle(
+                        size: 15,
+                        color: Colors.black,
+                      ),
+                    ),
+                    IconButton(onPressed: (){
+                      Get.back();
+                    }, icon: Icon(Icons.close))
+                  ],
+                ),
+                divider(color: Colors.grey),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        controller: controller.startDateController,
+                        labletext: 'Start Date',
+                        hintText: "dd-mm-yyyy",
+                        readOnly: true,
+                        onTap: _handleStartDateSelection,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        "To",
+                        style: MontserratStyles.montserratBoldTextStyle(
+                          size: 15,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: CustomTextField(
+                        controller: controller.endDateController,
+                        labletext: 'End Date',
+                        hintText: "dd-mm-yyyy",
+                        readOnly: true,
+                        onTap: _handleEndDateSelection,
+                      ),
+                    ),
+                  ],
+                ),
+                vGap(30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildActionButton(
+                      context,
+                      'Cancel',
+                      Icons.cancel,
+                      onTap: () {
+                        Get.back();
+                      },
+                    ),
+                    _buildActionButton(
+                      context,
+                      'Download Excel',
+                      Icons.download,
+                      onTap: () {
+                        if (startDate == null || endDate == null) {
+                          Get.snackbar(
+                            'Error',
+                            'Please select both start and end dates',
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                          return;
+                        }
+                        // controller.downloadTicketData();
+                        // Add your download logic here
+                        // You can access the selected dates using startDate and endDate
+                      },
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+
+  }
+  Widget _buildActionButton(
+      BuildContext context,
+      String label,
+      IconData icon,
+      {required VoidCallback onTap}
+      ) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: appColor,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      onPressed: onTap,
+      icon: Icon(icon, size: 18),
+      label: Text(
+        label,
+        style: MontserratStyles.montserratSemiBoldTextStyle(size: 13),
+      ),
+    );
   }
 }
 

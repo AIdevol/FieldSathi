@@ -27,7 +27,7 @@ class TicketListScreen extends GetView<TicketListController> {
     'ID': 50,
     'Task Name': 150,
     'Customer Name': 150,
-    'Sub-Customer': 150,
+    'Sub-Customer Name': 150,
     'Technician Name': 150,
     'Start Date/Time': 160,
     'End Date/Time': 160,
@@ -35,6 +35,8 @@ class TicketListScreen extends GetView<TicketListController> {
     'Address': 200,
     "Phone No":150,
     'Region': 120,
+    'Product Name': 120,
+    'Model No.': 120,
     'Purpose': 150,
     'Status': 120,
     'Ticket Date': 120,
@@ -460,7 +462,7 @@ class TicketListScreen extends GetView<TicketListController> {
           )),
           DataCell(_buildDataCell(
            "${ticket.subCustomerDetails?.customerName}"?? 'NA',
-            maxWidth: columnWidths['Sub-Customer'],
+            maxWidth: columnWidths['Sub-Customer Name'],
           )),
           DataCell(_buildDataCell(
             '${ticket.assignTo?.firstName ?? ''} ${ticket.assignTo?.lastName ?? ''}'.trim(),
@@ -489,6 +491,13 @@ class TicketListScreen extends GetView<TicketListController> {
           DataCell(_buildDataCell(
             ticket.region ?? 'NA',
             maxWidth: columnWidths['Region'],
+          )),DataCell(_buildDataCell(
+            ticket.model ?? 'NA',
+            maxWidth: columnWidths['Region'],
+          )),
+          DataCell(_buildDataCell(
+            ticket.productName.toString() ?? 'NA',
+            maxWidth: columnWidths['Product Name'],
           )),
           DataCell(_buildDataCell(
             ticket.purpose ?? 'NA',
@@ -651,6 +660,8 @@ class TicketListScreen extends GetView<TicketListController> {
      }
 
      // Add Delete option
+     final userrole = storage.read(userRole);
+     if(userrole != 'agent')
      menuItems.add(
        _buildPopupDeleteMenuItem('Delete', Icons.delete_outline, Colors.red, context, controller,ticket),
      );

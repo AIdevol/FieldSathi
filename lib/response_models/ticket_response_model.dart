@@ -13,7 +13,7 @@ class TicketResponseModel {
   final int? currentPage;
   final dynamic next;
   final dynamic previous;
-  final List<TicketResult>? results;
+  final List<TicketResult> results;
 
   factory TicketResponseModel.fromJson(Map<String, dynamic> json){
     return TicketResponseModel(
@@ -1008,7 +1008,6 @@ class TicketCheckpoint {
   }
 
 }
-
 
 //=====================================================================================================
 class TicketCountsResponseModel {

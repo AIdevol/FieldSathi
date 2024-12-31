@@ -23,6 +23,7 @@ class TechnicianDashboardHomepageController extends GetxController {
     super.onInit();
     hitGetTechnicianApiCall();
     fetchTicketsApiCall();
+    hitTicketsCountApiCall();
   }
 
   @override
@@ -37,51 +38,52 @@ class TechnicianDashboardHomepageController extends GetxController {
   final RxInt onHoldTickets = 0.obs;
   final RxInt inactiveTickets = 0.obs;
   final RxInt rejectedTickets = 0.obs;
-  final RxDouble ongoingTicketsPercentage = 0.0.obs;
+  final RxInt ongoingTickets = 0.obs;
 
   // Method to update dashboard statistics
-  void updateTicketStats() {
-    if (ticketData.value == null) return;
-
-    // Reset all counters
-    totalTickets.value = ticketData.value!.count ?? 0;
-    completedTickets.value = 0;
-    acceptedTickets.value = 0;
-    onHoldTickets.value = 0;
-    inactiveTickets.value = 0;
-    rejectedTickets.value = 0;
-
-    // Count tickets based on status
-    for (var ticket in ticketData.value!.results!) {
-      switch (ticket.status?.toLowerCase()) {
-        case 'completed':
-          completedTickets.value++;
-          break;
-        case 'accepted':
-          acceptedTickets.value++;
-          break;
-        case 'on hold':
-          onHoldTickets.value++;
-          break;
-        case 'rejected':
-          rejectedTickets.value++;
-          break;
-        default:
-          inactiveTickets.value++;
-      }
-    }
-
-    // Calculate ongoing tickets percentage
-    if (totalTickets.value > 0) {
-      ongoingTicketsPercentage.value = ((totalTickets.value -
-          (completedTickets.value + rejectedTickets.value)) /
-          totalTickets.value * 100).roundToDouble();
-    }
-
-    update(); // Trigger UI update
-  }
+  // void updateTicketStats() {
+  //   if (ticketData.value == null) return;
+  //
+  //   // Reset all counters
+  //   totalTickets.value = ticketData.value!.count ?? 0;
+  //   completedTickets.value = 0;
+  //   acceptedTickets.value = 0;
+  //   onHoldTickets.value = 0;
+  //   inactiveTickets.value = 0;
+  //   rejectedTickets.value = 0;
+  //
+  //   // Count tickets based on status
+  //   for (var ticket in ticketData.value!.results!) {
+  //     switch (ticket.status?.toLowerCase()) {
+  //       case 'completed':
+  //         completedTickets.value++;
+  //         break;
+  //       case 'accepted':
+  //         acceptedTickets.value++;
+  //         break;
+  //       case 'on hold':
+  //         onHoldTickets.value++;
+  //         break;
+  //       case 'rejected':
+  //         rejectedTickets.value++;
+  //         break;
+  //       default:
+  //         inactiveTickets.value++;
+  //     }
+  //   }
+  //
+  //   // Calculate ongoing tickets percentage
+  //   if (totalTickets.value > 0) {
+  //     ongoingTicketsPercentage.value = ((totalTickets.value -
+  //         (completedTickets.value + rejectedTickets.value)) /
+  //         totalTickets.value * 100).roundToDouble();
+  //   }
+  //
+  //   update(); // Trigger UI update
+  // }
 
   // Method to get dashboard items for grid view
+
   List<Map<String, dynamic>> getDashboardItems() {
     return [
       {
@@ -109,24 +111,45 @@ class TechnicianDashboardHomepageController extends GetxController {
         'color': 'Colors.purple'
       },
       {
+        'title': 'Inactive Tickets',
+        'value': '${inactiveTickets.value/*.toStringAsFixed(1)*/}',
+        'icon': 'inactive_increase',
+        'color': 'Colors.redAccent'
+      },
+      {
         'title': 'Rejected Tickets',
         'value': rejectedTickets.value.toString(),
         'icon': 'security',
         'color': 'Colors.red'
       },
       {
-        'title': 'Ongoing Tickets %',
-        'value': '${ongoingTicketsPercentage.value.toStringAsFixed(1)}%',
+        'title': 'Ongoing Tickets',
+        'value': '${ongoingTickets.value/*.toStringAsFixed(1)*/}',
         'icon': 'trending_up',
         'color': 'Colors.teal'
       }
+
     ];
   }
 
+  void hitTicketsCountApiCall(){
+    isLoading.value = true;
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().getTicketCountsApiCall().then((value){
+      totalTickets.value = value.total!;
+      completedTickets.value = value.completed!;
+      onHoldTickets.value = value.onHold!;
+      rejectedTickets.value = value.rejected!;
+      inactiveTickets.value = value.inactive!;
+      ongoingTickets.value = value.ongoing!;
+    }).onError((error,stackError){
+      toast(error.toString());
+    });
+  }
   Future<void> hitGetTechnicianApiCall() async {
     try {
       isLoading.value = true;
-      customLoader.show();
+      // customLoader.show();
       FocusManager.instance.primaryFocus?.unfocus();
 
       final roleWiseData = {'role': userrole};
@@ -169,8 +192,7 @@ class TechnicianDashboardHomepageController extends GetxController {
         print('Received ${ticketData.value!.results!.length} tickets');
         print('Total count from API: ${ticketData.value!.count}');
 
-        // Update ticket statistics
-        updateTicketStats();
+        // updateTicketStats();
       }
     } catch (error) {
       toast('Error fetching ticket details: ${error.toString()}');
@@ -186,6 +208,9 @@ class TechnicianDashboardHomepageController extends GetxController {
     completedTickets: completedTickets.value,
     onHoldTickets: onHoldTickets.value,
     rejectedTickets: rejectedTickets.value,
+    acceptedTickets: acceptedTickets.value,
+    inactiveTickets: inactiveTickets.value,
+    ongoingTickets: ongoingTickets.value,
   );
 }
 
@@ -195,11 +220,17 @@ class DashboardStats {
   final int completedTickets;
   final int onHoldTickets;
   final int rejectedTickets;
+  final int acceptedTickets;
+  final int inactiveTickets;
+  final int ongoingTickets;
 
   DashboardStats({
     required this.totalTickets,
     required this.completedTickets,
     required this.onHoldTickets,
     required this.rejectedTickets,
+    required this.acceptedTickets,
+    required this.inactiveTickets,
+    required this.ongoingTickets,
   });
 }

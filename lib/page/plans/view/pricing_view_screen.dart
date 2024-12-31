@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
+import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 
 import '../../../utilities/helper_widget.dart';
 import '../controller/pricing_view_controller.dart';
@@ -482,12 +483,8 @@ class PricingViewScreen extends GetView<PricingViewController> {
         appBar: AppBar(
           backgroundColor: appColor,
           title: Text(
-            'Choose Your Plan',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
+            'Our Pricing Plans',
+            style: MontserratStyles.montserratBoldTextStyle(color: blackColor,size: 20)
           ),
           leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87),

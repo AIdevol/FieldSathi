@@ -194,74 +194,79 @@ Widget _dataTableViewScreen(CustomerListViewController controller, BuildContext 
         child: SingleChildScrollView(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Obx(
-                  () => DataTable(
-                dataRowColor: MaterialStateProperty.resolveWith(
-                      (states) => states.contains(MaterialState.selected) ? Colors.blue.shade50 : Colors.white,
-                ),
-                headingRowColor: MaterialStateProperty.all(Colors.blue.shade100),
-                columnSpacing: 20,
-                columns: [
-                  DataColumn(label: Text('ID', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Customer Name', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Company Name', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Email', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Phone', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Region', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Address', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Model No.', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Since', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Action', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Options', style: TextStyle(fontWeight: FontWeight.bold))),
-                ],
-                rows: controller.customerPaginationData.map((customerData) {
-                  return DataRow(
-                    cells: [
-                      DataCell(_ticketBoxIcons(customerData.id.toString())),
-                      DataCell(CircleAvatar(
-                        radius: 20,
-                        backgroundImage: customerData.profileImage != null
-                            ? NetworkImage(customerData.profileImage!)
-                            : AssetImage(userImageIcon) as ImageProvider,
-                      )),
-                      DataCell(Text(customerData.customerName?.toString() ?? "N/A")),
-                      DataCell(Text(customerData.companyName?.toString() ?? "N/A")),
-                      DataCell(Text(customerData.email?.toString() ?? "N/A")),
-                      DataCell(Text(customerData.phoneNumber.toString())),
-                      DataCell(Text(customerData.region?.toString() ?? "N/A")),
-                      DataCell(Text(customerData.primaryAddress?.toString() ?? "None")),
-                      DataCell(Text(customerData.modelNo?.toString() ?? "N/A")),
-                      DataCell(Text(customerData.createdAt?.toString() ?? "N/A")),
-                      DataCell(_buildStatusIndicator(customerData.isActive == false)),
-                      DataCell(
-                        IconButton(
-                          icon: Image.asset(whatsappIcon, width: 24, height: 24),
-                          onPressed: () async {
-                            final Uri url = Uri.parse('https://wa.me/91${customerData.phoneNumber}');
-                            if (!await launchUrl(url)) {
-                              throw Exception('Could not launch $url');
-                            }
-                          },
-                        ),
+            child:
+
+              Obx(
+                    () => DataTable(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50)
                       ),
-                      DataCell(
-                        _dropDownValueViews(
-                          controller,
-                          context,
-                          customerData.id.toString(),
-                          customerData,
+                                      dataRowColor: MaterialStateProperty.resolveWith(
+                        (states) => states.contains(MaterialState.selected) ? Colors.blue.shade50 : Colors.white,
+                                      ),
+                                      headingRowColor: MaterialStateProperty.all(Colors.blue.shade100),
+                                      columnSpacing: 20,
+                                      columns: [
+                    DataColumn(label: Text('ID', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Customer Name', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Company Name', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Email', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Phone', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Region', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Address', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Model No.', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Since', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Action', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Options', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      ],
+                                      rows: controller.customerPaginationData.map((customerData) {
+                    return DataRow(
+                      cells: [
+                        DataCell(_ticketBoxIcons(customerData.id.toString())),
+                        DataCell(CircleAvatar(
+                          radius: 20,
+                          backgroundImage: customerData.profileImage != null
+                              ? NetworkImage(customerData.profileImage!)
+                              : AssetImage(userImageIcon) as ImageProvider,
+                        )),
+                        DataCell(Text(customerData.customerName?.toString() ?? "N/A")),
+                        DataCell(Text(customerData.companyName?.toString() ?? "N/A")),
+                        DataCell(Text(customerData.email?.toString() ?? "N/A")),
+                        DataCell(Text(customerData.phoneNumber.toString())),
+                        DataCell(Text(customerData.region?.toString() ?? "N/A")),
+                        DataCell(Text(customerData.primaryAddress?.toString() ?? "None")),
+                        DataCell(Text(customerData.modelNo?.toString() ?? "N/A")),
+                        DataCell(Text(customerData.createdAt?.toString() ?? "N/A")),
+                        DataCell(_buildStatusIndicator(customerData.isActive == false)),
+                        DataCell(
+                          IconButton(
+                            icon: Image.asset(whatsappIcon, width: 24, height: 24),
+                            onPressed: () async {
+                              final Uri url = Uri.parse('https://wa.me/91${customerData.phoneNumber}');
+                              if (!await launchUrl(url)) {
+                                throw Exception('Could not launch $url');
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                }).toList(),
+                        DataCell(
+                          _dropDownValueViews(
+                            controller,
+                            context,
+                            customerData.id.toString(),
+                            customerData,
+                          ),
+                        ),
+                      ],
+                    );
+                                      }).toList(),
+                                    ),
               ),
             ),
           ),
         ),
-      ),
       SizedBox(height: 20),
     ],
   );

@@ -63,3 +63,75 @@ class _AnimatedAppBarState extends State<AnimatedAppBar>
     );
   }
 }
+
+
+// Widget _techniciansList(TechnicianDashboardHomepageController controller) {
+//   return Container(
+//     decoration: BoxDecoration(
+//       color: whiteColor,
+//       borderRadius: BorderRadius.circular(12),
+//       boxShadow: [
+//         BoxShadow(
+//           color: Colors.grey.withOpacity(0.1),
+//           spreadRadius: 1,
+//           blurRadius: 8,
+//           offset: Offset(0, 3),
+//         ),
+//       ],
+//     ),
+//     child: Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         // Padding(
+//         //   padding: EdgeInsets.all(16),
+//         //   child: Text(
+//         //     'Active Users',
+//         //     style: TextStyle(
+//         //       fontSize: 18,
+//         //       fontWeight: FontWeight.bold,
+//         //       color: Colors.black87,
+//         //     ),
+//         //   ),
+//         // ),
+//         vGap(10),
+//         Obx(() => ListView.builder(
+//           shrinkWrap: true,
+//           physics: NeverScrollableScrollPhysics(),
+//           itemCount: controller.filteredTechnicians.length,
+//           itemBuilder: (context, index) {
+//             final technician = controller.filteredTechnicians[index];
+//             return ListTile(
+//               leading: CircleAvatar(
+//                 radius: 50,
+//                 backgroundColor: appColor,
+//                 backgroundImage: NetworkImage(technician.profileImage.toString()) ,
+//                 // child: Text(
+//                 //   technician.firstName[0].toUpperCase(),
+//                 //   style: TextStyle(color: whiteColor),
+//                 // ),
+//               ),
+//               title: Text('${technician.firstName} ${technician.lastName}'),
+//               subtitle: Text(technician.email!),
+//               trailing: Container(
+//                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+//                 decoration: BoxDecoration(
+//                   color: technician.isActive! ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+//                   borderRadius: BorderRadius.circular(12),
+//                 ),
+//                 child: Text(
+//                   technician.isActive !? 'Active' : 'Inactive',
+//                   style: TextStyle(
+//                     color: technician.isActive! ? Colors.green : Colors.red,
+//                     fontSize: 12,
+//                   ),
+//                 ),
+//               ),
+//             );
+//           },
+//         )),
+//         vGap(10),
+//
+//       ],
+//     ),
+//   );
+// }

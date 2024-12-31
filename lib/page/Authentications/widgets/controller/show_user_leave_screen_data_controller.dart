@@ -69,6 +69,7 @@ class ShowUserLeaveScreenDataController extends GetxController {
     FocusManager.instance.primaryFocus!.unfocus();
     Get.find<AuthenticationApiService>().getUserLeavesDataApiCall().then((value) {
       leaveData.assignAll(value.userLeaveData);
+      paginatedData.assignAll(value.userLeaveData);
       leavesDataPagination.assignAll(value.userLeaveData);
       toast("User Fetched Successfully");
       customLoader.hide();

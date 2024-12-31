@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
@@ -8,6 +9,8 @@ import 'package:tms_sathi/page/Authentications/presentations/controllers/service
 import 'package:tms_sathi/response_models/service_requests_response_model.dart';
 
 import '../../../../constans/color_constants.dart';
+import '../../../../constans/role_based_keys.dart';
+import '../../../../main.dart';
 import '../../../../utilities/google_fonts_textStyles.dart';
 import '../../../../utilities/helper_widget.dart';
 
@@ -18,6 +21,7 @@ class ServiceRequestViewScreen extends GetView<ServiceRequestScreenController> {
       child: SafeArea(
         child: GetBuilder<ServiceRequestScreenController>(
           builder: (controller) => Scaffold(
+            floatingActionButton: _buildFloatingActionButton(context,controller),
             bottomNavigationBar: _buildPaginationControls(controller,context),
             appBar: AppBar(
               backgroundColor: appColor,
@@ -76,7 +80,7 @@ Widget _viewTopBar(ServiceRequestScreenController controller, BuildContext conte
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Expanded(child: _buildSearchField(controller)),
-        hGap(10),
+        // hGap(10),
         Expanded(child: _buildSelectStatusField(controller)),
         hGap(10),
       ],
@@ -207,6 +211,7 @@ Widget _mainDataTable(BuildContext context, ServiceRequestScreenController contr
                 DataColumn(label: Center(child: Text('Sub Customer Name'))),
                 DataColumn(label: Center(child: Text('Technician Name'))),
                 DataColumn(label: Center(child: Text('Address'))),
+                DataColumn(label: Center(child: Text('Region'))),
                 DataColumn(label: Center(child: Text('Materials Required'))),
                 DataColumn(label: Center(child: Text('Status'))),
                 DataColumn(label: Center(child: Text('Courier CNO.'))),
@@ -228,6 +233,7 @@ Widget _mainDataTable(BuildContext context, ServiceRequestScreenController contr
                   DataCell(Center(child: Text("${request.ticket?.subCustomerDetails?.firstName} ${request.ticket?.subCustomerDetails?.lastName}".trim().isNotEmpty ? "${request.ticket?.subCustomerDetails?.firstName} ${request.ticket?.subCustomerDetails?.lastName}" : 'NA'))),
                   DataCell(Center(child: Text("${request.ticket?.assignTo?.firstName} ${request.ticket?.assignTo?.lastName}"))),
                   DataCell(Center(child: Text("${request.ticket?.assignTo?.city}, ${request.ticket?.assignTo?.state}, ${request.ticket?.assignTo?.country}"))),
+                  DataCell(Center(child: Text(request.ticket!.region.toString()))),
                   DataCell(Text(request.materialRequired.toString().isNotEmpty ? request.materialRequired.toString() : "No Materials")),
                   DataCell(Center(child: Text(request.status.toString()))),
                   DataCell(Center(child: Text(request.courierContactNumber.toString()))),
@@ -530,6 +536,69 @@ Widget _buildApprovalForm(ServiceRequestScreenController controller, ServiceRequ
     ),
   );
 }
+_buildFloatingActionButton(BuildContext context, ServiceRequestScreenController controller) {
+  final userrole = storage.read(userRole);
+
+  if (userrole == 'technician') {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        ElevatedButton(
+          onPressed: () {
+            // _leavesTypesApplicationViewScreen(context, controller);
+            // Get.dialog(
+            //   Dialog(
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(20),
+            //     ),
+            //     insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            //     child: AddExpenseForm(),
+            //   ),
+            // );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: appColor,
+            minimumSize: Size(120, 40),
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: CupertinoColors.white),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Text(
+            " +Add ",
+            style: MontserratStyles.montserratBoldTextStyle(
+              color: CupertinoColors.white,
+              size: 13,
+            ),
+          ),
+        ),
+        hGap(10),
+        // if (userrole == 'technician')
+          ElevatedButton(
+            onPressed: () {
+              // _leavesTypesApplicationViewScreen(context, controller);
+              // controller.downLoadExportModelView(context, controller);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: appColor,
+              minimumSize: Size(120, 40),
+              shape: RoundedRectangleBorder(
+                side: BorderSide(color: CupertinoColors.white),
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              "Export",
+              style: MontserratStyles.montserratBoldTextStyle(
+                color: CupertinoColors.white,
+                size: 15,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
 
 void _handleStatusUpdate(ServiceRequestScreenController controller) {
   final status = controller.dropDownValue.value;
@@ -559,398 +628,7 @@ void updateFilterStatusData(ServiceRequestScreenController controller,ServiceReq
     Dialog(child: _statusSelectUpdateWidget(controller, request),)
   );
 }
-//
-// Widget _statusSelectUpdateWidget(ServiceRequestScreenController controller, String? status) {
-//   return Container(
-//     height: Get.height * 0.35,
-//     child: Padding(
-//       padding: const EdgeInsets.all(16.0),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Padding(
-//             padding: const EdgeInsets.all(15.0),
-//             child: Text(
-//               "Update Status",
-//               style: MontserratStyles.montserratBoldTextStyle(
-//                 color: Colors.black,
-//                 size: 20,
-//               ),
-//             ),
-//           ),
-//           const SizedBox(height: 18.0),
-//           // Text("Status", style: MontserratStyles.montserratBoldTextStyle(
-//           //   color: blackColor,
-//           //   size: 15,
-//           // ),),
-//           // const SizedBox(height: 10.0),
-//           TextField(
-//             readOnly: true,
-//             controller: controller.statusController,
-//             decoration: InputDecoration(
-//               labelText: "Select Status",
-//               hintText: "Select Status",
-//               suffixIcon:
-//             //     DropdownButton(
-//             //         value: controller.selectedValue.value,
-//             //         items:  controller.selecteValue.map((String value) {
-//             //   return DropdownMenuItem<dynamic>(
-//             //     value: value,
-//             //     child: Text(value),
-//             //   );
-//             // }).toList(), onChanged: (String? newValue) {  },
-//               IconButton(
-//                 icon: Icon(Icons.arrow_drop_down, color: darkBlue3),
-//                 onPressed: () {
-//                   controller.selectedValue.value;
-//                 },
-//               ),
-//             ),
-//           ),
-//           const SizedBox(height: 24.0),
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.end,
-//             children: [
-//               ElevatedButton(
-//                 onPressed: () => Get.back(),
-//                 child: Text(
-//                   "Cancel",
-//                   style: MontserratStyles.montserratBoldTextStyle(
-//                     color: whiteColor,
-//                     size: 13,
-//                   ),
-//                 ),
-//                 style: ElevatedButton.styleFrom(
-//                   backgroundColor: appColor,
-//                   minimumSize: const Size(130, 40),
-//                   shape: RoundedRectangleBorder(
-//                     borderRadius: BorderRadius.circular(8),
-//                   ),
-//                 ),
-//               ),
-//               const SizedBox(width: 10.0),
-//               ElevatedButton(
-//                 onPressed: () {},
-//                 child: Text(
-//                   "Update",
-//                   style: MontserratStyles.montserratBoldTextStyle(
-//                     color: whiteColor,
-//                     size: 13,
-//                   ),
-//                 ),
-//                 style: ElevatedButton.styleFrom(
-//                   backgroundColor: appColor,
-//                   minimumSize: const Size(130, 40),
-//                   shape: RoundedRectangleBorder(
-//                     borderRadius: BorderRadius.circular(8),
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ],
-//       ),
-//     ),
-//   );
-// }
-// // Widget _statusSelectUpdateWidget(ServiceRequestScreenController controller, String? status) {
-// //   return Container(
-// //     height: Get.height * 0.35,
-// //     child: Padding(
-// //       padding: const EdgeInsets.all(16.0),
-// //       child: Column(
-// //         crossAxisAlignment: CrossAxisAlignment.start,
-// //         children: [
-// //           Padding(
-// //             padding: const EdgeInsets.all(15.0),
-// //             child: Text(
-// //               "Update Status",
-// //               style: MontserratStyles.montserratBoldTextStyle(
-// //                 color: Colors.black,
-// //                 size: 20,
-// //               ),
-// //             ),
-// //           ),
-// //           const SizedBox(height: 18.0),
-// //           DropdownButtonFormField<String>(
-// //             value: controller.dropDownValue.value,
-// //             items: controller.selecteValue.map((String value) {
-// //               return DropdownMenuItem<String>(
-// //                 value: value,
-// //                 child: Text(value),
-// //               );
-// //             }).toList(),
-// //             onChanged: (String? newValue) {
-// //               controller.dropDownValue.value = newValue!;
-// //               // Show the appropriate widget based on the selected status
-// //               if (newValue == "Submitted") {
-// //                 // Show the "Approved Remark" widget
-// //                 Get.dialog(
-// //                   Dialog(
-// //                     child: _approvedStatusWidget(controller),
-// //                   ),
-// //                 );
-// //               } else if (newValue == "Dispatched") {
-// //                 // Show the "Dispatched" widget
-// //                 Get.dialog(
-// //                   Dialog(
-// //                     child: _dispatchedStatusWidget(controller),
-// //                   ),
-// //                 );
-// //               } else if (newValue == "Approved") {
-// //                 // Show the "Approved" widget
-// //                 Get.dialog(
-// //                   Dialog(
-// //                     child: _approvedStatusWidget(controller),
-// //                   ),
-// //                 );
-// //               }
-// //             },
-// //             decoration: InputDecoration(
-// //               labelText: "Select Status",
-// //               hintText: "Select Status",
-// //             ),
-// //           ),
-// //           const SizedBox(height: 24.0),
-// //           Row(
-// //             mainAxisAlignment: MainAxisAlignment.end,
-// //             children: [
-// //               ElevatedButton(
-// //                 onPressed: () {
-// //                   Get.back();
-// //                 },
-// //                 child: Text(
-// //                   "Cancel",
-// //                   style: MontserratStyles.montserratBoldTextStyle(
-// //                     color: whiteColor,
-// //                     size: 13,
-// //                   ),
-// //                 ),
-// //                 style: ElevatedButton.styleFrom(
-// //                   backgroundColor: appColor,
-// //                   minimumSize: const Size(130, 40),
-// //                   shape: RoundedRectangleBorder(
-// //                     borderRadius: BorderRadius.circular(8),
-// //                   ),
-// //                 ),
-// //               ),
-// //               const SizedBox(width: 10.0),
-// //               ElevatedButton(
-// //                 onPressed: () {
-// //                   // Implement the update status logic here
-// //                   String selectedStatus = controller.dropDownValue.value;
-// //                   if (selectedStatus == "Submitted") {
-// //                     // Update the status to "Approved"
-// //                     // controller.updateStatusToApproved();
-// //                   } else if (selectedStatus == "Dispatched") {
-// //                     // Update the status to "Dispatched"
-// //                     // controller.updateStatusToDispatched();
-// //                   } else if (selectedStatus == "Approved") {
-// //                     // Update the status to "Approved"
-// //                     // controller.updateStatusToApproved();
-// //                   }
-// //                   Get.back();
-// //                 },
-// //                 child: Text(
-// //                   "Update",
-// //                   style: MontserratStyles.montserratBoldTextStyle(
-// //                     color: whiteColor,
-// //                     size: 13,
-// //                   ),
-// //                 ),
-// //                 style: ElevatedButton.styleFrom(
-// //                   backgroundColor: appColor,
-// //                   minimumSize: const Size(130, 40),
-// //                   shape: RoundedRectangleBorder(
-// //                     borderRadius: BorderRadius.circular(8),
-// //                   ),
-// //                 ),
-// //               ),
-// //             ],
-// //           ),
-// //         ],
-// //       ),
-// //     ),
-// //   );
-// // }
-// //
-// // Widget _approvedStatusWidget(ServiceRequestScreenController controller) {
-// //   return Padding(
-// //     padding: const EdgeInsets.all(16.0),
-// //     child: Column(
-// //       crossAxisAlignment: CrossAxisAlignment.start,
-// //       children: [
-// //         Text(
-// //           "Approved Remark",
-// //           style: MontserratStyles.montserratBoldTextStyle(
-// //             color: Colors.black,
-// //             size: 16,
-// //           ),
-// //         ),
-// //         const SizedBox(height: 10.0),
-// //         TextField(
-// //           controller: controller.approvedController,
-// //           decoration: InputDecoration(
-// //             hintText: "Enter approved remark",
-// //             border: OutlineInputBorder(),
-// //           ),
-// //         ),
-// //         const SizedBox(height: 24.0),
-// //         Row(
-// //           mainAxisAlignment: MainAxisAlignment.end,
-// //           children: [
-// //             ElevatedButton(
-// //               onPressed: () {
-// //                 Get.back();
-// //               },
-// //               child: Text(
-// //                 "Cancel",
-// //                 style: MontserratStyles.montserratBoldTextStyle(
-// //                   color: whiteColor,
-// //                   size: 13,
-// //                 ),
-// //               ),
-// //               style: ElevatedButton.styleFrom(
-// //                 backgroundColor: appColor,
-// //                 minimumSize: const Size(130, 40),
-// //                 shape: RoundedRectangleBorder(
-// //                   borderRadius: BorderRadius.circular(8),
-// //                 ),
-// //               ),
-// //             ),
-// //             const SizedBox(width: 10.0),
-// //             ElevatedButton(
-// //               onPressed: () {
-// //                 // Implement the "Approve" logic here
-// //                 // controller.updateStatusToApproved();
-// //                 Get.back();
-// //               },
-// //               child: Text(
-// //                 "Approve",
-// //                 style: MontserratStyles.montserratBoldTextStyle(
-// //                   color: whiteColor,
-// //                   size: 13,
-// //                 ),
-// //               ),
-// //               style: ElevatedButton.styleFrom(
-// //                 backgroundColor: appColor,
-// //                 minimumSize: const Size(130, 40),
-// //                 shape: RoundedRectangleBorder(
-// //                   borderRadius: BorderRadius.circular(8),
-// //                 ),
-// //               ),
-// //             ),
-// //           ],
-// //         ),
-// //       ],
-// //     ),
-// //   );
-// // }
-// //
-// // Widget _dispatchedStatusWidget(ServiceRequestScreenController controller) {
-// //   return Padding(
-// //     padding: const EdgeInsets.all(16.0),
-// //     child: Column(
-// //       crossAxisAlignment: CrossAxisAlignment.start,
-// //       children: [
-// //         Text(
-// //           "Dispatched Details",
-// //           style: MontserratStyles.montserratBoldTextStyle(
-// //             color: Colors.black,
-// //             size: 16,
-// //           ),
-// //         ),
-// //         const SizedBox(height: 10.0),
-// //         TextField(
-// //           controller: controller.courierContactNumberController,
-// //           decoration: InputDecoration(
-// //             hintText: "Enter courier contact number",
-// //             border: OutlineInputBorder(),
-// //           ),
-// //         ),
-// //         const SizedBox(height: 20.0),
-// //         TextField(
-// //           controller: controller.docktNoController,
-// //           decoration: InputDecoration(
-// //             hintText: "Enter docket number",
-// //             border: OutlineInputBorder(),
-// //           ),
-// //         ),
-// //         const SizedBox(height: 20.0),
-// //         TextField(
-// //           controller: controller.hubAddressController,
-// //           decoration: InputDecoration(
-// //             hintText: "Enter hub address",
-// //             border: OutlineInputBorder(),
-// //           ),
-// //         ),
-// //         const SizedBox(height: 20.0),
-// //         TextField(
-// //           controller: controller.whereToDispatchedController,
-// //           decoration: InputDecoration(
-// //             hintText: "Enter where to dispatched",
-// //             border: OutlineInputBorder(),
-// //           ),
-// //         ),
-// //         const SizedBox(height: 20.0),
-// //         TextField(
-// //           controller: controller.remarkController,
-// //           decoration: InputDecoration(
-// //             hintText: "Enter remark",
-// //             border: OutlineInputBorder(),
-// //           ),
-// //         ),
-// //         const SizedBox(height: 24.0),
-// //         Row(
-// //           mainAxisAlignment: MainAxisAlignment.end,
-// //           children: [
-// //             ElevatedButton(
-// //               onPressed: () {
-// //                 Get.back();
-// //               },
-// //               child: Text(
-// //                 "Cancel",
-// //                 style: MontserratStyles.montserratBoldTextStyle(
-// //                   color: whiteColor,
-// //                   size: 13,
-// //                 ),
-// //               ),
-// //               style: ElevatedButton.styleFrom(
-// //                 backgroundColor: appColor,
-// //                 minimumSize: const Size(130, 40),
-// //                 shape: RoundedRectangleBorder(
-// //                   borderRadius: BorderRadius.circular(8),
-// //                 ),
-// //               ),
-// //             ),
-// //             const SizedBox(width: 10.0),
-// //             ElevatedButton(
-// //               onPressed: () {
-// //                 // Implement the "Dispatch" logic here
-// //                 // controller.updateStatusToDispatched();
-// //                 Get.back();
-// //               },
-// //               child: Text(
-// //                 "Dispatch",
-// //                 style: MontserratStyles.montserratBoldTextStyle(
-// //                   color: whiteColor,
-// //                   size: 13,
-// //                 ),
-// //               ),
-// //               style: ElevatedButton.styleFrom(
-// //                 backgroundColor: appColor,
-// //                 minimumSize: const Size(130, 40),
-// //                 shape: RoundedRectangleBorder(
-// //                   borderRadius: BorderRadius.circular(8),
-// //                 ),
-// //               ),
-// //             ),
-// //           ],
-// //         ),
-// //       ],
-// //     ),
-// //   );
-// // }
+
 
 void downloadFilterData(ServiceRequestScreenController controller) {
   Get.dialog(

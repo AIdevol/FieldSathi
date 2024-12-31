@@ -157,7 +157,7 @@ class ShowUserLeaveScreenData extends GetView<ShowUserLeaveScreenDataController>
                         //   return const Center(child: CircularProgressIndicator());
                         // }
 
-                        if (controller.paginatedData.isEmpty) {
+                        if (controller.leavesDataPagination.isEmpty) {
                           return Center(
                             child: Text(
                               'No data found',
@@ -227,7 +227,7 @@ class ShowUserLeaveScreenData extends GetView<ShowUserLeaveScreenDataController>
                                       ),
                                     ),
                                   ],
-                                  rows: controller.paginatedData.map((data) {
+                                  rows: controller.leavesDataPagination.map((data) {
                                     return DataRow(
                                       cells: [
                                         DataCell(

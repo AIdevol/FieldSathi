@@ -23,30 +23,21 @@
       final approvedController = TextEditingController();
 
       RxList<String> selecteValue = [
-
-        "All",
-        "Pending",
-        "In Progress",
+        "--Select Status--",
         "Submitted",
         "Approved",
-        "Dispatched",
-        "Delivered",
-        "Cancelled"
+        "Dispatched"
       ].obs;
 
       RxList<String> statusOptions = [
-        "All",
-        "Pending",
-        "In Progress",
+        "--Select Status--",
         "Submitted",
         "Approved",
-        "Dispatched",
-        "Delivered",
-        "Cancelled"
+        "Dispatched"
       ].obs;
 
       RxString selectStatusValue = " ".obs;
-      RxString dropDownValue = "All".obs;
+      RxString dropDownValue = "--Select Status--".obs;
 
       final isSearching = false.obs;
       final RxString searchText = ''.obs;

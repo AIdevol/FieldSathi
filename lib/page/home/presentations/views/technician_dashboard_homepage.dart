@@ -30,7 +30,6 @@ class TechnicianDashboardHomepage extends GetView<TechnicianDashboardHomepageCon
                 vGap(20),
                 _mainDataGridView(context, controller),
                 vGap(20),
-                _techniciansList(controller),
                 vGap(20),
                 _ticketDistributionChart(context, controller),
               ],
@@ -61,7 +60,8 @@ class TechnicianDashboardHomepage extends GetView<TechnicianDashboardHomepageCon
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${getRoleHeader(userrole)} Dashboard',
+              "Ticket Overview",
+              // '${getRoleHeader(userrole)} Dashboard',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -121,6 +121,8 @@ class TechnicianDashboardHomepage extends GetView<TechnicianDashboardHomepageCon
         return Icons.warning_amber;
       case 'trending_up':
         return Icons.trending_up;
+      case 'inactive_increase':
+        return Icons.person_off_rounded;
       default:
         return Icons.error;
     }
@@ -213,72 +215,7 @@ class TechnicianDashboardHomepage extends GetView<TechnicianDashboardHomepageCon
     );
   }
 
-  Widget _techniciansList(TechnicianDashboardHomepageController controller) {
-    return Container(
-      decoration: BoxDecoration(
-        color: whiteColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Text(
-              'Active Users',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-          ),
-          Obx(() => ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: controller.filteredTechnicians.length,
-            itemBuilder: (context, index) {
-              final technician = controller.filteredTechnicians[index];
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: appColor,
-                  backgroundImage: NetworkImage(technician.profileImage.toString()) ,
-                  // child: Text(
-                  //   technician.firstName[0].toUpperCase(),
-                  //   style: TextStyle(color: whiteColor),
-                  // ),
-                ),
-                title: Text('${technician.firstName} ${technician.lastName}'),
-                subtitle: Text(technician.email!),
-                trailing: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: technician.isActive! ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    technician.isActive !? 'Active' : 'Inactive',
-                    style: TextStyle(
-                      color: technician.isActive! ? Colors.green : Colors.red,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              );
-            },
-          )),
-        ],
-      ),
-    );
-  }
+
 
   Widget _ticketDistributionChart(BuildContext context, TechnicianDashboardHomepageController controller) {
     return Obx(() {
@@ -323,28 +260,49 @@ class TechnicianDashboardHomepage extends GetView<TechnicianDashboardHomepageCon
                           PieChartSectionData(
                             color: Colors.blue,
                             value: stats.totalTickets.toDouble(),
-                            title: 'Total',
+                            // title: 'Total',
                             radius: 50,
                             titleStyle: TextStyle(color: whiteColor, fontSize: 12),
                           ),
                           PieChartSectionData(
                             color: Colors.orange,
                             value: stats.completedTickets.toDouble(),
-                            title: 'Completed',
+                            // title: 'Completed',
                             radius: 50,
                             titleStyle: TextStyle(color: whiteColor, fontSize: 12),
                           ),
                           PieChartSectionData(
                             color: Colors.green,
+                            value: stats.ongoingTickets.toDouble(),
+                            // title: 'Ongoing',
+                            radius: 50,
+                            titleStyle: TextStyle(color: whiteColor, fontSize: 12),
+                          ),
+                          PieChartSectionData(
+                            color: Colors.amber,
                             value: stats.onHoldTickets.toDouble(),
-                            title: 'On-Hold',
+                            // title: 'On-Hold',
+                            radius: 50,
+                            titleStyle: TextStyle(color: whiteColor, fontSize: 12),
+                          ),
+                          PieChartSectionData(
+                            color: Colors.purple,
+                            value: stats.acceptedTickets.toDouble(),
+                            // title: 'Accepted',
                             radius: 50,
                             titleStyle: TextStyle(color: whiteColor, fontSize: 12),
                           ),
                           PieChartSectionData(
                             color: Colors.red,
                             value: stats.rejectedTickets.toDouble(),
-                            title: 'Rejected',
+                            // title: 'Rejected',
+                            radius: 50,
+                            titleStyle: TextStyle(color: whiteColor, fontSize: 12),
+                          ),
+                          PieChartSectionData(
+                            color: Colors.grey,
+                            value: stats.inactiveTickets.toDouble(),
+                            // title: 'Inactive',
                             radius: 50,
                             titleStyle: TextStyle(color: whiteColor, fontSize: 12),
                           ),
@@ -362,9 +320,15 @@ class TechnicianDashboardHomepage extends GetView<TechnicianDashboardHomepageCon
                         SizedBox(height: 8),
                         _legendItem('Completed (${stats.completedTickets})', Colors.orange),
                         SizedBox(height: 8),
-                        _legendItem('On-Hold (${stats.onHoldTickets})', Colors.green),
+                        _legendItem('Ongoing (${stats.ongoingTickets})', Colors.green),
+                        SizedBox(height: 8),
+                        _legendItem('On-Hold (${stats.onHoldTickets})', Colors.amber),
+                        SizedBox(height: 8),
+                        _legendItem('Accepted (${stats.acceptedTickets})', Colors.purple),
                         SizedBox(height: 8),
                         _legendItem('Rejected (${stats.rejectedTickets})', Colors.red),
+                        SizedBox(height: 8),
+                        _legendItem('Inactive (${stats.inactiveTickets})', Colors.grey),
                       ],
                     ),
                   ),

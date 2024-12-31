@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:tms_sathi/constans/role_based_keys.dart';
 import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/response_models/holidays_calender_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
@@ -140,6 +141,8 @@ class CalendarController extends GetxController {
       this.selectedDay.value = selectedDay;
       this.focusedDay.value = focusedDay;
       selectedEventsResult.value = getEventsForDay(selectedDay);
+      storage.read(userRole);
+      if(storage.read(userRole) != 'technician')
       _showAddHolidayDialog(Get.context!, selectedDay);
     }
   }

@@ -198,7 +198,7 @@ class _DrawerScreenState extends State<DrawerScreen> {
         'onTap': () async {
           Get.toNamed(AppRoutes.agentsScreen);
         },
-        'roles': ['admin', 'superuser', 'agent'],
+        'roles': ['admin', 'superuser'],
       },
       {
         'icon': Icons.people_alt_sharp,

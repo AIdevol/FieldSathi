@@ -167,7 +167,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
-            headingRowColor: MaterialStateColor.resolveWith(
+            headingRowColor: WidgetStateColor.resolveWith(
                   (states) => Colors.grey[50]!,
             ),
             columnSpacing: 24,
