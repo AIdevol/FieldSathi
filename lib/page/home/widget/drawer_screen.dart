@@ -74,11 +74,16 @@ class _DrawerScreenState extends State<DrawerScreen> {
           {
             'title': "Attendance",
             'onTap': () async {
-              if (currentRole == 'technician' || currentRole == 'sales' || currentRole == 'agent') {
-                Get.toNamed(AppRoutes.forTechnicianAndSalesAttendace);
-              } else {
-                Get.toNamed(AppRoutes.attendanceScreen);
-              }
+              // if (currentRole == 'technician' || currentRole == 'sales' || currentRole == agentRole) {
+              //   Get.toNamed(AppRoutes.forTechnicianAndSalesAttendace);
+              // } else {
+              //   Get.toNamed(AppRoutes.attendanceScreen);
+              // }
+              (currentRole == adminRole || currentRole == agentRole)?
+              Get.toNamed(AppRoutes.attendanceScreen):
+              Get.toNamed(AppRoutes.forTechnicianAndSalesAttendace);
+              print("current Role= ${currentRole}");
+
             },
             'roles': ['admin', 'technician', 'superuser', 'agent', 'sales'],
           },

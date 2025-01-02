@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
 
 class AnimatedAppTitle extends StatefulWidget {
   const AnimatedAppTitle({Key? key}) : super(key: key);
@@ -9,7 +8,7 @@ class AnimatedAppTitle extends StatefulWidget {
 }
 
 class _AnimatedAppTitleState extends State<AnimatedAppTitle> with SingleTickerProviderStateMixin {
-  final List<String> _texts = ['Fieldsathi', 'Make work','Easy'];
+  final List<String> _texts = ['Fieldsathi', 'Make work easy'];
   late AnimationController _controller;
   late Animation<double> _animation;
   int _currentIndex = 0;
@@ -81,10 +80,11 @@ class _AnimatedAppTitleState extends State<AnimatedAppTitle> with SingleTickerPr
                     },
                     child: Text(
                       _texts[_currentIndex],
-                      style: MontserratStyles.montserratBoldTextStyle(
-                      size: 15,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
-                        color: Colors.black87,
+                        color: Colors.white,
                       ),
                     ),
                   ),

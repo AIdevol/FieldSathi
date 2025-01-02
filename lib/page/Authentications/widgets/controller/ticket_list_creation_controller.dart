@@ -24,6 +24,7 @@ class TicketListCreationController extends GetxController {
   late TextEditingController productNameController;
   late TextEditingController modelNoController;
   late TextEditingController fsrDetailsController;
+  late TextEditingController fsrCategoriesController;
   late TextEditingController serviceNamesController;
   late TextEditingController rateController;
   late TextEditingController instructionController;
@@ -36,6 +37,7 @@ class TicketListCreationController extends GetxController {
   late FocusNode productNameFocusNode;
   late FocusNode modelNoFocusNode;
   late FocusNode fsrDetailsFocusNode;
+  late FocusNode fsrCategoriesFocusNode;
   late FocusNode serviceDetailsFocusNode;
   late FocusNode rateFocusNode;
   late FocusNode instructionFocusNode;
@@ -97,7 +99,8 @@ class TicketListCreationController extends GetxController {
   RxList<ServiceData>servicesAllResponse=<ServiceData>[].obs;
   RxList<AmcDataCustomerWiseResult>AmcDataCustomerWiseList=<AmcDataCustomerWiseResult>[].obs;
   RxList<CustomerBrandResponseModel> customerBrandResponse= <CustomerBrandResponseModel>[].obs;
-
+  RxList<BrandAmcNameResponseModel> brandAmcNamedata = <BrandAmcNameResponseModel>[].obs;
+  RxList<FsrCategoriesNameResponseModel> fsrCategoriesNamedata = <FsrCategoriesNameResponseModel>[].obs;
 
 
   Rx<TechnicianData?> selectedTechnician = Rx<TechnicianData?>(null);
@@ -107,6 +110,7 @@ class TicketListCreationController extends GetxController {
   RxInt selectedProductId = RxInt(0);
   RxInt selectedServiceId = RxInt(0);
   RxInt selectedAmcId = RxInt(0);
+  RxInt fsrCategoriesId = RxInt(0);
 
   List<String> regionValues = [
     // 'Select Region'
@@ -149,6 +153,7 @@ class TicketListCreationController extends GetxController {
     productNameController =TextEditingController();
     modelNoController = TextEditingController();
     fsrDetailsController = TextEditingController();
+    fsrCategoriesController = TextEditingController();
     serviceNamesController = TextEditingController();
     instructionController = TextEditingController();
 
@@ -163,6 +168,7 @@ class TicketListCreationController extends GetxController {
     productNameFocusNode = FocusNode();
     modelNoFocusNode = FocusNode();
     fsrDetailsFocusNode = FocusNode();
+    fsrCategoriesFocusNode = FocusNode();
     serviceDetailsFocusNode = FocusNode();
     instructionFocusNode = FocusNode();
 
@@ -200,12 +206,11 @@ class TicketListCreationController extends GetxController {
     focusNode.addListener(() {
       isFocused.value = focusNode.hasFocus;
     });
-    fetchTicketsApiCall();
+    // fetchTicketsApiCall();
     hitGetTechnicianApiCall();
     hitGetCustomerListApiCall();
     hitGetFsrDetailsApiCall();
     hitServicesAllGetApiCall();
-    // hitGetCustomerBrandListApiCall(id: "${selectedCustomerId.value}");
   }
 
   @override
@@ -288,27 +293,34 @@ class TicketListCreationController extends GetxController {
     );
     if (picked != null && picked != selectedDate.value) {
       selectedDate.value = picked;
-      dateController.text = DateFormat('dd-MMM-yyyy').format(picked);
+      dateController.text = DateFormat('yyyy-MMM-dd').format(picked);
     }
   }
 
   void hitAddTicketApiCall(){
     customLoader.show();
     FocusManager.instance.primaryFocus!.context;
+    final formattedDate = dateController.text.isNotEmpty
+        ? dateController.text
+        : DateTime.now().toIso8601String().split('T')[0];
+
+    final formattedTime = timeController.text.isNotEmpty
+        ? timeController.text
+        : DateFormat('HH:mm:ss').format(DateTime.now());
     var ticketData = {
      "taskName":taskNameController.text,
       "assignTo":selectedTechnicianId.value,
       "isamc":isAmcSelected.value,
       "israte":isRateSelected.value,
       "purpose":purposeController.text,
-      "date_joined":dateController.text,
-      "time":timeController.text,
-      "customer_name":selectedCustomerId.value,
+      "date_joined":formattedDate,
+      "time":formattedTime,
+      "customerDetails":selectedCustomerId.value,
       "brand": selectedProductId.value,
       "model":modelNoController.text,
       "selected_amc":selectedAmcId.value,
-      "fsrName":selectedfsrId.value,
-      "service_name":selectedServiceId.value,
+      "fsrDetails":selectedfsrId.value,
+      "serviceDetails":selectedServiceId.value,
       "instructions":instructionController.text,
     };
     print("customer id selections: ${selectedCustomerId.value}");
@@ -537,10 +549,7 @@ class TicketListCreationController extends GetxController {
   void hitGetCustomerBrandListApiCall({required String id}){
     isLoading.value = true;
     FocusManager.instance.primaryFocus!.unfocus();
-    var brandId = {
-      'id': "${selectedCustomerId.value}"
-    };
-    Get.find<AuthenticationApiService>().getCustomerBrandDetailsApiCall(id: brandId.toString()).then((value){
+    Get.find<AuthenticationApiService>().getCustomerBrandDetailsApiCall(id: id).then((value){
       customerBrandResponse.assignAll(value);
       List<String> brandId = customerBrandResponse.map((f)=>f.id.toString()).toList();
       storage.write(customerBrandId, brandId);
@@ -551,4 +560,29 @@ class TicketListCreationController extends GetxController {
       toast(error.toString());
     });
   }
+
+  void hitBrandAmcNamehitApiCall({required String id}){
+    isLoading.value = true;
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().getBrandAmcNameDetailsApiCall(id: id.toString()).then((value){
+      toast("fetched customer brand name data");
+      brandAmcNamedata.assignAll(value);
+      update();
+    }).onError((error, stackTrace){
+      toast(error.toString());
+    });
+  }
+
+  void hitFsrCategoriesApiCall({required String id}){
+    isLoading.value = true;
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().getfsrCategoriesDetailsApiCall(id: id.toString()).then((value){
+      toast("fetched customer brand name data");
+      fsrCategoriesNamedata.assignAll(value);
+      update();
+    }).onError((error, stackTrace){
+      toast(error.toString());
+    });
+  }
+
 }

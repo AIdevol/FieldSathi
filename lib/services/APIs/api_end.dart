@@ -19,6 +19,8 @@ class ApiEnd{
   static const String leaveEditPeriodEnd = 'users/leave-allocations/';
   static const String userAttendanceCalendarApiEnd = 'users/attendance/';
   static const String customerBrandApiEnd = 'users/customer_brandnames/';
+  static const String brandAmcNameEnd = 'api/brand_amc_name/';
+  static const String fSrCategoriesNameEnd = 'api/fsr_categories_name/';
 /*==================================================================================*/
   static const String importTicketDataEnd = 'api/import-tickets/';
   static const String amcEnd = 'api/amcs/';
@@ -55,6 +57,7 @@ class ApiEnd{
   static const String ticketHistoryViewEnd = 'api/ticket_history_view/';
   static const String amcHistoryViewEnd = 'api/amc_history/';
   static const String leaveHistoryViewEnd = 'users/leave_history/';
+  static const String leadHistoryViewEnd = 'api/leads_history/';
   /*=============================================================Status Counts Lead ==========================================================================*/
   static const String statusLeadsCountsEnd= 'api/leads/status_counts/';
   static const String ticketCountsEnd = 'api/tickets/ticket_count/';
@@ -66,4 +69,10 @@ class ApiEnd{
   static const String leadSourceTypeEnd="api/lead-source/";
   static const String userLeavesDataEnd = 'users/tms_users/user_leave_data/';
   static const String technicianAttendanceStatusEnd = 'users/tms_users/technician_attendance_counts/';
+/*===========================================================lead interactions=================================================================*/
+
+ static const String leadInteractionsEnd = 'api/interactions/';
+ /*=================================================================================================*/
+static const String exportAttendanceEnd = 'api/export-attendance/';
+
 }

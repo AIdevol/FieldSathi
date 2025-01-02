@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dioo;
 import 'package:tms_sathi/response_models/add_technician_response_model.dart';
@@ -14,6 +16,7 @@ import 'package:tms_sathi/response_models/customer_list_response_model.dart';
 import 'package:tms_sathi/response_models/customer_rating_response_model.dart';
 import 'package:tms_sathi/response_models/expenses_response_model.dart';
 import 'package:tms_sathi/response_models/fsr_response_model.dart';
+import 'package:tms_sathi/response_models/interaction_leads_response_model.dart';
 import 'package:tms_sathi/response_models/lead_response_model.dart';
 import 'package:tms_sathi/response_models/lead_satus_response_model.dart';
 import 'package:tms_sathi/response_models/lead_source_type_response_model.dart';
@@ -54,9 +57,11 @@ import 'auth_abstract_api_services_impl.dart';
 class AuthenticationApiService extends GetxService
 implements AuthenticationApi {
   late DioClient? dioClient;
+  late FlutterDownloader? flutterDownloader;
   var deviceName, deviceType, deviceID;
 
   Dio dio = Dio();
+
 
   getDeviceData() async {
     DeviceInfoPlugin info = DeviceInfoPlugin();
@@ -78,6 +83,7 @@ implements AuthenticationApi {
   void onInit() {
     var dio = Dio();
     dioClient = DioClient(ApiEnd.baseUrl, dio);
+    flutterDownloader = FlutterDownloader();
     getDeviceData();
   }
 
@@ -234,6 +240,7 @@ implements AuthenticationApi {
   Future<TicketResponseModel>getticketDetailsApiCall({Map<String, dynamic>? dataBody, parameter})async{
     try{
       final response = await dioClient!.get('${ApiEnd.get_ticketEnd}', data: dataBody,queryParameters: parameter, skipAuth: false);
+      debugPrint("data breaches: ${response}");
       return TicketResponseModel.fromJson(response);
     }catch(error){
       return Future.error(NetworkExceptions.getDioException(error));
@@ -302,6 +309,47 @@ implements AuthenticationApi {
       if (response is Map<String, dynamic> && response.containsKey('data')) {
         final List<dynamic> data = response['data'];
         return data.map((item) => CustomerBrandResponseModel.fromJson(item)).toList();
+      }
+      throw Exception('Unexpected response format');
+    } catch (e) {
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+  @override
+  Future<List<BrandAmcNameResponseModel>> getBrandAmcNameDetailsApiCall(
+      {Map<String, dynamic>? dataBody, String? id}) async {
+    try {
+      final response = await dioClient!.get(
+          "${ApiEnd.brandAmcNameEnd}$id/", data: dataBody);
+      print("inside api calling method: ${response}");
+      if (response is List) {
+        return response.map((item) => BrandAmcNameResponseModel.fromJson(item))
+            .toList();
+      } else
+      if (response is Map<String, dynamic> && response.containsKey('data')) {
+        final List<dynamic> data = response['data'];
+        return data.map((item) => BrandAmcNameResponseModel.fromJson(item)).toList();
+      }
+      throw Exception('Unexpected response format');
+    } catch (e) {
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+
+  @override
+  Future<List<FsrCategoriesNameResponseModel>> getfsrCategoriesDetailsApiCall(
+      {Map<String, dynamic>? dataBody, String? id}) async {
+    try {
+      final response = await dioClient!.get(
+          "${ApiEnd.fSrCategoriesNameEnd}$id/", data: dataBody);
+      print("inside api calling method: ${response}");
+      if (response is List) {
+        return response.map((item) => FsrCategoriesNameResponseModel.fromJson(item))
+            .toList();
+      } else
+      if (response is Map<String, dynamic> && response.containsKey('data')) {
+        final List<dynamic> data = response['data'];
+        return data.map((item) => FsrCategoriesNameResponseModel.fromJson(item)).toList();
       }
       throw Exception('Unexpected response format');
     } catch (e) {
@@ -1371,6 +1419,71 @@ Future<ServicesResponseModel> getAllservicesPricesAndDetails({Map<String, dynami
       return Future.error(NetworkExceptions.getDioException(error));
     }
   }
+
+  @override
+  Future<List<LeadHistoryResponseModel>>getLeadHistoryApiCall({Map<String,dynamic>?dataBody,required String id})async {
+    try {
+      final response = await dioClient!.get(
+        "${ApiEnd.leadHistoryViewEnd}$id/", data: dataBody, skipAuth: false,);
+      if (response is List) {
+        return response.map((item) => LeadHistoryResponseModel.fromJson(item))
+            .toList();
+      } else
+      if (response is Map<String, dynamic> && response.containsKey('data')) {
+        final List<dynamic> data = response['data'];
+        return data.map((item) => LeadHistoryResponseModel.fromJson(item))
+            .toList();
+      }
+      return [];
+    } catch (error) {
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
+  @override
+  Future<List<InteractionLeadsResponseModel>>getLeadInteractionApiCall({Map<String,dynamic>?dataBody,required parameters})async {
+    try {
+      final response = await dioClient!.get(
+        "${ApiEnd.leadInteractionsEnd}", data: dataBody,queryParameters: parameters ,skipAuth: false,);
+      if (response is List) {
+        return response.map((item) => InteractionLeadsResponseModel.fromJson(item))
+            .toList();
+      } else
+      if (response is Map<String, dynamic> && response.containsKey('data')) {
+        final List<dynamic> data = response['data'];
+        return data.map((item) => InteractionLeadsResponseModel.fromJson(item))
+            .toList();
+      }
+      return [];
+    } catch (error) {
+      return Future.error(NetworkExceptions.getDioException(error));
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> exportAttendancebyCall({Map<String, dynamic>? dataBody, required Map<String, dynamic> parameters, required String id
+  }) async {
+    try {
+      final response = await dioClient!.get("${ApiEnd.exportAttendanceEnd}$id/", data: dataBody, queryParameters: parameters, skipAuth: false);
+      // Convert the response data to List<Map<String, dynamic>>
+      if (response.data is List) {
+        return List<Map<String, dynamic>>.from(
+            response.data.map((item) => Map<String, dynamic>.from(item))
+        );
+      } else if (response.data is Map) {
+        final attendanceData = response.data['data'] ?? [];
+        return List<Map<String, dynamic>>.from(
+            attendanceData.map((item) => Map<String, dynamic>.from(item))
+        );
+      }
+
+      throw Exception('Invalid response format');
+    } catch (error) {
+      throw NetworkExceptions.getDioException(error);
+    }
+  }
+
+
 }
 
 

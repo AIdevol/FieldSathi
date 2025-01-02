@@ -136,7 +136,15 @@ class OtpViewScreen extends GetView<OtpViewController>{
       await controller.hitOtpVerifyAPiCall();
     },child: Container( height: Get.height*0.06,
       width: Get.width,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(25), color: appColor),
+      decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: appColor.withOpacity(0.4),
+              blurRadius: 15,
+              spreadRadius: 5,
+            ),
+          ],
+          borderRadius: BorderRadius.circular(25), color: appColor),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(child: Text('Verify',style: MontserratStyles.montserratSemiBoldTextStyle(color: blackColor, size: 18),)),

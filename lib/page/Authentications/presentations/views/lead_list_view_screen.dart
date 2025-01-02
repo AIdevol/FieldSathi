@@ -17,6 +17,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../constans/role_based_keys.dart';
 import '../../../../main.dart';
 import '../../../../utilities/common_textFields.dart';
+import '../../../../utilities/lead_progress.dart';
 
 class LeadListViewScreen extends GetView<LeadListViewController> {
   @override
@@ -257,7 +258,7 @@ class LeadListViewScreen extends GetView<LeadListViewController> {
       ),
     );
   }
-  
+
   Widget _buildAnalyticsContainer(String title, String value, Color color) {
     return Container(
       height: Get.height * 0.15,
@@ -320,7 +321,8 @@ _dataTableViewScreen({required LeadListViewController controller, required Build
   return Obx((){
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: DataTable(columns: [
+      child: DataTable(
+        columns: [
         DataColumn(label: Text('ID')),
         DataColumn(label: Text('Customer')),
         DataColumn(label: Text('Company Name')),
@@ -347,7 +349,11 @@ _dataTableViewScreen({required LeadListViewController controller, required Build
             DataCell(Text(leadData.status.toString())),
             DataCell(_rowIconButtonData(controller, context,leadData)),
             DataCell(_viewDetailsButton(controller, leadData))
-      ])).toList(),
+      ],
+           onSelectChanged: (_){
+             _leadProgressReport(context,leadData,controller);
+           })).toList(),
+
       ),
     );
   });
@@ -1171,5 +1177,29 @@ Widget _buildButton(String text,{required LeadListViewController controller,requ
       ),
       shadowColor: Colors.black.withOpacity(0.5),
     ),
+  );
+}
+
+///Lead Progress Report
+///
+Future _leadProgressReport(BuildContext context, LeadResult leadData, LeadListViewController controller){
+ controller.hitLeadHistoryViewApiCall(id: leadData.id.toString());
+ controller.hitgetInteractionApiCall(id: leadData.id.toString());
+  return  Get.dialog(
+    LeadProgressDialog(
+        onClose: () => Navigator.of(context).pop(),
+      leadId: leadData.id.toString(),
+      leadCustomerName: "${leadData.firstName} ${leadData.lastName}",
+      status: leadData.status.toString(),
+      createdBy:"${leadData.createdBy?.firstName.toString()} ${leadData.createdBy!.lastName.toString()}",
+      email:"${leadData.email}",
+      phone:leadData.mobile.toString(),
+      source:leadData.source.toString(),
+      address:leadData.address.toString(),
+      companyName: leadData.companyName.toString(),
+      country: leadData.country.toString(),
+      notes: leadData.notes.toString(),
+      timeChamp: leadData.nextInteraction.toString(),
+      ),
   );
 }

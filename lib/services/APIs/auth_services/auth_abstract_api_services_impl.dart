@@ -16,6 +16,7 @@ import '../../../response_models/expenses_response_model.dart';
 import '../../../response_models/export_ticket_models.dart';
 import '../../../response_models/fsr_response_model.dart';
 import '../../../response_models/holidays_calender_response_model.dart';
+import '../../../response_models/interaction_leads_response_model.dart';
 import '../../../response_models/lead_response_model.dart';
 import '../../../response_models/lead_satus_response_model.dart';
 import '../../../response_models/lead_source_type_response_model.dart';
@@ -63,6 +64,10 @@ abstract class AuthenticationApi {
   Future<List<TicketHistoryResponseModel>>getTicketHistoryData({Map<String, dynamic>?dataBody,required String id });
   Future<TicketResponseModel>postTicketDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<List<CustomerBrandResponseModel>> getCustomerBrandDetailsApiCall({Map<String, dynamic>? dataBody, String? id});
+  Future<List<BrandAmcNameResponseModel>> getBrandAmcNameDetailsApiCall(
+      {Map<String, dynamic>? dataBody, String? id});
+  Future<List<FsrCategoriesNameResponseModel>> getfsrCategoriesDetailsApiCall(
+      {Map<String, dynamic>? dataBody, String? id});
   Future<LeaveResponseModel>getLeavesApiCall({Map<String, dynamic>? dataBody});
   Future<LeavePostResponseModel>postLeavesApiCall({Map<String, dynamic>?dataBody});
   Future<LeaveResponseModel>putLeavesApiCall({Map<String, dynamic>? dataBody,id});
@@ -131,7 +136,14 @@ abstract class AuthenticationApi {
   Future<List<AttendanceResponseModel>>getAttendanceHistoryApiCall({Map<String, dynamic>?dataBody, parameters});
   Future<AmcDataCustomerWiseResponseModel>getAMCCustomerWiseDataApiCall({Map<String, dynamic>?dataBody,parameter});
   Future<List<AmcHistoryViewResponseModel>>getAmcHistoryData({Map<String, dynamic>?dataBody,required String id });
+  Future<List<LeadHistoryResponseModel>>getLeadHistoryApiCall({Map<String,dynamic>?dataBody,required String id});
+  Future<List<InteractionLeadsResponseModel>>getLeadInteractionApiCall({Map<String,dynamic>?dataBody,required parameters});
   Future<CustomerRatingResponseModel>getCustomerRatingApiCall({Map<String,dynamic>?dataBody});
   Future<UserLeavesDataResponseModel>getUserLeavesDataApiCall({Map<String,dynamic>?dataBody});
   Future<TechnicianAttendanceDataResponseModel>getTechnicianStatusCountsDataApiCall({Map<String,dynamic>?dataBody});
+  Future<List<Map<String, dynamic>>> exportAttendancebyCall({
+    Map<String, dynamic>? dataBody,
+    required Map<String, dynamic> parameters,
+    required String id
+  });
 }

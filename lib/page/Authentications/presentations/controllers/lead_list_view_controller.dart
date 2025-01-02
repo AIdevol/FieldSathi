@@ -5,6 +5,9 @@ import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/response_models/lead_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
+import '../../../../response_models/interaction_leads_response_model.dart';
+import '../../../../response_models/leaves_history_response_model.dart';
+
 class LeadListViewController extends GetxController{
   RxList<String> leadStatusValue = [
     "---Select Status---",
@@ -30,6 +33,8 @@ class LeadListViewController extends GetxController{
   RxList<LeadResult> leadListData = <LeadResult>[].obs;
   RxList<LeadResult> leadFilters = <LeadResult>[].obs;
   RxList<LeadResult> leadPaginationsData = <LeadResult>[].obs;
+  RxList<LeadHistoryResponseModel>leadHistoryData = <LeadHistoryResponseModel>[].obs;
+  RxList<InteractionLeadsResponseModel>interactinData = <InteractionLeadsResponseModel>[].obs;
   late TextEditingController searchController;
 
   RxInt currentPage = 1.obs;
@@ -58,7 +63,6 @@ class LeadListViewController extends GetxController{
   super.onInit();
   searchController.addListener(applyFilter);
   fetchedLeadListApiCall();
-
 }
   void updateSelectedStatusFilter(String? newValue) {
     if (newValue != null) {
@@ -258,4 +262,35 @@ void fetchLeadStatusListApiCall(){
     fetchedLeadListApiCall();
   });
   }
+
+  Future<void> hitLeadHistoryViewApiCall({required String id})async {
+  isLoading.value = true;
+  // customLoader.show();
+  FocusManager.instance.primaryFocus!.unfocus();
+  Get.find<AuthenticationApiService>().getLeadHistoryApiCall(id: id).then((history){
+    leadHistoryData.assignAll(history);
+    customLoader.hide();
+    update();
+  }).onError((error,stackError){
+    toast(error.toString());
+    customLoader.hide();
+  });
+}
+
+Future<void> hitgetInteractionApiCall({required String id})async{
+  isLoading.value = true;
+  // customLoader.show();
+  FocusManager.instance.primaryFocus!.unfocus();
+  var parameterData = {
+    'lead_id':id
+  };
+  Get.find<AuthenticationApiService>().getLeadInteractionApiCall(parameters: parameterData).then((interation){
+    interactinData.assignAll(interation);
+    customLoader.hide();
+    update();
+  }).onError((error,stackError){
+    toast(error.toString());
+    customLoader.hide();
+  });
+}
 }

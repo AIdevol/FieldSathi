@@ -119,6 +119,7 @@ class TicketListScreen extends GetView<TicketListController> {
      final userrole = storage.read(userRole);
 
      return Container(
+       // height: Get.height*0.2,
        padding: const EdgeInsets.all(16.0),
        decoration: BoxDecoration(
          color: Colors.white,
@@ -133,24 +134,39 @@ class TicketListScreen extends GetView<TicketListController> {
          ],
        ),
        margin: const EdgeInsets.all(6),
-       child: Row(
+       child: Column(
          children: [
-           Expanded(child: _buildStatusFilterDropdown()),
-           const SizedBox(width: 16),
-           if(userrole != 'technician'&&userrole !='sale')
-             _buildActionButton(
-             context,
-             'Import',
-             Icons.file_download_outlined,
-             onTap: () => _showImportModelView(context, controller),
+           Row(
+             mainAxisAlignment: MainAxisAlignment.spaceAround,
+             children: [
+               // const SizedBox(width: 16),
+               if(userrole != 'technician'&&userrole !='sale')
+                 _buildActionButton(
+                 context,
+                 'Import',
+                 Icons.file_download_outlined,
+                 onTap: () => _showImportModelView(context, controller),
+               ),
+               // const SizedBox(width: 12),
+               if(userrole != 'technician'&&userrole !='sale')
+                 _buildActionButton(
+                 context,
+                 'Export',
+                 Icons.file_upload_outlined,
+                 onTap: () => _downLoadExportModelView(context, controller),
+               ),
+             ],
            ),
-           const SizedBox(width: 12),
-           if(userrole != 'technician'&&userrole !='sale')
-             _buildActionButton(
-             context,
-             'Export',
-             Icons.file_upload_outlined,
-             onTap: () => _downLoadExportModelView(context, controller),
+
+           Padding(
+             padding: const EdgeInsets.all(8.0),
+             child: Row(
+               children: [
+                 Expanded(child: _buildStatusFilterDropdown()),
+                 hGap(20),
+                 Expanded(child: _buildFilterByDropdown()),
+               ],
+             ),
            ),
          ],
        ),
@@ -187,6 +203,35 @@ class TicketListScreen extends GetView<TicketListController> {
      );
    }
 
+   Widget _buildFilterByDropdown() {
+     return Container(
+       padding: const EdgeInsets.symmetric(horizontal: 12),
+       decoration: BoxDecoration(
+         border: Border.all(color: Colors.grey.shade300),
+         borderRadius: BorderRadius.circular(8),
+       ),
+       child: Obx(
+             () => DropdownButton<String>(
+           value: controller.selectedFilterBy.value,
+           isExpanded: true,
+           underline: Container(),
+           items: controller.filteredByValue.map((String value) {
+             return DropdownMenuItem<String>(
+               value: value,
+               child: Text(
+                 value,
+                 style: MontserratStyles.montserratSemiBoldTextStyle(
+                   size: 13,
+                   color: Colors.black87,
+                 ),
+               ),
+             );
+           }).toList(),
+           onChanged: controller.updateSelectedFilterByData,
+         ),
+       ),
+     );
+   }
 
    Widget _buildSearchBar() {
     return Container(
@@ -1581,7 +1626,7 @@ Widget _buildActionButton(
   return ElevatedButton.icon(
     style: ElevatedButton.styleFrom(
       backgroundColor: appColor,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 50  , vertical: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),

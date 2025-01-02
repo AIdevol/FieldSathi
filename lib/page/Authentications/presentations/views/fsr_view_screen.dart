@@ -991,30 +991,28 @@ class FsrViewScreen extends GetView<FsrViewController> {
         child: Container(
           width: Get.width * 0.9,
           padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Edit FSR',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[800],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Edit FSR',
+                      style: MontserratStyles.montserratSemiBoldTextStyle(color: Colors.black,size: 20)
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              _buildModernEditForm(entry),
-            ],
+                    IconButton(
+                      onPressed: () => Get.back(),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildModernEditForm(entry),
+              ],
+            ),
           ),
         ),
       ),
@@ -1023,77 +1021,79 @@ class FsrViewScreen extends GetView<FsrViewController> {
 
   Widget _buildModernEditForm(Result entry) {
     return GetBuilder<FsrViewController>(
-      builder: (controller) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextFormField(
-            controller: controller.firstNameController,
-            decoration: InputDecoration(
-              labelText: 'FSR Name',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.blue[700]!),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Categories',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey[700],
-            ),
-          ),
-          const SizedBox(height: 16),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: controller.categoryNameControllers.length,
-            itemBuilder: (context, index) {
-              return _buildModernCategoryField(
-                controller: controller.categoryNameControllers[index],
-                onDelete: () => controller.removeCategoryField(index),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: _buildModernAddButton(
-              onPressed: controller.addNewCategoryField,
-              label: 'Add Category',
-            ),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                // Update logic here
-                Get.back();
-                controller.hitGetFsrDetailsApiCall();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: appColor,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
+      builder: (controller) => SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextFormField(
+              controller: controller.firstNameController,
+              decoration: InputDecoration(
+                labelText: 'FSR Name',
+                border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-              ),
-              child: const Text(
-                'Update',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.blue[700]!),
                 ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 24),
+            Text(
+              'Categories',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[700],
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: controller.categoryNameControllers.length,
+              itemBuilder: (context, index) {
+                return _buildModernCategoryField(
+                  controller: controller.categoryNameControllers[index],
+                  onDelete: () => controller.removeCategoryField(index),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: _buildModernAddButton(
+                onPressed: controller.addNewCategoryField,
+                label: 'Add Category',
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Update logic here
+                  Get.back();
+                  controller.hitGetFsrDetailsApiCall();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: appColor,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Update',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

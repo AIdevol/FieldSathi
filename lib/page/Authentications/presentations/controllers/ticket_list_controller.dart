@@ -42,7 +42,17 @@ class TicketListController extends GetxController {
     "Completed",
     "On-Hold"
   ].obs;
+  RxList<String> filteredByValue = [
+    "Filter By",
+    "Ticket Id",
+    "Task Name",
+    "Customer Name",
+    "Sub-Customer Name",
+    "Technician Name",
+    "Region"
+  ].obs;
   RxString selectedFilter = "All Status".obs;
+  RxString selectedFilterBy = "Filter By".obs;
   RxList<TicketResult> ticketResult = <TicketResult>[].obs;
   RxList<TicketResult> filteredtickets = <TicketResult>[].obs;
   RxList<TicketResult> ticketPaginationsData = <TicketResult>[].obs;
@@ -163,6 +173,12 @@ void onClose(){
   void updateSelectedStatusFilter(String? newValue) {
     if (newValue != null) {
       selectedFilter.value = newValue;
+      applyFilters();
+    }
+  }
+  void updateSelectedFilterByData(String? newValue) {
+    if (newValue != null) {
+      selectedFilterBy.value = newValue;
       applyFilters();
     }
   }

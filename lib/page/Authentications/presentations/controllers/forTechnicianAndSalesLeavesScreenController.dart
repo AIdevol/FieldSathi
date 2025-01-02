@@ -1,11 +1,16 @@
+import 'dart:io';
+
+import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:tms_sathi/main.dart';
 import 'package:tms_sathi/response_models/attendance_response_model.dart';
 import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 import '../../../../constans/const_local_keys.dart';
+import '../../../../utilities/excel_generator.dart';
 
 class ForTechcnicianandsalesAttendanceScreeenController extends GetxController {
   // Observables
@@ -18,8 +23,15 @@ class ForTechcnicianandsalesAttendanceScreeenController extends GetxController {
   Rx<DateTime?> currentPunchOutTime = Rx<DateTime?>(null);
   RxString currentStatus = "idle".obs;
   RxString userName = ''.obs;
+
+  late TextEditingController endDateController = TextEditingController();
+  late TextEditingController startDateController = TextEditingController();
+
+  // List<String>excelResponse = ;
   @override
   void onInit() {
+    endDateController = TextEditingController();
+    startDateController = TextEditingController();
     super.onInit();
     getCurrentStatus();
     hituserDetailsApiCall();
@@ -28,6 +40,8 @@ class ForTechcnicianandsalesAttendanceScreeenController extends GetxController {
 
   @override
   void onClose() {
+    endDateController.dispose();
+    startDateController.dispose();
     super.onClose();
   }
 
@@ -161,4 +175,52 @@ class ForTechcnicianandsalesAttendanceScreeenController extends GetxController {
       toast(error.toString());
     });
     }
+
+  Future<void> excelDownloaderAttendanceApiCall({
+    required String id,
+    required String startDate,
+    required String endDate
+  }) async {
+    try {
+      isLoading.value = true;
+      customLoader.show();
+
+      var parameters = {
+        "start_date": startDate,
+        "end_date": endDate
+      };
+
+      // Get attendance data from API
+      final attendanceData = await Get.find<AuthenticationApiService>()
+          .exportAttendancebyCall(parameters: parameters, id: id);
+
+      if (attendanceData.isEmpty) {
+        toast("No attendance data found for the selected date range");
+        return;
+      }
+
+      // Format the data for Excel
+      List<Map<String, dynamic>> formattedData = attendanceData.map((item) {
+        return {
+          "User": item['user'] ?? '',
+          "Punch In": item['check_in'] ?? '',
+          "Punch Out": item['check_out'] ?? '',
+          "Date": item['date'] ?? '',
+          "Status": item['status'] ?? ''
+        };
+      }).toList();
+
+      // Download the excel file
+      final filePath = await ExcelDownloadHandler.downloadAttendanceReport(formattedData);
+
+      toast("Excel file downloaded successfully at: $filePath");
+    } catch (error) {
+      print("Excel download error: $error"); // For debugging
+      toast("Failed to download excel: ${error.toString()}");
+    } finally {
+      customLoader.hide();
+      isLoading.value = false;
+      update();
+    }
+  }
 }

@@ -30,6 +30,7 @@ class TicketListCreation extends GetView<TicketListCreationController> {
         child: GetBuilder<TicketListCreationController>(
           init: TicketListCreationController(),
           builder: (controller) => CupertinoPageScaffold(
+            backgroundColor: CupertinoColors.white,
             navigationBar: CupertinoNavigationBar(
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back_ios, size: 25, color: Colors.black),
@@ -114,7 +115,7 @@ class TicketListCreation extends GetView<TicketListCreationController> {
           hintText: "Model no".tr,
           textInputType: TextInputType.text,
           labletext: "Model no".tr,
-
+          maxLines: 2,
         ),
       ],
     );
@@ -134,7 +135,9 @@ class TicketListCreation extends GetView<TicketListCreationController> {
         const SizedBox(height: 10),
         dropValueToShowfsrName(context,controller),
         const SizedBox(height: 20),
-      ],
+    dropValueTofsrCategories(context, controller),
+        const SizedBox(height: 20),
+    ],
     );
   }
 
@@ -201,6 +204,7 @@ class TicketListCreation extends GetView<TicketListCreationController> {
     return CustomTextField(
       controller: controller.taskNameController,
       hintText: "Task Name".tr,
+      maxLines: 2,
       textInputType: TextInputType.text,
       labletext: "Task Name".tr,
       prefix: const Icon(Icons.add_task, color: Colors.black),
@@ -376,7 +380,7 @@ class TicketListCreation extends GetView<TicketListCreationController> {
       children: [
         Expanded(
           child: CustomTextField(
-              hintText: "dd-month-yyyy".tr,
+              hintText: "yyyy-MMM-dd".tr,
               controller: controller.dateController,
               textInputType: TextInputType.datetime,
               focusNode: controller.focusNode,
@@ -580,6 +584,7 @@ Widget dropValueToShowCustomerName(BuildContext context, TicketListCreationContr
           "${customerData.customerName?? ''}";
           controller.selectedCustomerId.value = customerData.id ?? 0;
           controller.hitGetAmcDataAccordingtoCustomerData(SelectedCustomerId:"${customerData.id}");
+          controller.hitGetCustomerBrandListApiCall(id: customerData.id.toString());
           print('Selected Customer ID: ${controller.selectedCustomerId.value}');
         }
       },
@@ -636,6 +641,8 @@ Widget dropValueToShowProductName(BuildContext context, TicketListCreationContro
         if (ticket != null) {
           String allBrands = ticket.name.toString();
           controller.productNameController.text = allBrands/*.isNotEmpty?"All Brands" :'Unknown Brand'*/;
+          controller.selectedProductId.value = ticket.id??0;
+          controller.hitBrandAmcNamehitApiCall(id: ticket.id.toString());
           print("all brands: $allBrands");
         }
       },
@@ -648,13 +655,26 @@ Widget dropValueToShowProductName(BuildContext context, TicketListCreationContro
               label: allBrands/*.isNotEmpty?"All Brands" :'Unknown Brand'*/,
             );
           }).toList(),
+      menuHeight: 300, // Set a maximum height for the dropdown
+      menuStyle: MenuStyle(
+        maximumSize: MaterialStatePropertyAll(Size(
+            MediaQuery.of(context).size.width - 40,
+            300 // Maximum height of 300 pixels
+        )),
+        backgroundColor: MaterialStatePropertyAll(Colors.white),
+        shape: MaterialStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            )
+        ),
+      ),
     ),
   ));
 }
 
 Widget amcValueToShowProductName(BuildContext context, TicketListCreationController controller) {
   return Obx(() => DropdownButtonHideUnderline(
-    child: DropdownMenu<AmcDataCustomerWiseResult>(
+    child: DropdownMenu<BrandAmcNameResponseModel>(
       inputDecorationTheme: InputDecorationTheme(
         focusColor: appColor,
         border: OutlineInputBorder(
@@ -670,21 +690,33 @@ Widget amcValueToShowProductName(BuildContext context, TicketListCreationControl
         style: MontserratStyles.montserratSemiBoldTextStyle(
             size: 15, color: Colors.grey),
       ),
-      onSelected: (AmcDataCustomerWiseResult? ticket) {
+      onSelected: (BrandAmcNameResponseModel? ticket) {
         if (ticket != null) {
           controller.amcController.text = ticket.amcName ?? 'Unknown Brand';
-          controller.selectedAmcId.value = ticket.id ?? 0;
+          controller.selectedAmcId.value = ticket.amcid ?? 0;
         }
       },
-      // Make sure to use the correct list name
-      dropdownMenuEntries: controller.AmcDataCustomerWiseList
-          .map<DropdownMenuEntry<AmcDataCustomerWiseResult>>(
-              (AmcDataCustomerWiseResult ticket) {
-            return DropdownMenuEntry<AmcDataCustomerWiseResult>(
+      dropdownMenuEntries: controller.brandAmcNamedata
+          .map<DropdownMenuEntry<BrandAmcNameResponseModel>>(
+              (BrandAmcNameResponseModel ticket) {
+            return DropdownMenuEntry<BrandAmcNameResponseModel>(
               value: ticket,
               label: ticket.amcName ?? 'Unknown Brand',
             );
           }).toList(),
+      menuHeight: 300, // Set a maximum height for the dropdown
+      menuStyle: MenuStyle(
+        maximumSize: MaterialStatePropertyAll(Size(
+            MediaQuery.of(context).size.width - 40,
+            300 // Maximum height of 300 pixels
+        )),
+        backgroundColor: MaterialStatePropertyAll(Colors.white),
+        shape: MaterialStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            )
+        ),
+      ),
     ),
   ));
 }
@@ -709,6 +741,10 @@ Widget dropValueToShowfsrName(BuildContext context, TicketListCreationController
           controller.fsrDetailsController.text =
           "${result.fsrName ?? ''}";
           controller.selectedfsrId.value = result.id ?? 0;
+          controller.hitFsrCategoriesApiCall(id: result.id.toString());
+          // if(controller.selectedfsrId.value != null){
+          //   dropValueTofsrCategories(context, controller);
+          // }
         }
       },
       dropdownMenuEntries: controller.filteredFsr
@@ -719,9 +755,71 @@ Widget dropValueToShowfsrName(BuildContext context, TicketListCreationController
               label: "${result.fsrName ?? ''}" ?? 'Unknown Customer',
             );
           }).toList(),
+      menuHeight: 300, // Set a maximum height for the dropdown
+      menuStyle: MenuStyle(
+        maximumSize: MaterialStatePropertyAll(Size(
+            MediaQuery.of(context).size.width - 40,
+            300 // Maximum height of 300 pixels
+        )),
+        backgroundColor: MaterialStatePropertyAll(Colors.white),
+        shape: MaterialStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            )
+        ),
+      ),
     ),
   ));
 }
+
+
+Widget dropValueTofsrCategories(BuildContext context, TicketListCreationController controller) {
+  return Obx(() => DropdownButtonHideUnderline(
+    child: DropdownMenu<FsrCategoriesNameResponseModel>(
+      inputDecorationTheme: InputDecorationTheme(
+        focusColor: appColor,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide(color: Colors.grey, width: 1),
+        ),
+      ),
+      width: MediaQuery.of(context).size.width - 40, // Adjust width as needed
+      initialSelection: null,
+      requestFocusOnTap: true,
+      label: Text('FSR'.tr,style: MontserratStyles.montserratSemiBoldTextStyle(size: 15, color:Colors.grey),),
+      onSelected: (FsrCategoriesNameResponseModel? result) {
+        if (result != null) {
+          controller.fsrCategoriesController.text =
+          "${result.categoryName ?? ''}";
+          controller.fsrCategoriesId.value = result.categoryId ?? 0;
+        }
+      },
+      dropdownMenuEntries: controller.fsrCategoriesNamedata
+          .map<DropdownMenuEntry<FsrCategoriesNameResponseModel>>(
+              (FsrCategoriesNameResponseModel? result) {
+            return DropdownMenuEntry<FsrCategoriesNameResponseModel>(
+              value: result!,
+              label: "${result.categoryName ?? ''}" ?? 'Unknown Customer',
+            );
+          }).toList(),
+      menuHeight: 300, // Set a maximum height for the dropdown
+      menuStyle: MenuStyle(
+        maximumSize: MaterialStatePropertyAll(Size(
+            MediaQuery.of(context).size.width - 40,
+            300 // Maximum height of 300 pixels
+        )),
+        backgroundColor: MaterialStatePropertyAll(Colors.white),
+        shape: MaterialStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            )
+        ),
+      ),
+    ),
+  ));
+}
+
+
 
 Widget dropValueToShowSelectServiceName(BuildContext context, TicketListCreationController controller) {
   return Obx(() => DropdownButtonHideUnderline(
@@ -753,6 +851,19 @@ Widget dropValueToShowSelectServiceName(BuildContext context, TicketListCreation
             );
           } ,
     ).toList(),
+      menuHeight: 300, // Set a maximum height for the dropdown
+      menuStyle: MenuStyle(
+        maximumSize: MaterialStatePropertyAll(Size(
+            MediaQuery.of(context).size.width - 40,
+            300 // Maximum height of 300 pixels
+        )),
+        backgroundColor: MaterialStatePropertyAll(Colors.white),
+        shape: MaterialStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            )
+        ),
+      ),
   )));
 }
 

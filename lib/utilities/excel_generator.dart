@@ -1,178 +1,111 @@
-// import 'dart:io';
-//
-// import 'package:excel/excel.dart';
-// import 'package:path_provider/path_provider.dart';
-// import 'package:permission_handler/permission_handler.dart';
-//
-// class ExcelExportService {
-//   /// Converts data to Excel file and saves it locally
-//   /// [data] - List of Maps containing the data to export
-//   /// [fileName] - Name of the excel file (without extension)
-//   /// Returns the path where file is saved
-//   Future<String> exportToExcel({
-//     required List<Map<String, dynamic>> data,
-//     required String fileName,
-//   }) async {
-//     try {
-//       // Request storage permission
-//       if (!await _requestStoragePermission()) {
-//         throw Exception('Storage permission denied');
-//       }
-//
-//       // Create Excel workbook
-//       final excel = Excel.createExcel();
-//       final Sheet sheet = excel['Sheet1'];
-//
-//       // Add headers (using keys from first data item)
-//       if (data.isNotEmpty) {
-//         final headers = data.first.keys.toList();
-//         for (var i = 0; i < headers.length; i++) {
-//           sheet
-//               .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0))
-//               .value = headers[i] as CellValue?;
-//         }
-//       }
-//
-//       // Add data rows
-//       for (var rowIndex = 0; rowIndex < data.length; rowIndex++) {
-//         final rowData = data[rowIndex];
-//         final rowKeys = rowData.keys.toList();
-//
-//         for (var colIndex = 0; colIndex < rowKeys.length; colIndex++) {
-//           sheet
-//               .cell(CellIndex.indexByColumnRow(
-//               columnIndex: colIndex, rowIndex: rowIndex + 1))
-//               .value = rowData[rowKeys[colIndex]].toString() as CellValue?;
-//         }
-//       }
-//
-//       // Get application documents directory
-//       final directory = await _getExcelDirectory();
-//       final filePath = '${directory.path}/$fileName.xlsx';
-//
-//       // Save the excel file
-//       final fileBytes = excel.save();
-//       if (fileBytes != null) {
-//         File(filePath)
-//           ..createSync(recursive: true)
-//           ..writeAsBytesSync(fileBytes);
-//         return filePath;
-//       }
-//
-//       throw Exception('Failed to generate Excel file');
-//     } catch (e) {
-//       throw Exception('Error exporting to Excel: $e');
-//     }
-//   }
-//
-//   /// Request storage permission from user
-//   Future<bool> _requestStoragePermission() async {
-//     if (Platform.isAndroid) {
-//       final status = await Permission.storage.request();
-//       return status.isGranted;
-//     }
-//     return true; // iOS doesn't need explicit permission for app documents directory
-//   }
-//
-//   /// Get directory to save Excel file
-//   Future<Directory> _getExcelDirectory() async {
-//     if (Platform.isAndroid) {
-//       // For Android, save in Downloads folder
-//       return Directory('/storage/emulated/0/Download');
-//     } else {
-//       // For iOS, save in app documents directory
-//       return await getApplicationDocumentsDirectory();
-//     }
-//   }
-// }
 import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:intl/intl.dart';
 
-class ExcelExportService<T> {
-  /// Converts data to Excel file and saves it locally
-  /// [models] - List of objects to export
-  /// [fileName] - Name of the excel file (without extension)
-  /// [toMap] - Function that converts a model object to a Map<String, dynamic>
-  /// Returns the path where the file is saved
-  Future<String> exportToExcel({
-    required List<T> models,
-    required String fileName,
-    required Map<String, dynamic> Function(T model) toMap,
-  }) async {
+import 'hex_color.dart';
+
+class ExcelDownloadHandler {
+  static Future<String> downloadAttendanceReport(List<Map<String, dynamic>> data) async {
     try {
       // Request storage permission
-      if (!await _requestStoragePermission()) {
-        throw Exception('Storage permission denied');
+      var status = await Permission.storage.request();
+      if (!status.isGranted) {
+        throw Exception('Storage permission is required to download the file');
       }
 
-      // Convert models to data format for Excel
-      final data = models.map(toMap).toList();
+      // Create Excel workbook and sheet
+      var excel = Excel.createExcel();
+      Sheet sheetObject = excel['Attendance Report'];
 
-      // Create Excel workbook
-      final excel = Excel.createExcel();
-      final Sheet sheet = excel['Sheet1'];
+      // Define headers
+      final headers = ["User", "Punch In", "Punch Out", "Date", "Status", "Total Hours"];
+      for (int i = 0; i < headers.length; i++) {
+        var cell = sheetObject.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0));
+        cell.value = TextCellValue(headers[i]);
 
-      // Add headers (using keys from first data item)
-      if (data.isNotEmpty) {
-        final headers = data.first.keys.toList();
-        for (var i = 0; i < headers.length; i++) {
-          sheet
-              .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0))
-              .value = headers[i] as CellValue?;
-        }
+        // Style header cells
+        cell.cellStyle = CellStyle(
+          bold: true,
+          // backgroundColorHex:'#FFD9EAD3',
+          horizontalAlign: HorizontalAlign.Center,
+        );
       }
 
       // Add data rows
-      for (var rowIndex = 0; rowIndex < data.length; rowIndex++) {
-        final rowData = data[rowIndex];
-        final rowKeys = rowData.keys.toList();
+      for (int row = 0; row < data.length; row++) {
+        var item = data[row];
 
-        for (var colIndex = 0; colIndex < rowKeys.length; colIndex++) {
-          sheet
-              .cell(CellIndex.indexByColumnRow(
-              columnIndex: colIndex, rowIndex: rowIndex + 1))
-              .value = rowData[rowKeys[colIndex]].toString() as CellValue?;
+        // Format date and time values
+        DateTime? punchIn = item['Punch In'] != null ? DateTime.parse(item['Punch In']) : null;
+        DateTime? punchOut = item['Punch Out'] != null ? DateTime.parse(item['Punch Out']) : null;
+
+        String formattedPunchIn = punchIn != null
+            ? DateFormat('yyyy-MM-dd HH:mm:ss').format(punchIn)
+            : '';
+        String formattedPunchOut = punchOut != null
+            ? DateFormat('yyyy-MM-dd HH:mm:ss').format(punchOut)
+            : '';
+
+        // Calculate total hours if both punch in and out exist
+        String totalHours = '';
+        if (punchIn != null && punchOut != null) {
+          Duration difference = punchOut.difference(punchIn);
+          totalHours = '${difference.inHours}h ${difference.inMinutes.remainder(60)}m';
         }
+
+        // Add row data
+        sheetObject.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row + 1))
+            .value = TextCellValue(item['User'] ?? '');
+        sheetObject.cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row + 1))
+            .value = TextCellValue(formattedPunchIn);
+        sheetObject.cell(CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: row + 1))
+            .value = TextCellValue(formattedPunchOut);
+        sheetObject.cell(CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: row + 1))
+            .value = TextCellValue(item['Date'] ?? '');
+        sheetObject.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row + 1))
+            .value = TextCellValue(item['Status'] ?? '');
+        sheetObject.cell(CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: row + 1))
+            .value = TextCellValue(totalHours);
       }
 
-      // Get application documents directory
-      final directory = await _getExcelDirectory();
-      final filePath = '${directory.path}/$fileName.xlsx';
-
-      // Save the excel file
-      final fileBytes = excel.save();
-      if (fileBytes != null) {
-        File(filePath)
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(fileBytes);
-        return filePath;
+      // Auto-size columns
+      for (int i = 0; i < headers.length; i++) {
+        sheetObject.setColumnWidth(i, 15.0);
       }
 
-      throw Exception('Failed to generate Excel file');
+      // Generate file name with timestamp
+      String timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      String fileName = 'attendance_report_$timestamp.xlsx';
+
+      // Get download directory
+      Directory? directory;
+      if (Platform.isAndroid) {
+        directory = Directory('/storage/emulated/0/Download');
+        // Create directory if it doesn't exist
+        if (!await directory.exists()) {
+          directory = await getExternalStorageDirectory();
+        }
+      } else {
+        directory = await getApplicationDocumentsDirectory();
+      }
+
+      if (directory == null) {
+        throw Exception('Could not access storage directory');
+      }
+
+      // Create full file path
+      String filePath = '${directory.path}/$fileName';
+
+      // Save file
+      File excelFile = File(filePath)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(excel.encode()!);
+
+      return filePath;
     } catch (e) {
-      throw Exception('Error exporting to Excel: $e');
-    }
-  }
-
-  /// Request storage permission from user
-  Future<bool> _requestStoragePermission() async {
-    if (Platform.isAndroid) {
-      final status = await Permission.storage.request();
-      return status.isGranted;
-    }
-    return true; // iOS doesn't need explicit permission for app documents directory
-  }
-
-  /// Get directory to save Excel file
-  Future<Directory> _getExcelDirectory() async {
-    if (Platform.isAndroid) {
-      // For Android, save in Downloads folder
-      return Directory('/storage/emulated/0/Download');
-    } else {
-      // For iOS, save in app documents directory
-      return await getApplicationDocumentsDirectory();
+      throw Exception('Failed to download report: $e');
     }
   }
 }

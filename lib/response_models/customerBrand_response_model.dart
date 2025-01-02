@@ -16,3 +16,43 @@ class CustomerBrandResponseModel {
     return data;
   }
 }
+
+//==================================================Brand AMC Name ==============================
+class BrandAmcNameResponseModel {
+  BrandAmcNameResponseModel({
+    required this.amcid,
+    required this.amcName,
+  });
+
+  final int? amcid;
+  final String? amcName;
+
+  factory BrandAmcNameResponseModel.fromJson(Map<String, dynamic> json){
+    return BrandAmcNameResponseModel(
+      amcid: json["amcid"],
+      amcName: json["amcName"],
+    );
+  }
+
+}
+
+
+//=================================================================class FsrCategoriesNameResponseModel {
+
+class FsrCategoriesNameResponseModel {
+  FsrCategoriesNameResponseModel({
+    required this.categoryId,
+    required this.categoryName,
+  });
+
+  final int? categoryId;
+  final String? categoryName;
+
+  factory FsrCategoriesNameResponseModel.fromJson(Map<String, dynamic> json){
+    return FsrCategoriesNameResponseModel(
+      categoryId: json["category_id"],
+      categoryName: json["category_name"],
+    );
+  }
+}
+

@@ -213,9 +213,14 @@ class RegisterScreen extends GetView<RegisterScreenController> {
               height: Get.height * 0.06,
               width: Get.width,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
-                color: appColor,
-              ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: appColor.withOpacity(0.4),
+                      blurRadius: 15,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                  borderRadius: BorderRadius.circular(25), color: appColor),
               child: Center(
                 child: Text(
                   'Register'.tr,
@@ -266,7 +271,6 @@ class RegisterScreen extends GetView<RegisterScreenController> {
   }
 
   void _openCountryPicker(BuildContext context) {
-    // Set initial country code for India
     const String defaultCountry = 'IN';
 
     showModalBottomSheet(

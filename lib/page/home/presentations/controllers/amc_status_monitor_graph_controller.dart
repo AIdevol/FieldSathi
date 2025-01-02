@@ -63,4 +63,5 @@ class AmcStatusMonitorGraphController extends GetxController {
     });
   }
 
+
 }
