@@ -7,12 +7,18 @@ import 'package:tms_sathi/services/APIs/auth_services/auth_api_services.dart';
 
 class AddFSRViewController extends GetxController {
   // Initialize controllers immediately instead of using late
-  final TextEditingController firstNameController = TextEditingController();
+  late TextEditingController firstNameController;
   final List<TextEditingController> categoryNameControllers = [TextEditingController()];
   final List<List<TextEditingController>> categoryCheckpointControllers = [[TextEditingController()]];
-  final FocusNode firstNameFocusNode = FocusNode();
+  late FocusNode firstNameFocusNode;
 
-  // No need for onInit since we're initializing directly
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    firstNameController = TextEditingController();
+    firstNameFocusNode = FocusNode();
+    super.onInit();
+  }
 
   @override
   void onClose() {
@@ -80,7 +86,7 @@ class AddFSRViewController extends GetxController {
     Get.find<AuthenticationApiService>().postfsrDetailsApiCall(dataBody: postData).then((value) {
       customLoader.hide();
       toast('FSR details updated successfully');
-      Get.offAllNamed(AppRoutes.fsrScreen);
+      Get.back();
       update();
     }).onError((error, stackError) {
       customLoader.hide();

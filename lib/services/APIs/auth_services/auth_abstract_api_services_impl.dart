@@ -79,6 +79,10 @@ abstract class AuthenticationApi {
   Future<List<AttendanceUserResponseModel>>getCalenderViewUserAttendanceApiCall({Map<String, dynamic>? dataBody, parameter});
   Future<FsrResponseModel>getfsrDetailsApiCall({Map<String, dynamic>? dataBody});
   Future<List<CheckAndUpdateCheckingPointForFsrResponseModel>> getFsrCheckingPointDetailsApiCall({Map<String, dynamic>? dataBody,parameter});
+  Future<FsrResponseModel> postfsrDetailsApiCall({Map<String, dynamic>? dataBody, parameters});
+  Future<FSRDeleteRespnseModel> deletefsrDetailsApiCall({Map<String, dynamic>? dataBody, required String id});
+  Future<FsrResponseModel> putfsrDetailsApiCall(
+      {Map<String, dynamic>? dataBody, required String id});
   Future<CheckPointsResponseModel>postcheckPointStatusDetailsApiCall({Map<String, dynamic>? dataBody,});
   Future<LeaveAllocationResponseModel>getLeavesALLocationApiCall({Map<String, dynamic>? dataBody});
   Future<LeaveAllocationResponseModel>putLeavesAllocationApiCall({Map<String, dynamic>? dataBody,id});

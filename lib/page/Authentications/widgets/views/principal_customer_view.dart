@@ -2,7 +2,6 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:get/get.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
@@ -96,6 +95,7 @@ class PrincipalCustomerView extends GetView<PrincipalCstomerViewController> {
       textInputType: TextInputType.text,
       onFieldSubmitted: (String? value) {},
       labletext: "Customer Name".tr,
+      maxLines: 1,
       prefix: Icon(Icons.person, color: Colors.black),
     );
   }

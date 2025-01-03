@@ -619,6 +619,27 @@ implements AuthenticationApi {
       return Future.error(NetworkExceptions.getDioException(e));
     }
   }
+  @override
+  Future<FsrResponseModel> putfsrDetailsApiCall(
+      {Map<String, dynamic>? dataBody, required String id}) async {
+    try {
+      final response = await dioClient!.put(
+          "${ApiEnd.fsrApiEnd}$id/", data: dataBody,
+          skipAuth: false,);
+      return FsrResponseModel.fromJson(response);
+    } catch (e) {
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
+  @override
+  Future<FSRDeleteRespnseModel> deletefsrDetailsApiCall({Map<String, dynamic>? dataBody, required String id}) async {
+    try {
+      final response = await dioClient!.delete("${ApiEnd.fsrApiEnd}$id/", data: dataBody, skipAuth: false);
+      return FSRDeleteRespnseModel.fromJson(response);
+    } catch (e) {
+      return Future.error(NetworkExceptions.getDioException(e));
+    }
+  }
 
   @override
   Future<CheckPointsResponseModel> postcheckPointStatusDetailsApiCall(

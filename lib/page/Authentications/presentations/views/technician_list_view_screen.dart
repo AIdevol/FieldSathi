@@ -1,48 +1,46 @@
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:tms_sathi/constans/color_constants.dart';
-import 'package:tms_sathi/navigations/navigation.dart';
-import 'package:tms_sathi/page/Authentications/presentations/controllers/technician_list_view_screen_controller.dart';
-import 'package:tms_sathi/response_models/technician_response_model.dart';
-import 'package:tms_sathi/utilities/common_textFields.dart';
+import 'package:tms_sathi/constans/string_const.dart';
 import 'package:tms_sathi/utilities/google_fonts_textStyles.dart';
-import 'package:tms_sathi/utilities/helper_widget.dart';
 
 import '../../../../constans/role_based_keys.dart';
-import '../../../../constans/string_const.dart';
 import '../../../../main.dart';
-
+import '../../../../navigations/navigation.dart';
+import '../../../../response_models/technician_response_model.dart';
+import '../../../../utilities/common_textFields.dart';
+import '../../../../utilities/helper_widget.dart';
+import '../controllers/technician_list_view_screen_controller.dart';
 
 class TechnicianListViewScreen extends GetView<TechnicianListViewScreenController> {
-  final GlobalKey formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return MyAnnotatedRegion(
       child: GetBuilder<TechnicianListViewScreenController>(
         builder: (controller) => Scaffold(
           resizeToAvoidBottomInset: false,
-          bottomNavigationBar:  _buildPaginationControls(controller),
+          bottomNavigationBar: _buildPaginationControls(controller),
           floatingActionButton: _buildFloatingActionButton(),
-          backgroundColor: CupertinoColors.white,
+          backgroundColor: Colors.grey[100],
           appBar: _buildAppBar(controller),
           body: RefreshIndicator(
-            onRefresh: ()async{
+            onRefresh: () async {
               await controller.refreshAllData();
             },
             child: SafeArea(
               child: Column(
                 children: [
-                  _buildTopBar(context,controller),
+                  _buildTopBar(context, controller),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.all(18.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: _buildDataTableView(controller, context),
-                    ))
+                    ),
+                  )
                 ],
               ),
             ),
@@ -52,256 +50,316 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
     );
   }
 
-  FloatingActionButton? _buildFloatingActionButton() {
-    final userrole = storage.read(userRole);
-    return (userrole != 'technician'&&userrole !='sale')?
-    FloatingActionButton(
-      onPressed: () =>Get.toNamed(AppRoutes.addtechnicianListScreen),
-      backgroundColor: appColor,
-      child: Icon(Icons.add, color: Colors.white),
-    )
-        : null;
-  }
   PreferredSizeWidget _buildAppBar(TechnicianListViewScreenController controller) {
     return AppBar(
-      leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios, size: 22, color: Colors.black87)),
-      backgroundColor: appColor,
       elevation: 0,
+      backgroundColor: appColor,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back_ios, color: Colors.black87),
+        onPressed: () => Get.back(),
+      ),
       title: Text(
-        "Technician",
-        style: MontserratStyles.montserratBoldTextStyle(
-          size: 15,
-          color: Colors.black,
-        ),
+        'Technician',
+        style: MontserratStyles.montserratBoldTextStyle(size: 20,color: Colors.black87)
       ),
       actions: [
         IconButton(
+          icon: Icon(FontAwesomeIcons.rotate, color: Colors.black87),
           onPressed: () => controller.refreshList(),
-          icon: Icon(FontAwesomeIcons.rotate),
           tooltip: 'Refresh',
         ),
-        // IconButton(
-        //   onPressed: ()=>Get.toNamed(AppRoutes.addtechnicianListScreen),
-        //   icon: Icon(FontAwesomeIcons.plus),
-        //   tooltip: 'Filter',
-        // ),
       ],
     );
   }
 
-  Widget _buildTopBar(BuildContext context,TechnicianListViewScreenController controller) {
+  Widget _buildTopBar(BuildContext context, TechnicianListViewScreenController controller) {
     return Container(
-      height: Get.height * 0.07,
-      width: Get.width,
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: whiteColor,
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 1,
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 5,
-            offset: Offset(0, 5),
+            offset: Offset(0, 2),
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+      child: Column(
         children: [
-          Expanded(child: _buildSearchField()),
-          hGap(10),
-          ElevatedButton(
-            onPressed: () => _showImportModelView(context,controller),
-            style: _buttonStyle(),
-            child: Text(
-              'Import',
-              style: MontserratStyles.montserratBoldTextStyle(
-                color: whiteColor,
-                size: 13,
+          _buildSearchField(controller),
+          SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionButton(
+                  context,
+                  label: 'Import',
+                  icon: Icons.upload_file,
+                  onPressed: () => _showImportModelView(context, controller),
+                ),
               ),
-            ),
-          ),
-          hGap(10),
-          ElevatedButton(
-            onPressed: () {
-              _downLoadExportModelView(context,controller);
-            },
-            style: _buttonStyle(),
-            child: Text(
-              'Export',
-              style: MontserratStyles.montserratBoldTextStyle(
-                color: whiteColor,
-                size: 13,
+              SizedBox(width: 12),
+              Expanded(
+                child: _buildActionButton(
+                  context,
+                  label: 'Export',
+                  icon: Icons.download,
+                  onPressed: () => _downLoadExportModelView(context, controller),
+                ),
               ),
-            ),
+            ],
           ),
-          hGap(10),
         ],
       ),
     );
   }
 
-  ButtonStyle _buttonStyle() {
-    return ElevatedButton.styleFrom(
-      backgroundColor: appColor,
-      foregroundColor: Colors.white,
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      elevation: 5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      shadowColor: Colors.black.withOpacity(0.5),
-    );
-  }
-  Widget _buildSearchField() {
+  Widget _buildSearchField(TechnicianListViewScreenController controller) {
     return Container(
-      height: Get.height * 0.05,
-      margin: EdgeInsets.symmetric(horizontal: 10),
+      height: 48,
       decoration: BoxDecoration(
-        color: whiteColor,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          width: 1,
-          color: Colors.grey,
-        ),
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(24),
       ),
       child: TextField(
         controller: controller.searchController,
         decoration: InputDecoration(
-          hintText: "Search",
-          hintStyle: MontserratStyles.montserratSemiBoldTextStyle(
-            color: Colors.grey,
-          ),
-          prefixIcon: Icon(FeatherIcons.search, color: Colors.grey),
+          hintText: 'Search technicians...',
+          prefixIcon: Icon(Icons.search, color: Colors.grey),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 10),
+          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         ),
-        style: MontserratStyles.montserratSemiBoldTextStyle(
-          color: Colors.black,
-        ),
-        onChanged: (value) {
-          controller.onSearchChanged();// Implement this method in your controller
-        },
+        onChanged: (value) => controller.onSearchChanged(),
       ),
     );
   }
-  _buildEmptyState() {
-    return Center(
-      child: Column(
-        // mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            nullVisualImage,
-            width: 300,
-            height: 300,
-          ),
-          Text(
-            'No services found',
-            style: MontserratStyles.montserratNormalTextStyle(
-              // size: 18,
-              color: blackColor,
-            ),
-          ),
-        ],
+
+  Widget _buildActionButton(
+      BuildContext context, {
+    required String label,
+    required IconData icon,
+     VoidCallback? onPressed,
+  }) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 20),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: appColor,
+        padding: EdgeInsets.symmetric(horizontal:18,vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
     );
   }
+
   Widget _buildDataTableView(TechnicianListViewScreenController controller, BuildContext context) {
     if (controller.isLoading.value) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: CircularProgressIndicator());
     }
 
     if (controller.paginatedTechnicians.isEmpty) {
       return _buildEmptyState();
     }
 
-    return Column(
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SingleChildScrollView(
-            child: DataTable(
-              columns: [
-                _buildTableHeader('EmployeeId'),
-                _buildTableHeader('Image'),
-                _buildTableHeader('Name'),
-                _buildTableHeader('Email'),
-                _buildTableHeader('Phone No'),
-                _buildTableHeader('Date of Joining'),
-                _buildTableHeader('Casual Leaves'),
-                _buildTableHeader('Sick Leaves'),
-                _buildTableHeader('Check In'),
-                _buildTableHeader('Check Out'),
-                _buildTableHeader('Status'),
-                _buildTableHeader('Battery Status'),
-                _buildTableHeader('GPS'),
-                _buildTableHeader('Actions'),
-              ],
-              rows: controller.paginatedTechnicians.map((technician) {
-                final todayAttendance = technician.todayAttendance.map((value)=> value.punchIn).toList();
-                final todayAttendance1 = technician.todayAttendance.map((value)=> value.punchOut).toList();
-                return DataRow(
-                  cells: [
-                    DataCell(_ticketBoxIcons(technician.id.toString(), technician)),
-                    DataCell(_technicianImage(technician.id.toString(), technician)),
-                    DataCell(Text("${technician.firstName} ${technician.lastName}")),
-                    DataCell(Text(technician.email.toString())),
-                    DataCell(Text(technician.phoneNumber.toString())),
-                    DataCell(Text(technician.dateJoined.toString())),
-                    DataCell(Text(technician.allocatedCasualLeave.toString())),
-                    DataCell(Text(technician.allocatedSickLeave.toString())),
-                    DataCell(Text(_formatDateTime(
-                        todayAttendance.toString()?? 'N/A'))),
-                    DataCell(Text(_formatDateTime(
-                        todayAttendance1.toString()?? 'N/A'))),
-                    DataCell(_buildAttendanceStatusBadge(
-                        technician.todayAttendance.map((value)=> value.status).toString()?? '', technician.isActive)),
-                    DataCell(Text(technician.batteryStatus ?? 'N/A')),
-                    DataCell(Text(technician.gpsStatus! ? 'On' : 'Off')),
-                    DataCell(_dropDownValueViews(controller, context, technician.id.toString(), technician)),
-                  ],
-                );
-              }).toList(),
-            ),
+    return Card(
+      elevation: 2,
+      color: CupertinoColors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SingleChildScrollView(
+          child: DataTable(
+            horizontalMargin: 24,
+            columnSpacing: 24,
+            columns: _buildTableColumns(),
+            rows: _buildTableRows(controller, context),
           ),
         ),
-        // Pagination Controls
+      ),
+    );
+  }
 
+  List<DataColumn> _buildTableColumns() {
+    final columns = [
+      'ID',
+      'Image',
+      'Name',
+      'Email',
+      'Phone',
+      'Joined',
+      'Status',
+      'Actions'
+    ];
+    return columns.map((label) => DataColumn(
+      label: Text(
+        label,
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+    )).toList();
+  }
+
+  List<DataRow> _buildTableRows(
+      TechnicianListViewScreenController controller,
+      BuildContext context,
+      ) {
+    return controller.paginatedTechnicians.map((technician) {
+      return DataRow(
+        cells: [
+          DataCell(_buildIdBadge(technician.empId ?? '')),
+          DataCell(_buildProfileImage(technician.profileImage)),
+          DataCell(Text('${technician.firstName} ${technician.lastName}')),
+          DataCell(Text(technician.email ?? '')),
+          DataCell(Text(technician.phoneNumber ?? '')),
+          DataCell(Text(_formatDate(technician.dateJoined))),
+          DataCell(_buildStatusBadge(
+            technician.todayAttendance.isNotEmpty
+                ? technician.todayAttendance.first.status ?? ''
+                : '',
+            technician.isActive ?? false,
+          )),
+          DataCell(_buildActionButtons(controller, technician.id.toString(), technician)),
+        ],
+      );
+    }).toList();
+  }
+
+  Widget _buildIdBadge(String id) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.blue[100],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        id,
+        style: TextStyle(
+          color: Colors.blue[900],
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileImage(String? imageUrl) {
+    return CircleAvatar(
+      radius: 20,
+      backgroundImage: imageUrl != null
+          ? NetworkImage(imageUrl)
+          : AssetImage(userImageIcon) as ImageProvider,
+    );
+  }
+
+  Widget _buildStatusBadge(String status, bool isActive) {
+    Color statusColor;
+    switch (status.toLowerCase()) {
+      case 'present':
+        statusColor = Colors.green;
+        break;
+      case 'absent':
+        statusColor = Colors.red;
+        break;
+      case 'late':
+        statusColor = Colors.orange;
+        break;
+      default:
+        statusColor = Colors.grey;
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              status.isEmpty ? 'N/A' : status.toUpperCase(),
+              style: TextStyle(
+                color: statusColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          SizedBox(height: 4),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: isActive ? Colors.green : Colors.red,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              isActive ? 'Active' : 'Inactive',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(
+      TechnicianListViewScreenController controller,
+      String id,
+      TechnicianData technician,
+      ) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(Icons.edit, color: Colors.blue),
+          onPressed: () => _showEditDialog(controller, id, technician),
+        ),
+        IconButton(
+          icon: Icon(Icons.delete, color: Colors.red),
+          onPressed: () => _showDeleteConfirmation(controller, id),
+        ),
       ],
     );
   }
+
   Widget _buildPaginationControls(TechnicianListViewScreenController controller) {
-    return Obx(() => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      color: Colors.white,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // First Page Button
           IconButton(
             icon: Icon(Icons.first_page),
             onPressed: controller.currentPage.value > 1
                 ? () => controller.goToFirstPage()
                 : null,
           ),
-          // Previous Page Button
           IconButton(
             icon: Icon(Icons.chevron_left),
             onPressed: controller.currentPage.value > 1
                 ? () => controller.previousPage()
                 : null,
           ),
-          // Page Number Display
           Text(
             'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
             style: TextStyle(fontSize: 16),
           ),
-          // Next Page Button
           IconButton(
             icon: Icon(Icons.chevron_right),
             onPressed: controller.currentPage.value < controller.totalPages.value
                 ? () => controller.nextPage()
                 : null,
           ),
-          // Last Page Button
           IconButton(
             icon: Icon(Icons.last_page),
             onPressed: controller.currentPage.value < controller.totalPages.value
@@ -310,203 +368,495 @@ class TechnicianListViewScreen extends GetView<TechnicianListViewScreenControlle
           ),
         ],
       ),
-    ));
-  }
-
-  DataColumn _buildTableHeader(String title) {
-    return DataColumn(
-      label: Text(
-        title,
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
     );
   }
 
-  Widget _buildListView(TechnicianListViewScreenController controller) {
-    // Placeholder for list view if required
-    return Center(child: Text("List View will be displayed here"));
-  }
-}
-
-
-  Widget _buildAttendanceStatusBadge(String? status,bool? isActive) {
-    Color color;
-    String displayText = status!;
-
-    switch (status.toLowerCase()) {
-      case 'present':
-        color = Colors.green;
-        break;
-      case 'absent':
-        color = Colors.red;
-        break;
-      case 'late':
-        color = Colors.orange;
-        break;
-      case 'on_leave':
-        color = Colors.blue;
-        displayText = 'On Leave';
-        break;
-      default:
-        color = Colors.grey;
-    }
-
-    return Column(
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.person_off,
+            size: 64,
+            color: Colors.grey,
           ),
-          child: Text(
-            displayText,
+          SizedBox(height: 16),
+          Text(
+            'No technicians found',
             style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Colors.grey[600],
             ),
           ),
-        ),
-        vGap(2),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-          decoration: BoxDecoration(
-            color:(isActive != false)? Colors.green:Colors.red,
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: (isActive != false)
-              ?Text('Active',
+          SizedBox(height: 8),
+          Text(
+            'Add a new technician to get started',
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          )
-              :Text('Inactive',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          )
-        ),
-      ],
-    );
-  }
-  String _formatDateTime(String dateTimeStr) {
-    try {
-      final dateTime = DateTime.parse(dateTimeStr);
-      return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
-    } catch (e) {
-      return dateTimeStr;
-    }
-  }
-Widget _dropDownValueViews(TechnicianListViewScreenController controller, BuildContext context,
-    String agentId, TechnicianData agentData) {
-  return Center(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: PopupMenuButton<String>(
-        color: CupertinoColors.white,
-        icon: Icon(Icons.more_vert),
-        onSelected: (String result) {
-          switch (result) {
-            case 'Edit':
-              _editWidgetOfAgentsDialogValue(controller, context, agentId, agentData);
-              // _editWidgetOfAgentsDialogValue(
-              //     controller, Get.context!, agentId, agentData);
-              break;
-            case 'Delete':
-              controller.deleteTechnician(agentId);
-              break;
-            case 'Deactivate':
-              // controller.hitUpdateStatusValue(agentId);
-              break;
-          }
-        },
-        itemBuilder: (BuildContext context) =>
-        <PopupMenuEntry<String>>[
-          PopupMenuItem<String>(
-            value: 'Edit',
-            child: ListTile(
-              leading: Icon(Icons.edit_calendar_outlined, size: 20,
-                  color: Colors.black),
-              title: Text(
-                  'Edit', style: MontserratStyles.montserratBoldTextStyle(
-                color: blackColor,
-                size: 13,
-              )),
-            ),
-          ),
-          PopupMenuItem<String>(
-            value: 'Delete',
-            child: ListTile(
-              leading: Icon(Icons.delete, color: Colors.red, size: 20),
-              title: Text('Delete',
-                  style: MontserratStyles.montserratBoldTextStyle(
-                    color: blackColor,
-                    size: 13,
-                  )),
-            ),
-          ),
-          PopupMenuItem<String>(
-            value: 'Deactivate',
-            child: ListTile(
-              leading: Image.asset(wrongRoundedImage, color: Colors.black,
-                height: 25,
-                width: 25,),
-              title: Text('Deactivate',
-                  style: MontserratStyles.montserratBoldTextStyle(
-                    color: blackColor,
-                    size: 13,
-                  )),
+              color: Colors.grey[600],
             ),
           ),
         ],
       ),
-    ),
-  );
-}
-Widget _ticketBoxIcons(String ticketId, TechnicianData technician) {
-  return Center(
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: normalBlue,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: Colors.blue.shade300,
-          width: 1,
+    );
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'N/A';
+    return DateFormat('MMM dd, yyyy').format(date);
+  }
+
+  void _showDeleteConfirmation(
+      TechnicianListViewScreenController controller,
+      String id,
+      ) {
+    Get.dialog(
+      AlertDialog(
+        title: Text('Delete Technician'),
+        content: Text('Are you sure you want to delete this technician?'),
+        actions: [
+          TextButton(
+            child: Text('Cancel'),
+            onPressed: () => Get.back(),
+          ),
+          TextButton(
+            child: Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+            onPressed: () {
+              controller.deleteTechnician(id);
+              Get.back();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditDialog(
+      TechnicianListViewScreenController controller,
+      String id,
+      TechnicianData technician,
+      ) {
+    controller.initialized;
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(24),
+          width: Get.width * 0.9,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Edit Technician',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 24),
+                _buildEditForm(controller, id),
+              ],
+            ),
+          ),
         ),
       ),
-      child: Text(
-        '${technician.empId}',
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-          fontSize: 13,
+    );
+  }
+
+  Widget _buildEditForm(
+      TechnicianListViewScreenController controller,
+      String id,
+      ) {
+    final formKey = GlobalKey<FormState>();
+    return Form(
+        key: formKey,
+        child: Column(
+          children: [
+          _buildTextField(
+          controller: controller.employeeIdController,
+          label: 'Employee ID',
+          icon: Icons.badge,
         ),
+        SizedBox(height: 16),
+        _buildTextField(
+          controller: controller.firstNameController,
+          label: 'First Name',
+          icon: Icons.person,
+        ),
+        SizedBox(height: 16),
+        _buildTextField(
+          controller: controller.lastNameController,
+          label: 'Last Name',
+          icon: Icons.person_outline,
+        ),
+        SizedBox(height: 16),
+        _buildTextField(
+          controller: controller.emailController,
+          label: 'Email',
+          icon: Icons.email,
+          keyboardType: TextInputType.emailAddress,
+        ),
+        SizedBox(height: 16),
+        _buildTextField(
+          controller: controller.phoneController,
+          label: 'Phone Number',
+          icon: Icons.phone,
+          keyboardType: TextInputType.phone,
+        ),
+        SizedBox(height: 24),
+        Row(
+            children: [
+        Expanded(
+        child: ElevatedButton(
+        onPressed: () => Get.back(),
+    child: Text('Cancel'),
+    style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.grey[300],
+    foregroundColor: Colors.black87,
+    padding: EdgeInsets.symmetric(vertical: 12),
+    ),
+    ),
+    ),
+    SizedBox(width: 16),
+    Expanded(
+    child: ElevatedButton(onPressed: () {
+      if (formKey.currentState?.validate() ?? false) {
+        controller.updateTechnicianApiCall(id);
+        Get.back();
+      }
+    },
+      child: Text('Save Changes'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        padding: EdgeInsets.symmetric(vertical: 12),
       ),
     ),
-  );
-}
-Widget _technicianImage(String ticketId, TechnicianData technician) {
-  return Center(
-    child: Container(
-      // padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      decoration: BoxDecoration(
-        color: normalBlue,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          color: Colors.blue.shade300,
-          width: 1,
+    )],
+    ),
+            ],
+        ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    bool readOnly = false,
+    VoidCallback? onTap,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      readOnly: readOnly,
+      onTap: onTap,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        filled: true,
+        fillColor: Colors.grey[50],
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter $label';
+        }
+        if (label == 'Email') {
+          if (!GetUtils.isEmail(value)) {
+            return 'Please enter a valid email';
+          }
+        }
+        if (label == 'Phone Number') {
+          if (!GetUtils.isPhoneNumber(value)) {
+            return 'Please enter a valid phone number';
+          }
+        }
+        return null;
+      },
+    );
+  }
+
+  void _downLoadExportModelView(BuildContext context, TechnicianListViewScreenController controller) {
+    final startDateController = TextEditingController();
+    final endDateController = TextEditingController();
+    DateTime? startDate;
+    DateTime? endDate;
+
+    Future<DateTime?> _selectDate(BuildContext context, {DateTime? initialDate, DateTime? firstDate, DateTime? lastDate}) async {
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: initialDate ?? DateTime.now(),
+        firstDate: firstDate ?? DateTime(2000),
+        lastDate: lastDate ?? DateTime.now(),
+      );
+      return picked;
+    }
+
+    void _handleStartDateSelection() async {
+      final picked = await _selectDate(
+        context,
+        initialDate: startDate ?? DateTime.now(),
+        lastDate: endDate ?? DateTime.now(),
+      );
+      if (picked != null) {
+        startDate = picked;
+        startDateController.text = DateFormat('yyyy-MM-DD').format(picked);
+      }
+    }
+
+    void _handleEndDateSelection() async {
+      final picked = await _selectDate(
+        context,
+        initialDate: endDate ?? DateTime.now(),
+        firstDate: startDate ?? DateTime(2000),
+        lastDate: DateTime.now(),
+      );
+      if (picked != null) {
+        endDate = picked;
+        endDateController.text = DateFormat('yyyy-MM-DD').format(picked);
+      }
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.dialog(
+        Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: Get.height * 0.8,
+              maxWidth: Get.width * 0.8,
+            ),
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Download Technician Report",
+                  style: MontserratStyles.montserratBoldTextStyle(
+                    size: 15,
+                    color: Colors.black,
+                  ),
+                ),
+                divider(color: Colors.grey),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        controller: startDateController,
+                        labletext: 'Start Date',
+                        hintText: "dd-mm-yyyy",
+                        readOnly: true,
+                        onTap: _handleStartDateSelection,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        "To",
+                        style: MontserratStyles.montserratBoldTextStyle(
+                          size: 15,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: CustomTextField(
+                        controller: endDateController,
+                        labletext: 'End Date',
+                        hintText: "dd-mm-yyyy",
+                        readOnly: true,
+                        onTap: _handleEndDateSelection,
+                      ),
+                    ),
+                  ],
+                ),
+                vGap(30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildActionButton(
+                      context,
+                      label: 'Cancel',
+                      icon:Icons.cancel,
+                      onPressed: () {
+                        Get.back();
+                      },
+                    ),
+                    _buildActionButton(
+                      context,
+                      label: 'Download Excel',
+                      icon:Icons.download,
+                      onPressed: () {
+                        if (startDate == null || endDate == null) {
+                          Get.snackbar(
+                            'Error',
+                            'Please select both start and end dates',
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                          return;
+                        }
+                        // Add your download logic here
+                        // You can access the selected dates using startDate and endDate
+                      },
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  void _showExportModelView(BuildContext context, TechnicianListViewScreenController controller) {
+    final startDateController = TextEditingController();
+    final endDateController = TextEditingController();
+
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(24),
+          width: Get.width * 0.9,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Export Technician Data',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 24),
+              _buildTextField(
+                controller: startDateController,
+                label: 'Start Date',
+                icon: Icons.calendar_today,
+                readOnly: true,
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now(),
+                  );
+                  if (date != null) {
+                    startDateController.text = DateFormat('dd-MM-yyyy').format(date);
+                  }
+                },
+              ),
+              SizedBox(height: 16),
+              _buildTextField(
+                controller: endDateController,
+                label: 'End Date',
+                icon: Icons.calendar_today,
+                readOnly: true,
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now(),
+                  );
+                  if (date != null) {
+                    endDateController.text = DateFormat('dd-MM-yyyy').format(date);
+                  }
+                },
+              ),
+              SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => Get.back(),
+                      icon: Icon(Icons.close),
+                      label: Text('Cancel'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[300],
+                        foregroundColor: Colors.black87,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        if (startDateController.text.isNotEmpty &&
+                            endDateController.text.isNotEmpty) {
+                          // Implement export logic here
+                          Get.back();
+                          Get.snackbar(
+                            'Success',
+                            'Export started',
+                            backgroundColor: Colors.green[100],
+                            colorText: Colors.green[800],
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        } else {
+                          Get.snackbar(
+                            'Error',
+                            'Please select both dates',
+                            backgroundColor: Colors.red[100],
+                            colorText: Colors.red[800],
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        }
+                      },
+                      icon: Icon(Icons.download),
+                      label: Text('Export'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-      child: CircleAvatar(radius: 18,backgroundImage: technician.profileImage != null?NetworkImage("${technician.profileImage}"): AssetImage(userImageIcon),)
-    ),
-  );
+    );
+  }
+
+
+
+  FloatingActionButton? _buildFloatingActionButton() {
+    final userrole = storage.read(userRole);
+    return (userrole != 'technician' && userRole != 'sale')
+        ? FloatingActionButton.extended(
+      onPressed: () => Get.toNamed(AppRoutes.addtechnicianListScreen),
+      backgroundColor: appColor,
+      foregroundColor: CupertinoColors.white,
+      icon: Icon(Icons.add),
+      label: Text('Add Technician'),
+    )
+        : null;
+  }
 }
+
+
 void _showImportModelView(BuildContext context,TechnicianListViewScreenController controller) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
     showDialog(
@@ -587,7 +937,8 @@ void _showImportModelView(BuildContext context,TechnicianListViewScreenControlle
                                   children: const [
                                     TextSpan(
                                       text: 'Required Fields:\n',
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
                                     ),
                                     TextSpan(text: '• Name\n'),
                                     TextSpan(text: '• Email\n'),
@@ -648,7 +999,8 @@ void _showImportModelView(BuildContext context,TechnicianListViewScreenControlle
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () async {
-                            FilePickerResult? result = await FilePicker.platform.pickFiles();
+                            FilePickerResult? result = await FilePicker.platform
+                                .pickFiles();
                             if (result != null) {
                               String fileName = result.files.single.name;
                               Get.snackbar(
@@ -699,356 +1051,4 @@ void _showImportModelView(BuildContext context,TechnicianListViewScreenControlle
       },
     );
   });
-}
-void _downLoadExportModelView(BuildContext context, TechnicianListViewScreenController controller) {
-  final startDateController = TextEditingController();
-  final endDateController = TextEditingController();
-  DateTime? startDate;
-  DateTime? endDate;
-
-  Future<DateTime?> _selectDate(BuildContext context, {DateTime? initialDate, DateTime? firstDate, DateTime? lastDate}) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: initialDate ?? DateTime.now(),
-      firstDate: firstDate ?? DateTime(2000),
-      lastDate: lastDate ?? DateTime.now(),
-    );
-    return picked;
-  }
-
-  void _handleStartDateSelection() async {
-    final picked = await _selectDate(
-      context,
-      initialDate: startDate ?? DateTime.now(),
-      lastDate: endDate ?? DateTime.now(),
-    );
-    if (picked != null) {
-      startDate = picked;
-      startDateController.text = DateFormat('dd-MM-yyyy').format(picked);
-    }
-  }
-
-  void _handleEndDateSelection() async {
-    final picked = await _selectDate(
-      context,
-      initialDate: endDate ?? DateTime.now(),
-      firstDate: startDate ?? DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null) {
-      endDate = picked;
-      endDateController.text = DateFormat('dd-MM-yyyy').format(picked);
-    }
-  }
-
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Container(
-          constraints: BoxConstraints(
-            maxHeight: Get.height * 0.8,
-            maxWidth: Get.width * 0.8,
-          ),
-          padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Download Technician Report",
-                style: MontserratStyles.montserratBoldTextStyle(
-                  size: 15,
-                  color: Colors.black,
-                ),
-              ),
-              divider(color: Colors.grey),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Expanded(
-                    child: CustomTextField(
-                      controller: startDateController,
-                      labletext: 'Start Date',
-                      hintText: "dd-mm-yyyy",
-                      readOnly: true,
-                      onTap: _handleStartDateSelection,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      "To",
-                      style: MontserratStyles.montserratBoldTextStyle(
-                        size: 15,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: CustomTextField(
-                      controller: endDateController,
-                      labletext: 'End Date',
-                      hintText: "dd-mm-yyyy",
-                      readOnly: true,
-                      onTap: _handleEndDateSelection,
-                    ),
-                  ),
-                ],
-              ),
-              vGap(30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildActionButton(
-                    context,
-                    'Cancel',
-                    Icons.cancel,
-                    onTap: () {
-                      Get.back();
-                    },
-                  ),
-                  _buildActionButton(
-                    context,
-                    'Download Excel',
-                    Icons.download,
-                    onTap: () {
-                      if (startDate == null || endDate == null) {
-                        Get.snackbar(
-                          'Error',
-                          'Please select both start and end dates',
-                          snackPosition: SnackPosition.BOTTOM,
-                        );
-                        return;
-                      }
-                      // Add your download logic here
-                      // You can access the selected dates using startDate and endDate
-                    },
-                  ),
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  });
-}
-
-Widget _buildActionButton(
-    BuildContext context,
-    String label,
-    IconData icon,
-    {required VoidCallback onTap}
-    ) {
-  return ElevatedButton.icon(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: appColor,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-    ),
-    onPressed: onTap,
-    icon: Icon(icon, size: 18),
-    label: Text(
-      label,
-      style: MontserratStyles.montserratSemiBoldTextStyle(size: 13),
-    ),
-  );
-}
-
-void _editWidgetOfAgentsDialogValue(TechnicianListViewScreenController controller, BuildContext context, String agentId, TechnicianData agentData) {
-  controller.firstNameController.text = agentData.firstName ?? '';
-  controller.lastNameController.text = agentData.lastName ?? '';
-  controller.emailController.text = agentData.email ?? '';
-  controller.phoneController.text = agentData.phoneNumber ?? '';
-  controller.joiningDateController.text = agentData.dateJoined.toString()??"";
-  controller.employeeIdController.text = agentData.empId??"";
-
-  Get.dialog(
-      Dialog(
-        insetAnimationDuration: Duration(milliseconds: 3),
-        child: SingleChildScrollView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: Container(
-            height: Get.height,
-            width: Get.width,
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-            child: _form(controller, context, agentId, agentData),
-          ),
-        ),
-      )
-  );
-}
-
-
-Widget _form(TechnicianListViewScreenController controller, BuildContext context, String agentId, TechnicianData agentData){
-  final GlobalKey formKey = GlobalKey<FormState>();
-  return Padding(
-    padding: const EdgeInsets.all(18.0),
-    child: Form(
-      key: formKey,
-      child: ListView(
-        // controller: ,
-          children: [
-            vGap(20),
-            Text('Edit Technician',style: MontserratStyles.montserratBoldTextStyle(size: 15, color: Colors.black),),
-            Divider(color: Colors.black,),
-            vGap(20),
-            _employeIdField(controller, context,),
-            vGap(20),
-            _joiningDateField(controller, context),
-            vGap(20),
-            _firstNameField(controller, context),
-            vGap(20),
-            _lastNameField(controller, context),
-            vGap(20),
-            _emailField(controller, context),
-            vGap(20),
-            _phoneNumberField(controller, context),
-            vGap(40),
-            _buildOptionButtons(controller, context,agentData.id.toString()),
-            vGap(20),
-          ]
-      ),
-    ),
-  );
-}
-
-_employeIdField(TechnicianListViewScreenController controller, BuildContext context){
-  return CustomTextField(
-    controller: controller.employeeIdController,
-    hintText: 'Employee Id',
-    labletext: 'Employee Id',
-    // prefix: Icon(Icons.perm_identity),
-    validator: (value){
-      if (value == null || value.isEmpty) {
-        return 'Please select a Employee Id';
-      };
-      return null;
-    },
-  );
-}
-
-_joiningDateField(TechnicianListViewScreenController controller, BuildContext context) {
-  return CustomTextField(
-    onTap: ()=> controller.selectDate(context),
-    controller: controller.joiningDateController,
-    hintText: 'Date of Joining',
-    labletext: 'Date of Joining',
-    validator: (value) {
-      if (value == null || value.isEmpty) {
-        return 'Please select a joining date';
-      }
-      return null;
-    },
-    suffix: IconButton(
-      onPressed: () async {
-        controller.selectDate(context);
-        // final DateTime? picked = await showDatePicker(
-        //   context: context,
-        //   initialDate: DateTime.now(),
-        //   firstDate: DateTime(2000),
-        //   lastDate: DateTime(2100),
-        // );
-        // if (picked != null) {
-        //   String formattedDate="${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
-        //   // String formattedDate = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";  /*YYYY-MM-D*/
-        //   controller.joiningDateController.text = formattedDate;
-        // }
-
-      },
-      icon: Icon(Icons.calendar_month_outlined),
-    ),
-  );
-}
-
-
-_firstNameField(TechnicianListViewScreenController controller, BuildContext context){
-  return CustomTextField(
-    controller: controller.firstNameController,
-    hintText: 'First Name',
-    labletext: 'First Name',
-    // prefix: Icon(Icons.),
-  );
-}
-
-_lastNameField(TechnicianListViewScreenController controller, BuildContext context){
-  return CustomTextField(
-    controller: controller.lastNameController,
-    hintText: 'Last Name',
-    labletext: 'Last Name',
-    // prefix: Icon(Icons.)
-
-  );
-}
-
-_emailField(TechnicianListViewScreenController controller, BuildContext context){
-  return CustomTextField(
-    controller: controller.emailController,
-    hintText: 'Email',
-    labletext: 'Email',
-    prefix: Icon(Icons.email
-    ),
-  );
-}
-
-_phoneNumberField(TechnicianListViewScreenController controller, BuildContext context){
-  return CustomTextField(
-    controller: controller.phoneController,
-    hintText: 'Phone Number',
-    labletext: 'Phone Number',
-    textInputType: TextInputType.phone,
-    prefix: Icon(Icons.phone
-    ),
-  );
-}
-
-_buildOptionButtons(TechnicianListViewScreenController controller, BuildContext context, String agentId) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      ElevatedButton(
-        onPressed: () {
-          // Implement cancel functionality
-          Get.back();
-        },
-        child: Text(
-          'Cancel',
-          style: MontserratStyles.montserratBoldTextStyle(color: Colors.white, size: 13),
-        ),
-        style: _buttonStyle(),
-      ),
-      hGap(20),
-      ElevatedButton(
-        onPressed: () {
-          controller.updateTechnicianApiCall(agentId);
-          print("rajesh data: $agentId");
-        },
-        child: Text(
-          'Submit',
-          style: MontserratStyles.montserratBoldTextStyle(color: whiteColor, size: 13),
-        ),
-        style: _buttonStyle(),
-      )
-    ],
-  );
-}
-
-ButtonStyle _buttonStyle() {
-  return ButtonStyle(
-    backgroundColor: MaterialStateProperty.all(appColor),
-    foregroundColor: MaterialStateProperty.all(Colors.white),
-    padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
-    elevation: MaterialStateProperty.all(5),
-    shape: MaterialStateProperty.all(
-      RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-    ),
-    shadowColor: MaterialStateProperty.all(Colors.black.withOpacity(0.5)),
-  );
 }

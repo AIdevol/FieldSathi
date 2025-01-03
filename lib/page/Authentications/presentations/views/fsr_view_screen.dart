@@ -87,29 +87,54 @@ class FsrViewScreen extends GetView<FsrViewController> {
           ),
         ],
       ),
-      child: TextFormField(
-        controller: controller.searchController,
-        onChanged: controller.updateSearch,
-        decoration: InputDecoration(
-          hintText: "Search FSRs...",
-          hintStyle: TextStyle(color: Colors.grey[400]),
-          prefixIcon: Icon(FeatherIcons.search, color: Colors.grey[400], size: 20),
-          filled: true,
-          fillColor: Colors.grey[50],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: controller.searchController,
+              onChanged: controller.updateSearch,
+              decoration: InputDecoration(
+                hintText: "Search FSRs, categories, or checkpoints...",
+                hintStyle: TextStyle(color: Colors.grey[400]),
+                prefixIcon: Icon(FeatherIcons.search, color: Colors.grey[400], size: 20),
+                suffixIcon: Obx(() => controller.searchQuery.isNotEmpty
+                    ? IconButton(
+                  icon: Icon(Icons.clear, color: Colors.grey[400], size: 20),
+                  onPressed: controller.clearSearch,
+                )
+                    : const SizedBox.shrink(),
+                ),
+                filled: true,
+                fillColor: Colors.grey[50],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              ),
+            ),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        ),
+          const SizedBox(width: 8),
+          Obx(() => AnimatedOpacity(
+            opacity: controller.searchQuery.isNotEmpty ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 200),
+            child: Text(
+              '${controller.filteredFsr.length} results',
+              style: TextStyle(
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          )),
+        ],
       ),
     );
   }
 
   Widget _buildModernContent() {
-    return controller.allFsr.isEmpty
+    return Obx(() => controller.filteredFsr.isEmpty
         ? _buildModernEmptyState()
-        : _buildModernDataTable();
+        : _buildModernDataTable());
   }
 
   Widget _buildModernEmptyState() {
@@ -125,7 +150,9 @@ class FsrViewScreen extends GetView<FsrViewController> {
           ),
           const SizedBox(height: 24),
           Text(
-            'No services found',
+            controller.searchQuery.isEmpty
+                ? 'No FSRs found'
+                : 'No matching results found',
             style: TextStyle(
               fontSize: 18,
               color: Colors.grey[600],
@@ -134,7 +161,9 @@ class FsrViewScreen extends GetView<FsrViewController> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Try adjusting your search or add a new FSR',
+            controller.searchQuery.isEmpty
+                ? 'Try adding a new FSR'
+                : 'Try adjusting your search terms',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[400],
@@ -147,7 +176,6 @@ class FsrViewScreen extends GetView<FsrViewController> {
 
   Widget _buildModernDataTable() {
     final paginatedData = _getPaginatedData(controller);
-
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -209,6 +237,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
   }
 
   DataRow _buildModernDataRow(Result entry) {
+
     return DataRow(
       cells: [
         DataCell(
@@ -226,8 +255,13 @@ class FsrViewScreen extends GetView<FsrViewController> {
   }
 
   Widget _buildModernCategoriesButton(Result entry) {
+    // final categoryID = controller.categoryData.map((category)=>category.id).toList();
+
     return TextButton(
-      onPressed: () => _showModernCategoriesDialog(entry),
+      onPressed: () {
+        // controller.GetFsrCheckingPointDetailsApiCall(fsr_id: entry.id.toString(), Category_id: categoryID.toString());
+        _showModernCategoriesDialog(entry);
+      },
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(
@@ -444,7 +478,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
                   separatorBuilder: (_, __) => const Divider(),
                   itemBuilder: (context, index) {
                     final category = entry.categories![index];
-                    return _buildModernCategoryItem(category,entry);
+                    return _buildModernCategoryItem(category,entry,controller);
                   },
                 ),
               ),
@@ -455,9 +489,9 @@ class FsrViewScreen extends GetView<FsrViewController> {
     );
   }
 
-  Widget _buildModernCategoryItem(Category category,Result entry) {
+  Widget _buildModernCategoryItem(Category category,Result entry, FsrViewController controller) {
     return InkWell(
-      onTap: ()=>_showModernCheckpointsDialog(category,entry),
+      onTap: ()=>showCheckpointManagementDialog(category,entry, controller),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Column(
@@ -477,7 +511,9 @@ class FsrViewScreen extends GetView<FsrViewController> {
           ),
         ),
         IconButton(
-          onPressed: () => _showModernCheckpointsDialog(category,entry),
+          onPressed: () {
+            controller.GetFsrCheckingPointDetailsApiCall(fsr_id: entry.id.toString(), Category_id: category.id.toString());
+          showCheckpointManagementDialog(category,entry,controller);},
           icon: const Icon(Icons.arrow_forward_ios, size: 16),
         ),
         ],
@@ -520,8 +556,11 @@ class FsrViewScreen extends GetView<FsrViewController> {
     );
   }
 
-  void _showModernCheckpointsDialog(Category category, Result entry) {
-    final checkpointControllers = category.checkpoints?.map(
+  void showCheckpointManagementDialog(Category category,Result entry , FsrViewController controller) {
+    // Initialize controllers based on API response
+    controller.GetFsrCheckingPointDetailsApiCall(fsr_id: entry.id.toString(), Category_id: category.id.toString());
+
+    final checkpointControllers = controller.checkPointsDetails.map(
           (checkpoint) => TextEditingController(text: checkpoint.checkpointName),
     ).toList() ?? [TextEditingController()];
 
@@ -529,10 +568,21 @@ class FsrViewScreen extends GetView<FsrViewController> {
     final selectedTypes = <String>[];
     final isExpandedList = <bool>[];
 
-    // Initialize controllers and states
+    // Initialize controllers and states based on API response
     for (int i = 0; i < checkpointControllers.length; i++) {
-      statusControllers.add([TextEditingController()]);
-      selectedTypes.add('text'); // Default type
+      String displayType = controller.checkPointsDetails[i].displayType?.toLowerCase() ?? 'text';
+
+      if (displayType == 'dropdown' && controller.checkPointsDetails[i].checkpointStatuses.isNotEmpty) {
+        statusControllers.add(
+            controller.checkPointsDetails[i].checkpointStatuses
+                .map((status) => TextEditingController(text: status))
+                .toList()
+        );
+      } else {
+        statusControllers.add([TextEditingController()]);
+      }
+
+      selectedTypes.add(displayType);
       isExpandedList.add(false);
     }
 
@@ -588,9 +638,9 @@ class FsrViewScreen extends GetView<FsrViewController> {
                               return Column(
                                 children: [
                                   // Checkpoint Name Field
-                                  _buildModernCheckpointField(
+                                  _buildCheckpointField(
                                     controller: checkpointControllers[index],
-                                    onDelete: index >= (category.checkpoints?.length ?? 0)
+                                    onDelete: index >= (controller.checkPointsDetails.length)
                                         ? () {
                                       setState(() {
                                         checkpointControllers[index].dispose();
@@ -609,7 +659,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
                                     isExpanded: isExpandedList[index],
                                   ),
 
-                                  // Checkpoint Type Selection and Status Fields
+                                  // Expanded Section for Type Selection and Status Fields
                                   if (isExpandedList[index])
                                     Container(
                                       margin: const EdgeInsets.only(left: 16, bottom: 16),
@@ -655,7 +705,9 @@ class FsrViewScreen extends GetView<FsrViewController> {
                                                       (value) {
                                                     setState(() {
                                                       selectedTypes[index] = value!;
-                                                      statusControllers[index] = [TextEditingController()];
+                                                      if (statusControllers[index].isEmpty) {
+                                                        statusControllers[index] = [TextEditingController()];
+                                                      }
                                                     });
                                                   },
                                                 ),
@@ -724,8 +776,14 @@ class FsrViewScreen extends GetView<FsrViewController> {
                                                   statusControllers[index].add(TextEditingController());
                                                 });
                                               },
-                                              icon: const Icon(Icons.add,color: Colors.blue,size: 15,),
-                                              label:  Text('Add Option',style: MontserratStyles.montserratSemiBoldTextStyle(color: Colors.blue,size: 15),),
+                                              icon: const Icon(Icons.add, color: Colors.blue, size: 15),
+                                              label: Text(
+                                                'Add Option',
+                                                style: MontserratStyles.montserratSemiBoldTextStyle(
+                                                  color: Colors.blue,
+                                                  size: 15,
+                                                ),
+                                              ),
                                             ),
                                           ] else if (selectedTypes[index] == 'text') ...[
                                             Text(
@@ -768,7 +826,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
                             },
                           ),
                           const SizedBox(height: 16),
-                          _buildModernAddButton(
+                          _buildAddButton(
                             onPressed: () {
                               setState(() {
                                 checkpointControllers.add(TextEditingController());
@@ -800,6 +858,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
                             }
                           }
                           Get.back();
+                          controller.hitGetFsrDetailsApiCall();
                         },
                         child: Text(
                           'Cancel',
@@ -809,15 +868,40 @@ class FsrViewScreen extends GetView<FsrViewController> {
                       const SizedBox(width: 16),
                       ElevatedButton(
                         onPressed: () {
-                         /* controller.hitUpdateCheckPointStatuses(
-                              fsrId: entry.id.toString(), // Get the FSR ID
-                              categoryId: category.id.toString(), // Get the category ID
-                              checkpointName:  checkpointControllers[index].text,
-                              checkpointStatuses: selectedTypes[index] == 'dropdown'
-                                  ? statusControllers[index].map((c) => c.text).toList()
-                                  : [statusControllers[index].first.text],
-                              isDropdown: selectedTypes[index] == 'dropdown'
-                          );   */                       Get.back();
+                          // Prepare checkpoints data
+                          var checkpoints = List<Map<String, dynamic>>.generate(
+                              checkpointControllers.length,
+                                  (i) => {
+                                "checkpoint_name": checkpointControllers[i].text,
+                                "checkpointStatuses": selectedTypes[i] == 'dropdown'
+                                    ? statusControllers[i].map((c) => c.text).toList().cast<String>()
+                                    : [], // Empty list for text and calendar types
+                                "displayType": selectedTypes[i] // 'text', 'dropdown', or 'calendar'
+                              }
+                          );
+
+                          // Make API call with all checkpoints
+                          controller.hitUpdateCheckPointStatuses(
+                            fsrId: entry.id.toString(),
+                            categoryId: category.id.toString(),
+                            checkpointName: checkpoints[0]["checkpoint_name"],
+                            checkpointStatuses: checkpoints[0]["checkpointStatuses"] as List<String>,
+                            displayType: checkpoints[0]["displayType"],
+                          );
+
+                          // If there are more checkpoints, make additional API calls
+                          for (int i = 1; i < checkpoints.length; i++) {
+                            controller.hitUpdateCheckPointStatuses(
+                              fsrId: entry.id.toString(),
+                              categoryId: category.id.toString(),
+                              checkpointName: checkpoints[i]["checkpoint_name"],
+                              checkpointStatuses: checkpoints[i]["checkpointStatuses"] as List<String>,
+                              displayType: checkpoints[i]["displayType"],
+                            );
+                          }
+
+                          // Close dialog and refresh data
+                          Get.back();
                           controller.hitGetFsrDetailsApiCall();
                         },
                         style: ElevatedButton.styleFrom(
@@ -830,11 +914,11 @@ class FsrViewScreen extends GetView<FsrViewController> {
                             vertical: 12,
                           ),
                         ),
-                        child:  Text(
+                        child: Text(
                           'Update',
                           style: MontserratStyles.montserratSemiBoldTextStyle(color: Colors.white),
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ],
@@ -842,6 +926,52 @@ class FsrViewScreen extends GetView<FsrViewController> {
             },
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCheckpointField({
+    required TextEditingController controller,
+    VoidCallback? onDelete,
+    required VoidCallback onExpand,
+    required bool isExpanded,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: Icon(
+                  isExpanded ? Icons.expand_less : Icons.expand_more,
+                  color: Colors.grey[600],
+                ),
+                onPressed: onExpand,
+              ),
+              Expanded(
+                child: TextFormField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    hintText: 'Enter checkpoint name',
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                ),
+              ),
+              if (onDelete != null)
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  onPressed: onDelete,
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -865,6 +995,21 @@ class FsrViewScreen extends GetView<FsrViewController> {
       ],
     );
   }
+
+  Widget _buildAddButton({required VoidCallback onPressed, required String label}) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      icon: const Icon(Icons.add, color: Colors.blue, size: 15),
+      label: Text(
+        label,
+        style: MontserratStyles.montserratSemiBoldTextStyle(
+          color: Colors.blue,
+          size: 15,
+        ),
+      ),
+    );
+  }
+
 
   Widget _buildModernCheckpointField({
     required TextEditingController controller,
@@ -1001,7 +1146,10 @@ class FsrViewScreen extends GetView<FsrViewController> {
                   children: [
                     Text(
                       'Edit FSR',
-                      style: MontserratStyles.montserratSemiBoldTextStyle(color: Colors.black,size: 20)
+                      style: MontserratStyles.montserratSemiBoldTextStyle(
+                        color: Colors.black,
+                        size: 20,
+                      ),
                     ),
                     IconButton(
                       onPressed: () => Get.back(),
@@ -1055,7 +1203,8 @@ class FsrViewScreen extends GetView<FsrViewController> {
               itemBuilder: (context, index) {
                 return _buildModernCategoryField(
                   controller: controller.categoryNameControllers[index],
-                  onDelete: () => controller.removeCategoryField(index),
+                  onDelete: () =>controller.categoryNameControllers.length > 1?
+                       controller.removeCategoryField(index):null
                 );
               },
             ),
@@ -1071,7 +1220,21 @@ class FsrViewScreen extends GetView<FsrViewController> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Update logic here
+                  // Create a list of categories from the controllers
+                  final categories = entry.categories!.asMap().map((index, category) {
+                    return MapEntry(index, {
+                      "id": category.id,
+                      "name": controller.categoryNameControllers[index].text,
+                      "checkpoints": category.checkpoints ?? [],
+                    });
+                  }).values.toList();
+
+                  controller.hitputMehtodforUpdationInFserDetails(
+                    id: entry.id.toString(),
+                    fsrname: controller.firstNameController.text,
+                    categories_name: categories[0]["name"] as String, // For backward compatibility
+                    catId: entry.categories![0].id.toString(), // For backward compatibility
+                  );
                   Get.back();
                   controller.hitGetFsrDetailsApiCall();
                 },
@@ -1082,14 +1245,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text(
-                  'Update',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: const Text('Update'),
               ),
             ),
           ],
@@ -1180,6 +1336,7 @@ class FsrViewScreen extends GetView<FsrViewController> {
                     onPressed: () {
                       // Delete logic here
                       Get.back();
+                      controller.deleteFSrDetails(fsrid: entry.id.toString());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,

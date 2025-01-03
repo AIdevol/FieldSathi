@@ -246,76 +246,80 @@ class LeaveReportViewScreen extends GetView<LeaveReportViewScreenController> {
   }
 
   Widget _buildDataTable(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
+    return Card(
+      elevation: 2,
+      color: CupertinoColors.white,
       child: SingleChildScrollView(
-        child: Container(
+        scrollDirection: Axis.horizontal,
+        child: SingleChildScrollView(
+          child: Container(
 
-          padding: EdgeInsets.all(16),
-          child: Obx(() {
-            final filteredData = controller.leavesPaginationsData;
-            return DataTable(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              headingRowColor: MaterialStateColor.resolveWith((states) => Colors.grey.shade400),
-              dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
-              columnSpacing: 20,
-              horizontalMargin: 12,
-              headingRowHeight: 50,
-              dataRowHeight: 60,
-              headingTextStyle: MontserratStyles.montserratBoldTextStyle(
-                size: 13,
-                color: Colors.black,
-              ),
-              dataTextStyle: MontserratStyles.montserratSemiBoldTextStyle(
-                size: 12,
-                color: Colors.black,
-              ),
-              columns: [
-                // DataColumn(label: Text('.')),
-                DataColumn(label: Text('EmpId/Name')),
-                DataColumn(label: Text('Phone No')),
-                DataColumn(label: Text('Profile')),
-                DataColumn(label: Text('Leave Type')),
-                DataColumn(label: Text('From Date')),
-                DataColumn(label: Text('To Date')),
-                DataColumn(label: Text('Days')),
-                DataColumn(label: Text('Reason')),
-                DataColumn(label: Text('Status')),
-                DataColumn(label: Text(' ')),
-              ],
-              rows: List<DataRow>.generate(
-                filteredData.length,
-                    (index) {
-                  final leave = filteredData[index];
-                  return DataRow(
-                    onSelectChanged: (selected){
-                      if(selected != null){
-                        showLeavesHistoryDialog(context,controller,leave);
-                      }
-                    },
-                    cells: [
-                      // DataCell(Text('${index + 1}')),
-                      DataCell(_ticketBoxIcons(leave.id.toString(),leave)),
-                      DataCell(Text(leave.userId?.phoneNumber ?? '')),
-                      DataCell(Text(leave.userId?.role ?? '')),
-                      DataCell(Text(leave.leaveType ?? '')),
-                      DataCell(Text(_formatDate(leave.startDate.toString()))),
-                      DataCell(Text(_formatDate(leave.endDate.toString()))),
-                      DataCell(Text(controller.calculateDays(
-                        DateTime.parse(leave.startDate.toString() ?? ''),
-                        DateTime.parse(leave.endDate.toString()?? ''),
-                      ).toString())),
-                      DataCell(Text(leave.reason ?? '')),
-                      DataCell(_buildStatusCell(leave.status ?? '')),
-                      DataCell(_buildActionButton(leave)),
-                    ],
-                  );
-                },
-              ),
-            );
-          }),
+            padding: EdgeInsets.all(16),
+            child: Obx(() {
+              final filteredData = controller.leavesPaginationsData;
+              return DataTable(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                // headingRowColor: MaterialStateColor.((states) => Colors.grey.shade400),
+                dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
+                columnSpacing: 20,
+                horizontalMargin: 12,
+                headingRowHeight: 50,
+                dataRowHeight: 60,
+                headingTextStyle: MontserratStyles.montserratBoldTextStyle(
+                  size: 13,
+                  color: Colors.black,
+                ),
+                dataTextStyle: MontserratStyles.montserratSemiBoldTextStyle(
+                  size: 12,
+                  color: Colors.black,
+                ),
+                columns: [
+                  // DataColumn(label: Text('.')),
+                  DataColumn(label: Text('EmpId/Name')),
+                  DataColumn(label: Text('Phone No')),
+                  DataColumn(label: Text('Profile')),
+                  DataColumn(label: Text('Leave Type')),
+                  DataColumn(label: Text('From Date')),
+                  DataColumn(label: Text('To Date')),
+                  DataColumn(label: Text('Days')),
+                  DataColumn(label: Text('Reason')),
+                  DataColumn(label: Text('Status')),
+                  DataColumn(label: Text(' ')),
+                ],
+                rows: List<DataRow>.generate(
+                  filteredData.length,
+                      (index) {
+                    final leave = filteredData[index];
+                    return DataRow(
+                      onSelectChanged: (selected){
+                        if(selected != null){
+                          showLeavesHistoryDialog(context,controller,leave);
+                        }
+                      },
+                      cells: [
+                        // DataCell(Text('${index + 1}')),
+                        DataCell(_ticketBoxIcons(leave.id.toString(),leave)),
+                        DataCell(Text(leave.userId?.phoneNumber ?? '')),
+                        DataCell(Text(leave.userId?.role ?? '')),
+                        DataCell(Text(leave.leaveType ?? '')),
+                        DataCell(Text(_formatDate(leave.startDate.toString()))),
+                        DataCell(Text(_formatDate(leave.endDate.toString()))),
+                        DataCell(Text(controller.calculateDays(
+                          DateTime.parse(leave.startDate.toString() ?? ''),
+                          DateTime.parse(leave.endDate.toString()?? ''),
+                        ).toString())),
+                        DataCell(Text(leave.reason ?? '')),
+                        DataCell(_buildStatusCell(leave.status ?? '')),
+                        DataCell(_buildActionButton(leave)),
+                      ],
+                    );
+                  },
+                ),
+              );
+            }),
+          ),
         ),
       ),
     );

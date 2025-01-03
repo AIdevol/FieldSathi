@@ -75,7 +75,7 @@ class AmcStatusBarChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                const titles = ['Total', 'Upcoming', 'Renewal', 'Completed', 'Expired']; // Added 'Expired'
+                const titles = ['Total', 'Upcoming', 'Renewal', 'Completed', 'Expired'];
                 return Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
@@ -111,6 +111,7 @@ class AmcStatusBarChart extends StatelessWidget {
         ),
         gridData: FlGridData(
           show: true,
+          drawHorizontalLine: true,
           drawVerticalLine: false,
           horizontalInterval: controller.totalCount.value > 0
               ? (controller.totalCount.value / 5).toDouble()
@@ -124,17 +125,20 @@ class AmcStatusBarChart extends StatelessWidget {
         ),
         borderData: FlBorderData(
           show: true,
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border(
+            left: BorderSide(color: Colors.grey.shade300),
+            bottom: BorderSide(color: Colors.grey.shade300),
+          ),
         ),
         barGroups: counts
             .asMap()
             .map((index, value) {
           final colors = [
-            Colors.green, // Total
-            Colors.blue,  // Upcoming
-            Colors.yellow, // Renewal
-            Colors.purple, // Completed
-            Colors.red,   // Expired
+            Colors.green,
+            Colors.blue,
+            Colors.yellow,
+            Colors.purple,
+            Colors.red,
           ];
           return MapEntry(
             index,
@@ -151,7 +155,7 @@ class AmcStatusBarChart extends StatelessWidget {
                   ),
                 ),
               ],
-              showingTooltipIndicators: [0],
+              // Removed showingTooltipIndicators to hide the count boxes
             ),
           );
         })
@@ -175,7 +179,9 @@ class _LegendItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
+        const SizedBox(width: 4),
         Container(
           width: 16,
           height: 16,

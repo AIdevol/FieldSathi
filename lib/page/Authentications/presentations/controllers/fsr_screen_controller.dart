@@ -9,11 +9,11 @@ import '../../../../constans/enum.dart';
 
 class FsrViewController extends GetxController {
 
-  final TextEditingController firstNameController = TextEditingController();
+  late TextEditingController firstNameController ;
   final List<TextEditingController> categoryNameControllers = [TextEditingController()];
   final List<List<TextEditingController>> categoryCheckpointControllers = [[TextEditingController()]];
-  final FocusNode firstNameFocusNode = FocusNode();
-  final TextEditingController searchController = TextEditingController();
+  late FocusNode firstNameFocusNode ;
+  late TextEditingController searchController ;
   final TextEditingController checkPointStatusCheckingController = TextEditingController();
   final FocusNode checkPointStatusCheckingFocusNode = FocusNode();
   final RxString searchQuery = ''.obs;
@@ -52,11 +52,13 @@ class FsrViewController extends GetxController {
 
   @override
   void onInit() {
+    firstNameController = TextEditingController();
+    searchController= TextEditingController();
+    firstNameFocusNode = FocusNode();
     super.onInit();
     searchController.addListener(_onSearchChanged);
     currentPage.value = 1; // Start on first page
     hitGetFsrDetailsApiCall();
-
   }
 
   @override
@@ -66,20 +68,64 @@ class FsrViewController extends GetxController {
   }
 
   void updateSearch(String query) {
-    searchQuery.value = query;
+    searchQuery.value = query.trim();
     _filterFsr();
     currentPage.value = 1; // Reset to first page on search
+    update(); // Ensure UI updates
   }
 
   void _filterFsr() {
     if (searchQuery.isEmpty) {
       filteredFsr.assignAll(allFsr);
     } else {
-      filteredFsr.assignAll(allFsr.where((fsr) =>
-      fsr.fsrName?.toLowerCase().contains(searchQuery.toLowerCase()) ?? false ||
-          _searchInCategories(fsr.categories ?? [], searchQuery.toLowerCase())
-      ));
+      final query = searchQuery.toLowerCase();
+      filteredFsr.assignAll(allFsr.where((fsr) => _matchesFsrCriteria(fsr, query)));
     }
+    totalPages.value = _calculateTotalPages();
+    update();
+  }
+
+  bool _matchesFsrCriteria(Result fsr, String query) {
+    // Check FSR name
+    if (fsr.fsrName?.toLowerCase().contains(query) ?? false) {
+      return true;
+    }
+
+
+    if (fsr.categories?.any((category) =>
+    // Category name
+    (category.name?.toLowerCase().contains(query) ?? false) ||
+        // Checkpoints within category
+        (category.checkpoints?.any((checkpoint) =>
+        checkpoint.checkpointName?.toLowerCase().contains(query) ?? false
+        ) ?? false)
+    ) ?? false) {
+      return true;
+    }
+
+    return false;
+  }
+
+  List<Result> getPaginatedData() {
+    const itemsPerPage = 10;
+    final startIndex = (currentPage.value - 1) * itemsPerPage;
+    final endIndex = startIndex + itemsPerPage;
+
+    if (filteredFsr.isEmpty) return [];
+    if (startIndex >= filteredFsr.length) return [];
+
+    return filteredFsr.sublist(
+        startIndex,
+        endIndex > filteredFsr.length ? filteredFsr.length : endIndex
+    );
+  }
+
+
+  void clearSearch() {
+    searchController.clear();
+    searchQuery.value = '';
+    _filterFsr();
+    currentPage.value = 1;
     update();
   }
 
@@ -168,6 +214,34 @@ class FsrViewController extends GetxController {
     }
   }
 
+  void hitputMehtodforUpdationInFserDetails({
+    required String id,
+  required String fsrname,
+  required String categories_name,
+  required String catId}){
+    isLoading.value = true;
+    FocusManager.instance.primaryFocus!.unfocus();
+    var fsrResponses = {
+      "id": id,
+      "fsrName": fsrname,
+      "categories": [
+      {
+        "id": catId,
+        "name": categories_name,
+        "checkpoints": [],
+      },
+      ]
+    };
+    Get.find<AuthenticationApiService>().putfsrDetailsApiCall(dataBody: fsrResponses,id: id).then((value){
+      toast("FSR Updated Successfully");
+      customLoader.hide();
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
+      customLoader.hide();
+    });
+  }
+
   void GetFsrCheckingPointDetailsApiCall({required String fsr_id,required String Category_id}){
     isLoading.value=true;
     customLoader.show();
@@ -233,35 +307,48 @@ class FsrViewController extends GetxController {
     required String categoryId,
     required String checkpointName,
     required List<String> checkpointStatuses,
-    required bool isDropdown
+    required String displayType,
   }) {
     isLoading.value = true;
-    customLoader.show();
+    // customLoader.show();
     FocusManager.instance.primaryFocus?.unfocus();
 
     var requestData = {
       "fsr_id": fsrId,
       "category_id": categoryId,
       "checkpoints": [
-        {
-          "checkpoint_name": checkpointName,
-          "checkpointStatuses": checkpointStatuses,
-          "displayType": isDropdown ? "dropdown" : "text"
-        }
+        {"checkpoint_name": checkpointName,
+          "checkpointStatuses":checkpointStatuses,
+          "displayType": displayType},
       ]
     };
-
     Get.find<AuthenticationApiService>()
         .UpdatecheckPointStatusApiCall(dataBody: requestData)
         .then((response) {
       toast(response.message.toString());
       Get.back();
-      hitGetFsrDetailsApiCall(); // Refresh the data
+      hitGetFsrDetailsApiCall();
+      customLoader.hide();// Refresh the data
       update();
     }).onError((error, stackTrace) {
       toast(error.toString());
     }).whenComplete(() {
       isLoading.value = false;
+      customLoader.hide();
+    });
+  }
+
+
+  void deleteFSrDetails({required String fsrid}){
+    isLoading.value = true;
+    customLoader.show();
+    FocusManager.instance.primaryFocus!.unfocus();
+    Get.find<AuthenticationApiService>().deletefsrDetailsApiCall(id: fsrid).then((value){
+      toast(value.message.toString());
+      customLoader.hide();
+      update();
+    }).onError((error,stackError){
+      toast(error.toString());
       customLoader.hide();
     });
   }

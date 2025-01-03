@@ -1382,7 +1382,7 @@ ButtonStyle _buttonStyle() {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildActionButton(
+                    _buildActionButton1(
                       context,
                       'Cancel',
                       Icons.cancel,
@@ -1390,7 +1390,7 @@ ButtonStyle _buttonStyle() {
                         Get.back();
                       },
                     ),
-                    _buildActionButton(
+                    _buildActionButton1(
                       context,
                       'Download Excel',
                       Icons.download,
@@ -1626,7 +1626,7 @@ Widget _buildActionButton(
   return ElevatedButton.icon(
     style: ElevatedButton.styleFrom(
       backgroundColor: appColor,
-      padding: const EdgeInsets.symmetric(horizontal: 50  , vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal:50  , vertical: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
@@ -1639,7 +1639,28 @@ Widget _buildActionButton(
     ),
   );
 }
-
+Widget _buildActionButton1(
+    BuildContext context,
+    String label,
+    IconData icon,
+    {required VoidCallback onTap}
+    ) {
+  return ElevatedButton.icon(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: appColor,
+      padding: const EdgeInsets.symmetric(horizontal:25  , vertical: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    ),
+    onPressed: onTap,
+    icon: Icon(icon, size: 18),
+    label: Text(
+      label,
+      style: MontserratStyles.montserratSemiBoldTextStyle(size: 13),
+    ),
+  );
+}
 Future<void> showDialogWidgetContext(BuildContext context, TicketListController controller, String ticketid, TicketResult ticket, ){
    controller.hitGetTicketHistoryApiCall(ticketid);
    controller.fetchTicketsApiCall();

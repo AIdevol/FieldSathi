@@ -187,39 +187,44 @@ Widget _dataTableViewScreen(CustomerListViewController controller, BuildContext 
     return Center(child: _buildEmptyState());
   }
 
-  return Column(
-    children: [
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SingleChildScrollView(
+  return Card(
+    elevation: 2,
+    color: CupertinoColors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      children: [
+        SingleChildScrollView(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child:
 
               Obx(
                     () => DataTable(
+                      horizontalMargin: 24,
+                      columnSpacing: 24,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50)
                       ),
-                                      dataRowColor: MaterialStateProperty.resolveWith(
-                        (states) => states.contains(MaterialState.selected) ? Colors.blue.shade50 : Colors.white,
+                                      dataRowColor: WidgetStateProperty.resolveWith(
+                        (states) => states.contains(WidgetState.selected) ? Colors.blue.shade50 : Colors.white,
                                       ),
-                                      headingRowColor: MaterialStateProperty.all(Colors.blue.shade100),
-                                      columnSpacing: 20,
+                                      // headingRowColor: MaterialStateProperty.all(Colors.blue),
                                       columns: [
-                    DataColumn(label: Text('ID', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Customer Name', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Company Name', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Email', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Phone', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Region', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Address', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Model No.', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Since', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Action', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Options', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      DataColumn(label: Text('ID', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      DataColumn(label: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      DataColumn(label: Text('Customer Name', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      DataColumn(label: Text('Company Name', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      DataColumn(label: Text('Email', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      DataColumn(label: Text('Phone', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      DataColumn(label: Text('Region', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      DataColumn(label: Text('Address', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      DataColumn(label: Text('Model No.', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      DataColumn(label: Text('Since', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      DataColumn(label: Text('Action', style: TextStyle(fontWeight: FontWeight.bold))),
+                                      DataColumn(label: Text('Options', style: TextStyle(fontWeight: FontWeight.bold))),
                                       ],
                                       rows: controller.customerPaginationData.map((customerData) {
                     return DataRow(
@@ -266,9 +271,9 @@ Widget _dataTableViewScreen(CustomerListViewController controller, BuildContext 
               ),
             ),
           ),
-        ),
-      SizedBox(height: 20),
-    ],
+        SizedBox(height: 20),
+      ],
+    ),
   );
 }
 

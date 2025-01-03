@@ -158,7 +158,7 @@ class TicketResult {
       totalTime: json["total_time"],
       startDateTime: DateTime.tryParse(json["start_date_time"] ?? ""),
       endDateTime: DateTime.tryParse(json["end_date_time"] ?? ""),
-      ticketCheckpoints: json["ticket_checkpoints"] == null ? [] : List<TicketCheckpoint>.from(json["ticket_checkpoints"]!.map((x) => TicketCheckpoint.fromJson(x))),
+      ticketCheckpoints: json["ticket_checkpoints" ]== null ? [] : List<TicketCheckpoint>.from(json["ticket_checkpoints"]!.map((x) => TicketCheckpoint.fromJson(x))),
       admin: json["admin"],
       createdBy: json["created_by"],
       fsrData: json["fsr_data"] == null ? null : FsrData.fromJson(json["fsr_data"]),
@@ -207,9 +207,7 @@ class TicketResult {
 
 class AssignTo {
   AssignTo({
-    required this.id,
-    required this.todayAttendance,
-    required this.brandNames,
+    required this.password,
     required this.lastLogin,
     required this.firstName,
     required this.lastName,
@@ -270,17 +268,17 @@ class AssignTo {
     required this.isLeaveAllocated,
     required this.empId,
     required this.isDisabled,
-    required this.createdAt,
     required this.createdBy,
-    required this.admin,
     required this.customerId,
     required this.subscription,
-    required this.password,
+    required this.id,
+    required this.todayAttendance,
+    required this.brandNames,
+    required this.createdAt,
+    required this.admin,
   });
 
-  final int? id;
-  final List<TodayAttendance> todayAttendance;
-  final List<ProductName> brandNames;
+  final String? password;
   final dynamic lastLogin;
   final String? firstName;
   final String? lastName;
@@ -341,18 +339,18 @@ class AssignTo {
   final bool? isLeaveAllocated;
   final String? empId;
   final bool? isDisabled;
-  final DateTime? createdAt;
   final String? createdBy;
-  final int? admin;
   final int? customerId;
   final dynamic subscription;
-  final String? password;
+  final int? id;
+  final List<TodayAttendance> todayAttendance;
+  final List<ProductName> brandNames;
+  final DateTime? createdAt;
+  final int? admin;
 
   factory AssignTo.fromJson(Map<String, dynamic> json){
     return AssignTo(
-      id: json["id"],
-      todayAttendance: json["today_attendance"] == null ? [] : List<TodayAttendance>.from(json["today_attendance"]!.map((x) => TodayAttendance.fromJson(x))),
-      brandNames: json["brand_names"] == null ? [] : List<ProductName>.from(json["brand_names"]!.map((x) => ProductName.fromJson(x))),
+      password: json["password"],
       lastLogin: json["last_login"],
       firstName: json["first_name"],
       lastName: json["last_name"],
@@ -413,12 +411,14 @@ class AssignTo {
       isLeaveAllocated: json["is_leave_allocated"],
       empId: json["emp_id"],
       isDisabled: json["is_disabled"],
-      createdAt: DateTime.tryParse(json["created_at"] ?? ""),
       createdBy: json["created_by"],
-      admin: json["admin"],
       customerId: json["customer_id"],
       subscription: json["subscription"],
-      password: json["password"],
+      id: json["id"],
+      todayAttendance: json["today_attendance"] == null ? [] : List<TodayAttendance>.from(json["today_attendance"]!.map((x) => TodayAttendance.fromJson(x))),
+      brandNames: json["brand_names"] == null ? [] : List<ProductName>.from(json["brand_names"]!.map((x) => ProductName.fromJson(x))),
+      createdAt: DateTime.tryParse(json["created_at"] ?? ""),
+      admin: json["admin"],
     );
   }
 
@@ -454,7 +454,7 @@ class TodayAttendance {
 
   final int? id;
   final int? user;
-  final dynamic punchIn;
+  final DateTime? punchIn;
   final dynamic punchOut;
   final String? status;
   final DateTime? date;
@@ -463,7 +463,7 @@ class TodayAttendance {
     return TodayAttendance(
       id: json["id"],
       user: json["user"],
-      punchIn: json["punch_in"],
+      punchIn: DateTime.tryParse(json["punch_in"] ?? ""),
       punchOut: json["punch_out"],
       status: json["status"],
       date: DateTime.tryParse(json["date"] ?? ""),
@@ -552,24 +552,24 @@ class Checkpoint {
 
 class FsrDetails {
   FsrDetails({
-    required this.id,
     required this.fsrName,
     required this.categories,
+    required this.id,
     required this.createdBy,
     required this.admin,
   });
 
-  final int? id;
   final String? fsrName;
   final List<SelectedCat> categories;
+  final int? id;
   final int? createdBy;
   final int? admin;
 
   factory FsrDetails.fromJson(Map<String, dynamic> json){
     return FsrDetails(
-      id: json["id"],
       fsrName: json["fsrName"],
       categories: json["categories"] == null ? [] : List<SelectedCat>.from(json["categories"]!.map((x) => SelectedCat.fromJson(x))),
+      id: json["id"],
       createdBy: json["created_by"],
       admin: json["admin"],
     );
@@ -579,6 +579,9 @@ class FsrDetails {
 
 class SelectedAmc {
   SelectedAmc({
+    required this.id,
+    required this.remainingAmount,
+    required this.serviceCompleted,
     required this.amcName,
     required this.activationTime,
     required this.activationDate,
@@ -593,17 +596,17 @@ class SelectedAmc {
     required this.noOfService,
     required this.note,
     required this.expiry,
+    required this.createdAt,
     required this.service,
     required this.brand,
     required this.customer,
     required this.createdBy,
     required this.admin,
-    required this.id,
-    required this.remainingAmount,
-    required this.serviceCompleted,
-    required this.createdAt,
   });
 
+  final int? id;
+  final int? remainingAmount;
+  final int? serviceCompleted;
   final String? amcName;
   final String? activationTime;
   final DateTime? activationDate;
@@ -618,18 +621,18 @@ class SelectedAmc {
   final String? noOfService;
   final String? note;
   final DateTime? expiry;
+  final DateTime? createdAt;
   final Service? service;
   final ProductName? brand;
   final AssignTo? customer;
   final String? createdBy;
   final int? admin;
-  final int? id;
-  final int? remainingAmount;
-  final int? serviceCompleted;
-  final DateTime? createdAt;
 
   factory SelectedAmc.fromJson(Map<String, dynamic> json){
     return SelectedAmc(
+      id: json["id"],
+      remainingAmount: json["remainingAmount"],
+      serviceCompleted: json["serviceCompleted"],
       amcName: json["amcName"],
       activationTime: json["activationTime"],
       activationDate: DateTime.tryParse(json["activationDate"] ?? ""),
@@ -644,15 +647,12 @@ class SelectedAmc {
       noOfService: json["no_of_service"],
       note: json["note"],
       expiry: DateTime.tryParse(json["expiry"] ?? ""),
+      createdAt: DateTime.tryParse(json["created_at"] ?? ""),
       service: json["service"] == null ? null : Service.fromJson(json["service"]),
       brand: json["brand"] == null ? null : ProductName.fromJson(json["brand"]),
       customer: json["customer"] == null ? null : AssignTo.fromJson(json["customer"]),
       createdBy: json["created_by"],
       admin: json["admin"],
-      id: json["id"],
-      remainingAmount: json["remainingAmount"],
-      serviceCompleted: json["serviceCompleted"],
-      createdAt: DateTime.tryParse(json["created_at"] ?? ""),
     );
   }
 
@@ -792,6 +792,7 @@ class TicketCheckpoint {
   }
 
 }
+
 
 //=====================================================================================================
 class TicketCountsResponseModel {
